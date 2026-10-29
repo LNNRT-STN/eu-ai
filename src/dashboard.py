@@ -10,12 +10,13 @@ st.set_page_config(page_title="Flood desk", page_icon=":material/water:", layout
                    initial_sidebar_state="auto")
 
 nav = st.navigation({
-    "": [st.Page("views/evacuate.py", title="Evacuation plan", icon=":material/directions_run:", default=True),
-         st.Page("views/view3d.py", title="3D view", icon=":material/landscape:"),
-         st.Page("views/long_term.py", title="Long term", icon=":material/construction:"),
-         st.Page("views/resident.py", title="Do I need to leave?", icon=":material/home_pin:"),
-         st.Page("views/checkin.py", title="Safe check-in", icon=":material/how_to_reg:"),
-         st.Page("views/host.py", title="Offer a bed", icon=":material/volunteer_activism:")],
+    "Crisis room": [st.Page("views/crisis.py", title="Crisis room", icon=":material/crisis_alert:", default=True),
+                    st.Page("views/evacuate.py", title="Town plan", icon=":material/directions_run:"),
+                    st.Page("views/view3d.py", title="3D view", icon=":material/landscape:"),
+                    st.Page("views/long_term.py", title="Long term", icon=":material/construction:")],
+    "Residents": [st.Page("views/resident.py", title="Do I need to leave?", icon=":material/home_pin:"),
+                  st.Page("views/host.py", title="Offer a bed", icon=":material/volunteer_activism:")],
+    "Responders": [st.Page("views/checkin.py", title="Check-ins and door-knock list", icon=":material/how_to_reg:")],
     "More": [st.Page("views/first_action.py", title="All towns and care sites", icon=":material/flag:"),
                      st.Page("views/briefing.py", title="Briefing", icon=":material/space_dashboard:"),
                      st.Page("views/rivers.py", title="Rivers", icon=":material/water:"),
@@ -26,7 +27,7 @@ nav = st.navigation({
 }, expanded=True)
 
 # one Town picker for every page that works on a town; _town keeps the choice while other pages are open
-TOWN_PAGES = {"Evacuation plan", "Safe check-in", "3D view"}
+TOWN_PAGES = {"Town plan", "Check-ins and door-knock list", "3D view"}
 with st.sidebar:
     if nav.title in TOWN_PAGES:
         tw = anna.load()[1]

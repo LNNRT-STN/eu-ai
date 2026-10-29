@@ -164,6 +164,12 @@ re-runnable script in `notebooks/` (`pipeline.py`, `osm_extract.py`, `dq_report.
 - How we checked it: Ahr peaks on 14 July at 5-6× its 2-year flow (Schuld 5.2, Altenahr 5.8, Bad Bodendorf 6.1); the Bad Bodendorf cell was picked by hand because the neighbouring Rhine cells carry ~2,400 m³/s. Flagged as weak: Urft at Gemünd peaks at only 44 m³/s (cell above the reservoir; Schleiden/Kall alerts may come late), Geul point 18 km from Kelmis, Stolberg's Vicht not resolved.
 - Result: approximate matches (Kall 15 km; Bitsingen on the Geer uses Meuse · Liège) kept and labelled.
 
+## 29. Live engine, Claude reports and the Crisis room (scenario replay)
+- Prompt/intent: owner chose a live replay of July 2021 for the pitch; reports to mayors and fire brigades drafted by Claude into an in-app outbox (nothing sent).
+- AI output (short): an agent built src/live.py (SQLite state: clock, town status via the impact forecast, events, simulated check-ins, auto road closures, outbox) and src/reports.py (claude-haiku-5-5, key from .env server-side, only a small facts dict sent, numbers given in the prompt, template fallback); 9 tests pass. Lead built src/views/crisis.py (scenario player in the sidebar, six live counters, region map, latest events, outbox) and regrouped the menu by role.
+- How we checked it: played the replay in the browser: 12 Jul 16:32 → 13 Jul 07:32 in 15 s at 1 h/s; Rochefort turned to warn at 13 Jul 07:00 and its fire-brigade briefing reached the outbox. Replay timeline (agent): first evacuate Rochefort 13 Jul 18:00, Vesdre 20:00, Ahr 23:00. Cost ~$0.0002 per report.
+- Result: stated on the page: levels never drop in a replay (highest flow so far); daily flows interpolated, times ±12 h; a model replay, not official warnings.
+
 ## Data-cleaning decisions (from *Python for Data Analysis* ch.7)
 - Duplicates: overlapping flood shapes dissolved; OSM objects merged per campus; a building in two study areas counted once.
 - Missing values: analysed and reported per area (book p.210), not silently filled.
