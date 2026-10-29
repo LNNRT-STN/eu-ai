@@ -35,7 +35,7 @@ WATER = [pdk.Layer("GeoJsonLayer", flood[(a, V)], filled=True, stroked=True, lin
          for a in anna.AREA]
 GREEN, RED = core.rgb(core.SHELTER), core.rgb(core.EVACUATE)
 S = st.session_state
-for k, v in {"tab": TABS[0], "site": None, "dfilt": "All", "town": None, "shelter": None, "meas": None,
+for k, v in {"tab": TABS[0], "site": None, "dfilt": "All", "town": None, "shelter": None, "meas": None, "commune": None,
              "v": 0}.items():
     S.setdefault(k, v)
 
@@ -133,8 +133,10 @@ def on_map(key, layer_to_state):
     for lid, picked in objs.items():
         base = lid.rsplit("-", 1)[0]
         if picked and base in layer_to_state:
-            target, col = layer_to_state[base]
+            target, col, *clear = layer_to_state[base]
             S[target] = picked[0][col]
+            for c in clear:
+                S[c] = None
             bump()
             return
 
@@ -276,6 +278,8 @@ elif tab == "Shelters":
 
 # ================================================================================================ Since 2021
 else:
+    # the map shows communes, the list shows measures: a commune dot filters the list to the measures naming it,
+    # a picked measure rings its communes on the map
     place = T.drop_duplicates("name").set_index("name")[["lon", "lat"]]
     M = pd.DataFrame(MEASURES, columns=["area", "theme", "what", "communes", "status", "src", "url"])
     COL = {**STATUS, "Not found": "#c7c7cc"}
@@ -283,39 +287,59 @@ else:
                                          url="") for t, d in GAPS])], ignore_index=True)
     M["id"] = range(len(M))
     M["where"] = M.area.str.split(" · ").str[0]
+    M["places"] = [[anna.town(c) for c in cs if anna.town(c) in place.index] for cs in M.communes]
     n = M.status.value_counts().reindex(list(COL), fill_value=0)
     pick = M[M.id == S.meas].iloc[0] if S.meas in set(M.id) else None
+    com = S.commune if S.commune in place.index else None
+    rows_ = (M[M.places.map(lambda p: com in p)] if com else M).reset_index(drop=True)
     with panel:
         st.html("<div class='sbar'>" + "".join(f"<i style='flex:{c};background:{COL[s]}'></i>" for s, c in n.items()
                                                if c) + "</div><div class='slab'>"
                 + "".join(f"<span><i style='background:{COL[s]}'></i><b>{c}</b>{s.lower()}</span>"
                           for s, c in n.items()) + "</div>")
         if pick is None:
-            k = f"meas-{S.v}"
-            st.dataframe(M[["status", "where", "what"]], key=k, on_select=partial(on_table, k, M, "meas", "id"),
-                         selection_mode="single-row", hide_index=True, height=PANEL_H - 92, column_config={
+            if com:
+                st.button(f"All measures · showing {com}", icon=":material/arrow_back:", type="tertiary", on_click=set_,
+                          args=("commune", None))
+            k = f"meas-{com}-{S.v}"
+            st.dataframe(rows_[["status", "where", "what"]], key=k, on_select=partial(on_table, k, rows_, "meas", "id"),
+                         selection_mode="single-row", hide_index=True,
+                         height=min(36 * len(rows_) + 38, PANEL_H - 92 - (44 if com else 0)), column_config={
                              "status": st.column_config.TextColumn("Status", width=88),
                              "where": st.column_config.TextColumn("Where", width=70),
                              "what": st.column_config.TextColumn("What changed", width=250)})
-            st.html("<p class='note'>Desk research, Oct 2026. Status as each source reports it.</p>")
+            st.html("<p class='note'>Desk research, Oct 2026, status as sources report it. Click a commune on the map."
+                    "</p>")
         else:
-            st.button("All measures", icon=":material/arrow_back:", type="tertiary", on_click=set_, args=("meas", None))
-            where = ", ".join(anna.town(c) for c in pick.communes) or ("Region-wide" if pick.area else "Not on the map")
+            st.button("Back to the list", icon=":material/arrow_back:", type="tertiary", on_click=set_,
+                      args=("meas", None))
+            where = ", ".join(anna.town(c) for c in pick.communes) or ("Region-wide: not on the map" if pick.area
+                                                                       else "Not on the map")
             src = (f"<div class='r'><div>Source</div><a href='{pick.url}' target='_blank'>{pick.src}</a></div>"
                    if pick.url else "<div class='r'><div>Not found in the public record<span>absence in our search is "
                    "not proof nothing was done</span></div></div>")
             st.html(f"<div class='card'><h3>{(pick.area + ' · ') if pick.area else ''}{pick.theme}</h3><div class='sub'>"
                     f"{where}</div><p>{pick.what}</p><div class='r'><div>Status<span>as the source reports it</span></div>"
                     f"<b>{pick.status}</b></div>{src}</div>")
-    pts = pd.DataFrame([dict(id=m.id, lon=place.lon[anna.town(c)], lat=place.lat[anna.town(c)], tname=anna.town(c),
-                             tinfo=f"{m.status} · {m.area} · {m.theme}", fill=core.rgb(COL[m.status]))
-                        for m in M.itertuples() for c in m.communes if anna.town(c) in place.index])
-    show = pts[pts.id == pick.id] if pick is not None else pts
-    show = show.groupby("tname", as_index=False).first() if pick is None else show
-    layers.append(dots(show, "meas", "fill", 8))
-    picks = {"meas": ("meas", "id")}
-    view = fit(show, 1.3) if len(show) else pdk.ViewState(longitude=6.0, latitude=50.7, zoom=7.6)
-    key_html = "".join(core.swatch(STATUS[s], s, True) for s in STATUS) + "<span>one dot per commune named</span>"
+    per = M.explode("places").dropna(subset=["places"]).groupby("places")
+    cdf = pd.DataFrame({"tname": list(per.groups)}).assign(
+        lon=lambda d: d.tname.map(place.lon), lat=lambda d: d.tname.map(place.lat),
+        k=lambda d: d.tname.map(per.size()),
+        tinfo=lambda d: [f"{per.size()[t]} measures: " + ", ".join(f"{s} ({th})" for s, th in
+                                                                    zip(per.get_group(t).status, per.get_group(t).theme))
+                         for t in d.tname])
+    cdf["r"] = 6 + 3 * cdf.k ** .5
+    hl = pick.places if pick is not None else ([com] if com else [])
+    layers.append(dots(cdf, "com", [72, 72, 74], get_radius="r"))
+    layers += [ring(place.lon[h], place.lat[h]) for h in hl]
+    picks = {"com": ("commune", "tname", "meas")}
+    if hl:
+        v = fit(place.loc[hl].reset_index(), 1.3)
+        view = pdk.ViewState(longitude=v.longitude, latitude=v.latitude, zoom=min(v.zoom, 10.5))
+    else:
+        view = fit(cdf, 1.2)
+    key_html = (core.swatch("#48484a", "Commune named in a measure (size = number of measures)", True)
+                + "<span><i style='border:2px solid #1d1d1f;border-radius:50%;background:none'></i>Selected</span>")
 
 with right:
     # one map per tab that stays mounted: a new view then glides there instead of redrawing. Streamlit's map does
