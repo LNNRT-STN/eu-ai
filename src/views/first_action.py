@@ -23,7 +23,7 @@ lead = (flow.idxmax().max() - flow.idxmax().min()).days
 st.html("""<style>
 .act{background:#fff;border-radius:16px;padding:1.4rem 1.6rem;display:flex;gap:1rem;align-items:center}
 .act i{flex:none;width:.9rem;height:.9rem;border-radius:50%;background:#d70015;box-shadow:0 0 0 5px #d7001522}
-.act h1{font-size:1.9rem;font-weight:700;letter-spacing:-.02em;line-height:1.15;margin:0;padding:0;color:#1d1d1f}
+.act h1{font-size:1.35rem;font-weight:700;letter-spacing:-.02em;line-height:1.15;margin:0;padding:0;color:#1d1d1f}
 .act p{margin:.35rem 0 0;color:#6e6e73;font-size:1rem}
 .big{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem}
 .big div{background:#fff;border-radius:16px;padding:1.1rem 1.3rem}
@@ -45,12 +45,39 @@ st.html("""<style>
 .one b{display:block;font-size:2.4rem;font-weight:700;letter-spacing:-.03em;line-height:1.05;color:#1d1d1f}
 .one span{display:block;margin-top:.3rem;color:#6e6e73;font-size:.95rem}
 .h2{font-size:1.15rem;font-weight:650;color:#1d1d1f;margin:0 0 .5rem .2rem}
+.dc{background:#fff;border-radius:16px;padding:1rem 1.2rem;border:2px solid transparent;transition:border-color .15s}
+.dc b{display:block;font-size:2.2rem;font-weight:700;letter-spacing:-.03em;line-height:1;color:#d70015}
+.dc h3{font-size:1.05rem;font-weight:650;margin:.35rem 0 0;padding:0;color:#1d1d1f}
+.dc span{display:block;margin-top:.2rem;color:#6e6e73;font-size:.88rem}
+.dc.on{border-color:#d70015}
+[class*=st-key-dcard-]{position:relative;gap:0}
+[class*=st-key-dcard-] [data-testid=stElementContainer]:has(button){position:absolute;inset:0;margin:0;width:100%!important;height:100%}
+[class*=st-key-dcard-] [data-testid=stButton],[class*=st-key-dcard-] [data-testid=stButton]>*{width:100%;height:100%}
+[class*=st-key-dcard-] [data-testid=stButton] button{width:100%;height:100%;opacity:0;cursor:pointer}
+[class*=st-key-dcard-]:hover .dc{border-color:#d7001555}
 @media (max-width:900px){.big,.steps{grid-template-columns:1fr}.act h1{font-size:1.5rem}}
 </style>""")
 
-# 1. the decision
-st.html(f"<div class='act'><i></i><div><h1>Evacuate the {len(care)} hospitals and care homes in the flood zone first</h1>"
-        f"<p>District crisis staffs: {' · '.join(f'{d} {n}' for d, n in by_d.items())}</p></div></div>")
+# 1. the decision, then one clickable card per district: a click shows exactly where its sites are
+st.html(f"<div class='act'><i></i><div><h1>First action: evacuate the {len(care)} hospitals and care homes in the "
+        "flood zone</h1><p>Pick a district to see the sites, in evacuation order.</p></div></div>")
+st.space("small")
+st.session_state.setdefault("district", None)
+
+
+def pick_district(d):
+    st.session_state.district = None if st.session_state.district == d else d
+    st.session_state.town = "All"
+    st.session_state.focus = None
+
+
+cards = st.columns(len(by_d), gap="small")
+for col, (d, n) in zip(cards, by_d.items()):
+    in_d = care[care.area.map(DISTRICT) == d].town.value_counts()
+    with col, st.container(key=f"dcard-{d}"):
+        st.html(f"<div class='dc{' on' if st.session_state.district == d else ''}'><b>{n}</b>"
+                f"<h3>{d} district crisis staff</h3><span>{' · '.join(f'{t} {k}' for t, k in in_d.items())}</span></div>")
+        st.button(f"Show {d}", key=f"dbtn-{d}", on_click=pick_district, args=(d,))
 st.space("small")
 
 # 2. three numbers
@@ -64,39 +91,56 @@ MAP_H = 500
 top = T.nlargest(5, "no_shelter").reset_index(drop=True)
 top["short"] = top.label.str.replace(" (modelled)", " *")
 top["why"] = ["full" if f >= n else "far" for f, n in zip(top.full, top.no_reach)]
-pick = st.pills("Town", ["All", *top.short], default="All", label_visibility="collapsed")
-sel = None if pick in (None, "All") else top[top.short == pick].iloc[0]
+st.session_state.setdefault("town", "All")
+pick = st.pills("Town", ["All", *top.short], label_visibility="collapsed", key="town",
+                on_change=lambda: st.session_state.update(district=None, focus=None))
+dist = st.session_state.district
+sel = None if dist or pick in (None, "All") else top[top.short == pick].iloc[0]
+mode = f"d:{dist}" if dist else pick          # identifies what the lists below belong to
 
 focus = None                                   # the site or shelter clicked in a list, shown on the map
+
+
+def evac_order(d):
+    """Most of the site under water first; on a tie, hospitals before care homes."""
+    d = (d.assign(_h=lambda x: (x.type != "hospital").astype(int))
+         .sort_values(["share_of_site_flooded", "_h", "name"], ascending=[False, True, True])
+         .drop(columns="_h").reset_index(drop=True))
+    d.insert(0, "order", range(1, len(d) + 1))
+    return d
+
+
+def rows(key):
+    try:
+        return list(st.session_state[key]["selection"]["rows"])
+    except Exception:
+        return []
+
+
+def clicked(key, kind):
+    r = rows(key)
+    st.session_state["focus"] = (mode, kind, r[0]) if r else None
+    if r:
+        other = "shel" if kind == "evac" else "evac"
+        st.session_state["ver"][other] += 1
+
+
+ver = st.session_state.setdefault("ver", {"evac": 0, "shel": 0})
+if dist:
+    sites = evac_order(care[care.area.map(DISTRICT) == dist])
+    near = shel.iloc[0:0]
+    kE, kS = f"evac-{mode}-{ver['evac']}", f"shel-{mode}-{ver['shel']}"
 if sel is not None:
     # evacuation order: most of the site under water first; on a tie, hospitals before care homes
-    sites = (care[(care.town == sel["name"]) & (care.area == sel.area)]
-             .assign(_h=lambda d: (d.type != "hospital").astype(int))
-             .sort_values(["share_of_site_flooded", "_h", "name"], ascending=[False, True, True])
-             .drop(columns="_h").reset_index(drop=True))
-    sites.insert(0, "order", range(1, len(sites) + 1))
+    sites = evac_order(care[(care.town == sel["name"]) & (care.area == sel.area)])
     near = shel[shel.area == sel.area].assign(km=lambda d: core.km(sel.lon, sel.lat, d.lon, d.lat))
     near = near[near.km <= 6].sort_values("capacity_central", ascending=False).reset_index(drop=True)
     near["label"] = [n if isinstance(n, str) else f"Unnamed {c}" for n, c in zip(near.name, near.cat)]
-    # one selection at a time: clicking in one list resets the other (its key gets a new version)
-    ver = st.session_state.setdefault("ver", {"evac": 0, "shel": 0})
-    kE, kS = f"evac-{pick}-{ver['evac']}", f"shel-{pick}-{ver['shel']}"
+    kE, kS = f"evac-{mode}-{ver['evac']}", f"shel-{mode}-{ver['shel']}"
 
-    def rows(key):
-        try:
-            return list(st.session_state[key]["selection"]["rows"])
-        except Exception:
-            return []
-
-    def clicked(key, kind):
-        r = rows(key)
-        st.session_state["focus"] = (pick, kind, r[0]) if r else None
-        if r:
-            other = "shel" if kind == "evac" else "evac"
-            st.session_state["ver"][other] += 1
-
+if dist or sel is not None:
     f = st.session_state.get("focus")
-    if f and f[0] == pick:
+    if f and f[0] == mode:
         src = sites if f[1] == "evac" else near
         if f[2] < len(src):
             focus = src.iloc[f[2]].copy()
@@ -109,7 +153,22 @@ with left:
     layers = [pdk.Layer("GeoJsonLayer", flood[(a, V)], filled=True, stroked=True, line_width_min_pixels=1,
                         get_fill_color=[0, 113, 227, 70 if a in anna.MODELLED else 140], get_line_color=[0, 90, 200, 200])
               for a in anna.AREA]
-    if sel is None:
+    if dist:
+        # district: its flooded care sites in evacuation order; a clicked one gets a ring
+        mine = sites.assign(tname=[f"{o}. {n}" for o, n in zip(sites.order, sites.name)],
+                            tinfo=[f"{t} · {w} · {x:.0%} of the site under water"
+                                   for t, w, x in zip(sites.type, sites.town, sites.share_of_site_flooded)])
+        layers.append(core.points(mine, core.rgb(core.EVACUATE), 8))
+        if focus is not None:
+            layers.append(pdk.Layer("ScatterplotLayer", pd.DataFrame([{"lon": focus.lon, "lat": focus.lat}]),
+                                    get_position=["lon", "lat"], get_radius=17, radius_units="'pixels'", filled=False,
+                                    stroked=True, get_line_color=[29, 29, 31], line_width_min_pixels=3))
+            view = pdk.ViewState(longitude=focus.lon, latitude=focus.lat, zoom=15)
+        else:
+            spread = core.km(sites.lon.mean(), sites.lat.mean(), sites.lon, sites.lat).max()
+            view = pdk.ViewState(longitude=sites.lon.mean(), latitude=sites.lat.mean(),
+                                 zoom=13 if spread < 1.5 else 12 if spread < 4 else 11 if spread < 8 else 10)
+    elif sel is None:
         # overview: one labelled circle per town, coloured by the reason (same colours as the bars)
         pts = top.assign(r=lambda d: d.no_shelter ** .5 * .32 + 6, fill=[color(w) for w in top.why],
                          txt=[f"{s}  {about(n)}" for s, n in zip(top.short, top.no_shelter)],
@@ -150,7 +209,12 @@ with left:
     st.pydeck_chart(pdk.Deck(layers=layers, initial_view_state=view, map_style=pdk.map_styles.CARTO_LIGHT,
                              views=[pdk.View(type="MapView", controller={"scrollZoom": False})],
                              tooltip={"html": "<b>{tname}</b><br/>{tinfo}", "style": tipstyle}), height=MAP_H)
-    if sel is None:
+    if dist:
+        core.legend(("" if focus is None else f"<b>◯ {focus.order}. {focus['name']}</b> · {focus.town} · "
+                     f"{focus.share_of_site_flooded:.0%} of the site under water<br>")
+                    + core.swatch(core.EVACUATE, "Hospital / care home to evacuate", True)
+                    + core.swatch("rgba(0,113,227,.55)", "2021 water"))
+    elif sel is None:
         core.legend(core.swatch(anna.FULL, "Shelters full", True) + core.swatch(anna.TOO_FAR, "Too far to walk", True)
                     + core.swatch(core.EVACUATE, "Hospital / care home", True) + core.swatch("rgba(0,113,227,.55)", "2021 water"))
     else:
@@ -161,7 +225,19 @@ with left:
                     + core.swatch("rgba(0,113,227,.55)", "2021 water"))
 
 with right:
-    if sel is None:
+    if dist:
+        st.html(f"<div class='bars'><div class='cap'>{dist} district crisis staff</div><div class='one'>"
+                f"<b>{len(sites)} sites</b><span>to evacuate, in this order</span></div></div>")
+        st.dataframe(sites.assign(pct=sites.share_of_site_flooded * 100)[["order", "name", "town", "pct"]], key=kE,
+                     on_select=lambda: clicked(kE, "evac"), selection_mode="single-row", hide_index=True,
+                     height=min(MAP_H - 130, 36 * len(sites) + 38), column_config={
+                         "order": st.column_config.NumberColumn("#", width=40),
+                         "name": st.column_config.TextColumn("Site", width="medium"),
+                         "town": st.column_config.TextColumn("Town", width="small"),
+                         "pct": st.column_config.NumberColumn("Under water", format="%d%%", width="small")})
+        st.html("<p class='asof'>Click a site to find it on the map. Order: most of the site under water first, "
+                "hospitals before care homes; confirm residents and mobility with each operator.</p>")
+    elif sel is None:
         mx = top.no_shelter.max()
         bars = "".join(f"<div class='r'><div class='n'>{r.short}<span class='t'>"
                        f"{'shelters full' if r.why == 'full' else 'too far to walk'}</span></div>"
