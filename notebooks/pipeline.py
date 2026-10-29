@@ -36,7 +36,8 @@ AREAS = [  # order matters: a building exposed in two areas is counted in the fi
 ]
 EFAS_THR = 0.1                                       # m of water depth counted as flooded
 MIN_GFA, FLOOR_H, MAX_FLOORS = 200, 3.0, 10
-SCEN = {"low": dict(use=0.4, m2=5.0, walk=1000), "central": dict(use=0.5, m2=4.0, walk=1500), "high": dict(use=0.6, m2=3.0, walk=2500)}
+SCEN = {"low": dict(use=0.4, m2=5.0, walk=1000), "central": dict(use=0.5, m2=4.0, walk=1500), "high": dict(use=0.6, m2=3.0, walk=2500),
+        "bus": dict(use=0.5, m2=4.0, walk=10000)}   # central capacity, but buses take people up to 10 km (straight line)
 VARIANTS = ("main", "worst")
 def say(*a): print(*a, flush=True)
 
@@ -159,7 +160,7 @@ def capacity(sites, b, qc):
     return sites
 
 SCALE = 1000
-def allocate_maxflow(exp, shel, s):
+def allocate_maxflow(exp, shel, s, flows=False):
     """Best possible plan: maximum flow (CLRS ch.26, p.669-670). Supersource -> each exposed building (capacity = its
     residents) -> every shelter in walking reach (unbounded) -> supersink (capacity = shelter places). Units: 0.001 person (0.1 dropped small fractions)."""
     from scipy.sparse import csr_matrix
@@ -177,11 +178,17 @@ def allocate_maxflow(exp, shel, s):
         f = maximum_flow(csr_matrix((caps, (rows, cols)), shape=(T + 1, T + 1)), S, T, method="dinic").flow
         got = np.asarray(f[0, 1:n + 1].todense()).ravel() / SCALE
         assert got.sum() <= cap.sum() / SCALE + 1e-6, "max-flow exceeds shelter capacity"
+        if flows:                                            # who goes where: building i -> shelter j, people
+            fs = f[1:n + 1, n + 1:n + m + 1].tocoo()
+            keep = fs.data > 0
+            flow_df = pd.DataFrame({"i": fs.row[keep], "j": fs.col[keep], "people": fs.data[keep] / SCALE})
     got = np.minimum(got, exp["people"].values)
     e = exp.assign(covered=got, reach=reach)
     e["no_reach"] = np.where(~reach, e.people, 0.0); e["full"] = np.where(reach, e.people - e.covered, 0.0)
     assert np.allclose(e.covered + e.no_reach + e.full, e.people, atol=0.2), "people buckets do not add up"
     assert (e[["covered", "no_reach", "full"]] >= -1e-6).all().all(), "negative people"
+    if flows:
+        e.attrs["flows"] = flow_df if n and m else pd.DataFrame(columns=["i", "j", "people"])
     return e
 
 def allocate(exp, shel, s):
@@ -205,6 +212,7 @@ def allocate(exp, shel, s):
 
 # ---------------------------------------------------------------- run
 seen, summary, muni_rows, crit_rows, shelters_all, qc_all, validation = set(), [], [], [], [], {}, {}
+bus_rows = []                                    # bus plan: (area, municipality) -> shelter, people
 for A in AREAS:
     key, cc = A["key"], A["cc"]; qc = {}
     if len(sys.argv) > 1 and key not in sys.argv[1:]: continue      # optional: run only the named areas
@@ -213,8 +221,9 @@ for A in AREAS:
     if part.exists():                                   # finished in an earlier run: reuse it
         p = pickle.load(open(part, "rb"))
         summary += p["summary"]; muni_rows += p["muni"]; crit_rows += p["crit"]; shelters_all.append(p["shel"])
-        qc_all[key] = p["qc"]; validation.update(p["val"]); seen |= p["seen"]; say("  (cached)"); continue
-    n0 = (len(summary), len(muni_rows), len(crit_rows))
+        qc_all[key] = p["qc"]; validation.update(p["val"]); seen |= p["seen"]; bus_rows += p.get("bus", [])
+        say("  (cached)"); continue
+    n0 = (len(summary), len(muni_rows), len(crit_rows), len(bus_rows))
     if "efas" in A:
         bbox = A["bbox"]; fl = {"main": efas_polygon(A["efas"][0], bbox), "worst": efas_polygon(A["efas"][1], bbox)}
         npoly = {"main": None, "worst": None}; source = f"EFAS modelled {A['efas'][0]}-year (main) / {A['efas'][1]}-year (worst)"
@@ -270,13 +279,24 @@ for A in AREAS:
                    people_2020=round(e.people.sum()), people_2025=round(e.people25.sum()))
         exp = e[e.people > 0][["people", "muni", "geometry"]]
         for sc, s in SCEN.items():
-            al = allocate_maxflow(exp, shel, s)                 # best coordinated plan (primary)
+            al = allocate_maxflow(exp, shel, s, flows=(sc == "bus" and v == "worst"))   # best coordinated plan
             nf = allocate(exp, shel, s)                         # everyone goes to the nearest shelter with room
             if al.covered.sum() < nf.covered.sum() - max(1, 0.001 * exp.people.sum()):     # 0.1-person rounding tolerance
                 pickle.dump((exp, shel, s), open(OUT / "debug_maxflow.pkl", "wb"))
                 raise AssertionError(f"max-flow below greedy: bug ({al.covered.sum():.0f} < {nf.covered.sum():.0f}), case saved")
             row.update({f"{sc}_covered": round(al.covered.sum()), f"{sc}_no_reach": round(al.no_reach.sum()), f"{sc}_full": round(al.full.sum()),
                         f"{sc}_covered_nearest_first": round(nf.covered.sum())})
+            if sc == "bus" and v == "worst" and len(al.attrs.get("flows", [])):
+                fdf = al.attrs["flows"]
+                pts = gpd.GeoSeries(shel.geometry.values, crs=M).representative_point().to_crs(4326)
+                fdf = fdf.assign(municipality=exp["muni"].values[fdf.i.values],
+                                 shelter=[n if isinstance(n, str) else f"Unnamed {c}" for n, c in
+                                          zip(shel["name"].values[fdf.j.values], shel["cat"].values[fdf.j.values])],
+                                 cat=shel["cat"].values[fdf.j.values], s_lon=pts.x.values[fdf.j.values].round(5),
+                                 s_lat=pts.y.values[fdf.j.values].round(5),
+                                 places=(shel["gfa"].values[fdf.j.values] * s["use"] / s["m2"]).round())
+                agg = fdf.groupby(["municipality", "shelter", "cat", "s_lon", "s_lat", "places"], as_index=False).people.sum()
+                bus_rows += agg.assign(area=key, people=agg.people.round(1)).to_dict("records")
             if sc == "central":
                 g = al.groupby("muni")[["people", "covered", "no_reach", "full"]].sum().round()
                 g2 = e.groupby("muni").agg(buildings=("id", "size"), people_2025=("people25", "sum")).round()
@@ -299,11 +319,13 @@ for A in AREAS:
     for v in VARIANTS:
         gpd.GeoSeries([fl[v]], crs=M).simplify(15).to_crs(4326).to_file(OUT / f"flood_{key}_{v}.geojson", driver="GeoJSON")
     pickle.dump(dict(summary=summary[n0[0]:], muni=muni_rows[n0[1]:], crit=crit_rows[n0[2]:], shel=shelters_all[-1], qc=qc,
+                     bus=bus_rows[n0[3]:],
                      val={key: validation[key]} if key in validation else {}, seen=set(b.loc[b.in_worst, "id"])), open(part, "wb"))
 
 pd.DataFrame(summary).to_csv(OUT / "area_summary.csv", index=False, encoding="utf-8-sig")
 pd.DataFrame(muni_rows).sort_values(["variant", "people"], ascending=[True, False]).to_csv(OUT / "municipalities.csv", index=False, encoding="utf-8-sig")
 pd.DataFrame(crit_rows).to_csv(OUT / "critical_sites.csv", index=False, encoding="utf-8-sig")
+pd.DataFrame(bus_rows).to_csv(OUT / "bus_plan.csv", index=False, encoding="utf-8-sig")
 gpd.GeoDataFrame(pd.concat(shelters_all, ignore_index=True), crs=M).to_crs(4326)[["area", "muni", "name", "cat", "gfa", "capacity_central", "geometry"]] \
     .to_file(OUT / "shelters.geojson", driver="GeoJSON")
 json.dump(dict(qc=qc_all, efas_validation=validation, decisions=__doc__), open(OUT / "qc_and_validation.json", "w"), indent=2, default=str)

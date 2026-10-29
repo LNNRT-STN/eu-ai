@@ -1,0 +1,46 @@
+﻿from_name,from_town,from_area,type,to_name,km,lon,lat
+Ahrschleife Seniorenzentrum,Altenahr (DE),ahr,care home,Seniorenzentrum St. Anna,8.8,7.10297,50.53665
+Ahrschleife Seniorenzentrum,Altenahr (DE),ahr,care home,Seniorenzentrum St. Martin,9.0,7.10098,50.54532
+Ahrschleife Seniorenzentrum,Altenahr (DE),ahr,care home,Caritashaus - Wohnanlage und Tagespflege für Senioren,12.8,7.02338,50.6216
+Augustinum Seniorenresidenz Bad Neuenahr,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,care home,Seniorenzentrum St. Anna,3.6,7.10297,50.53665
+Augustinum Seniorenresidenz Bad Neuenahr,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,care home,Seniorenzentrum St. Martin,3.7,7.10098,50.54532
+Augustinum Seniorenresidenz Bad Neuenahr,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,care home,"Betreute Wohngemeinschaft, Bad Bodendorf",5.2,7.22219,50.55811
+(no name in OSM),"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,care home,Seniorenzentrum St. Anna,0.8,7.10297,50.53665
+(no name in OSM),"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,care home,"Betreute Wohngemeinschaft, Bad Bodendorf",8.9,7.22219,50.55811
+(no name in OSM),"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,care home,Seniorenassistenz Wachtberg,9.5,7.1355,50.62482
+Villa Sibilla,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,care home,Seniorenzentrum St. Anna,2.2,7.10297,50.53665
+Villa Sibilla,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,care home,Seniorenzentrum St. Martin,2.3,7.10098,50.54532
+Villa Sibilla,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,care home,"Betreute Wohngemeinschaft, Bad Bodendorf",6.6,7.22219,50.55811
+Dr. v. Ehrenwall'sche Klinik,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,hospital,Unnamed hospital,2.5,7.1265,50.54026
+Dr. v. Ehrenwall'sche Klinik,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,hospital,Krankenhaus Maria Hilf Bad Neuenahr-Ahrweiler,2.5,7.1272,50.54067
+Dr. v. Ehrenwall'sche Klinik,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,hospital,Unnamed hospital,2.6,7.1272,50.54105
+Krankenhaus Maria Hilf Bad Neuenahr-Ahrweiler,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,hospital,Median Klinik Tönisstein,0.4,7.13241,50.54066
+Krankenhaus Maria Hilf Bad Neuenahr-Ahrweiler,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,hospital,Venen-Clinic,0.4,7.13274,50.5404
+Krankenhaus Maria Hilf Bad Neuenahr-Ahrweiler,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,hospital,Klinik Niederrhein,0.5,7.13404,50.5399
+DRK Fachklinik Bad Neuenahr,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,hospital,Klinik Niederrhein,0.5,7.13404,50.5399
+DRK Fachklinik Bad Neuenahr,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,hospital,Median Klinik Tönisstein,0.5,7.13241,50.54066
+DRK Fachklinik Bad Neuenahr,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,hospital,Venen-Clinic,0.5,7.13274,50.5404
+Orthopädische Fachklinik Kurköln,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,hospital,Klinik Niederrhein,0.8,7.13404,50.5399
+Orthopädische Fachklinik Kurköln,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,hospital,Venen-Clinic,0.8,7.13274,50.5404
+Orthopädische Fachklinik Kurköln,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,hospital,Median Klinik Tönisstein,0.9,7.13241,50.54066
+EvA Pflegewohnhaus,Kall (DE),schleiden,care home,Marisa Residenz,4.6,6.60127,50.56806
+EvA Pflegewohnhaus,Kall (DE),schleiden,care home,Lebenshilfe HPZ,4.8,6.4873,50.53276
+EvA Pflegewohnhaus,Kall (DE),schleiden,care home,Liebfrauenhof Schleiden GmbH,6.0,6.47191,50.52882
+Lebenshilfe HPZ,"Schleiden, Stadt (DE)",schleiden,care home,Lebenshilfe HPZ,4.9,6.4873,50.53276
+Lebenshilfe HPZ,"Schleiden, Stadt (DE)",schleiden,care home,Pflegewohnhaus Hergarten,5.3,6.5343,50.61614
+Lebenshilfe HPZ,"Schleiden, Stadt (DE)",schleiden,care home,Liebfrauenhof Schleiden GmbH,5.5,6.47191,50.52882
+Franziskus - Haus,"Schleiden, Stadt (DE)",schleiden,hospital,Krankenhaus Schleiden,0.9,6.4871,50.53335
+Franziskus - Haus,"Schleiden, Stadt (DE)",schleiden,hospital,Unnamed hospital,8.6,6.57271,50.48255
+Franziskus - Haus,"Schleiden, Stadt (DE)",schleiden,hospital,Unnamed hospital,14.2,6.64986,50.5927
+MÜNCH - Stift - APZ,"Erftstadt, Stadt (DE)",erftstadt,care home,Schönes Leben Erftstadt,3.0,6.76789,50.81416
+MÜNCH - Stift - APZ,"Erftstadt, Stadt (DE)",erftstadt,care home,Heinz-Kühn Seniorenzentrum,3.5,6.76284,50.79723
+MÜNCH - Stift - APZ,"Erftstadt, Stadt (DE)",erftstadt,care home,Senioren Residenz Brühl,6.5,6.89635,50.82764
+Schönes Leben Erftstadt,"Erftstadt, Stadt (DE)",erftstadt,care home,Heinz-Kühn Seniorenzentrum,1.9,6.76284,50.79723
+Schönes Leben Erftstadt,"Erftstadt, Stadt (DE)",erftstadt,care home,MÜNCH - Stift - APZ,3.0,6.80983,50.80832
+Schönes Leben Erftstadt,"Erftstadt, Stadt (DE)",erftstadt,care home,Seniorenzentrum am Stadtgarten,3.0,6.81043,50.81016
+Marien-Hospital,"Erftstadt, Stadt (DE)",erftstadt,hospital,Haus Zwei Höfe,6.0,6.72547,50.79983
+Marien-Hospital,"Erftstadt, Stadt (DE)",erftstadt,hospital,Oberberg Somnia Fachklinik Köln Herrig,6.0,6.72512,50.79948
+Marien-Hospital,"Erftstadt, Stadt (DE)",erftstadt,hospital,GFO Klinik Brühl - Marienhospital,6.8,6.90065,50.82739
+TELOS Fachklinik Liblar,"Erftstadt, Stadt (DE)",erftstadt,hospital,Haus Zwei Höfe,6.2,6.72547,50.79983
+TELOS Fachklinik Liblar,"Erftstadt, Stadt (DE)",erftstadt,hospital,Oberberg Somnia Fachklinik Köln Herrig,6.2,6.72512,50.79948
+TELOS Fachklinik Liblar,"Erftstadt, Stadt (DE)",erftstadt,hospital,GFO Klinik Brühl - Marienhospital,6.6,6.90065,50.82739

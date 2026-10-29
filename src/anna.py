@@ -49,3 +49,16 @@ def _load(_stamp):
     summary = pd.read_csv(DATA / "area_summary.csv")
     qc = json.loads((DATA / "qc_and_validation.json").read_text())
     return head, towns, crit, shel, flood, summary, qc
+
+
+def load_moves():
+    """Where people go: receiving hospitals / care homes per flooded site, and the 10 km bus plan per town."""
+    return _load_moves(max(f.stat().st_mtime for f in DATA.glob("*.*")))
+
+
+@st.cache_data
+def _load_moves(_stamp):
+    recv = pd.read_csv(DATA / "receiving_sites.csv")
+    bus = pd.read_csv(DATA / "bus_plan.csv")
+    bus["town"] = bus.municipality.map(town)
+    return recv, bus

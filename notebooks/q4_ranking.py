@@ -64,13 +64,18 @@ m2 = m2[(m2.people >= 1) & (m2.municipality != "(outside mapped municipalities)"
 m2["lon"] = [lonlat(a, n)[0] for a, n in zip(m2.area, m2.municipality)]
 m2["lat"] = [lonlat(a, n)[1] for a, n in zip(m2.area, m2.municipality)]
 m2["source"] = m2.area.map(lambda a: "modelled" if a in MODELLED else "observed")
+# bus plan (all satellite passes only): people sheltered when buses take them up to 10 km
+bus = pd.read_csv(D + "bus_plan.csv").groupby(["area", "municipality"]).people.sum().rename("bus_covered")
+m2 = m2.merge(bus, left_on=["area", "municipality"], right_index=True, how="left")
+m2["bus_covered"] = m2.bus_covered.where(m2.variant == "worst").round()
 m2.to_csv(D + "app_towns.csv", index=False, encoding="utf-8-sig")
 
 # headline numbers per flood variant, central assumptions; observed and modelled kept apart
 def tot(d): return dict(people=int(d.people_2020.sum()), people_2025=int(d.people_2025.sum()), sheltered=int(d.central_covered.sum()),
                         no_shelter=int((d.central_no_reach + d.central_full).sum()), too_far=int(d.central_no_reach.sum()), full=int(d.central_full.sum()),
                         no_shelter_range=[int(d.people_2020.sum() - d.high_covered.sum()), int(d.people_2020.sum() - d.low_covered.sum())],
-                        coordination_gain=int((d.central_covered - d.central_covered_nearest_first).sum()))
+                        coordination_gain=int((d.central_covered - d.central_covered_nearest_first).sum()),
+                        bus_covered=int(d.bus_covered.sum()), bus_no_shelter=int((d.people_2020 - d.bus_covered).sum()))
 def sites(v):
     flag = "in_worst_flood" if v == "worst" else "in_main_flood"
     x = cc[cc[flag].astype(bool)]

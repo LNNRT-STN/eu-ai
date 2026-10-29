@@ -93,3 +93,10 @@ re-runnable script in `notebooks/` (`pipeline.py`, `osm_extract.py`, `dq_report.
 - How we checked it: palette validator (red vs orange failed the normal-vision floor, 13.6 < 15; replaced by grey / orange / dark brown, all checks pass); Streamlit test runner on every state (default, town picked, first pass only); real renders captured with Playwright in Edge at 1440 px and 390 px.
 - Result: corrected four issues found in the renders: map circles covering half the region; fact 1 wording contradicting fact 4; two numbers that summed observed and modelled areas (removed); a stale data cache that kept serving old numbers after a rebuild (cache now keyed on file times).
 - Decision taken by the team: First action is the default page; the teammate's Meuse pages stay, rebuilt with the same residents method.
+
+## 14. "Where do people go if shelters are full?" (question from the team)
+- Prompt/intent: the page said "shelters are full" without saying where evacuees go.
+- AI output (short): two additions. (1) For each flooded hospital / care home, the 3 nearest dry sites of the same kind (OpenStreetMap; dry in 2021 and in the 100-year model). (2) A bus scenario: same capacity rules, reach 10 km instead of 1.5 km on foot, recording which shelter each town's people go to (max-flow).
+- How we checked it: first receiving run found 58,744 "hospitals" and no match anywhere: a column called `type` clashed with GeoDataFrame.type (geometry type); renamed and re-ran (3,281 sites, median nearest 2.5 km). Bus plan checked against capacity (people per shelter <= places). Every view clicked through in the browser; a second `.cat` name clash (pandas accessor) and a Python 3.11 quote error were caught there and fixed.
+- Result: with buses up to 10 km, about 29,800 of 29,950 people in the satellite-mapped areas get a place (about 100 still without). The gap is transport and coordination, not total space. Free beds in receiving hospitals are unknown.
+- Decision taken by the team: page reorganised as Do now (evacuation + receiving sites) / Next (shelters, bus plan) / Context.
