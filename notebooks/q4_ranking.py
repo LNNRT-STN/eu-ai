@@ -67,7 +67,7 @@ m2["source"] = m2.area.map(lambda a: "modelled" if a in MODELLED else "observed"
 m2.to_csv(D + "app_towns.csv", index=False, encoding="utf-8-sig")
 
 # headline numbers per flood variant, central assumptions; observed and modelled kept apart
-def tot(d): return dict(people=int(d.people_2020.sum()), sheltered=int(d.central_covered.sum()),
+def tot(d): return dict(people=int(d.people_2020.sum()), people_2025=int(d.people_2025.sum()), sheltered=int(d.central_covered.sum()),
                         no_shelter=int((d.central_no_reach + d.central_full).sum()), too_far=int(d.central_no_reach.sum()), full=int(d.central_full.sum()),
                         no_shelter_range=[int(d.people_2020.sum() - d.high_covered.sum()), int(d.people_2020.sum() - d.low_covered.sum())],
                         coordination_gain=int((d.central_covered - d.central_covered_nearest_first).sum()))

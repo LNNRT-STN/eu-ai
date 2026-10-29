@@ -2,6 +2,7 @@
   "main": {
     "observed": {
       "people": 16048,
+      "people_2025": 15857,
       "sheltered": 9508,
       "no_shelter": 6539,
       "too_far": 3852,
@@ -14,6 +15,7 @@
     },
     "modelled_vesdre": {
       "people": 19102,
+      "people_2025": 19250,
       "sheltered": 13084,
       "no_shelter": 6018,
       "too_far": 729,
@@ -34,6 +36,7 @@
   "worst": {
     "observed": {
       "people": 29951,
+      "people_2025": 29721,
       "sheltered": 10962,
       "no_shelter": 18990,
       "too_far": 4116,
@@ -46,6 +49,7 @@
     },
     "modelled_vesdre": {
       "people": 19864,
+      "people_2025": 20012,
       "sheltered": 13372,
       "no_shelter": 6491,
       "too_far": 729,

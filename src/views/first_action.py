@@ -1,6 +1,6 @@
-"""Home page: Anna's first action. All mapped areas (Ahr, Vesdre, Meuse, Eifel, Erft), shelter capacity per town.
-Numbers come from outputs/data/ (notebooks/pipeline.py, q4_ranking.py); nothing is computed here beyond selection."""
-import altair as alt
+"""Home page for Anna. Every section title is the finding itself (Storytelling with Data p.187, horizontal logic);
+the page follows diagnosis -> guiding policy -> coherent actions (Good Strategy Bad Strategy p.60).
+Numbers come from outputs/data/ (notebooks/pipeline.py, q4_ranking.py) and src/out/meuse/replay_2021.json."""
 import pandas as pd
 import pydeck as pdk
 import streamlit as st
@@ -10,145 +10,113 @@ import core
 from core import about, fmt
 
 head, towns, crit, shel, flood, summary, qc = anna.load()
-
-core.header("First action",
-            "If the July 2021 flood came back tomorrow: who would have no shelter in reach, which care sites sit in the "
-            "water, and what to do first. Every mapped area: Ahr, Vesdre, Meuse, Eifel and Erft.")
-
-v = st.segmented_control("2021 flood map", list(anna.VARIANT), format_func=anna.VARIANT.get, default="worst",
-                         required=True, help="All satellite passes is closer to the official 2021 figures (Ahr: 7,202 "
-                                             "buildings in the water, against over 9,000 reported). The first pass alone "
-                                             "is a lower bound.")
-H, T = head[v], towns[towns.variant == v].copy()
-obs, mod, sites = H["observed"], H["modelled_vesdre"], H["sites"]
-C = crit[crit.share_of_site_flooded.ge(.05) & crit["in_worst_flood" if v == "worst" else "in_main_flood"].astype(bool)]
+V = "worst"                                                    # all satellite passes: closest to official 2021 figures
+H, T = head[V], towns[towns.variant == V].copy()
+obs, mod = H["observed"], H["modelled_vesdre"]
+T["no_shelter"] = T.no_reach + T.full
+C = crit[crit.share_of_site_flooded.ge(.05) & crit.in_worst_flood.astype(bool)]
 care = C[C.type.isin(["hospital", "care home"])]
+DISTRICT = {"ahr": "Ahrweiler", "erftstadt": "Rhein-Erft", "schleiden": "Euskirchen"}
+by_d = care.groupby(care.area.map(DISTRICT)).size().sort_values(ascending=False)
+top_t = care.town.value_counts()
 
-# 1. the action, one sentence, then why
-where = f", {sites['top_town_count']} of them in {anna.town(sites['top_town'])}" if sites["top_town"] else ""
-core.banner(core.EVACUATE, f"Start evacuating the {sites['vulnerable']} hospitals and care homes that sat in the 2021 "
-                           f"water{where}.",
-            "Their residents cannot walk to a shelter and need the most time to move. Before acting, check with each "
-            "site whether it was flood-proofed after 2021: that evidence is still being collected.", note=False)
-st.space("small")
-
-core.facts([
-    (about(obs["no_shelter"]), f"<strong>people would find no shelter place</strong> where the satellite saw the 2021 "
-                               f"water. {about(obs['no_shelter_range'][0])} to {about(obs['no_shelter_range'][1])} with "
-                               "stricter or looser assumptions."),
-    (about(mod["no_shelter"]), "<strong>more in the Vesdre valley</strong>, modelled. The satellite missed this valley, "
-                               "so the EFAS 100-year zone stands in: an order of magnitude."),
-    (fmt(len(care)), f"<strong>hospitals and care homes</strong> sit in the 2021 water, with {fmt((C.type == 'school').sum())} "
-                     "schools."),
-    (about(obs["full"]), "<strong>of them have a shelter within walking reach, but it is full.</strong> The gap is "
-                         "space, not distance."),
-], "Source · Copernicus EMS 2021 · EFAS 100-year (Vesdre) · GHS-POP 2020 · GHS-OBAT 2020 · OpenStreetMap shelters, "
-   "capacity at 4 m² per person, 50 % of floor usable, 1.5 km on foot")
-st.space("small")
-
-# 2. follow-up steps, derived from the same table
-far = T[T.no_reach > T.full].nlargest(2, "no_reach")
-full = T[T.full >= T.no_reach].nlargest(3, "full")
-core.group([
-    ("<b>Assign streets to shelters</b>", "Plan who goes where instead of letting everyone head to the nearest hall: "
-     f"{about(obs['coordination_gain'])} more people sheltered where the satellite saw the water, "
-     f"{about(mod['coordination_gain'])} more in the Vesdre (modelled).", f"+{about(obs['coordination_gain'])}"),
-    ("<b>Send buses where shelters are too far</b>",
-     ", ".join(f"{r.label}: {about(r.no_reach)}" for r in far.itertuples()) + " people beyond 1.5 km on foot.",
-     about(far.no_reach.sum())),
-    ("<b>Open overflow space where shelters are full</b>",
-     ", ".join(f"{r.label}: {about(r.full)}" for r in full.itertuples()) + " people with a shelter in reach but no room.",
-     ""),
-], "Then")
+# 1. the decision
+core.banner(core.EVACUATE,
+            f"Evacuate the {len(care)} hospitals and care homes that sat in the 2021 water first.",
+            "<b>Who:</b> the crisis staffs of the districts of "
+            + ", ".join(f"{d} ({n})" for d, n in by_d.items())
+            + f". {top_t.iloc[0]} of the sites are in {top_t.index[0]}.<br><b>Why:</b> their residents cannot walk to "
+              "a shelter and need the most time to move. Check first whether any site was flood-proofed after 2021.",
+            note=False)
 st.space("medium")
 
-# 3. where the gap is: towns ranked, and the map
+# 2. the diagnosis, then the towns it applies to
+st.html(f"<header class='pg'><h1 style='font-size:1.6rem'>The gap is space, not distance</h1><p>If the July 2021 "
+        f"flood came back today, {about(obs['no_shelter'])} people would find no shelter place where the satellite saw "
+        "the water (Meuse, Ahr, Eifel, Erft). <b>{about(obs['full'])} of them "
+        f"have a shelter within walking distance, but it is full.</b> So: move those who cannot walk first, make room where "
+        "people can walk, and bring transport where they cannot.</p></header>")
+st.space("small")
+
+top = T.nlargest(5, "no_shelter").reset_index(drop=True)
 left, right = st.columns([5, 6], gap="medium")
-T["no_shelter"] = T.no_reach + T.full
-top = T.nlargest(12, "no_shelter")
 with left:
-    st.html("<div class='gh'>Towns with the most people and no shelter</div>")
-    long = top.melt(id_vars=["label", "no_shelter", "people"], value_vars=["no_reach", "full", "covered"],
-                    var_name="state", value_name="n")
-    names = {"no_reach": "Too far: no shelter within 1.5 km", "full": "Shelter in reach but full", "covered": "Sheltered"}
-    long["state"] = long.state.map(names)
-    order = list(names.values())
-    bars = alt.Chart(long).mark_bar(height=16, stroke="#fff", strokeWidth=2).encode(
-        y=alt.Y("label:N", sort=list(top.label), title=None, axis=alt.Axis(labelLimit=220)),
-        x=alt.X("n:Q", stack="zero", title="Residents in the 2021 water", axis=alt.Axis(format=",.0f", grid=True)),
-        color=alt.Color("state:N", scale=alt.Scale(domain=order, range=[anna.TOO_FAR, anna.FULL, anna.SHELTERED]),
-                        legend=None),
-        order=alt.Order("rank:Q"),
-        tooltip=[alt.Tooltip("label:N", title="Town"), alt.Tooltip("state:N", title=" "),
-                 alt.Tooltip("n:Q", format=",.0f", title="Residents")],
-    ).transform_calculate(rank=f"indexof({order}, datum.state)")
-    text = alt.Chart(top).mark_text(align="left", dx=6, fontSize=12, color="#1d1d1f").encode(
-        y=alt.Y("label:N", sort=list(top.label)), x=alt.X("people:Q"),
-        text=alt.Text("no_shelter:Q", format=",.0f"))
-    st.altair_chart(alt.layer(bars, text).properties(height=34 * len(top), background="#ffffff",
-                                                     padding={"left": 12, "right": 40, "top": 10, "bottom": 8})
-                    .configure_view(stroke=None).configure_axis(labelColor="#1d1d1f", titleColor="#6e6e73",
-                                                                gridColor="#ececf0", domain=False, ticks=False),
-                    width="stretch")
-    core.legend("".join(core.swatch(c, lab) for c, lab in zip([anna.TOO_FAR, anna.FULL, anna.SHELTERED], order))
-                + "<span>Number = people with no shelter</span>")
-
+    rows = [(f"<b>{i + 1}. {r.label}</b>",
+             ("Shelters nearby are full" if r.full >= r.no_reach else "No shelter within 1.5 km on foot")
+             + (" · modelled, the satellite missed this valley" if r.area in anna.MODELLED else ""),
+             f"<b>{about(r.no_shelter)}</b>") for i, r in top.iterrows()]
+    core.group(rows, "People with no shelter place, by town", "Pick a town below the map for its sites and shelters.")
 with right:
-    pick = st.selectbox("Town", [None, *top.municipality], format_func=lambda m: "All mapped areas" if m is None else
-                        top.set_index("municipality").label[m], label_visibility="collapsed",
-                        placeholder="Pick a town to see its sites and shelters")
-    sel = None if pick is None else T[T.municipality == pick].iloc[0]
-    layers = []
-    for a in anna.AREA:
-        modelled = a in anna.MODELLED
-        layers.append(pdk.Layer("GeoJsonLayer", flood[(a, v)], filled=True, stroked=modelled,
-                                get_fill_color=[0, 113, 227, 45 if modelled else 95],
-                                get_line_color=[0, 113, 227, 160], line_width_min_pixels=1))
-    pts = T[T.no_shelter > 0].assign(
-        r=lambda d: (d.no_shelter ** .5) * .32 + 3,          # area ~ people: 11,000 -> ~37 px, 200 -> ~8 px
-        tip=lambda d: [f"<b>{x.label}</b><br>{fmt(x.no_shelter)} of {fmt(x.people)} residents with no shelter"
-                       f"<br>{fmt(x.no_reach)} too far · {fmt(x.full)} shelter full" for x in d.itertuples()])
-    layers.append(pdk.Layer("ScatterplotLayer", pts, get_position=["lon", "lat"], get_radius="r", radius_units="'pixels'",
-                            get_fill_color=core.rgb(anna.TOO_FAR, 150), get_line_color=[255, 255, 255],
-                            line_width_min_pixels=1, stroked=True, pickable=True))
-    layers.append(core.points(care.assign(tip=[f"<b>{n}</b><br>{t} · {w}<br>{s:.0%} of the site under water"
-                                               for n, t, w, s in zip(care.name, care.type, care.town,
-                                                                     care.share_of_site_flooded)]),
-                              core.rgb(core.EVACUATE), 6))
-    # whole study area (Rochefort to Venlo, Liège to Sinzig) in one frame, or the picked town
-    vs = (pdk.ViewState(longitude=6.25, latitude=50.78, zoom=7.25) if sel is None else
+    pick = st.selectbox("Town", [None, *top.municipality], label_visibility="collapsed",
+                        format_func=lambda m: "All five towns" if m is None else top.set_index("municipality").label[m])
+    sel = None if pick is None else top[top.municipality == pick].iloc[0]
+    layers = [pdk.Layer("GeoJsonLayer", flood[(a, V)], filled=True, stroked=False,
+                        get_fill_color=[0, 113, 227, 40 if a in anna.MODELLED else 90]) for a in anna.AREA]
+    layers.append(pdk.Layer("ScatterplotLayer", top.assign(
+        r=lambda d: d.no_shelter ** .5 * .32 + 4,
+        tip=lambda d: [f"<b>{x.label}</b><br>{fmt(x.no_shelter)} people with no shelter place" for x in d.itertuples()]),
+        get_position=["lon", "lat"], get_radius="r", radius_units="'pixels'", get_fill_color=core.rgb(anna.TOO_FAR, 170),
+        get_line_color=[255, 255, 255], line_width_min_pixels=1.5, stroked=True, pickable=True))
+    layers.append(core.points(care.assign(tip=[f"<b>{n}</b><br>{t} · {w}" for n, t, w in
+                                               zip(care.name, care.type, care.town)]), core.rgb(core.EVACUATE), 6))
+    vs = (pdk.ViewState(longitude=6.35, latitude=50.62, zoom=7.7) if sel is None else
           pdk.ViewState(longitude=sel.lon, latitude=sel.lat, zoom=11.5))
-    core.deck(layers, vs, 520)
-    core.legend(core.swatch("rgba(0,113,227,.37)", "2021 water, satellite")
-                + core.swatch("rgba(0,113,227,.18)", "Vesdre, 100-year model")
-                + core.swatch(anna.TOO_FAR, "People with no shelter (circle size)", True)
-                + core.swatch(core.EVACUATE, "Hospital or care home in the water", True))
+    core.deck(layers, vs, 400)
+    core.legend(core.swatch(anna.TOO_FAR, "People with no shelter place", True)
+                + core.swatch(core.EVACUATE, "Hospital or care home in the water", True)
+                + core.swatch("rgba(0,113,227,.35)", "2021 water"))
 
-# 4. one town, one level deeper
 if sel is not None:
-    st.space("medium")
     a, b = st.columns(2, gap="medium")
     with a:
-        core.group([
-            ("<b>Residents in the 2021 water</b>", "Order of magnitude: GHS-POP 2020 spread over homes by floor volume",
-             f"≈ {about(sel.people)}"),
-            ("<b>Sheltered</b>", "Best plan, shelters within 1.5 km on foot", fmt(sel.covered)),
-            ("<b>Shelter in reach but full</b>", "Needs overflow space or a coordinated plan", fmt(sel.full)),
-            ("<b>Too far</b>", "No shelter within 1.5 km: needs transport", fmt(sel.no_reach)),
-            ("<b>Evidence</b>", "Modelled: EFAS 100-year zone, the satellite missed this valley" if sel.area in anna.MODELLED
-             else "Observed: Copernicus EMS satellite map, July 2021", ""),
-        ], sel.label)
-    with b:
         here = C[(C.town == sel["name"]) & (C.area == sel.area)].sort_values("share_of_site_flooded", ascending=False)
         core.group([(f"<b>{r.name}</b>", r.type, f"{r.share_of_site_flooded:.0%} under water") for r in here.itertuples()]
-                   or [("No hospital, care home or school in the water", "", "")], "Sites in the water")
-        st.space("small")
+                   or [("None in the water", "", "")], f"{sel.label}: sites in the water")
+    with b:
         near = shel[(shel.town == sel["name"]) & (shel.area == sel.area)].nlargest(5, "capacity_central")
         core.group([(f"<b>{r.name if isinstance(r.name, str) else 'Unnamed ' + r.cat}</b>", r.cat,
                      f"≈ {about(r.capacity_central)} places") for r in near.itertuples()]
                    or [("No candidate shelter inside the town", "Look at neighbouring towns", "")],
-                   "Largest dry candidate shelters in the town",
-                   "OpenStreetMap schools, sports halls and civic buildings, dry in 2021 and in the 100-year model. "
-                   "Capacity is an estimate: confirm with the commune.")
+                   f"{sel.label}: largest dry shelters", "Candidates from OpenStreetMap, not official shelters.")
+st.space("medium")
 
-st.html("<p class='asof'>How each number was checked against the official 2021 figures: Data &amp; limits.</p>")
+# 3. coherent actions that follow from the diagnosis
+full = T[T.full >= T.no_reach].nlargest(3, "full")
+far = T[T.no_reach > T.full].nlargest(2, "no_reach")
+st.html("<header class='pg'><h1 style='font-size:1.6rem'>Then make room, send buses, and plan who goes where</h1>"
+        "</header>")
+st.space("small")
+core.group([
+    (f"<b>Open overflow space in {', '.join(full.label)}</b>",
+     "Municipal crisis cells. " + ", ".join(f"{r.label}: {about(r.full)}" for r in full.itertuples())
+     + " people have a shelter nearby with no room left.", ""),
+    (f"<b>Send buses to {' and '.join(far.label)}</b>",
+     f"District crisis staff. {about(far.no_reach.sum())} people have no shelter within 1.5 km on foot.", ""),
+    ("<b>Assign streets to shelters</b>",
+     f"Municipal crisis cells. A plan shelters {about(obs['coordination_gain'])} more people than everyone heading to the "
+     f"nearest hall ({about(mod['coordination_gain'])} more in the Vesdre, modelled).", ""),
+])
+st.space("medium")
+
+# 4. time: the warning travels downstream (Thinking in Systems: delays are where coordination has leverage)
+_, flow = core.load_brief()
+peak = flow.idxmax()
+first, last = peak.min(), peak.max()
+up = sorted({g.split(" · ")[1] for g, d in peak.items() if d == first})
+down = sorted({g.split(" · ")[1] for g, d in peak.items() if d == last})
+st.html(f"<header class='pg'><h1 style='font-size:1.6rem'>A warning upstream buys downstream about "
+        f"{(last - first).days} day</h1><p>In the July 2021 replay the rivers peaked at {', '.join(up)} on "
+        f"{first:%d %B}, and at {', '.join(down)} on {last:%d %B}. The Ahr is not in this river model.</p></header>")
+core.asof("replay")
+st.space("medium")
+
+# 5. then vs now (Big Book of Dashboards ch.6: compare now with then)
+st.html("<header class='pg'><h1 style='font-size:1.6rem'>We cannot yet say we are better prepared</h1></header>")
+core.group([
+    ("<b>People living where the 2021 water reached</b>",
+     f"{about(obs['people'])} in 2020, {about(obs['people_2025'])} in 2025. The 2025 figure is a projection, not a "
+     "count, and it shows no drop.", "No sign of change"),
+    ("<b>New defences, rebuilding, evacuation plans, flood-proofed hospitals, awareness</b>",
+     "Not verified yet. The team's desk research on what changed since 2021 is in progress; nothing is shown until it "
+     "has a source.", "Pending"),
+], foot="Sources and checks: Data & limits.")
