@@ -37,8 +37,8 @@ close the 2021 governance gaps (roles, warning → instruction, plans and drills
   funding (cited), per town and per area. Keep the home page one minute to read.
 - Wire each agent's output in as it lands; render; verify totals against app_towns.
 - "Better prepared than 2021?" one line on the page: brief Q2/Q4 asks it; only verified facts, else say "not verified".
-- Map: mark the town centre (distances are measured from it); avoid label overlap of numbered shelters.
-- Run the impeccable detector on `src/views/evacuate.py`; fix findings.
+- Map: avoid label overlap of numbered shelters (town centre now marked).
+- Impeccable detector: clean on evacuate.py (re-run after big changes).
 - Shelters shared by several towns: one line naming the shelters that need an agreement between municipalities.
 - Check the "All towns and care sites" page still reads well under "More" (title, first line).
 - Mobile pass at 390 px after all changes.

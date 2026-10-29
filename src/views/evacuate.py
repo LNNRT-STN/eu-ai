@@ -224,6 +224,11 @@ with lm:
                              line_width_min_pixels=2, stroked=True, pickable=True),
                    pdk.Layer("TextLayer", lab, get_position=["lon", "lat"], get_text="txt", get_size=12,
                              get_color=[255, 255, 255], font_weight=700, get_alignment_baseline="'center'")]
+    ctr = pd.DataFrame([{"lon": t.lon, "lat": t.lat, "tname": f"{t['name']} centre",
+                         "tinfo": "distances in the list are straight lines from here"}])
+    layers.append(pdk.Layer("ScatterplotLayer", ctr, get_position=["lon", "lat"], get_radius=7, radius_units="'pixels'",
+                            get_fill_color=[255, 255, 255], get_line_color=[29, 29, 31], line_width_min_pixels=3,
+                            stroked=True, pickable=True))
     pts = pd.concat([plan.rename(columns={"s_lon": "lon", "s_lat": "lat"})[["lon", "lat"]],
                      pd.DataFrame([{"lon": t.lon, "lat": t.lat}])])
     spread = core.km(pts.lon.mean(), pts.lat.mean(), pts.lon, pts.lat).max()
@@ -235,7 +240,8 @@ with lm:
                              views=[pdk.View(type="MapView", controller={"scrollZoom": False})]), height=MAP_H)
     core.legend(core.swatch(core.SHELTER, "Dry shelter (size = people sent there; the ten largest numbered as in the list)", True)
                 + (core.swatch(core.EVACUATE, "Hospital, care home or school in the 2021 water", True) if len(care) else "")
-                + core.swatch("rgba(0,113,227,.55)", "2021 water" + (" (modelled)" if modelled else "")))
+                + core.swatch("rgba(0,113,227,.55)", "2021 water" + (" (modelled)" if modelled else ""))
+                + "<span><i style='border:3px solid #1d1d1f;border-radius:50%;background:#fff'></i>Town centre</span>")
 with rm:
     if len(plan):
         st.dataframe(plan[["n", "shelter", "km", "people", "places", "shared"]], hide_index=True, height=MAP_H - 10,
