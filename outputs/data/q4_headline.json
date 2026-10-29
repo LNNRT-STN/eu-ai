@@ -1,0 +1,180 @@
+{
+  "main": {
+    "observed": {
+      "people": 16079,
+      "sheltered": 9867,
+      "no_shelter": 6212,
+      "no_shelter_range": [
+        4551,
+        11971
+      ],
+      "coordination_gain": 906
+    },
+    "modelled_vesdre": {
+      "people": 18709,
+      "sheltered": 13162,
+      "no_shelter": 5547,
+      "no_shelter_range": [
+        2140,
+        8643
+      ],
+      "coordination_gain": 902
+    },
+    "sites": {
+      "vulnerable": 10,
+      "schools": 31,
+      "top_town": "Erftstadt, Stadt (DE)",
+      "top_town_count": 4
+    }
+  },
+  "worst": {
+    "observed": {
+      "people": 29359,
+      "sheltered": 11398,
+      "no_shelter": 17961,
+      "no_shelter_range": [
+        11292,
+        23848
+      ],
+      "coordination_gain": 370
+    },
+    "modelled_vesdre": {
+      "people": 19339,
+      "sheltered": 13453,
+      "no_shelter": 5886,
+      "no_shelter_range": [
+        2414,
+        9110
+      ],
+      "coordination_gain": 979
+    },
+    "sites": {
+      "vulnerable": 15,
+      "schools": 44,
+      "top_town": "Bad Neuenahr-Ahrweiler, Stadt (DE)",
+      "top_town_count": 7
+    }
+  },
+  "top10_main": [
+    {
+      "rank": 1,
+      "municipality": "Schleiden, Stadt (DE)",
+      "area": "schleiden",
+      "source": "observed (EMS 2021)",
+      "people": 3340,
+      "covered": 1166,
+      "no_shelter": 2174,
+      "why": "shelters too far",
+      "no_reach": 2174,
+      "full": 0
+    },
+    {
+      "rank": 2,
+      "municipality": "Pepinster (BE)",
+      "area": "vesdre",
+      "source": "MODELLED (EFAS 100-yr)",
+      "people": 2981,
+      "covered": 909,
+      "no_shelter": 2071,
+      "why": "shelters full",
+      "no_reach": 655,
+      "full": 1416
+    },
+    {
+      "rank": 3,
+      "municipality": "Trooz (BE)",
+      "area": "vesdre",
+      "source": "MODELLED (EFAS 100-yr)",
+      "people": 2127,
+      "covered": 183,
+      "no_shelter": 1944,
+      "why": "shelters full",
+      "no_reach": 54,
+      "full": 1890
+    },
+    {
+      "rank": 4,
+      "municipality": "Kall (DE)",
+      "area": "schleiden",
+      "source": "observed (EMS 2021)",
+      "people": 1790,
+      "covered": 79,
+      "no_shelter": 1712,
+      "why": "shelters too far",
+      "no_reach": 1115,
+      "full": 597
+    },
+    {
+      "rank": 5,
+      "municipality": "Dernau (DE)",
+      "area": "ahr",
+      "source": "observed (EMS 2021)",
+      "people": 1122,
+      "covered": 201,
+      "no_shelter": 920,
+      "why": "shelters full",
+      "no_reach": 186,
+      "full": 734
+    },
+    {
+      "rank": 6,
+      "municipality": "Limburg (BE)",
+      "area": "vesdre",
+      "source": "MODELLED (EFAS 100-yr)",
+      "people": 1306,
+      "covered": 392,
+      "no_shelter": 914,
+      "why": "shelters full",
+      "no_reach": 12,
+      "full": 902
+    },
+    {
+      "rank": 7,
+      "municipality": "Altenahr (DE)",
+      "area": "ahr",
+      "source": "observed (EMS 2021)",
+      "people": 800,
+      "covered": 51,
+      "no_shelter": 748,
+      "why": "shelters full",
+      "no_reach": 1,
+      "full": 747
+    },
+    {
+      "rank": 8,
+      "municipality": "Theux (BE)",
+      "area": "vesdre",
+      "source": "MODELLED (EFAS 100-yr)",
+      "people": 519,
+      "covered": 143,
+      "no_shelter": 376,
+      "why": "shelters full",
+      "no_reach": 0,
+      "full": 376
+    },
+    {
+      "rank": 9,
+      "municipality": "Bad Neuenahr-Ahrweiler, Stadt (DE)",
+      "area": "ahr",
+      "source": "observed (EMS 2021)",
+      "people": 4378,
+      "covered": 4157,
+      "no_shelter": 221,
+      "why": "shelters full",
+      "no_reach": 0,
+      "full": 221
+    },
+    {
+      "rank": 10,
+      "municipality": "Rech (DE)",
+      "area": "ahr",
+      "source": "observed (EMS 2021)",
+      "people": 219,
+      "covered": 0,
+      "no_shelter": 220,
+      "why": "shelters full",
+      "no_reach": 110,
+      "full": 110
+    }
+  ]
+}
