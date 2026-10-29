@@ -21,11 +21,11 @@ left, right = st.columns([1, 1], gap="large")
 with left:
     st.html("<div class='gh'>Forecast points · select one for its curve</div>")
     pick = st.dataframe(tab[["gauge", "status", "peak", "peak_day", "pct"]], hide_index=True, on_select="rerun",
-                        selection_mode="single-row", key="gauge", height=400, column_config={
+                        selection_mode="single-row", key="gauge", column_config={
                             "gauge": "River · place", "status": st.column_config.TextColumn("Expected", width="small"),
                             "peak": st.column_config.NumberColumn("Peak m³/s", format="%.0f"),
                             "peak_day": st.column_config.DateColumn("Peak day", format="ddd D MMM"),
-                            "pct": st.column_config.ProgressColumn("Of July 2021", format="%.0f%%", min_value=0, max_value=100)})
+                            "pct": st.column_config.ProgressColumn("% of 2021", format="%.0f%%", min_value=0, max_value=100)})
 rows = pick.selection.rows
 g = tab.iloc[rows[0] if rows else 0]
 d = series[series.gauge == g.gauge]

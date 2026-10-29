@@ -17,8 +17,7 @@ DAY0 = pd.Timestamp("2021-07-12")  # the replay's "now": rivers still normal, th
 STEPS = {0: "Now", 1: "+24 h", 2: "+48 h", 3: "+72 h", 4: "+96 h"}
 
 core.header("If July 2021 happens again",
-            "The river forecast below replays the July 2021 flood as if it started today. Each commune gets a score "
-            "out of 10: the higher it is, the sooner it needs to act.")
+            "The July 2021 river flows, replayed as if they start today. Each commune scores 0–10: higher acts sooner.")
 
 c1, c2 = st.columns([2, 3], vertical_alignment="bottom")
 side = c1.segmented_control("Country", ["All", "BE", "NL", "DE"], default="All", required=True,
@@ -32,14 +31,13 @@ lvl = pd.DataFrame({g: [sum(q >= x for x in (ref[g][0], ref[g][1] / 2, ref[g][1]
                    index=flow.index)
 danger = lambda g: lvl.index[lvl[g] >= 2]
 now = lvl.loc[day]
-place = lambda gs: "; ".join(f"{r} at {', '.join(t)}" for r, t in  # "Meuse at Liège, Maastricht; Vesdre at Verviers"
-                            pd.Series([g.split(" · ")[1] for g in gs], [g.split(" · ")[0] for g in gs]).groupby(level=0, sort=False).agg(list).items())
+place = lambda gs: ", ".join(g.split(" · ")[1] for g in gs)  # towns only: the river timeline below names each river
 high = [g for g in now.index if now[g] >= 2]
 peak = {g: flow[g].idxmax() for g in flow}
 soon = [g for g in now.index if peak[g] > day]
 if high:
     head = f"{len(high)} of {len(now)} river points are above half the July 2021 peak"
-    detail = f"Dangerous now: {place(high)}."
+    detail = f"Now: {place(high)}."
 else:
     head = ("All rivers are normal now, but a flood like July 2021 is forecast" if soon else
             "The water is falling: all river points are back below half the July 2021 peak")
@@ -49,9 +47,9 @@ if soon:
     detail += " " + " ".join(f"Peak in {h} h: {place(gs)}." for h, gs in by.items())
 color = forecast.LEVELS[3 if soon and not high else int(now.max())][1] if now.max() or soon else core.SHELTER
 st.html(f"<div class='banner' style='--halo:{color}33'><i class='dot' style='background:{color}'></i><div>"
-        f"<h2>{head}</h2><p>{detail.strip()}</p><small>{day:%a %d %b %Y} in the replay. A training scenario from the "
-        f"2021 model run, not a warning. Today's live outlook: "
-        + ("unavailable." if gauges is None else core.status(gauges, rain, err)[1].lower() + ".") + "</small></div></div>")
+        f"<h2>{head}</h2><p>{detail.strip()}</p><small>Replay day {day:%a %d %b %Y} · training scenario, not a warning · "
+        "Live outlook today: " + ("unavailable" if gauges is None else core.status(gauges, rain, err)[1].lower())
+        + "</small></div></div>")
 st.space("small")
 
 p = pri if side == "All" else pri[pri.country == side]
@@ -59,16 +57,15 @@ ev = sites[(sites.role == "evacuate") & ((side == "All") | (sites.country == sid
 dry = sites[(sites.role == "shelter") & ((side == "All") | (sites.country == side))]
 first = p[p.level == "Act first"]
 core.facts([
-    (fmt(len(first)), f"<strong>communes should act first</strong> (score 7 or more): "
-                      f"{', '.join(first.commune.head(3)) or 'none'}" + (" and others." if len(first) > 3 else ".")),
-    (about(p.people.sum()), f"<strong>people live where the water can reach</strong>, in {fmt((p.people > 0).sum())} "
-                            "communes. That is the modelled 100-year zone; 2021 went higher in places."),
-    (fmt(len(ev)), "<strong>hospitals and care homes</strong> sit in or next to the flood zone. They need the most "
-                   "time to evacuate, so they move first."),
-    ("–" if side == "DE" else fmt(len(dry)), "<strong>dry schools and town halls</strong> could take people. Candidates "
-                                             "only: capacity and access are unknown." if side != "DE" else
-     "<strong>dry sites unknown</strong>: OpenStreetMap has no schools or town halls for this area."),
-], "Source · " + " · ".join(core.AS_OF[k] for k in ("zone", "osm")))
+    (fmt(len(first)), f"<strong>communes act first</strong> (score 7+): {', '.join(first.commune.head(3)) or 'none'}"
+                      + ("…" if len(first) > 3 else "")),
+    (about(p.people.sum()), f"<strong>people in the 100-year zone</strong>, across {fmt((p.people > 0).sum())} communes. "
+                            "2021 reached further in places."),
+    (fmt(len(ev)), "<strong>hospitals and care homes</strong> in or next to the zone. Slowest to evacuate."),
+    ("–" if side == "DE" else fmt(len(dry)), "<strong>dry schools and town halls</strong> could take people. Capacity "
+                                             "unknown." if side != "DE" else
+     "<strong>dry sites unknown</strong>: OpenStreetMap has no schools or town halls here."),
+], "Source · " + " · ".join(core.AS_OF[k] for k in ("zone", "obs", "osm")))
 st.space("small")
 
 # one selected commune, set from the map, the table or the picker
@@ -141,17 +138,17 @@ with right:
                           f"{p.set_index('lau_id').commune[x]} · {p.set_index('lau_id').score[x]}/10",
                           label_visibility="collapsed")
     if sel is None:
-        core.group([
-            ("<b>People in the flood zone</b>", "50+: 1 · 500+: 2 · 2,000+: 3 · 10,000+: 4", "up to 4"),
-            ("<b>Share of the commune</b>", "5 %+ of residents: 1 · 20 %+: 2", "up to 2"),
-            ("<b>Flooded in July 2021</b>", "The satellite saw homes in the water, or missed a known flood", "2"),
-            ("<b>Care sites at risk</b>", "1–2 hospitals or care homes: 1 · 3+: 2", "up to 2"),
-        ], "How the score works", "Thresholds are the team's choice, simple enough to redo by hand. Not an official "
-                                  "standard.")
-        st.space("small")
         core.group([(f"<span class='pill' style='background:{c};color:{'#1d1d1f' if lab in ('Watch', 'Low') else '#fff'}'>"
                      f"{lab}</span>", what, f"{fmt((p.level == lab).sum())}") for lab, (c, what) in core.PRIORITY.items()],
-                   "What each level means")
+                   "Communes per level")
+        st.space("small")
+        with st.expander("How the score works"):
+            core.group([
+                ("<b>People in the flood zone</b>", "50+: 1 · 500+: 2 · 2,000+: 3 · 10,000+: 4", "up to 4"),
+                ("<b>Share of the commune</b>", "5 %+ of residents: 1 · 20 %+: 2", "up to 2"),
+                ("<b>Flooded in July 2021</b>", "Homes in the mapped water, or a known flood the satellite missed", "2"),
+                ("<b>Care sites at risk</b>", "1–2 hospitals or care homes: 1 · 3+: 2", "up to 2"),
+            ], foot="The team's thresholds, simple enough to redo by hand. Not an official standard.")
     else:
         c, what = core.PRIORITY[sel.level]
         ink = "#1d1d1f" if sel.level in ("Watch", "Low") else "#fff"
@@ -184,29 +181,23 @@ st.space("medium")
 st.html("<div class='gh'>All communes, highest priority first · select a row to see why</div>")
 tab = p.drop(columns="geometry").sort_values(["score", "people"], ascending=False).reset_index(drop=True)
 st.session_state.table_ids = list(tab.lau_id)
-show = tab.assign(country=tab.country.map(core.COUNTRY), share=tab.share * 100,
-                  hit_2021=tab.hit_2021.map({True: "Yes", False: "No"}))
-st.dataframe(show[["commune", "country", "level", "score", "people", "share", "care", "hit_2021", "dry_5km", "per_site"]],
+show = tab.assign(country=tab.country.map(core.COUNTRY))
+st.dataframe(show[["commune", "country", "level", "score", "people", "care", "dry_5km", "per_site"]],
              hide_index=True, height=380, on_select=from_table, selection_mode="single-row", key="table", column_config={
                  "commune": "Commune", "country": st.column_config.TextColumn("Country", width="small"),
                  "level": st.column_config.TextColumn("Priority", width="small"),
                  "score": st.column_config.ProgressColumn("Score", format="%d / 10", min_value=0, max_value=10, width="small"),
                  "people": st.column_config.NumberColumn("People in flood zone", format="localized",
                                                          help="Residents in the EFAS 100-year zone. Order of magnitude."),
-                 "share": st.column_config.NumberColumn("% of commune", format="%.0f%%"),
                  "care": st.column_config.NumberColumn("Care sites", width="small", help="Hospitals and care homes at risk"),
-                 "hit_2021": st.column_config.TextColumn("2021", width="small", help="Flooded in July 2021"),
                  "dry_5km": st.column_config.NumberColumn("Dry sites ≤ 5 km", format="%d",
                                                           help="Empty on the German side: no OSM data."),
                  "per_site": st.column_config.NumberColumn("People per dry site", format="localized",
                                                            help="People in the flood zone ÷ dry candidate sites within "
                                                                 "5 km. High = shelter shortfall: look further or across "
                                                                 "the border.")})
-c_a, c_b = st.columns([3, 1], vertical_alignment="center")
-with c_a:
-    core.asof("zone", "obs", "osm")
-c_b.download_button("Download table", tab.to_csv(index=False), "priority_by_commune.csv", icon=":material/download:",
-                    type="tertiary", width="stretch")
+st.download_button("Download table", tab.to_csv(index=False), "priority_by_commune.csv", icon=":material/download:",
+                    type="tertiary")
 
 st.space("medium")
 st.html("<div class='gh'>When each river peaks · % of its own July 2021 peak</div>")
@@ -217,7 +208,7 @@ heat = pd.DataFrame([(t, g, flow.loc[t, g] / ref[g][1], forecast.LEVELS[lvl.loc[
 heat = heat[(heat.day >= DAY0) & (heat.day <= DAY0 + pd.Timedelta(days=5))]
 heat["d"] = heat.day.dt.strftime("%a %d")  # plain labels: a year-less time unit would print 2012 weekdays
 x = alt.X("d:O", sort=list(heat.d.unique()), title=None, axis=alt.Axis(labelAngle=0, orient="top"))
-y = alt.Y("gauge:N", sort=order, title=None)
+y = alt.Y("gauge:N", sort=order, title=None, axis=alt.Axis(labelLimit=220))
 base = alt.Chart(heat).encode(x=x, y=y)
 st.altair_chart(alt.layer(
     base.mark_rect(stroke="#fff", strokeWidth=2, cornerRadius=4).encode(
@@ -232,18 +223,17 @@ st.altair_chart(alt.layer(
 ).properties(height=330, background="#ffffff", padding={"left": 12, "right": 12, "top": 8, "bottom": 8}).configure_view(stroke=None)
  .configure_axis(domain=False, ticks=False, labelColor="#1d1d1f", labelFontSize=12), width="stretch")
 lag = (flow["Meuse · Venlo"].idxmax() - flow["Vesdre · Chaudfontaine"].idxmax()).days
-st.html(f"<p class='foot'>Read top to bottom as the water flows: Ardennes tributaries peak first, the Meuse in Dutch "
-        f"Limburg about {lag} day{'s' if lag != 1 else ''} later. That gap is the time downstream crisis cells have "
-        "to prepare. The black frame is the forecast time chosen above.</p>")
+st.html(f"<p class='foot'>Top to bottom follows the water: Ardennes tributaries peak first, Dutch Limburg about {lag} "
+        f"day{'s' if lag != 1 else ''} later. That gap is the downstream lead time. Black frame: the forecast time above.</p>")
 core.legend("".join(core.swatch(c, lab) for lab, c in forecast.LEVELS))
 core.asof("replay")
 
 st.space("medium")
 core.group([
-    ("<b>Emergency services</b>", "Belgium, Netherlands, Germany", "112"),
+    ("<b>Emergency services</b>", "BE · NL · DE", "112"),
     ("<b>Belgium · Wallonia</b>", "SPW river levels and flood warnings, hydrometrie.wallonie.be · FR, DE", "Official"),
     ("<b>Netherlands</b>", "Rijkswaterstaat water levels, waterinfo.rws.nl · NL", "Official"),
     ("<b>Germany · North Rhine-Westphalia</b>", "State flood portal, hochwasserportal.nrw · DE", "Official"),
     ("<b>Your own focal points</b>", "Add each agency's contact person, phone and radio channel before an event", "To fill"),
-], "Who issues the real warnings", "This briefing is a training and planning tool. Before acting, check the official "
-                                   "warning for your river.")
+], "Who issues the real warnings", "A training and planning tool. Check the official warning for your river before "
+                                   "acting.")
