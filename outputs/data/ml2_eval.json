@@ -1,0 +1,703 @@
+{
+ "all_areas_pooled": {
+  "cells": 14823,
+  "hit_cells": 466,
+  "LightGBM + terrain": {
+   "roc_auc": 0.792,
+   "avg_precision": 0.096,
+   "top10pct_capture": 0.337
+  },
+  "LightGBM old (no terrain)": {
+   "roc_auc": 0.752,
+   "avg_precision": 0.082,
+   "top10pct_capture": 0.29
+  },
+  "EFAS 100-yr share of cell": {
+   "roc_auc": 0.75,
+   "avg_precision": 0.071,
+   "top10pct_capture": 0.217
+  },
+  "Terrain-only LightGBM": {
+   "roc_auc": 0.749,
+   "avg_precision": 0.093,
+   "top10pct_capture": 0.386
+  },
+  "Height above valley floor (rule)": {
+   "roc_auc": 0.728,
+   "avg_precision": 0.07,
+   "top10pct_capture": 0.234
+  }
+ },
+ "meuse_pooled": {
+  "cells": 5153,
+  "hit_cells": 115,
+  "LightGBM + terrain": {
+   "roc_auc": 0.789,
+   "avg_precision": 0.057,
+   "top10pct_capture": 0.296
+  },
+  "LightGBM old (no terrain)": {
+   "roc_auc": 0.796,
+   "avg_precision": 0.064,
+   "top10pct_capture": 0.348
+  },
+  "EFAS 100-yr share of cell": {
+   "roc_auc": 0.798,
+   "avg_precision": 0.078,
+   "top10pct_capture": 0.417
+  },
+  "Terrain-only LightGBM": {
+   "roc_auc": 0.726,
+   "avg_precision": 0.044,
+   "top10pct_capture": 0.191
+  },
+  "Height above valley floor (rule)": {
+   "roc_auc": 0.782,
+   "avg_precision": 0.06,
+   "top10pct_capture": 0.313
+  }
+ },
+ "ahr_pooled": {
+  "cells": 362,
+  "hit_cells": 91,
+  "LightGBM + terrain": {
+   "roc_auc": 0.9,
+   "avg_precision": 0.769,
+   "top10pct_capture": 0.341
+  },
+  "LightGBM old (no terrain)": {
+   "roc_auc": 0.874,
+   "avg_precision": 0.747,
+   "top10pct_capture": 0.33
+  },
+  "EFAS 100-yr share of cell": {
+   "roc_auc": 0.891,
+   "avg_precision": 0.677,
+   "top10pct_capture": 0.308
+  },
+  "Terrain-only LightGBM": {
+   "roc_auc": 0.851,
+   "avg_precision": 0.637,
+   "top10pct_capture": 0.264
+  },
+  "Height above valley floor (rule)": {
+   "roc_auc": 0.884,
+   "avg_precision": 0.765,
+   "top10pct_capture": 0.352
+  }
+ },
+ "per_area": {
+  "EMSR517_AOI01": {
+   "cells": 942,
+   "hit_cells": 34,
+   "LightGBM + terrain": {
+    "roc_auc": 0.768,
+    "avg_precision": 0.184,
+    "top10pct_capture": 0.353
+   },
+   "LightGBM old (no terrain)": {
+    "roc_auc": 0.767,
+    "avg_precision": 0.13,
+    "top10pct_capture": 0.353
+   },
+   "EFAS 100-yr share of cell": {
+    "roc_auc": 0.655,
+    "avg_precision": 0.051,
+    "top10pct_capture": 0.029
+   },
+   "Terrain-only LightGBM": {
+    "roc_auc": 0.768,
+    "avg_precision": 0.173,
+    "top10pct_capture": 0.471
+   },
+   "Height above valley floor (rule)": {
+    "roc_auc": 0.746,
+    "avg_precision": 0.171,
+    "top10pct_capture": 0.382
+   }
+  },
+  "EMSR517_AOI03": {
+   "cells": 132,
+   "hit_cells": 7,
+   "LightGBM + terrain": {
+    "roc_auc": 0.61,
+    "avg_precision": 0.334,
+    "top10pct_capture": 0.286
+   },
+   "LightGBM old (no terrain)": {
+    "roc_auc": 0.746,
+    "avg_precision": 0.352,
+    "top10pct_capture": 0.429
+   },
+   "EFAS 100-yr share of cell": {
+    "roc_auc": 0.703,
+    "avg_precision": 0.33,
+    "top10pct_capture": 0.429
+   },
+   "Terrain-only LightGBM": {
+    "roc_auc": 0.593,
+    "avg_precision": 0.332,
+    "top10pct_capture": 0.286
+   },
+   "Height above valley floor (rule)": {
+    "roc_auc": 0.4,
+    "avg_precision": 0.318,
+    "top10pct_capture": 0.286
+   }
+  },
+  "EMSR517_AOI04": {
+   "cells": 983,
+   "hit_cells": 58,
+   "LightGBM + terrain": {
+    "roc_auc": 0.926,
+    "avg_precision": 0.639,
+    "top10pct_capture": 0.776
+   },
+   "LightGBM old (no terrain)": {
+    "roc_auc": 0.913,
+    "avg_precision": 0.585,
+    "top10pct_capture": 0.724
+   },
+   "EFAS 100-yr share of cell": {
+    "roc_auc": 0.855,
+    "avg_precision": 0.5,
+    "top10pct_capture": 0.759
+   },
+   "Terrain-only LightGBM": {
+    "roc_auc": 0.901,
+    "avg_precision": 0.55,
+    "top10pct_capture": 0.69
+   },
+   "Height above valley floor (rule)": {
+    "roc_auc": 0.883,
+    "avg_precision": 0.501,
+    "top10pct_capture": 0.586
+   }
+  },
+  "EMSR517_AOI05": {
+   "cells": 3844,
+   "hit_cells": 35,
+   "LightGBM + terrain": {
+    "roc_auc": 0.799,
+    "avg_precision": 0.044,
+    "top10pct_capture": 0.457
+   },
+   "LightGBM old (no terrain)": {
+    "roc_auc": 0.755,
+    "avg_precision": 0.037,
+    "top10pct_capture": 0.371
+   },
+   "EFAS 100-yr share of cell": {
+    "roc_auc": 0.731,
+    "avg_precision": 0.02,
+    "top10pct_capture": 0.229
+   },
+   "Terrain-only LightGBM": {
+    "roc_auc": 0.754,
+    "avg_precision": 0.041,
+    "top10pct_capture": 0.371
+   },
+   "Height above valley floor (rule)": {
+    "roc_auc": 0.647,
+    "avg_precision": 0.014,
+    "top10pct_capture": 0.143
+   }
+  },
+  "EMSR517_AOI06": {
+   "cells": 2301,
+   "hit_cells": 25,
+   "LightGBM + terrain": {
+    "roc_auc": 0.887,
+    "avg_precision": 0.054,
+    "top10pct_capture": 0.64
+   },
+   "LightGBM old (no terrain)": {
+    "roc_auc": 0.873,
+    "avg_precision": 0.056,
+    "top10pct_capture": 0.48
+   },
+   "EFAS 100-yr share of cell": {
+    "roc_auc": 0.849,
+    "avg_precision": 0.05,
+    "top10pct_capture": 0.52
+   },
+   "Terrain-only LightGBM": {
+    "roc_auc": 0.787,
+    "avg_precision": 0.038,
+    "top10pct_capture": 0.4
+   },
+   "Height above valley floor (rule)": {
+    "roc_auc": 0.742,
+    "avg_precision": 0.038,
+    "top10pct_capture": 0.36
+   }
+  },
+  "EMSR517_AOI07": {
+   "cells": 85,
+   "hit_cells": 31,
+   "LightGBM + terrain": {
+    "roc_auc": 0.846,
+    "avg_precision": 0.734,
+    "top10pct_capture": 0.226
+   },
+   "LightGBM old (no terrain)": {
+    "roc_auc": 0.871,
+    "avg_precision": 0.726,
+    "top10pct_capture": 0.161
+   },
+   "EFAS 100-yr share of cell": {
+    "roc_auc": 0.82,
+    "avg_precision": 0.73,
+    "top10pct_capture": 0.226
+   },
+   "Terrain-only LightGBM": {
+    "roc_auc": 0.648,
+    "avg_precision": 0.559,
+    "top10pct_capture": 0.161
+   },
+   "Height above valley floor (rule)": {
+    "roc_auc": 0.566,
+    "avg_precision": 0.415,
+    "top10pct_capture": 0.129
+   }
+  },
+  "EMSR517_AOI08": {
+   "cells": 279,
+   "hit_cells": 19,
+   "LightGBM + terrain": {
+    "roc_auc": 0.845,
+    "avg_precision": 0.351,
+    "top10pct_capture": 0.316
+   },
+   "LightGBM old (no terrain)": {
+    "roc_auc": 0.738,
+    "avg_precision": 0.17,
+    "top10pct_capture": 0.105
+   },
+   "EFAS 100-yr share of cell": {
+    "roc_auc": 0.509,
+    "avg_precision": 0.075,
+    "top10pct_capture": 0.053
+   },
+   "Terrain-only LightGBM": {
+    "roc_auc": 0.824,
+    "avg_precision": 0.292,
+    "top10pct_capture": 0.368
+   },
+   "Height above valley floor (rule)": {
+    "roc_auc": 0.613,
+    "avg_precision": 0.086,
+    "top10pct_capture": 0.053
+   }
+  },
+  "EMSR517_AOI09": {
+   "cells": 207,
+   "hit_cells": 13,
+   "LightGBM + terrain": {
+    "roc_auc": 0.633,
+    "avg_precision": 0.09,
+    "top10pct_capture": 0.077
+   },
+   "LightGBM old (no terrain)": {
+    "roc_auc": 0.56,
+    "avg_precision": 0.081,
+    "top10pct_capture": 0.077
+   },
+   "EFAS 100-yr share of cell": {
+    "roc_auc": 0.476,
+    "avg_precision": 0.067,
+    "top10pct_capture": 0.077
+   },
+   "Terrain-only LightGBM": {
+    "roc_auc": 0.697,
+    "avg_precision": 0.185,
+    "top10pct_capture": 0.231
+   },
+   "Height above valley floor (rule)": {
+    "roc_auc": 0.636,
+    "avg_precision": 0.09,
+    "top10pct_capture": 0.077
+   }
+  },
+  "EMSR517_AOI10": {
+   "cells": 75,
+   "hit_cells": 8,
+   "LightGBM + terrain": {
+    "roc_auc": 0.632,
+    "avg_precision": 0.262,
+    "top10pct_capture": 0.25
+   },
+   "LightGBM old (no terrain)": {
+    "roc_auc": 0.63,
+    "avg_precision": 0.145,
+    "top10pct_capture": 0.125
+   },
+   "EFAS 100-yr share of cell": {
+    "roc_auc": 0.685,
+    "avg_precision": 0.197,
+    "top10pct_capture": 0.125
+   },
+   "Terrain-only LightGBM": {
+    "roc_auc": 0.391,
+    "avg_precision": 0.116,
+    "top10pct_capture": 0.125
+   },
+   "Height above valley floor (rule)": {
+    "roc_auc": 0.576,
+    "avg_precision": 0.156,
+    "top10pct_capture": 0.125
+   }
+  },
+  "EMSR517_AOI11": {
+   "cells": 116,
+   "hit_cells": 9,
+   "LightGBM + terrain": {
+    "roc_auc": 0.803,
+    "avg_precision": 0.298,
+    "top10pct_capture": 0.333
+   },
+   "LightGBM old (no terrain)": {
+    "roc_auc": 0.823,
+    "avg_precision": 0.373,
+    "top10pct_capture": 0.444
+   },
+   "EFAS 100-yr share of cell": {
+    "roc_auc": 0.723,
+    "avg_precision": 0.161,
+    "top10pct_capture": 0.333
+   },
+   "Terrain-only LightGBM": {
+    "roc_auc": 0.609,
+    "avg_precision": 0.179,
+    "top10pct_capture": 0.222
+   },
+   "Height above valley floor (rule)": {
+    "roc_auc": 0.521,
+    "avg_precision": 0.277,
+    "top10pct_capture": 0.333
+   }
+  },
+  "EMSR517_AOI14": {
+   "cells": 162,
+   "hit_cells": 5,
+   "LightGBM + terrain": {
+    "roc_auc": 0.444,
+    "avg_precision": 0.053,
+    "top10pct_capture": 0.2
+   },
+   "LightGBM old (no terrain)": {
+    "roc_auc": 0.448,
+    "avg_precision": 0.134,
+    "top10pct_capture": 0.2
+   },
+   "EFAS 100-yr share of cell": {
+    "roc_auc": 0.524,
+    "avg_precision": 0.071,
+    "top10pct_capture": 0.4
+   },
+   "Terrain-only LightGBM": {
+    "roc_auc": 0.439,
+    "avg_precision": 0.034,
+    "top10pct_capture": 0.0
+   },
+   "Height above valley floor (rule)": {
+    "roc_auc": 0.596,
+    "avg_precision": 0.059,
+    "top10pct_capture": 0.2
+   }
+  },
+  "EMSR517_AOI15": {
+   "cells": 230,
+   "hit_cells": 84,
+   "LightGBM + terrain": {
+    "roc_auc": 0.89,
+    "avg_precision": 0.795,
+    "top10pct_capture": 0.214
+   },
+   "LightGBM old (no terrain)": {
+    "roc_auc": 0.858,
+    "avg_precision": 0.78,
+    "top10pct_capture": 0.238
+   },
+   "EFAS 100-yr share of cell": {
+    "roc_auc": 0.87,
+    "avg_precision": 0.702,
+    "top10pct_capture": 0.214
+   },
+   "Terrain-only LightGBM": {
+    "roc_auc": 0.82,
+    "avg_precision": 0.647,
+    "top10pct_capture": 0.179
+   },
+   "Height above valley floor (rule)": {
+    "roc_auc": 0.893,
+    "avg_precision": 0.81,
+    "top10pct_capture": 0.25
+   }
+  },
+  "EMSR517_AOI16": {
+   "cells": 238,
+   "hit_cells": 4,
+   "LightGBM + terrain": {
+    "roc_auc": 0.831,
+    "avg_precision": 0.068,
+    "top10pct_capture": 0.25
+   },
+   "LightGBM old (no terrain)": {
+    "roc_auc": 0.761,
+    "avg_precision": 0.047,
+    "top10pct_capture": 0.25
+   },
+   "EFAS 100-yr share of cell": {
+    "roc_auc": 0.761,
+    "avg_precision": 0.083,
+    "top10pct_capture": 0.75
+   },
+   "Terrain-only LightGBM": {
+    "roc_auc": 0.783,
+    "avg_precision": 0.064,
+    "top10pct_capture": 0.5
+   },
+   "Height above valley floor (rule)": {
+    "roc_auc": 0.76,
+    "avg_precision": 0.284,
+    "top10pct_capture": 0.25
+   }
+  },
+  "EMSR517_AOI17": {
+   "cells": 212,
+   "hit_cells": 10,
+   "LightGBM + terrain": {
+    "roc_auc": 0.879,
+    "avg_precision": 0.24,
+    "top10pct_capture": 0.5
+   },
+   "LightGBM old (no terrain)": {
+    "roc_auc": 0.89,
+    "avg_precision": 0.305,
+    "top10pct_capture": 0.4
+   },
+   "EFAS 100-yr share of cell": {
+    "roc_auc": 0.871,
+    "avg_precision": 0.177,
+    "top10pct_capture": 0.3
+   },
+   "Terrain-only LightGBM": {
+    "roc_auc": 0.835,
+    "avg_precision": 0.186,
+    "top10pct_capture": 0.4
+   },
+   "Height above valley floor (rule)": {
+    "roc_auc": 0.77,
+    "avg_precision": 0.113,
+    "top10pct_capture": 0.2
+   }
+  },
+  "EMSR517_AOI18": {
+   "cells": 63,
+   "hit_cells": 30,
+   "LightGBM + terrain": {
+    "roc_auc": 0.897,
+    "avg_precision": 0.877,
+    "top10pct_capture": 0.2
+   },
+   "LightGBM old (no terrain)": {
+    "roc_auc": 0.789,
+    "avg_precision": 0.792,
+    "top10pct_capture": 0.2
+   },
+   "EFAS 100-yr share of cell": {
+    "roc_auc": 0.661,
+    "avg_precision": 0.66,
+    "top10pct_capture": 0.2
+   },
+   "Terrain-only LightGBM": {
+    "roc_auc": 0.943,
+    "avg_precision": 0.935,
+    "top10pct_capture": 0.2
+   },
+   "Height above valley floor (rule)": {
+    "roc_auc": 0.954,
+    "avg_precision": 0.943,
+    "top10pct_capture": 0.2
+   }
+  },
+  "EMSR517_AOI20": {
+   "cells": 83,
+   "hit_cells": 0
+  },
+  "EMSR518_AOI01": {
+   "cells": 2947,
+   "hit_cells": 37,
+   "LightGBM + terrain": {
+    "roc_auc": 0.831,
+    "avg_precision": 0.048,
+    "top10pct_capture": 0.459
+   },
+   "LightGBM old (no terrain)": {
+    "roc_auc": 0.83,
+    "avg_precision": 0.056,
+    "top10pct_capture": 0.541
+   },
+   "EFAS 100-yr share of cell": {
+    "roc_auc": 0.795,
+    "avg_precision": 0.038,
+    "top10pct_capture": 0.378
+   },
+   "Terrain-only LightGBM": {
+    "roc_auc": 0.797,
+    "avg_precision": 0.04,
+    "top10pct_capture": 0.324
+   },
+   "Height above valley floor (rule)": {
+    "roc_auc": 0.785,
+    "avg_precision": 0.038,
+    "top10pct_capture": 0.378
+   }
+  },
+  "EMSR518_AOI02": {
+   "cells": 1554,
+   "hit_cells": 20,
+   "LightGBM + terrain": {
+    "roc_auc": 0.835,
+    "avg_precision": 0.065,
+    "top10pct_capture": 0.6
+   },
+   "LightGBM old (no terrain)": {
+    "roc_auc": 0.84,
+    "avg_precision": 0.057,
+    "top10pct_capture": 0.55
+   },
+   "EFAS 100-yr share of cell": {
+    "roc_auc": 0.843,
+    "avg_precision": 0.129,
+    "top10pct_capture": 0.65
+   },
+   "Terrain-only LightGBM": {
+    "roc_auc": 0.807,
+    "avg_precision": 0.056,
+    "top10pct_capture": 0.35
+   },
+   "Height above valley floor (rule)": {
+    "roc_auc": 0.8,
+    "avg_precision": 0.081,
+    "top10pct_capture": 0.55
+   }
+  },
+  "EMSR520_AOI01": {
+   "cells": 370,
+   "hit_cells": 37,
+   "LightGBM + terrain": {
+    "roc_auc": 0.7,
+    "avg_precision": 0.171,
+    "top10pct_capture": 0.216
+   },
+   "LightGBM old (no terrain)": {
+    "roc_auc": 0.718,
+    "avg_precision": 0.187,
+    "top10pct_capture": 0.216
+   },
+   "EFAS 100-yr share of cell": {
+    "roc_auc": 0.714,
+    "avg_precision": 0.188,
+    "top10pct_capture": 0.243
+   },
+   "Terrain-only LightGBM": {
+    "roc_auc": 0.595,
+    "avg_precision": 0.154,
+    "top10pct_capture": 0.216
+   },
+   "Height above valley floor (rule)": {
+    "roc_auc": 0.609,
+    "avg_precision": 0.14,
+    "top10pct_capture": 0.162
+   }
+  }
+ },
+ "auc_gain_new_vs_efas100_95ci": {
+  "all": [
+   0.024,
+   0.042,
+   0.058
+  ],
+  "meuse": [
+   -0.039,
+   -0.01,
+   0.02
+  ],
+  "ahr": [
+   -0.025,
+   0.008,
+   0.046
+  ]
+ },
+ "auc_gain_new_vs_old_95ci": {
+  "all": [
+   0.028,
+   0.04,
+   0.053
+  ],
+  "meuse": [
+   -0.025,
+   -0.007,
+   0.01
+  ],
+  "ahr": [
+   -0.006,
+   0.025,
+   0.059
+  ]
+ },
+ "vesdre_modelled": {
+  "cells_in_vesdre_communes": 406,
+  "satellite_hit": 0,
+  "cells_with_homes_in_efas500": 73,
+  "median_percentile_among_meuse_cells": {
+   "LightGBM + terrain": 0.972,
+   "LightGBM old": 0.915,
+   "EFAS 100-yr share": 0.786,
+   "Height above valley floor": 0.774
+  },
+  "terrain_rule_auc_vs_modelled_label": 0.955
+ },
+ "features_added": [
+  "hand1k_p10",
+  "hand1k_med",
+  "hand500_p10",
+  "slope_med",
+  "relief3k",
+  "vslope3k"
+ ],
+ "params": {
+  "objective": "binary",
+  "learning_rate": 0.05,
+  "num_leaves": 4,
+  "min_child_samples": 50,
+  "n_estimators": 150,
+  "verbose": -1,
+  "random_state": 0,
+  "monotone": {
+   "wet10": 1,
+   "wet100": 1,
+   "wet500": 1,
+   "max100": 1,
+   "max500": 1,
+   "bwet10": 1,
+   "bwet100": 1,
+   "bwet500": 1,
+   "nb_wet100": 1,
+   "nb_wet500": 1,
+   "buildings": 0,
+   "res_share": 0,
+   "height": 0,
+   "residents": 0,
+   "hand1k_p10": -1,
+   "hand1k_med": -1,
+   "hand500_p10": -1,
+   "slope_med": 0,
+   "relief3k": 0,
+   "vslope3k": 0
+  }
+ },
+ "terrain_source": "AWS Terrain Tiles, Terrarium PNG, zoom 12"
+}

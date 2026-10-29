@@ -3,19 +3,40 @@ at each rise the tool queues briefings for the mayor and the district fire briga
 numbers), simulated check-ins arrive, and roads in the 2021 water close. State: src/live.py (data/live.db).
 Status uses the highest river flow reached so far (it never drops in a replay); daily GloFAS flows are placed at noon
 and interpolated, so times are accurate to about ±12 h."""
+import json
+
 import pandas as pd
-import pydeck as pdk
+import shapely
 import streamlit as st
+from shapely.geometry import mapping, shape
 
 import anna
 import core
 import live
+from regionmap import ATTRIBUTION, region_map
 from core import about, fmt
 
 COL = {"evacuate": "#d70015", "warn": "#f2994a", "watch": "#f2c94c", "none": "#8e8e93"}
 WORD = {"evacuate": "Evacuate", "warn": "Warn", "watch": "Watch", "none": "Normal"}
 towns = anna.load()[1]
 T = towns[towns.variant == "worst"].drop_duplicates("municipality").set_index("municipality")
+
+
+@st.cache_data
+def water_by_town():
+    """Each area's 2021 water cut by the real municipality outlines (Eurostat GISCO LAU), one feature per town."""
+    flood = anna.load()[4]
+    outl = {f["properties"]["municipality"]: shapely.make_valid(shape(f["geometry"]))
+            for f in json.loads((core.DATA / "municipality_outlines.geojson").read_text())["features"]}
+    feats = []
+    for area in anna.AREA:
+        water = shapely.make_valid(shape(flood[(area, "worst")]["features"][0]["geometry"]))
+        for m in T.index[T.area == area]:
+            if m in outl:
+                part = water.intersection(outl[m]).simplify(.0001)
+                if not part.is_empty:
+                    feats.append({"type": "Feature", "geometry": mapping(part), "properties": {"municipality": m}})
+    return {"type": "FeatureCollection", "features": feats}
 
 # ------------------------------------------------------------------ scenario player (sidebar)
 c = live.clock()
@@ -60,23 +81,28 @@ def board():
     left, right = st.columns([3, 2], gap="medium")
     with left:
         d = s.assign(lon=s.municipality.map(T.lon), lat=s.municipality.map(T.lat)).dropna(subset=["lon"])
-        d["status"] = d.status.where(d.status.isin(COL), "none")
-        d = d.assign(c=d.status.map(lambda x: core.rgb(COL[x], 220)), r=d.people.clip(lower=50) ** .5 * .35 + 5,
-                     tname=d.municipality.map(anna.town), tinfo=[f"{WORD[x]} · {about(p)} residents in the 2021 water"
-                                                                for x, p in zip(d.status, d.people)])
-        cl = live.closures()
-        layers = [pdk.Layer("ScatterplotLayer", d, get_position=["lon", "lat"], get_fill_color="c", get_radius="r",
-                            radius_units="'pixels'", get_line_color=[255, 255, 255], line_width_min_pixels=2,
-                            stroked=True, pickable=True)]
-        if len(cl):
-            layers.append(pdk.Layer("ScatterplotLayer", cl.dropna(subset=["lon"]), get_position=["lon", "lat"],
-                                    get_fill_color=[29, 29, 31], get_radius=4, radius_units="'pixels'"))
-        st.pydeck_chart(pdk.Deck(layers=layers, map_style=pdk.map_styles.CARTO_LIGHT,
-                                 initial_view_state=pdk.ViewState(longitude=6.1, latitude=50.65, zoom=7.6),
-                                 tooltip={"html": "<b>{tname}</b><br/>{tinfo}"},
-                                 views=[pdk.View(type="MapView", controller={"scrollZoom": False})]), height=430)
-        st.caption(":red[●] Evacuate · :orange[●] Warn · :yellow[●] Watch · :gray[●] Normal · ● black: road closed. Circle size = residents "
-                   "in the 2021 water.")
+        d = d.sort_values("level").drop_duplicates("municipality", keep="last")  # one row per town, worst status
+        cl = live.closures().dropna(subset=["lon"])
+        sel = region_map(dict(
+            towns=[dict(municipality=r.municipality, label=anna.town(r.municipality), lon=r.lon, lat=r.lat,
+                        status=r.status if r.status in COL else "none", people=float(r.people),
+                        people_expected=float(r.people_expected or 0), modelled=r.area in anna.MODELLED)
+                   for r in d.itertuples()],
+            flood=water_by_town(),
+            closures={"type": "FeatureCollection", "features": [
+                {"type": "Feature", "geometry": {"type": "Point", "coordinates": [r.lon, r.lat]},
+                 "properties": {"name": r.name or ""}} for r in cl.itertuples()]},
+            selected=st.session_state.get("cr_sel")), key="crisis_map", height=470)
+        if sel and sel.get("selected") and sel.get("clicks") != st.session_state.get("cr_clicks"):
+            st.session_state.cr_clicks = sel["clicks"]
+            st.session_state.cr_sel = st.session_state.town = st.session_state._town = sel["selected"]
+        if st.session_state.get("cr_sel"):
+            a, b = st.columns([3, 1])
+            a.page_link("views/evacuate.py", label=f"Open the plan for {anna.town(st.session_state.cr_sel)}",
+                        icon=":material/arrow_forward:")
+            b.button("Whole region", on_click=lambda: st.session_state.update(cr_sel=None), width="stretch")
+        st.caption(":red[●] Evacuate · :orange[●] Warn · :yellow[●] Watch · :blue[●] Normal · dashed edge: modelled "
+                   "(Vesdre) · barrier: road closed. Click a town to fly in. " + ATTRIBUTION)
     with right:
         ev = live.events().tail(8).iloc[::-1]
         st.markdown("**Latest**")

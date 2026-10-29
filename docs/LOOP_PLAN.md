@@ -17,6 +17,8 @@ close the 2021 governance gaps (roles, warning → instruction, plans and drills
   evacuating; long term = repairs and preparedness, each tied to a funding line.
 - ML: simulation, not ML, for evacuation; keep docs/ML.md (risk model tested, not shipped) as evidence of checking.
 
+**Handoff 29 Oct ~19:00 (spend limit): see docs/HANDOFF.md for state, method and open work.**
+
 ## Phase 2 (owner brief, 29 Oct ~18:15): one live tool for four roles, pitched as a scenario replay
 - Roles: crisis room / risk centre (whole-region map, red zones, drill down), residents (address → leave or host),
   responders (who has not self-reported, close roads, live map), long term.
