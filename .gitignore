@@ -1,2 +1,11 @@
 .venv/
 .ipynb_checkpoints/
+/data/
+challenge_data/
+cache/
+__pycache__/
+outputs/data/parts/
+outputs/**/*.log
+outputs/data/debug_*
+.claude/
+.DS_Store

@@ -1,0 +1,21 @@
+﻿area,name,source,variant,polygons,flood_km2,buildings,residential,non_residential,people_2020,people_2025,low_covered,low_no_reach,low_full,low_covered_nearest_first,central_covered,central_no_reach,central_full,central_covered_nearest_first,high_covered,high_no_reach,high_full,high_covered_nearest_first,critical_sites_in_flood
+ahr,Ahr valley (DE),EMS observed (PRODUCT main / +MONIT worst),main,117.0,5.71,3300,3268,25,6911,6876,952,1835,4125,910,4680,367,1864,4026,5440,31,1441,5390,7
+ahr,Ahr valley (DE),EMS observed (PRODUCT main / +MONIT worst),worst,383.0,13.24,7202,7004,178,20155,20074,2343,5099,12713,2151,6191,614,13350,6073,11949,245,7962,11357,24
+liege,Liege / Meuse (BE),EMS observed (PRODUCT main / +MONIT worst),main,151.0,7.52,137,129,3,233,237,176,15,42,176,211,8,14,211,233,0,0,233,1
+liege,Liege / Meuse (BE),EMS observed (PRODUCT main / +MONIT worst),worst,541.0,13.99,158,146,3,259,267,186,30,42,186,229,16,14,229,259,0,0,259,1
+rochefort,Rochefort (BE),EMS observed (PRODUCT main / +MONIT worst),main,284.0,8.31,38,30,3,36,35,12,24,0,12,12,24,0,12,36,0,0,36,0
+rochefort,Rochefort (BE),EMS observed (PRODUCT main / +MONIT worst),worst,1479.0,15.74,62,47,3,46,45,14,32,0,14,14,32,0,14,40,5,0,40,0
+venlo,Venlo / Meuse (NL),EMS observed (PRODUCT main / +MONIT worst),main,368.0,11.97,216,195,3,525,447,367,58,101,367,490,35,0,490,525,0,0,525,3
+venlo,Venlo / Meuse (NL),EMS observed (PRODUCT main / +MONIT worst),worst,368.0,11.97,216,195,3,525,447,367,58,101,367,490,35,0,490,525,0,0,525,3
+eschweiler,Eschweiler (DE),EMS observed (PRODUCT main / +MONIT worst),main,380.0,3.19,38,35,3,93,111,67,26,0,67,78,15,0,78,93,0,0,93,3
+eschweiler,Eschweiler (DE),EMS observed (PRODUCT main / +MONIT worst),worst,380.0,3.19,38,35,3,93,111,67,26,0,67,78,15,0,78,93,0,0,93,3
+wassenberg,Wassenberg (DE),EMS observed (PRODUCT main / +MONIT worst),main,186.0,3.41,84,83,0,82,83,75,0,7,75,82,0,0,82,82,0,0,82,0
+wassenberg,Wassenberg (DE),EMS observed (PRODUCT main / +MONIT worst),worst,186.0,3.41,84,83,0,82,83,75,0,7,75,82,0,0,82,82,0,0,82,0
+schleiden,Schleiden (DE),EMS observed (PRODUCT main / +MONIT worst),main,17.0,2.16,3435,3360,75,5130,4963,775,4053,302,775,1245,3288,597,1226,2050,2023,1057,1906,10
+schleiden,Schleiden (DE),EMS observed (PRODUCT main / +MONIT worst),worst,17.0,2.16,3435,3360,75,5130,4963,775,4053,302,775,1245,3288,597,1226,2050,2023,1057,1906,10
+euskirchen,Euskirchen-Rheinbach (DE),EMS observed (PRODUCT main / +MONIT worst),main,101.0,0.7,152,141,10,262,260,248,0,14,248,262,0,0,262,262,0,0,262,0
+euskirchen,Euskirchen-Rheinbach (DE),EMS observed (PRODUCT main / +MONIT worst),worst,101.0,0.7,152,141,10,262,260,248,0,14,248,262,0,0,262,262,0,0,262,0
+erftstadt,Erftstadt (DE),EMS observed (PRODUCT main / +MONIT worst),main,79.0,10.68,1740,1682,49,2807,2857,1436,754,617,1296,2807,0,0,2574,2807,0,0,2807,5
+erftstadt,Erftstadt (DE),EMS observed (PRODUCT main / +MONIT worst),worst,79.0,10.68,1740,1682,49,2807,2857,1436,754,617,1296,2807,0,0,2574,2807,0,0,2807,5
+vesdre,Vesdre valley (BE) - MODELLED,EFAS modelled 100-year (main) / 500-year (worst),main,,9.96,8463,7856,598,18709,18851,10066,4154,4488,8963,13162,752,4795,12260,16569,0,2140,14643,18
+vesdre,Vesdre valley (BE) - MODELLED,EFAS modelled 100-year (main) / 500-year (worst),worst,,10.18,8798,8177,612,19339,19482,10229,4280,4831,9138,13453,752,5134,12474,16925,0,2414,14962,19
