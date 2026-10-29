@@ -17,6 +17,18 @@ close the 2021 governance gaps (roles, warning → instruction, plans and drills
   evacuating; long term = repairs and preparedness, each tied to a funding line.
 - ML: simulation, not ML, for evacuation; keep docs/ML.md (risk model tested, not shipped) as evidence of checking.
 
+## Phase 2 (owner brief, 29 Oct ~18:15): one live tool for four roles, pitched as a scenario replay
+- Roles: crisis room / risk centre (whole-region map, red zones, drill down), residents (address → leave or host),
+  responders (who has not self-reported, close roads, live map), long term.
+- Live state shared by all pages (data/live.db, gitignored): scenario clock, town alert levels, check-ins, road
+  closures, report outbox. Pages refresh themselves (st.fragment run_every).
+- Scenario replay (owner choice): July 2021 river flows drive alert levels per town; at each change Claude writes reports
+  for mayor and fire brigade into an in-app outbox (owner choice: outbox, no real sending). Simulated check-ins labelled.
+- Claude API: key `claude_api` in .env, server-side only, only summary numbers sent, AI writes words never numbers.
+- ML not minimised: terrain (height above river) features for the risk model, ensemble-based impact forecast per town.
+- Agents: A gauges+replay for all rivers (forecast.py), B ML/impact forecast, C live state + scenario engine + Claude
+  reports (src/live.py, src/reports.py), D visual ideas research (docs/VISUAL_IDEAS.md). Lead: role pages + impeccable.
+
 ## Done
 1. Evacuation plan page: town → walk / transport / no place, shelters from the 10 km plan, tabs (evacuate first, who
    gives the order, message, plan and drill), HTML download. Roles + translations fact-checked by an agent. `e19040f`
