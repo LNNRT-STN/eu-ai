@@ -1,2 +1,6 @@
 .venv/
 .ipynb_checkpoints/
+data/
+src/out/
+__pycache__/
+.DS_Store

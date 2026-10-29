@@ -1,0 +1,26 @@
+[client]
+toolbarMode = "minimal"
+
+# Apple HIG system grammar: grouped background, white inset groups, one action blue
+[theme]
+base = "light"
+primaryColor = "#0071e3"
+backgroundColor = "#f2f2f7"
+secondaryBackgroundColor = "#ffffff"
+textColor = "#1d1d1f"
+borderColor = "#e3e3e8"
+linkColor = "#0066cc"
+font = "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+headingFont = "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+baseFontSize = 15
+baseRadius = "medium"
+showWidgetBorder = true
+redColor = "#d70015"
+orangeColor = "#c93400"
+greenColor = "#248a3d"
+blueColor = "#0071e3"
+grayColor = "#6e6e73"
+
+[theme.sidebar]
+backgroundColor = "#fbfbfd"
+secondaryBackgroundColor = "#f2f2f7"
