@@ -15,7 +15,12 @@ REFS = Path(__file__).resolve().parent / "out" / "meuse" / "gauge_refs.json"  # 
 GAUGES = {"Meuse · Liège": (50.675, 5.625), "Meuse · Maastricht": (50.925, 5.675), "Meuse · Roermond": (51.225, 5.925),
           "Meuse · Venlo": (51.425, 6.125), "Vesdre · Chaudfontaine": (50.575, 5.625), "Vesdre · Verviers": (50.575, 5.825),
           "Ourthe · Tabreux": (50.475, 5.525), "Lesse · Rochefort": (50.175, 5.175), "Rur · Wassenberg": (51.025, 6.175),
-          "Inde · Eschweiler": (50.875, 6.325)}
+          "Inde · Eschweiler": (50.875, 6.325), "Hoëgne · Theux": (50.525, 5.775), "Ourthe · Hotton": (50.275, 5.425),
+          "Geul · Gulpen-Wijlre": (50.825, 5.825), "Ahr · Schuld": (50.425, 6.875), "Ahr · Altenahr": (50.525, 6.975),
+          "Ahr · Bad Bodendorf": (50.525, 7.175), "Erft · Bad Münstereifel": (50.625, 6.775),
+          "Erft · Erftstadt": (50.775, 6.775), "Urft · Gemünd": (50.625, 6.425)}
+# Bad Bodendorf: the Rhine cells next door carry ~2,400 m³/s, so the scan keeps to the Ahr cell (~10 m³/s mean).
+# Urft · Gemünd sits just above the Urft reservoir; Geul · Gulpen-Wijlre is ~15 km downstream of Kelmis.
 # headwaters where the July 2021 rain fell
 RAIN_AREAS = {"Upper Vesdre (Eupen)": (50.55, 6.05), "Upper Ourthe": (50.25, 5.65), "Eifel / upper Rur": (50.55, 6.35),
               "Amblève (Stavelot)": (50.40, 5.93)}
@@ -25,10 +30,14 @@ LEVELS = [("Normal", "#b9d3f2"), ("Above 2-year flood", "#7c9cf0"), ("Above half
           ("At or above July 2021", "#3f1170")]
 
 
-def _get(url, pts, **params):
+def _get(url, pts, retries=0, **params):
     lat, lon = zip(*pts.values())
-    r = requests.get(url, params={"latitude": ",".join(map(str, lat)), "longitude": ",".join(map(str, lon)), **params},
-                     timeout=30)
+    for _ in range(retries + 1):
+        r = requests.get(url, params={"latitude": ",".join(map(str, lat)), "longitude": ",".join(map(str, lon)), **params},
+                         timeout=60)
+        if r.status_code != 429:
+            break
+        time.sleep(30)  # free tier: wait for the per-minute weight to clear
     if r.status_code == 429:
         raise RuntimeError("Open-Meteo free-tier limit reached, try again in a minute")
     r.raise_for_status()
@@ -45,14 +54,14 @@ def refs():
 
 
 def build_refs():
-    out = {}
-    for g in GAUGES:
-        h = _get(FLOOD, {g: GAUGES[g]}, daily="river_discharge", start_date="2011-01-01", end_date="2021-12-31")[g]
+    out = json.loads(REFS.read_text()) if REFS.exists() else {}  # keep the points already fetched
+    for g in [g for g in GAUGES if g not in out]:
+        h = _get(FLOOD, {g: GAUGES[g]}, retries=5, daily="river_discharge", start_date="2011-01-01", end_date="2021-12-31")[g]
         h = pd.Series(h["daily"]["river_discharge"], index=pd.to_datetime(h["daily"]["time"]))
         out[g] = [h[:"2020"].groupby(h[:"2020"].index.year).max().median(), h["2021-07-10":"2021-07-25"].max()]
-        print(g, [round(q) for q in out[g]])
+        print(g, [round(q) for q in out[g]], "peak", h["2021-07-10":"2021-07-25"].idxmax().date())
+        REFS.write_text(json.dumps(out, indent=1))
         time.sleep(20)  # stay under the per-minute weight limit
-    REFS.write_text(json.dumps(out, indent=1))
 
 
 def rivers():

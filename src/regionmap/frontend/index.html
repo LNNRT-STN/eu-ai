@@ -1,0 +1,242 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>Region map</title>
+<link href="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css" rel="stylesheet">
+<script src="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
+<style>
+html,body{margin:0;height:100%;font:13px/1.35 "Source Sans Pro",system-ui,sans-serif;background:#e8eef5}
+#m{position:absolute;inset:0;border-radius:12px;overflow:hidden}
+.pin{display:flex;align-items:center;gap:6px;cursor:pointer}
+.pin i{width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.5);flex:none}
+.pin b{background:rgba(255,255,255,.94);color:#1d1d1f;padding:2px 7px;border-radius:6px;font-weight:400;
+  white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.pin b em{font-style:normal;font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:.02em;margin-right:4px}
+.pin.watch i{background:#f2c94c}.pin.warn i{background:#f2994a}.pin.evacuate i{background:#d70015}.pin.none i{background:#0071e3}
+.pin.evacuate b em{color:#d70015}.pin.warn b em{color:#a85400}.pin.watch b em{color:#7a5d00}.pin.none b em{color:#6e6e73}
+.pin.sel b{outline:2px solid #1d1d1f}
+.pin.sel i{transform:scale(1.35)}
+body.far .pin.none:not(.sel) b{display:none}
+.pin.hid b{display:none}
+.bar{display:flex;align-items:center;gap:4px;pointer-events:none}
+.bar s{width:22px;height:10px;border:1px solid #1d1d1f;border-radius:2px;
+  background:repeating-linear-gradient(45deg,#1d1d1f 0 4px,#fff 4px 8px)}
+.bar b{background:#fff;color:#1d1d1f;font-size:11px;padding:0 4px;border-radius:3px;border:1px solid #1d1d1f}
+</style></head><body><div id="m"></div>
+<script>
+// ---- Streamlit component protocol (v1), by hand: see streamlit/static ComponentInstance.js ----
+const send = (type, data) => parent.postMessage(Object.assign({isStreamlitMessage: true, type}, data), "*");
+let clicks = 0, lastH = null;
+const select = m => send("streamlit:setComponentValue", {value: {selected: m, clicks: ++clicks}, dataType: "json"});
+
+const STATUS = {none: "#0071e3", watch: "#f2c94c", warn: "#f2994a", evacuate: "#d70015"};
+const WORD = {none: "No alert", watch: "Watch", warn: "Warn", evacuate: "Evacuate"};
+const RANK = {none: 0, watch: 1, warn: 2, evacuate: 3};
+const OVERVIEW = [5.45, 50.33, 7.3, 50.92];  // Liège - Aachen - Ahr
+const NONE = ["boolean", false];
+const EMPTY = {type: "FeatureCollection", features: []};
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const fmt = n => n == null ? null : Math.round(n).toLocaleString("en-GB");
+
+let map = null, ready = false, pending = null, prev = {};
+const pins = new Map(), bars = new Map();
+let floodSig = null, closSig = null, cur = null;  // cur = municipality the camera is on (or null)
+
+function overviewCam(d, animate) {
+  const b = d.overview || OVERVIEW;
+  const c = map.cameraForBounds([[b[0], b[1]], [b[2], b[3]]], {padding: 30});
+  const opt = {center: c.center, zoom: c.zoom, pitch: 45, bearing: 0};
+  animate ? map.flyTo(Object.assign(opt, {duration: 2200})) : map.jumpTo(opt);
+}
+function townCam(t, animate) {
+  const opt = {center: [t.lon, t.lat], zoom: 13.5, pitch: 60, bearing: -15};
+  animate ? map.flyTo(Object.assign(opt, {duration: 2500, essential: true})) : map.jumpTo(opt);
+}
+function goTo(m, d, animate) {
+  cur = m;
+  const t = m && (d.towns || []).find(x => x.municipality === m);
+  t ? townCam(t, animate) : overviewCam(d, animate);
+}
+
+function create(d) {
+  map = new maplibregl.Map({
+    container: "m", hash: false, maxPitch: 80, center: [6.3, 50.6], zoom: 8.5,
+    style: {version: 8, sources: {
+        img: {type: "raster", tileSize: 256, maxzoom: 15,
+          tiles: ["https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2021_3857/default/g/{z}/{y}/{x}.jpg"],
+          attribution: '<a href="https://s2maps.eu" target="_blank">Sentinel-2 cloudless 2021</a> by EOX IT Services GmbH (modified Copernicus Sentinel data 2021), CC BY-NC-SA 4.0'},
+        dem: {type: "raster-dem", encoding: "terrarium", tileSize: 256, maxzoom: 15,
+          tiles: ["https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"],
+          attribution: 'Terrain: <a href="https://registry.opendata.aws/terrain-tiles/" target="_blank">AWS Terrain Tiles</a> (Mapzen; SRTM, EU-DEM and others)'},
+        hs: {type: "raster-dem", encoding: "terrarium", tileSize: 256, maxzoom: 15,
+          tiles: ["https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"]},
+        flood: {type: "geojson", data: EMPTY},
+        closures: {type: "geojson", data: EMPTY}},
+      layers: [{id: "img", type: "raster", source: "img"},
+        {id: "hs", type: "hillshade", source: "hs", paint: {"hillshade-exaggeration": 0.25, "hillshade-shadow-color": "#1d1d1f"}},
+        {id: "flood-fill", type: "fill", source: "flood", paint: {"fill-color": "#0071e3", "fill-opacity": 0.25}},
+        {id: "flood-edge", type: "line", source: "flood", paint: {"line-color": "#ffffff", "line-width": 1, "line-opacity": 0.7}},
+        {id: "flood-edge-modelled", type: "line", source: "flood", filter: NONE,
+          paint: {"line-color": "#ffffff", "line-width": 1.6, "line-dasharray": [3, 2]}},
+        {id: "flood-sel", type: "line", source: "flood", filter: NONE,
+          paint: {"line-color": "#1d1d1f", "line-width": 3}},
+        {id: "closure-case", type: "line", source: "closures", filter: ["==", ["geometry-type"], "LineString"],
+          layout: {"line-cap": "butt"}, paint: {"line-color": "#ffffff", "line-width": 6}},
+        {id: "closure-line", type: "line", source: "closures", filter: ["==", ["geometry-type"], "LineString"],
+          paint: {"line-color": "#1d1d1f", "line-width": 4, "line-dasharray": [1.5, 1]}}]},
+    attributionControl: {compact: true}
+  });
+  map.addControl(new maplibregl.NavigationControl({visualizePitch: true}), "top-right");
+  map.addControl(new maplibregl.ScaleControl({unit: "metric"}), "bottom-right");
+  const far = () => document.body.classList.toggle("far", map.getZoom() < 11);
+  map.on("zoomend", far); far();
+  // Credits are printed under the map; keep the compact "i" button closed so it does not cover the bottom edge.
+  map.on("load", () => document.querySelectorAll(".maplibregl-ctrl-attrib").forEach(e => e.classList.remove("maplibregl-compact-show")));
+  map.on("moveend", declutter);
+  map.on("click", "flood-fill", e => {
+    const m = e.features[0] && e.features[0].properties.municipality;
+    if (m) { goTo(m, prev, true); paintSel(m); select(m); }
+  });
+  map.on("mouseenter", "flood-fill", () => map.getCanvas().style.cursor = "pointer");
+  map.on("mouseleave", "flood-fill", () => map.getCanvas().style.cursor = "");
+  map.once("style.load", () => {
+    map.setTerrain({source: "dem", exaggeration: 1.5});
+    if (map.setSky) map.setSky({"sky-color": "#a9c8ee", "horizon-color": "#e8eef5", "fog-color": "#e8eef5",
+      "sky-horizon-blend": 0.6, "horizon-fog-blend": 0.6, "fog-ground-blend": 0.2});
+    const at = document.querySelector(".maplibregl-ctrl-attrib");  // start folded: the page caption credits the sources
+    if (at) at.classList.remove("maplibregl-compact-show");
+    ready = true;
+    const d = pending; pending = null; update(d, true);
+  });
+}
+
+function paintSel(m) {
+  map.setFilter("flood-sel", m ? ["==", ["get", "municipality"], m] : NONE);
+  let ch = false;
+  pins.forEach((p, k) => { if (p.el.classList.contains("sel") !== (k === m)) { p.el.classList.toggle("sel", k === m); ch = true; } });
+  if (ch) requestAnimationFrame(declutter);
+}
+
+function updatePins(towns, sel) {
+  const seen = new Set();
+  let changed = false;
+  for (const t of towns) {
+    const k = t.municipality; seen.add(k);
+    let p = pins.get(k);
+    if (!p) {
+      const el = document.createElement("div");
+      el.addEventListener("click", ev => { ev.stopPropagation(); goTo(k, prev, true); paintSel(k); select(k); });
+      p = {el, marker: new maplibregl.Marker({element: el, anchor: "left"}).setLngLat([t.lon, t.lat]).addTo(map), html: ""};
+      pins.set(k, p);
+    }
+    const st = STATUS[t.status] ? t.status : "none";
+    const n = fmt(t.people);  // stable 2021 count; "expected now" changes every tick and sits in the tooltip
+    const html = '<i></i><b><em>' + WORD[st] + "</em>" + esc(t.label || k) + (n != null ? " · " + n + (t.modelled ? " modelled" : " in 2021") : "") + "</b>";
+    if (p.html !== html) { p.el.innerHTML = html; p.html = html; }  // touch the DOM only on change
+    // classList, not className: MapLibre keeps its own marker classes on this element
+    p.el.classList.add("pin");
+    for (const x in STATUS) if (p.el.classList.contains(x) !== (x === st)) p.el.classList.toggle(x, x === st);
+    if (p.el.classList.contains("sel") !== (k === sel)) { p.el.classList.toggle("sel", k === sel); changed = true; }
+    p.el.title = (t.label || k) + ": " + WORD[st] + ". " + fmt(t.people) + " people in the 2021 water" +
+      (t.people_expected != null ? ", " + fmt(t.people_expected) + " expected now" : "") + (t.modelled ? " (modelled area)" : "");
+    p.el.style.zIndex = String(10 + RANK[st]);
+    if (p.rank !== RANK[st]) { p.rank = RANK[st]; changed = true; }
+    p.people = t.people || 0;
+    const ll = p.marker.getLngLat();
+    if (ll.lng !== t.lon || ll.lat !== t.lat) p.marker.setLngLat([t.lon, t.lat]);
+  }
+  for (const [k, p] of pins) if (!seen.has(k)) { p.marker.remove(); pins.delete(k); changed = true; }
+  if (changed) requestAnimationFrame(declutter);
+}
+
+// Hide labels that would cover a more urgent (then more populous) town's label; the dot and its tooltip stay.
+function declutter() {
+  const order = [...pins.values()].sort((a, b) => (b.el.classList.contains("sel") - a.el.classList.contains("sel"))
+    || (b.rank - a.rank) || (b.people - a.people));
+  const shown = [];
+  for (const p of order) {
+    p.el.classList.remove("hid");
+    const lab = p.el.querySelector("b");
+    if (!lab || getComputedStyle(lab).display === "none") continue;
+    const r = lab.getBoundingClientRect(), d = p.el.querySelector("i").getBoundingClientRect();
+    const box = {l: d.left, t: Math.min(r.top, d.top), r: r.right + 2, b: Math.max(r.bottom, d.bottom) + 2};
+    if (shown.some(o => box.l < o.r && box.r > o.l && box.t < o.b && box.b > o.t)) p.el.classList.add("hid");
+    else shown.push(box);
+  }
+}
+
+function updateWater(towns) {
+  const by = {};  // one status per municipality (the worst, if a name repeats across areas)
+  for (const t of towns) {
+    const s = STATUS[t.status] ? t.status : "none";
+    if (!(t.municipality in by) || RANK[s] > RANK[by[t.municipality].s]) by[t.municipality] = {s, mod: !!t.modelled};
+  }
+  const keys = Object.keys(by);
+  const color = keys.length ? ["match", ["get", "municipality"]] : null, op = keys.length ? ["match", ["get", "municipality"]] : null;
+  for (const k of keys) { color.push(k, STATUS[by[k].s]); op.push(k, by[k].s === "none" ? 0.25 : 0.62); }
+  map.setPaintProperty("flood-fill", "fill-color", color ? color.concat(["#0071e3"]) : "#0071e3");
+  map.setPaintProperty("flood-fill", "fill-opacity", op ? op.concat([0.25]) : 0.25);
+  const mod = keys.filter(k => by[k].mod);
+  const inMod = ["in", ["get", "municipality"], ["literal", mod]];
+  map.setFilter("flood-edge-modelled", inMod);
+  map.setFilter("flood-edge", ["!", inMod]);
+}
+
+function lineMid(g) {
+  const c = g.type === "LineString" ? g.coordinates : g.coordinates[0];
+  return c[Math.floor(c.length / 2)];
+}
+function updateClosures(fc) {
+  const sig = JSON.stringify(fc || null);
+  if (sig === closSig) return;
+  closSig = sig;
+  map.getSource("closures").setData(fc || EMPTY);
+  const seen = new Set();
+  for (const f of (fc && fc.features) || []) {
+    const g = f.geometry; if (!g) continue;
+    const at = g.type === "Point" ? g.coordinates : lineMid(g);
+    const k = at.join(","); seen.add(k);
+    if (!bars.has(k)) {
+      const el = document.createElement("div"); el.className = "bar";
+      el.title = (f.properties && f.properties.name ? f.properties.name + ": " : "") + "road closed";
+      el.innerHTML = "<s></s><b>closed</b>";
+      bars.set(k, new maplibregl.Marker({element: el, anchor: "left"}).setLngLat(at).addTo(map));
+    }
+  }
+  for (const [k, mk] of bars) if (!seen.has(k)) { mk.remove(); bars.delete(k); }
+}
+
+function update(d, first) {
+  const towns = d.towns || [];
+  const fsig = d.flood ? (d.flood.features || []).length + ":" + JSON.stringify(d.flood).length : "0";
+  if (fsig !== floodSig) { floodSig = fsig; map.getSource("flood").setData(d.flood || EMPTY); }
+  updateWater(towns);
+  updateClosures(d.closures);
+  const sel = d.selected || null;
+  // Fly only when Python changes `selected` (and the camera is not already there): a user click flies at once,
+  // and a page that never echoes the selection back does not yank the camera home on its next rerun.
+  if (first) goTo(sel, d, false);
+  else if (sel !== (prev.selected || null) && sel !== cur) goTo(sel, d, true);
+  const s = first || sel !== (prev.selected || null) ? sel : cur;
+  updatePins(towns, s);
+  paintSel(s);
+  const cam = d.camera ? JSON.stringify(d.camera) : null;
+  if (cam && cam !== (prev.camera ? JSON.stringify(prev.camera) : null)) {
+    const c = d.camera, o = {duration: first ? 0 : 2500};
+    ["center", "zoom", "pitch", "bearing"].forEach(k => { if (c[k] != null) o[k] = c[k]; });
+    first ? map.jumpTo(o) : map.flyTo(o);
+  }
+  prev = d;
+}
+
+window.addEventListener("message", ev => {
+  const m = ev.data;
+  if (!m || m.type !== "streamlit:render") return;
+  const a = m.args || {};
+  const d = a.data || {};
+  const h = a.height || 560;
+  if (h !== lastH) { lastH = h; document.getElementById("m").style.height = h + "px"; send("streamlit:setFrameHeight", {height: h}); }
+  if (!map) { pending = d; create(d); return; }
+  if (!ready) { pending = d; return; }
+  update(d, false);
+});
+send("streamlit:componentReady", {apiVersion: 1});
+</script></body></html>
