@@ -1,0 +1,97 @@
+﻿area,indicator,value,warn_above,status,likely_cause,who_can_fix
+ahr,Residents not placed on any home (%),0.2,10.0,PASS,Population cells with no residential building: border cells (other country's buildings not loaded) or OBAT undercount,JRC (GHS-OBAT / GHS-POP)
+ahr,Exposed buildings with no height (%),0.3,5.0,PASS,Height raster has no value at the footprint,JRC (GHS-BUILT-H)
+ahr,Exposed buildings outside built-up domain (use=0) (%),0.3,5.0,PASS,Building not covered by the 10 m functional classification,JRC (GHS-BUILT-C)
+ahr,Unusually crowded exposed buildings (count),0.0,0.0,PASS,One small home holds a whole population cell (few residential buildings in the cell),Team (method choice)
+ahr,OSM candidates without a name (%),37.1,40.0,PASS,Volunteer mapping incomplete,OpenStreetMap community / official lists
+ahr,Shelter sites with no matching building (%),10.1,20.0,PASS,"Outdoor sports grounds, or OSM point far from any OBAT footprint",Team / OSM
+ahr,Shelter buildings with height at the 2.5 m floor (%),19.2,30.0,PASS,"Height floored by design (GHS-OBAT doc p.19): storeys unknown, counted as 1",JRC (GHS-BUILT-H)
+ahr,Shelter capacity outliers capped (count),0.0,0.0,PASS,Site matched to an unusually large building (possible wrong match),Team: check names in qc file
+ahr,Shelters excluded only by the EFAS 100-year model (count),64.0,0.0,WARN,"Satellite map did not cover the spot, model says it floods: unmapped is not safe",Info (expected)
+liege,Residents not placed on any home (%),40.4,10.0,WARN,Population cells with no residential building: border cells (other country's buildings not loaded) or OBAT undercount,JRC (GHS-OBAT / GHS-POP)
+liege,Exposed buildings with no height (%),5.7,5.0,WARN,Height raster has no value at the footprint,JRC (GHS-BUILT-H)
+liege,Exposed buildings outside built-up domain (use=0) (%),5.7,5.0,WARN,Building not covered by the 10 m functional classification,JRC (GHS-BUILT-C)
+liege,Unusually crowded exposed buildings (count),0.0,0.0,PASS,One small home holds a whole population cell (few residential buildings in the cell),Team (method choice)
+liege,OSM candidates without a name (%),39.6,40.0,PASS,Volunteer mapping incomplete,OpenStreetMap community / official lists
+liege,Shelter sites with no matching building (%),35.8,20.0,WARN,"Outdoor sports grounds, or OSM point far from any OBAT footprint",Team / OSM
+liege,Shelter buildings with height at the 2.5 m floor (%),11.4,30.0,PASS,"Height floored by design (GHS-OBAT doc p.19): storeys unknown, counted as 1",JRC (GHS-BUILT-H)
+liege,Shelter capacity outliers capped (count),0.0,0.0,PASS,Site matched to an unusually large building (possible wrong match),Team: check names in qc file
+liege,Shelters excluded only by the EFAS 100-year model (count),374.0,0.0,WARN,"Satellite map did not cover the spot, model says it floods: unmapped is not safe",Info (expected)
+rochefort,Residents not placed on any home (%),0.7,10.0,PASS,Population cells with no residential building: border cells (other country's buildings not loaded) or OBAT undercount,JRC (GHS-OBAT / GHS-POP)
+rochefort,Exposed buildings with no height (%),19.4,5.0,WARN,Height raster has no value at the footprint,JRC (GHS-BUILT-H)
+rochefort,Exposed buildings outside built-up domain (use=0) (%),19.4,5.0,WARN,Building not covered by the 10 m functional classification,JRC (GHS-BUILT-C)
+rochefort,Unusually crowded exposed buildings (count),0.0,0.0,PASS,One small home holds a whole population cell (few residential buildings in the cell),Team (method choice)
+rochefort,OSM candidates without a name (%),41.1,40.0,WARN,Volunteer mapping incomplete,OpenStreetMap community / official lists
+rochefort,Shelter sites with no matching building (%),4.7,20.0,PASS,"Outdoor sports grounds, or OSM point far from any OBAT footprint",Team / OSM
+rochefort,Shelter buildings with height at the 2.5 m floor (%),45.0,30.0,WARN,"Height floored by design (GHS-OBAT doc p.19): storeys unknown, counted as 1",JRC (GHS-BUILT-H)
+rochefort,Shelter capacity outliers capped (count),0.0,0.0,PASS,Site matched to an unusually large building (possible wrong match),Team: check names in qc file
+rochefort,Shelters excluded only by the EFAS 100-year model (count),62.0,0.0,WARN,"Satellite map did not cover the spot, model says it floods: unmapped is not safe",Info (expected)
+venlo,Residents not placed on any home (%),19.2,10.0,WARN,Population cells with no residential building: border cells (other country's buildings not loaded) or OBAT undercount,JRC (GHS-OBAT / GHS-POP)
+venlo,Exposed buildings with no height (%),8.3,5.0,WARN,Height raster has no value at the footprint,JRC (GHS-BUILT-H)
+venlo,Exposed buildings outside built-up domain (use=0) (%),8.3,5.0,WARN,Building not covered by the 10 m functional classification,JRC (GHS-BUILT-C)
+venlo,Unusually crowded exposed buildings (count),0.0,0.0,PASS,One small home holds a whole population cell (few residential buildings in the cell),Team (method choice)
+venlo,OSM candidates without a name (%),32.4,40.0,PASS,Volunteer mapping incomplete,OpenStreetMap community / official lists
+venlo,Shelter sites with no matching building (%),17.3,20.0,PASS,"Outdoor sports grounds, or OSM point far from any OBAT footprint",Team / OSM
+venlo,Shelter buildings with height at the 2.5 m floor (%),7.8,30.0,PASS,"Height floored by design (GHS-OBAT doc p.19): storeys unknown, counted as 1",JRC (GHS-BUILT-H)
+venlo,Shelter capacity outliers capped (count),0.0,0.0,PASS,Site matched to an unusually large building (possible wrong match),Team: check names in qc file
+venlo,Shelters excluded only by the EFAS 100-year model (count),43.0,0.0,WARN,"Satellite map did not cover the spot, model says it floods: unmapped is not safe",Info (expected)
+eschweiler,Residents not placed on any home (%),0.2,10.0,PASS,Population cells with no residential building: border cells (other country's buildings not loaded) or OBAT undercount,JRC (GHS-OBAT / GHS-POP)
+eschweiler,Exposed buildings with no height (%),0.0,5.0,PASS,Height raster has no value at the footprint,JRC (GHS-BUILT-H)
+eschweiler,Exposed buildings outside built-up domain (use=0) (%),0.0,5.0,PASS,Building not covered by the 10 m functional classification,JRC (GHS-BUILT-C)
+eschweiler,Unusually crowded exposed buildings (count),1.0,0.0,WARN,One small home holds a whole population cell (few residential buildings in the cell),Team (method choice)
+eschweiler,OSM candidates without a name (%),48.3,40.0,WARN,Volunteer mapping incomplete,OpenStreetMap community / official lists
+eschweiler,Shelter sites with no matching building (%),5.8,20.0,PASS,"Outdoor sports grounds, or OSM point far from any OBAT footprint",Team / OSM
+eschweiler,Shelter buildings with height at the 2.5 m floor (%),4.9,30.0,PASS,"Height floored by design (GHS-OBAT doc p.19): storeys unknown, counted as 1",JRC (GHS-BUILT-H)
+eschweiler,Shelter capacity outliers capped (count),0.0,0.0,PASS,Site matched to an unusually large building (possible wrong match),Team: check names in qc file
+eschweiler,Shelters excluded only by the EFAS 100-year model (count),22.0,0.0,WARN,"Satellite map did not cover the spot, model says it floods: unmapped is not safe",Info (expected)
+wassenberg,Residents not placed on any home (%),10.0,10.0,PASS,Population cells with no residential building: border cells (other country's buildings not loaded) or OBAT undercount,JRC (GHS-OBAT / GHS-POP)
+wassenberg,Exposed buildings with no height (%),1.2,5.0,PASS,Height raster has no value at the footprint,JRC (GHS-BUILT-H)
+wassenberg,Exposed buildings outside built-up domain (use=0) (%),1.2,5.0,PASS,Building not covered by the 10 m functional classification,JRC (GHS-BUILT-C)
+wassenberg,Unusually crowded exposed buildings (count),0.0,0.0,PASS,One small home holds a whole population cell (few residential buildings in the cell),Team (method choice)
+wassenberg,OSM candidates without a name (%),59.4,40.0,WARN,Volunteer mapping incomplete,OpenStreetMap community / official lists
+wassenberg,Shelter sites with no matching building (%),14.0,20.0,PASS,"Outdoor sports grounds, or OSM point far from any OBAT footprint",Team / OSM
+wassenberg,Shelter buildings with height at the 2.5 m floor (%),4.2,30.0,PASS,"Height floored by design (GHS-OBAT doc p.19): storeys unknown, counted as 1",JRC (GHS-BUILT-H)
+wassenberg,Shelter capacity outliers capped (count),0.0,0.0,PASS,Site matched to an unusually large building (possible wrong match),Team: check names in qc file
+wassenberg,Shelters excluded only by the EFAS 100-year model (count),0.0,0.0,PASS,"Satellite map did not cover the spot, model says it floods: unmapped is not safe",Info (expected)
+schleiden,Residents not placed on any home (%),1.4,10.0,PASS,Population cells with no residential building: border cells (other country's buildings not loaded) or OBAT undercount,JRC (GHS-OBAT / GHS-POP)
+schleiden,Exposed buildings with no height (%),0.0,5.0,PASS,Height raster has no value at the footprint,JRC (GHS-BUILT-H)
+schleiden,Exposed buildings outside built-up domain (use=0) (%),0.0,5.0,PASS,Building not covered by the 10 m functional classification,JRC (GHS-BUILT-C)
+schleiden,Unusually crowded exposed buildings (count),186.0,0.0,WARN,One small home holds a whole population cell (few residential buildings in the cell),Team (method choice)
+schleiden,OSM candidates without a name (%),48.1,40.0,WARN,Volunteer mapping incomplete,OpenStreetMap community / official lists
+schleiden,Shelter sites with no matching building (%),9.8,20.0,PASS,"Outdoor sports grounds, or OSM point far from any OBAT footprint",Team / OSM
+schleiden,Shelter buildings with height at the 2.5 m floor (%),9.2,30.0,PASS,"Height floored by design (GHS-OBAT doc p.19): storeys unknown, counted as 1",JRC (GHS-BUILT-H)
+schleiden,Shelter capacity outliers capped (count),0.0,0.0,PASS,Site matched to an unusually large building (possible wrong match),Team: check names in qc file
+schleiden,Shelters excluded only by the EFAS 100-year model (count),3.0,0.0,WARN,"Satellite map did not cover the spot, model says it floods: unmapped is not safe",Info (expected)
+euskirchen,Residents not placed on any home (%),0.4,10.0,PASS,Population cells with no residential building: border cells (other country's buildings not loaded) or OBAT undercount,JRC (GHS-OBAT / GHS-POP)
+euskirchen,Exposed buildings with no height (%),0.7,5.0,PASS,Height raster has no value at the footprint,JRC (GHS-BUILT-H)
+euskirchen,Exposed buildings outside built-up domain (use=0) (%),0.7,5.0,PASS,Building not covered by the 10 m functional classification,JRC (GHS-BUILT-C)
+euskirchen,Unusually crowded exposed buildings (count),0.0,0.0,PASS,One small home holds a whole population cell (few residential buildings in the cell),Team (method choice)
+euskirchen,OSM candidates without a name (%),41.8,40.0,WARN,Volunteer mapping incomplete,OpenStreetMap community / official lists
+euskirchen,Shelter sites with no matching building (%),6.2,20.0,PASS,"Outdoor sports grounds, or OSM point far from any OBAT footprint",Team / OSM
+euskirchen,Shelter buildings with height at the 2.5 m floor (%),11.2,30.0,PASS,"Height floored by design (GHS-OBAT doc p.19): storeys unknown, counted as 1",JRC (GHS-BUILT-H)
+euskirchen,Shelter capacity outliers capped (count),0.0,0.0,PASS,Site matched to an unusually large building (possible wrong match),Team: check names in qc file
+euskirchen,Shelters excluded only by the EFAS 100-year model (count),5.0,0.0,WARN,"Satellite map did not cover the spot, model says it floods: unmapped is not safe",Info (expected)
+erftstadt,Residents not placed on any home (%),0.9,10.0,PASS,Population cells with no residential building: border cells (other country's buildings not loaded) or OBAT undercount,JRC (GHS-OBAT / GHS-POP)
+erftstadt,Exposed buildings with no height (%),0.5,5.0,PASS,Height raster has no value at the footprint,JRC (GHS-BUILT-H)
+erftstadt,Exposed buildings outside built-up domain (use=0) (%),0.5,5.0,PASS,Building not covered by the 10 m functional classification,JRC (GHS-BUILT-C)
+erftstadt,Unusually crowded exposed buildings (count),1.0,0.0,WARN,One small home holds a whole population cell (few residential buildings in the cell),Team (method choice)
+erftstadt,OSM candidates without a name (%),40.3,40.0,WARN,Volunteer mapping incomplete,OpenStreetMap community / official lists
+erftstadt,Shelter sites with no matching building (%),8.6,20.0,PASS,"Outdoor sports grounds, or OSM point far from any OBAT footprint",Team / OSM
+erftstadt,Shelter buildings with height at the 2.5 m floor (%),4.1,30.0,PASS,"Height floored by design (GHS-OBAT doc p.19): storeys unknown, counted as 1",JRC (GHS-BUILT-H)
+erftstadt,Shelter capacity outliers capped (count),0.0,0.0,PASS,Site matched to an unusually large building (possible wrong match),Team: check names in qc file
+erftstadt,Shelters excluded only by the EFAS 100-year model (count),9.0,0.0,WARN,"Satellite map did not cover the spot, model says it floods: unmapped is not safe",Info (expected)
+vesdre,Residents not placed on any home (%),0.0,10.0,PASS,Population cells with no residential building: border cells (other country's buildings not loaded) or OBAT undercount,JRC (GHS-OBAT / GHS-POP)
+vesdre,Exposed buildings with no height (%),0.1,5.0,PASS,Height raster has no value at the footprint,JRC (GHS-BUILT-H)
+vesdre,Exposed buildings outside built-up domain (use=0) (%),0.1,5.0,PASS,Building not covered by the 10 m functional classification,JRC (GHS-BUILT-C)
+vesdre,Unusually crowded exposed buildings (count),0.0,0.0,PASS,One small home holds a whole population cell (few residential buildings in the cell),Team (method choice)
+vesdre,OSM candidates without a name (%),45.3,40.0,WARN,Volunteer mapping incomplete,OpenStreetMap community / official lists
+vesdre,Shelter sites with no matching building (%),7.4,20.0,PASS,"Outdoor sports grounds, or OSM point far from any OBAT footprint",Team / OSM
+vesdre,Shelter buildings with height at the 2.5 m floor (%),8.6,30.0,PASS,"Height floored by design (GHS-OBAT doc p.19): storeys unknown, counted as 1",JRC (GHS-BUILT-H)
+vesdre,Shelter capacity outliers capped (count),0.0,0.0,PASS,Site matched to an unusually large building (possible wrong match),Team: check names in qc file
+vesdre,Shelters excluded only by the EFAS 100-year model (count),0.0,0.0,PASS,"Satellite map did not cover the spot, model says it floods: unmapped is not safe",Info (expected)
+ahr,EFAS RP10 recall vs observed flood (share of flooded buildings the model also floods),0.35,,INFO,Model vs satellite agreement,JRC (EFAS)
+ahr,EFAS RP100 recall vs observed flood (share of flooded buildings the model also floods),0.42,,INFO,Model vs satellite agreement,JRC (EFAS)
+ahr,EFAS RP500 recall vs observed flood (share of flooded buildings the model also floods),0.48,,INFO,Model vs satellite agreement,JRC (EFAS)
+liege,EFAS RP10 recall vs observed flood (share of flooded buildings the model also floods),0.7,,INFO,Model vs satellite agreement,JRC (EFAS)
+liege,EFAS RP100 recall vs observed flood (share of flooded buildings the model also floods),0.75,,INFO,Model vs satellite agreement,JRC (EFAS)
+liege,EFAS RP500 recall vs observed flood (share of flooded buildings the model also floods),0.75,,INFO,Model vs satellite agreement,JRC (EFAS)
