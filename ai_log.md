@@ -88,6 +88,12 @@ re-runnable script in `notebooks/` (`pipeline.py`, `osm_extract.py`, `dq_report.
 - Result: roles and message are labelled as team text, not data, to be confirmed against the municipality's emergency plan and by a native speaker. Distances are straight lines from the town centre. No age or income data: stated on the page.
 - Decision taken by the team: Evacuation plan is the home page; earlier pages under "More".
 
+## 16. First action as a call list, and the river outlook per town
+- Prompt/intent: ground the page in the brief's test (Anna names her first action in under a minute) and close the warning-to-action gap.
+- AI output (short): a call list at the top (six towns with most residents lacking a shelter on foot, the district or province to call, care sites to evacuate; click opens the town plan) and one line per town with the nearest GloFAS outlook point within 15 km, or a pointer to the official centre.
+- How we checked it: rendered and clicked (Schleiden: 1,200 walk + 2,300 transport = 3,500 residents, matching app_towns). The outlook was rate-limited by Open-Meteo during the test; the page now says "unavailable right now" instead of "offline". District/province per area is a team summary to verify.
+- Result: the first action is the first thing on the home page.
+
 ## Data-cleaning decisions (from *Python for Data Analysis* ch.7)
 - Duplicates: overlapping flood shapes dissolved; OSM objects merged per campus; a building in two study areas counted once.
 - Missing values: analysed and reported per area (book p.210), not silently filled.

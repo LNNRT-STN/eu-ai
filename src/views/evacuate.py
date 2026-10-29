@@ -12,6 +12,7 @@ import streamlit as st
 
 import anna
 import core
+import forecast
 from core import about, fmt
 
 head, towns, crit, shel, flood, *_ = anna.load()
@@ -67,6 +68,8 @@ MSG = {
                    "om naar buren die oud, ziek of alleen zijn. Loop of rijd nooit door overstromingswater."),
 }
 OR = {"English": " or ", "Français": " ou ", "Deutsch": " oder ", "Nederlands": " of "}
+OFFICIAL = {"BE": "SPW (hydrometrie.wallonie.be)", "NL": "Rijkswaterstaat and the water board",
+            "DE": "the state flood centre (hochwasser.rlp.de, hochwasserportal.nrw)"}
 LOCAL_LANG = {"BE": "Français", "NL": "Nederlands", "DE": "Deutsch"}
 
 # Before the season: the contingency steps 2021 showed missing. Team text.
@@ -83,11 +86,47 @@ st.html("""<style>
 .ev-n span{display:block;margin-top:.25rem;color:#6e6e73;font-size:.92rem;line-height:1.35}
 .ev-n i{font-style:normal;color:#1d1d1f;font-weight:600}
 .ev-msg{background:#fff;border-radius:14px;padding:1rem 1.2rem;font-size:1.02rem;line-height:1.5;color:#1d1d1f;max-width:75ch}
+.ev-river{display:flex;gap:.6rem;align-items:baseline;margin:0;color:#6e6e73;font-size:.92rem;line-height:1.45}
+.ev-river i{flex:none;width:.7rem;height:.7rem;border-radius:50%;transform:translateY(.05rem)}
+.ev-river b{color:#1d1d1f;font-weight:600}
 @media (max-width:900px){.ev-n{grid-template-columns:1fr}}
 </style>""")
 
 core.header("Evacuation plan", "If the July 2021 flood came back: who leaves, which dry shelter they go to, "
             "who gives the order.")
+st.space("small")
+
+
+# Who Anna calls: the authority that orders an evacuation across municipalities, per study area (team summary of the
+# administrative map; check against the emergency plan). The mayor is called too.
+CALL = {"ahr": "Kreis Ahrweiler", "erftstadt": "Rhein-Erft-Kreis", "schleiden": "Kreis Euskirchen",
+        "euskirchen": "Kreis Euskirchen", "eschweiler": "StädteRegion Aachen", "wassenberg": "Kreis Heinsberg",
+        "venlo": "Safety region Limburg-Noord", "liege": "Province of Liège (governor)",
+        "vesdre": "Province of Liège (governor)", "rochefort": "Province of Namur (governor)"}
+cs_all = crit[crit.in_worst_flood.astype(bool) & crit.share_of_site_flooded.ge(.05) & crit.type.isin(["hospital", "care home"])]
+first_n = cs_all.groupby(["area", "municipality"]).size()
+calls = (T.assign(care=[int(first_n.get((a, m), 0)) for a, m in zip(T.area, T.municipality)], call=T.area.map(CALL),
+                  short=T.label.str.replace(" (modelled)", " *"))
+         .sort_values(["no_shelter", "care"], ascending=False).head(6))
+
+
+def pick_call():
+    rows = st.session_state.ev_calls.selection.rows
+    if rows:
+        st.session_state.ev_town = int(calls.index[rows[0]])
+
+
+st.html("<div class='gh'>First action: call these towns, in this order</div>")
+st.dataframe(calls[["short", "call", "no_shelter", "care"]].assign(no_shelter=calls.no_shelter.map(about)),
+             hide_index=True, key="ev_calls", on_select=pick_call, selection_mode="single-row",
+             column_config={"short": st.column_config.TextColumn("Town (and its mayor)"),
+                            "call": st.column_config.TextColumn("Also call"),
+                            "no_shelter": st.column_config.TextColumn("No shelter on foot",
+                                                                      help="Residents in the 2021 water with no free "
+                                                                           "shelter place within 1.5 km"),
+                            "care": st.column_config.NumberColumn("Care sites to evacuate", format="%d")})
+st.html("<p class='asof'>Ordered by residents with no shelter place on foot: they need transport, so these calls take "
+        "longest to act on. * modelled (Vesdre). Click a town to open its plan below.</p>")
 st.space("small")
 
 
@@ -125,6 +164,30 @@ sub = (f"{about(walk)} can walk to one (within 1.5 km); {about(ride)} need a bus
           "first." if len(weak) else ""))
 note = ("Modelled: the satellite missed the Vesdre, so the EFAS 500-year flood zone stands in."
         if modelled else "Observed: all Copernicus satellite passes of July 2021, a floor, not the peak.")
+
+
+def river_line():
+    """Is a flood coming here? The nearest GloFAS outlook point within 15 km of the town centre, else say there is none."""
+    gauges, *_, err = core.outlook()
+    pts = pd.DataFrame([(g, la, lo) for g, (la, lo) in forecast.GAUGES.items()], columns=["gauge", "lat", "lon"])
+    pts["d"] = core.km(t.lon, t.lat, pts.lon, pts.lat)
+    near_g = pts[pts.d <= 15].nsmallest(1, "d")
+    if gauges is None:
+        txt, c = f"River outlook unavailable right now. Follow {OFFICIAL[cc]}.", core.OFFLINE
+    elif near_g.empty:
+        txt, c = f"No river outlook point near {t['name']} in this tool. Follow {OFFICIAL[cc]}.", core.OFFLINE
+    else:
+        g = gauges[gauges.gauge == near_g.gauge.iloc[0]].iloc[0]
+        name, col = forecast.LEVELS[g.level]
+        txt = (f"<b>{g.gauge}, next 30 days: {name.lower()}</b> · peak {g.pct_2021:.0%} of its July 2021 peak on "
+               f"{g.peak_day:%a %d %b}" + (f"; wettest run: {forecast.LEVELS[g.level_worst][0].lower()}"
+                                           if g.level_worst > g.level else "")
+               + f". A model heads-up, not a warning: official warnings come from {OFFICIAL[cc]}.")
+        c = col
+    st.html(f"<p class='ev-river'><i style='background:{c}'></i><span>{txt}</span></p>")
+
+
+river_line()
 core.banner("#d70015" if left >= 5 or len(weak) else "#0071e3", verdict, sub + f"<small>{note}</small>", note=False)
 st.space("small")
 
