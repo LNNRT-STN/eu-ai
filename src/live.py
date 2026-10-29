@@ -1,0 +1,732 @@
+"""Live shared state for every role page, plus a scenario engine that replays July 2021.
+
+One SQLite file (data/live.db, gitignored) in WAL mode, short transactions: several browser sessions read and write
+at once. Pages call advance() on every refresh; it moves the shared clock and, from the river flows at that time,
+raises town status, records events, auto-closes flooded evacuation roads, adds simulated (drill) check-ins and queues
+briefings for mayors and fire brigades. Briefings are drafted in a background thread (reports.py) and stored here.
+
+Replay assumptions (say them in the UI): GloFAS daily flows are placed at noon and interpolated hourly; a town's
+level holds its highest value reached so far in the replay (water that has risen is not un-warned when it falls).
+"""
+import hashlib
+import json
+import sqlite3
+import threading
+import time
+import zlib
+from contextlib import contextmanager
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+
+ROOT = Path(__file__).resolve().parents[1]
+DB = ROOT / "data" / "live.db"
+CSV = ROOT / "data" / "checkins.csv"
+DATA = ROOT / "outputs" / "data"
+REFS = Path(__file__).resolve().parent / "out" / "meuse" / "gauge_refs.json"
+
+START, END = pd.Timestamp("2021-07-12 06:00"), pd.Timestamp("2021-07-18 00:00")
+STATUS = ["watch", "warn", "evacuate"]  # status from level: 0 watch, 1 warn, 2-3 evacuate
+NO_POINT = "no river point"
+RADIUS_KM = 15
+CHECKIN_COLS = ["when", "municipality", "door", "status", "where", "people", "drill"]
+WHERE = ["A shelter", "Family or friends", "A spare bed offered by a resident", "Elsewhere, outside the flood zone"]
+SIM_CAP = 4000          # simulated check-in rows, all towns together
+SIM_SHARE, SIM_HOURS = .85, 18  # share of doors that report safe, reached this many hours after "evacuate"
+HELP_EVERY = 15         # one simulated door in this many asks for help
+AUTO_ROADS = 3          # busiest flooded evacuation roads closed per town at level 3
+# district that runs the response, copied from views/evacuate.py
+CALL = {"ahr": "Kreis Ahrweiler", "erftstadt": "Rhein-Erft-Kreis", "schleiden": "Kreis Euskirchen",
+        "euskirchen": "Kreis Euskirchen", "eschweiler": "StädteRegion Aachen", "wassenberg": "Kreis Heinsberg",
+        "venlo": "Safety region Limburg-Noord", "liege": "Province of Liège (governor)",
+        "vesdre": "Province of Liège (governor)", "rochefort": "Province of Namur (governor)"}
+
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS clock(id INTEGER PRIMARY KEY CHECK(id=1), mode TEXT, t TEXT, playing INTEGER, speed REAL,
+  wall REAL);
+CREATE TABLE IF NOT EXISTS meta(k TEXT PRIMARY KEY, v TEXT);
+CREATE TABLE IF NOT EXISTS state(municipality TEXT PRIMARY KEY, status TEXT, level INTEGER, since TEXT);
+CREATE TABLE IF NOT EXISTS events(id INTEGER PRIMARY KEY, t TEXT, municipality TEXT, area TEXT, "from" TEXT, "to" TEXT,
+  mode TEXT, UNIQUE(municipality, "to", mode));
+CREATE TABLE IF NOT EXISTS checkins(id INTEGER PRIMARY KEY, "when" TEXT, municipality TEXT, door TEXT, status TEXT,
+  "where" TEXT, people INTEGER, drill INTEGER, sim INTEGER DEFAULT 0);
+CREATE INDEX IF NOT EXISTS checkins_muni ON checkins(municipality);
+CREATE TABLE IF NOT EXISTS closures(id INTEGER PRIMARY KEY, osm_id TEXT, name TEXT, municipality TEXT, "by" TEXT,
+  note TEXT, lon REAL, lat REAL, t TEXT, auto INTEGER DEFAULT 0, open INTEGER DEFAULT 0, reopened_t TEXT);
+CREATE TABLE IF NOT EXISTS outbox(id INTEGER PRIMARY KEY, kind TEXT, recipient TEXT, municipality TEXT, t TEXT,
+  facts TEXT, text TEXT, source TEXT, created REAL, UNIQUE(kind, recipient, municipality, t));
+CREATE TABLE IF NOT EXISTS drafts(h TEXT PRIMARY KEY, text TEXT, source TEXT);
+"""
+
+
+# ---------- database ----------
+
+def _connect(path):
+    path.parent.mkdir(exist_ok=True)
+    c = sqlite3.connect(path, timeout=15, isolation_level=None)
+    c.execute("PRAGMA journal_mode=WAL")
+    c.execute("PRAGMA synchronous=NORMAL")
+    c.execute("PRAGMA busy_timeout=15000")
+    return c
+
+
+_ready = set()
+_init = threading.Lock()
+
+
+@contextmanager
+def _db(write=False):
+    path = DB
+    c = _connect(path)
+    try:
+        if str(path) not in _ready:
+            with _init:
+                c.executescript(SCHEMA)
+                _migrate_csv(c)
+                _ready.add(str(path))
+        if write:
+            c.execute("BEGIN IMMEDIATE")
+        yield c
+        if write:
+            c.execute("COMMIT")
+    except BaseException:
+        if write and c.in_transaction:
+            c.execute("ROLLBACK")
+        raise
+    finally:
+        c.close()
+
+
+def _q(sql, args=()):
+    with _db() as c:
+        return pd.read_sql_query(sql, c, params=args)
+
+
+def _migrate_csv(c):
+    if c.execute("SELECT 1 FROM meta WHERE k='csv_migrated'").fetchone():
+        return
+    c.execute("BEGIN IMMEDIATE")
+    if not c.execute("SELECT 1 FROM meta WHERE k='csv_migrated'").fetchone():
+        if CSV.exists():
+            try:
+                df = pd.read_csv(CSV)
+                for r in df.reindex(columns=CHECKIN_COLS).itertuples(index=False):
+                    c.execute('INSERT INTO checkins("when",municipality,door,status,"where",people,drill) '
+                              "VALUES(?,?,?,?,?,?,?)", (str(r.when), r.municipality, r.door, r.status,
+                                                        None if pd.isna(r.where) else r.where,
+                                                        int(r.people) if pd.notna(r.people) else 1,
+                                                        int(str(r.drill).lower() in ("true", "1"))))
+            except pd.errors.EmptyDataError:
+                pass
+        c.execute("INSERT INTO meta VALUES('csv_migrated', ?)", (str(pd.Timestamp.now()),))
+    c.execute("COMMIT")
+
+
+# ---------- clock ----------
+
+def _ts(x):
+    return pd.Timestamp(x).floor("s")
+
+
+def _now():
+    return pd.Timestamp.now(tz="Europe/Brussels").tz_localize(None).floor("s")
+
+
+def _row(c):
+    r = c.execute("SELECT mode,t,playing,speed,wall FROM clock WHERE id=1").fetchone()
+    if r is None:
+        r = ("replay", str(START), 0, 1.0, time.time())
+        c.execute("INSERT OR IGNORE INTO clock VALUES(1,?,?,?,?,?)", r)
+    return r
+
+
+def clock() -> dict:
+    """mode "replay"|"live", t (pd.Timestamp, Brussels local time), playing, speed (hours per real second)."""
+    with _db() as c:
+        m, t, p, s, _ = _row(c)
+    return dict(mode=m, t=_ts(t), playing=bool(p), speed=float(s))
+
+
+def _set(**kw):
+    with _db(write=True) as c:
+        _row(c)
+        if "playing" in kw or "speed" in kw:  # bank the time played so far before changing rate
+            _advance(c)
+        kw["wall"] = time.time()
+        c.execute(f"UPDATE clock SET {', '.join(f'{k}=?' for k in kw)} WHERE id=1",
+                  [str(v) if isinstance(v, pd.Timestamp) else v for v in kw.values()])
+
+
+def play():
+    _set(playing=1)
+
+
+def pause():
+    _set(playing=0)
+
+
+def set_speed(x):
+    _set(speed=float(x))
+
+
+def set_mode(m):
+    assert m in ("replay", "live")
+    _set(mode=m, t=_now() if m == "live" else START, playing=int(m == "live"))
+
+
+def reset(t0="2021-07-12 06:00"):
+    """Back to t0 in replay mode, paused. Clears events, status, outbox, closures and simulated check-ins;
+    check-ins made by people (and by the check-in page's own drill) stay."""
+    with _db(write=True) as c:
+        _row(c)
+        c.execute("UPDATE clock SET mode='replay', t=?, playing=0, wall=? WHERE id=1", (str(_ts(t0)), time.time()))
+        for tb in ("events", "state", "outbox", "closures"):
+            c.execute(f"DELETE FROM {tb}")
+        c.execute("DELETE FROM checkins WHERE sim=1")
+        c.execute("DELETE FROM meta WHERE k LIKE 'done:%'")
+
+
+def _advance(c):
+    m, t, p, s, wall = _row(c)
+    now = time.time()
+    t = _ts(t)
+    if m == "live":
+        t = _now()
+    elif p:
+        t = t + pd.Timedelta(hours=(now - wall) * s)
+        if t >= END:
+            t, p = END, 0
+    c.execute("UPDATE clock SET t=?, playing=?, wall=? WHERE id=1", (str(_ts(t)), p, now))
+    return m, _ts(t)
+
+
+def advance() -> dict:
+    """Move the shared clock by real time elapsed × speed while playing, then apply the scenario at the new time.
+    Call on every page refresh; safe from several sessions at once."""
+    with _db(write=True) as c:
+        _advance(c)
+    k = clock()
+    try:
+        tick(k["t"], k["mode"])
+    except sqlite3.OperationalError:  # another session holds the lock: it is ticking for us
+        pass
+    return k
+
+
+# ---------- rivers ----------
+
+_cache = {}
+_WATCH = [REFS, REFS.parent / "replay_2021.json", DATA / "town_gauge.csv", DATA / "ml2_curves.json",
+          DATA / "app_towns.csv"]
+
+
+def _fresh():
+    """Drop cached rivers and towns when another process rebuilds their files (the server keeps running)."""
+    st = tuple(f.stat().st_mtime if f.exists() else 0 for f in _WATCH)
+    if _cache.get("stamp") != st:
+        _cache.clear()
+        _cache["stamp"] = st
+
+
+def _refs():
+    if "refs" not in _cache:
+        _cache["refs"] = json.loads(REFS.read_text())
+    return _cache["refs"]
+
+
+def _hourly():
+    """GloFAS daily flows 10-20 Jul 2021, placed at noon, interpolated hourly. Every gauge column that exists."""
+    if "hourly" not in _cache:
+        r = pd.DataFrame(json.loads((REFS.parent / "replay_2021.json").read_text()))  # as core.load_replay(),
+        r.index = pd.to_datetime(r.index) + pd.Timedelta(hours=12)  # uncached so a rebuild shows up live
+        grid = pd.date_range(r.index[0], r.index[-1], freq="h")
+        _cache["hourly"] = r.reindex(r.index.union(grid)).interpolate("time").reindex(grid)
+    return _cache["hourly"]
+
+
+def _live_flows(t):
+    import core
+    gauges, series, *_ = core.outlook()
+    if gauges is None:
+        return {}
+    out = {}
+    for g, d in (series.groupby("gauge") if series is not None else []):
+        s = d.set_index("time").river_discharge.dropna()
+        s.index = pd.to_datetime(s.index) + pd.Timedelta(hours=12)
+        if len(s) and s.index[0] <= t <= s.index[-1]:
+            out[g] = float(np.interp(t.as_unit("ns").value, s.index.as_unit("ns").asi8, s.values))
+    for g, q in zip(gauges.gauge, gauges.now):
+        out.setdefault(g, float(q))
+    return out
+
+
+def flows(t, mode=None) -> dict:
+    """Flow (m³/s) per river point at time t: the 2021 replay, or in live mode the latest live forecast."""
+    t = _ts(t)
+    _fresh()
+    if (mode or clock()["mode"]) == "live":
+        return _live_flows(t)
+    h = _hourly()
+    t = min(max(t, h.index[0]), h.index[-1])
+    x, xp = t.as_unit("ns").value, h.index.as_unit("ns").asi8
+    return {g: float(np.interp(x, xp, h[g].values)) for g in h.columns}
+
+
+# ---------- towns ----------
+
+def _km(lon0, lat0, lon, lat):
+    return np.hypot((lon - lon0) * 111.32 * np.cos(np.radians(lat0)), (lat - lat0) * 110.57)
+
+
+def _ml2():
+    """build_ml2 if another agent has provided impact_forecast there, else None (fallback: flow thresholds)."""
+    try:
+        import build_ml2
+        return build_ml2 if hasattr(build_ml2, "impact_forecast") else None
+    except Exception:
+        return None
+
+
+def _town_gauge(t):
+    """area, municipality, gauge (+ optional q2, q2021): outputs/data/town_gauge.csv, else the nearest
+    forecast.GAUGES point within 15 km (build_ml2.load_town_gauge does the same when present)."""
+    m = _ml2()
+    if m is not None and hasattr(m, "load_town_gauge"):
+        try:
+            return m.load_town_gauge()
+        except Exception:
+            pass
+    tg = DATA / "town_gauge.csv"
+    if tg.exists():
+        return pd.read_csv(tg)
+    import forecast
+    pts = forecast.GAUGES
+
+    def near(r):
+        d = {g: _km(lo, la, r.lon, r.lat) for g, (la, lo) in pts.items()}
+        g = min(d, key=d.get)
+        return g if d[g] <= RADIUS_KM else None
+    return t.assign(gauge=t.apply(near, axis=1))[["area", "municipality", "gauge"]]
+
+
+def _towns():
+    """Towns of the worst-case map with their river point and reference flows."""
+    if "towns" in _cache:
+        return _cache["towns"]
+    import anna
+    t = anna.load()[1]
+    t = t[t.variant == "worst"].drop_duplicates("municipality")[
+        ["area", "municipality", "people", "lon", "lat"]].reset_index(drop=True)
+    tg = _town_gauge(t).drop_duplicates("municipality")
+    t = t.merge(tg[[c for c in ("municipality", "gauge", "q2", "q2021") if c in tg]], on="municipality", how="left")
+    refs = _refs()
+    ok = lambda g: isinstance(g, str) and g in refs
+    t["gauge"] = t.gauge.where(t.gauge.map(lambda g: isinstance(g, str)), None).astype(object)
+    for i, col in enumerate(("q2", "q2021")):
+        own = t[col] if col in t else pd.Series(np.nan, index=t.index)
+        t[col] = own.fillna(t.gauge.map(lambda g: refs[g][i] if ok(g) else np.nan))
+    _cache["towns"] = t
+    return t
+
+
+def _levels(T, q):
+    """0-3 from flow q: above the 2-year flow, above half the 2021 peak, at or above the 2021 peak."""
+    q = pd.Series(q, index=T.index, dtype=float)
+    return ((q >= T.q2).astype(int) + (q >= T.q2021 / 2).astype(int)
+            + (q >= T.q2021 * .999).astype(int))  # .999: the 2021 peak is the replay series' own maximum
+
+
+def _judge(T, fl, t=None):
+    """(level, status, people_expected) per town for flows fl. Status and people_expected from
+    build_ml2.impact_forecast when available, else level thresholds and a linear share of the 2021 people."""
+    q = T.gauge.map(lambda g: fl.get(g, np.nan) if isinstance(g, str) else np.nan)
+    level = _levels(T, q)
+    status = level.map(lambda l: STATUS[min(int(l), 2)]).where(q.notna(), NO_POINT)
+    share = ((q - T.q2) / (T.q2021 - T.q2)).clip(0, 1).fillna(0)
+    pe = (T.people * share).round()
+    m = _ml2()
+    if m is not None:
+        try:
+            tg = T[["area", "municipality", "gauge", "q2", "q2021"]]
+            imp = m.impact_forecast({g: v for g, v in fl.items() if pd.notna(v)}, tg).drop_duplicates("municipality")
+            imp = imp.set_index("municipality").reindex(T.municipality)
+            s = imp.status.map({"none": "watch", "watch": "watch", "warn": "warn", "evacuate": "evacuate",
+                                "no gauge": NO_POINT})
+            status = pd.Series(s.values, index=T.index).fillna(status)
+            pe = pd.Series(imp.people_expected.values, index=T.index).fillna(pe)
+        except Exception:
+            pass
+    return level, status, pe.fillna(0).astype(int)
+
+
+def _replay():
+    """Hour by hour over the replay, from the highest flow reached so far (a risen river is not un-warned):
+    level, status and people_expected per town, and the first hour each status is reached."""
+    if "replay" in _cache:
+        return _cache["replay"]
+    T, h = _towns(), _hourly().cummax()
+    lv, stt, pe = [], [], []
+    for _, row in h.iterrows():
+        a, b, c = _judge(T, row.to_dict())
+        lv.append(a.values), stt.append(b.values), pe.append(c.values)
+    lv, stt, pe = np.array(lv), np.array(stt, dtype=object), np.array(pe)
+    first = lambda mask: [h.index[mask[:, j].argmax()] if mask[:, j].any() else pd.NaT for j in range(len(T))]
+    rank = np.vectorize(lambda s: STATUS.index(s) if s in STATUS else -1)(stt)
+    times = pd.DataFrame({"municipality": T.municipality, "t_warn": first(rank >= 1), "t_evacuate": first(rank >= 2),
+                          "t_level3": first(lv >= 3)}).set_index("municipality")
+    _cache["replay"] = dict(index=h.index, level=lv, status=stt, people_expected=pe, times=times, peak=h)
+    return _cache["replay"]
+
+
+def towns_status(t=None, mode=None) -> pd.DataFrame:
+    """[municipality, area, gauge, flow, q2, q2021, level 0-3, status, people, people_expected, since].
+    level 1 above the 2-year flow, 2 above half the 2021 peak, 3 at or above it. status watch|warn|evacuate (or
+    "no river point"): from build_ml2.impact_forecast when present, else warn at level 1 and evacuate at 2+.
+    people: residents inside the 2021 flood extent; people_expected: impact_forecast's expectation (fallback: that
+    number scaled linearly between the 2-year flow and the 2021 peak). In replay, level and status hold the highest
+    value reached so far; since is when the current status was first reached."""
+    k = clock()
+    t, mode = _ts(t if t is not None else k["t"]), mode or k["mode"]
+    _fresh()
+    T = _towns().copy()
+    fl = flows(t, mode)
+    T["flow"] = T.gauge.map(lambda g: fl.get(g, np.nan) if isinstance(g, str) else np.nan)
+    if mode == "replay":
+        R = _replay()
+        i = max(int(R["index"].searchsorted(t, side="right")) - 1, 0)
+        T["level"], T["status"], T["people_expected"] = R["level"][i], R["status"][i], R["people_expected"][i]
+        tm = R["times"].reindex(T.municipality)
+        T["since"] = np.where(T.status == "evacuate", tm.t_evacuate.values,
+                              np.where(T.status == "warn", tm.t_warn.values, np.datetime64("NaT", "ns")))
+        T["since"] = pd.to_datetime(T.since)
+    else:
+        T["level"], T["status"], T["people_expected"] = _judge(T, fl, t)
+        st = _q("SELECT municipality, since FROM state").set_index("municipality").since
+        T["since"] = pd.to_datetime(T.municipality.map(st))
+    T["level"] = T.level.astype(int)
+    T["people_expected"] = T.people_expected.astype(int)
+    return T[["municipality", "area", "gauge", "flow", "q2", "q2021", "level", "status", "people", "people_expected",
+              "since"]].sort_values(["level", "people"], ascending=False).reset_index(drop=True)
+
+
+def events(muni=None) -> pd.DataFrame:
+    """Status rises: t, municipality, area, from, to (oldest first)."""
+    sql = 'SELECT t, municipality, area, "from", "to" FROM events'
+    df = _q(sql + (" WHERE municipality=?" if muni else "") + " ORDER BY t, id", (muni,) if muni else ())
+    df["t"] = pd.to_datetime(df.t)
+    return df
+
+
+# ---------- scenario tick ----------
+
+def _fmt_t(t):
+    return pd.Timestamp(t).strftime("%-d %b %Y %H:%M")
+
+
+def tick(t=None, mode=None):
+    """Apply the scenario at time t: status rises -> events, reports, auto closures, simulated check-ins."""
+    k = clock()
+    t, mode = _ts(t if t is not None else k["t"]), mode or k["mode"]
+    T = towns_status(t, mode)
+    T = T[T.status != NO_POINT]
+    queued = []
+    with _db(write=True) as c:
+        old = dict(c.execute("SELECT municipality, status FROM state").fetchall())
+        times = _replay()["times"] if mode == "replay" else None
+        for r in T.itertuples():
+            before = old.get(r.municipality, "watch")
+            if STATUS.index(r.status) <= STATUS.index(before):
+                continue
+            steps = STATUS[STATUS.index(before) + 1: STATUS.index(r.status) + 1]
+            prev = before
+            for s in steps:
+                when = times.at[r.municipality, f"t_{s}"] if mode == "replay" else t
+                when = t if pd.isna(when) else when
+                c.execute('INSERT OR IGNORE INTO events(t,municipality,area,"from","to",mode) VALUES(?,?,?,?,?,?)',
+                          (str(when), r.municipality, r.area, prev, s, mode))
+                queued.append((r, prev, s, when))
+                prev = s
+            c.execute("INSERT OR REPLACE INTO state VALUES(?,?,?,?)", (r.municipality, r.status, int(r.level),
+                                                                       str(queued[-1][3])))
+    for r, prev, s, when in queued:
+        facts = _facts(r, prev, s, when, t, mode)
+        name = _name(r.municipality)
+        queue_report("status", f"Mayor of {name}", r.municipality, when, facts)
+        queue_report("status", f"Fire brigade, {CALL.get(r.area, r.area)}", r.municipality, when, facts)
+    _auto_close(T, t, mode)
+    if mode == "replay":
+        _simulate_checkins(T, t)
+
+
+def _name(m):
+    import anna
+    return anna.town(m)
+
+
+def _facts(r, prev, s, when, t, mode):
+    """Small facts dict for one report: numbers rounded here, so the AI never has to."""
+    raw = _towns().set_index("municipality").loc[r.municipality]
+    q, pe = r.flow, r.people_expected
+    if mode == "replay":
+        at = towns_status(when, mode).set_index("municipality").loc[r.municipality]
+        q, pe = at.flow, at.people_expected
+    return {"town": _name(r.municipality), "status": s, "from": prev,
+            "time": _fmt_t(when), "scenario": "replay of July 2021" if mode == "replay" else "live forecast",
+            "river_point": r.gauge, "flow_m3s": int(round(q)), "two_year_flow_m3s": int(round(raw.q2)),
+            "july_2021_peak_m3s": int(round(raw.q2021)), "people_in_2021_flood_extent": int(r.people),
+            "people_expected_in_water": int(pe),
+            "district": CALL.get(r.area, r.area)}
+
+
+def _edges():
+    if "edges" not in _cache:
+        import geopandas as gpd
+        e = gpd.read_file(DATA / "evac_edges.geojson")
+        e = e[e.in_flood_2021.astype(bool)].copy()
+        pt = e.geometry.representative_point()
+        e = pd.DataFrame(e.drop(columns="geometry").assign(lon=pt.x, lat=pt.y))
+        e["osm_id"] = e.osm_id.astype(str)
+        _cache["edges"] = e
+    return _cache["edges"]
+
+
+def _auto_close(T, t, mode):
+    hit = T[T.level >= 3]
+    if hit.empty:
+        return
+    e = _edges()
+    tm = _replay()["times"]
+    with _db(write=True) as c:
+        for m in hit.municipality:
+            key = f"done:close:{m}"
+            if c.execute("SELECT 1 FROM meta WHERE k=?", (key,)).fetchone():
+                continue
+            when = tm.at[m, "t_level3"] if mode == "replay" and pd.notna(tm.at[m, "t_level3"]) else t
+            roads = (e[e.municipality == m].assign(named=lambda x: x.name.fillna("").str[:1].str.isupper())
+                     .sort_values(["named", "people", "length_m"], ascending=False)
+                     .drop_duplicates("name").head(AUTO_ROADS))
+            if roads.named.any():  # unnamed ways carry their OSM type ("footway"): only when nothing else is flooded
+                roads = roads[roads.named]
+            for r in roads.itertuples():
+                c.execute('INSERT INTO closures(osm_id,name,municipality,"by",note,lon,lat,t,auto) '
+                          "VALUES(?,?,?,?,?,?,?,?,1)", (r.osm_id, r.name, m, "scenario",
+                                                       "Evacuation road in the July 2021 water; river at its 2021 peak",
+                                                       float(r.lon), float(r.lat), str(when)))
+            c.execute("INSERT INTO meta VALUES(?,?)", (key, str(t)))
+
+
+def _doors():
+    """One row per home address in the 2021 water, as views/checkin.py builds them (copied, not imported)."""
+    if "doors" not in _cache:
+        a = pd.read_parquet(DATA / "addresses.parquet")
+        a = a[a.use == 1].copy()
+        a["door"] = a.label.where(a.label.astype(bool), "No address · " + a.bid)
+        a.loc[a.label.astype(bool) & a.street.isna(), "door"] = "House no. " + a.housenumber + " (no street name)"
+        _cache["doors"] = a.groupby(["municipality", "door"], as_index=False).size()[["municipality", "door"]]
+    return _cache["doors"]
+
+
+def _simulate_checkins(T, t):
+    """For towns at evacuate, a growing, seeded share of doors check in safe (one in HELP_EVERY needs help)."""
+    ev = T[T.status == "evacuate"]
+    if ev.empty:
+        return
+    D = _doors()
+    tm = _replay()["times"]
+    with _db(write=True) as c:
+        have = dict(c.execute("SELECT municipality, COUNT(*) FROM checkins WHERE sim=1 GROUP BY 1").fetchall())
+        total = sum(have.values())
+        for m in ev.municipality:
+            d = D[D.municipality == m].door.to_numpy()
+            if not len(d) or total >= SIM_CAP:
+                continue
+            t0 = tm.at[m, "t_evacuate"]
+            hours = (t - t0) / pd.Timedelta(hours=1) if pd.notna(t0) else 0
+            n_full = int(SIM_SHARE * len(d))
+            n = min(n_full, int(n_full * max(hours, 0) / SIM_HOURS))
+            n = min(n, have.get(m, 0) + SIM_CAP - total)
+            if n <= have.get(m, 0):
+                continue
+            rng = np.random.default_rng(zlib.crc32(m.encode()))
+            order, where, ppl = rng.permutation(len(d)), rng.integers(0, len(WHERE), len(d)), rng.integers(1, 5, len(d))
+            rows = []
+            for i in range(have.get(m, 0), n):
+                j = order[i]
+                helpme = i % HELP_EVERY == HELP_EVERY - 1
+                when = t0 + pd.Timedelta(hours=SIM_HOURS * i / max(n_full, 1))
+                rows.append((str(_ts(when)), m, str(d[j]), "needs help" if helpme else "safe",
+                             None if helpme else WHERE[where[j]], int(ppl[j]), 1, 1))
+            c.executemany('INSERT INTO checkins("when",municipality,door,status,"where",people,drill,sim) '
+                          "VALUES(?,?,?,?,?,?,?,?)", rows)
+            total += len(rows)
+
+
+# ---------- check-ins ----------
+
+def checkins(muni=None) -> pd.DataFrame:
+    """Check-ins (when, municipality, door, status, where, people, drill), newest last; drill rows include simulated
+    ones (column sim)."""
+    sql = 'SELECT id, "when", municipality, door, status, "where", people, drill, sim FROM checkins'
+    df = _q(sql + (" WHERE municipality=?" if muni else "") + " ORDER BY id", (muni,) if muni else ())
+    df["drill"], df["sim"] = df.drill.astype(bool), df.sim.astype(bool)
+    return df
+
+
+def add_checkin(municipality, door, status="safe", where=None, people=1, drill=False, when=None) -> int:
+    assert status in ("safe", "needs help")
+    when = when if when is not None else clock()["t"]
+    with _db(write=True) as c:
+        cur = c.execute('INSERT INTO checkins("when",municipality,door,status,"where",people,drill) VALUES(?,?,?,?,?,?,?)',
+                        (str(_ts(when)), municipality, door, status, where, int(people), int(bool(drill))))
+        return cur.lastrowid
+
+
+def clear_drill(muni=None):
+    """Remove drill check-ins (simulated ones included), for one town or all."""
+    with _db(write=True) as c:
+        c.execute("DELETE FROM checkins WHERE drill=1" + (" AND municipality=?" if muni else ""),
+                  (muni,) if muni else ())
+
+
+# ---------- road closures ----------
+
+def closures(open_only=True) -> pd.DataFrame:
+    """Closed roads: id, osm_id, name, municipality, by, note, lon, lat, t, auto (scenario), open (reopened)."""
+    df = _q('SELECT * FROM closures' + (" WHERE open=0" if open_only else "") + " ORDER BY t, id")
+    df["auto"], df["open"] = df.auto.astype(bool), df.open.astype(bool)
+    return df
+
+
+def close_road(road, municipality, by="crisis room", note="", lon=None, lat=None) -> int:
+    """Close a road by OSM id or by name. Position from evac_edges when not given and the road is known."""
+    road = str(road)
+    name, osm = (road, None)
+    try:
+        e = _edges()
+    except Exception:
+        e = pd.DataFrame(columns=["osm_id", "name", "lon", "lat"])
+    hit = e[e.osm_id == road]
+    if road.isdigit():
+        osm, name = road, (hit.name.iloc[0] if len(hit) else None)
+    else:
+        hit = e[(e.name == road) & (e.municipality == municipality)] if "municipality" in e else hit.iloc[:0]
+    if len(hit) and lon is None:
+        lon, lat = float(hit.lon.iloc[0]), float(hit.lat.iloc[0])
+    with _db(write=True) as c:
+        return c.execute('INSERT INTO closures(osm_id,name,municipality,"by",note,lon,lat,t) VALUES(?,?,?,?,?,?,?,?)',
+                         (osm, name, municipality, by, note, lon, lat, str(clock()["t"]))).lastrowid
+
+
+def reopen(id):
+    with _db(write=True) as c:
+        c.execute("UPDATE closures SET open=1, reopened_t=? WHERE id=?", (str(clock()["t"]), int(id)))
+
+
+# ---------- outbox ----------
+
+def outbox(recipient=None) -> pd.DataFrame:
+    """Queued briefings: id, kind, recipient, municipality, t, facts (dict), text (None while drafting),
+    source ai|template|drafting|None. Oldest first."""
+    df = _q("SELECT id, kind, recipient, municipality, t, facts, text, source FROM outbox"
+            + (" WHERE recipient=?" if recipient else "") + " ORDER BY t, id", (recipient,) if recipient else ())
+    df["facts"] = df.facts.map(json.loads)
+    df["t"] = pd.to_datetime(df.t)
+    return df
+
+
+def _hash(kind, recipient, facts):
+    return hashlib.sha1(json.dumps([kind, recipient, facts], sort_keys=True, default=str).encode()).hexdigest()
+
+
+def queue_report(kind, recipient, municipality, t, facts: dict) -> int:
+    """Queue one report; drafted in the background (once per identical facts: replays reuse earlier drafts)."""
+    with _db(write=True) as c:
+        cur = c.execute("INSERT OR IGNORE INTO outbox(kind,recipient,municipality,t,facts,created) VALUES(?,?,?,?,?,?)",
+                        (kind, recipient, municipality, str(_ts(t)), json.dumps(facts, default=str), time.time()))
+        rid = cur.lastrowid if cur.rowcount else None
+    _start_worker()
+    return rid
+
+
+def report(id) -> str:
+    """Text of one report, drafting it now if the background worker has not got to it yet."""
+    _draft_one(int(id))
+    for _ in range(100):  # the worker may be drafting it right now: wait up to 10 s
+        with _db() as c:
+            r = c.execute("SELECT text FROM outbox WHERE id=?", (int(id),)).fetchone()
+        if not r or r[0] is not None:
+            return r[0] if r else None
+        time.sleep(.1)
+    return None
+
+
+def _draft_one(rid):
+    import reports
+    with _db(write=True) as c:  # claim the row so two threads never draft the same one
+        r = c.execute("SELECT kind, recipient, facts FROM outbox WHERE id=? AND text IS NULL AND source IS NULL",
+                      (rid,)).fetchone()
+        if not r:
+            return
+        c.execute("UPDATE outbox SET source='drafting' WHERE id=?", (rid,))
+    kind, recipient, facts = r[0], r[1], json.loads(r[2])
+    h = _hash(kind, recipient, facts)
+    with _db() as c:
+        got = c.execute("SELECT text, source FROM drafts WHERE h=?", (h,)).fetchone()
+    try:
+        text, source = got or reports.draft(kind, recipient, facts)
+    except Exception:
+        text, source = reports.template(kind, recipient, facts), "template"
+    with _db(write=True) as c:
+        if source == "ai" and not got:
+            c.execute("INSERT OR REPLACE INTO drafts VALUES(?,?,?)", (h, text, source))
+        c.execute("UPDATE outbox SET text=?, source=? WHERE id=?", (text, source, rid))
+
+
+WORKERS = 4  # parallel drafts, so the outbox keeps up with a fast replay
+_workers = []
+_lock = threading.Lock()
+
+
+def _work():
+    while True:
+        with _db() as c:
+            ids = [r[0] for r in c.execute("SELECT id FROM outbox WHERE text IS NULL AND source IS NULL "
+                                           "ORDER BY t, id LIMIT 20").fetchall()]
+        if not ids:
+            return
+        for i in ids:
+            try:
+                _draft_one(i)
+            except Exception:
+                time.sleep(1)
+
+
+def _start_worker():
+    with _lock:
+        _workers[:] = [w for w in _workers if w.is_alive()]
+        if not _workers:
+            _unstick()
+        while len(_workers) < WORKERS:
+            w = threading.Thread(target=_work, name=f"live-reports-{len(_workers)}", daemon=True)
+            w.start()
+            _workers.append(w)
+
+
+def _unstick():
+    """Rows left 'drafting' by a process that died get another go."""
+    with _db(write=True) as c:
+        c.execute("UPDATE outbox SET source=NULL WHERE source='drafting' AND created < ?", (time.time() - 120,))
+
+
+# ---------- one-line summary for headers ----------
+
+def summary(t=None) -> dict:
+    """Counts for a header strip: towns at warn / evacuate, people in them, check-ins safe / needing help,
+    roads closed, reports queued."""
+    T = towns_status(t)
+    ck = checkins()
+    return {"warn": int((T.status == "warn").sum()), "evacuate": int((T.status == "evacuate").sum()),
+            "people_evacuate": int(T.people[T.status == "evacuate"].sum()),
+            "safe": int((ck.status == "safe").sum()), "needs_help": int((ck.status == "needs help").sum()),
+            "roads_closed": len(closures()), "reports": len(outbox())}
