@@ -12,6 +12,10 @@ close the 2021 governance gaps (roles, warning → instruction, plans and drills
 - Features in: who-does-what chain, ready warning message, printable town plan, vulnerability flags.
 - Older housing: compute from GHS-OBAT construction period (bucket, anonymous read).
 - Questions to the owner: menu (multiple choice).
+- Scope added 29 Oct, ~17:00: road evacuation sim (routes + road load, no time-stepped traffic), rail and bridges cut,
+  3D "no upper floor" view (OBAT height), long-term page with real, cited budgets. Short term = damage control while
+  evacuating; long term = repairs and preparedness, each tied to a funding line.
+- ML: simulation, not ML, for evacuation; keep docs/ML.md (risk model tested, not shipped) as evidence of checking.
 
 ## Done
 1. Evacuation plan page: town → walk / transport / no place, shelters from the 10 km plan, tabs (evacuate first, who
@@ -19,12 +23,19 @@ close the 2021 governance gaps (roles, warning → instruction, plans and drills
 2. River outlook line per town (nearest GloFAS point ≤ 15 km, else "follow official centre"); first-action call list
    (top 6 towns by residents with no shelter on foot, district/province to call, care sites; click opens the plan).
 
-## In progress (delegated)
-- Agent: `outputs/data/housing_age.csv` + `notebooks/housing_age.py` (residential pre-1980 and non-residential
-  buildings in the flood, per town). When it lands: show it in "Evacuate first" and the plan download; flag in call list.
+## In progress (delegated, background agents; each writes only its own files)
+- Housing: `outputs/data/housing_age.csv` + `buildings_3d_*.parquet` (`notebooks/housing_age.py`). → "Evacuate first",
+  plan download, 3D view of single-storey homes in the water.
+- Road sim: `outputs/data/evac_towns.csv`, `evac_edges.geojson` (`notebooks/evac_sim.py`): time to leave the water
+  (4 and 3 km/h), time to shelter, busiest roads and bridges, routes through water. → map layer + numbers per town.
+- Rail and bridges: `outputs/data/infra_in_flood.csv`, `infra_rail.geojson`, `docs/INFRA_2021.md`. → map layer
+  (short term: no train evacuation) + long-term repair list.
+- Budgets: `docs/BUDGETS.md` (cited). → long-term page.
 
 ## Backlog (highest value first)
-- Wire housing age into the page (after the agent reports).
+- Page structure once data lands: Evacuation plan = short term (now / today); new page "Long term" = gaps → measures →
+  funding (cited), per town and per area. Keep the home page one minute to read.
+- Wire each agent's output in as it lands; render; verify totals against app_towns.
 - "Better prepared than 2021?" one line on the page: brief Q2/Q4 asks it; only verified facts, else say "not verified".
 - Map: mark the town centre (distances are measured from it); avoid label overlap of numbered shelters.
 - Run the impeccable detector on `src/views/evacuate.py`; fix findings.
