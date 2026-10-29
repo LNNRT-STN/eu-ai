@@ -13,7 +13,8 @@ nav = st.navigation({
     "Act": [st.Page("views/rivers.py", title="Rivers", icon=":material/water:"),
             st.Page("views/risk_areas.py", title="Risk areas", icon=":material/map:"),
             st.Page("views/shelters.py", title="Shelters", icon=":material/home_health:")],
-    "Reference": [st.Page("views/limits.py", title="Data & limits", icon=":material/info:")],
+    "Reference": [st.Page("views/then_now.py", title="2021 and today", icon=":material/history:"),
+                  st.Page("views/limits.py", title="Data & limits", icon=":material/info:")],
 })
 
 with st.sidebar:
