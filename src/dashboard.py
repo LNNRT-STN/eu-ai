@@ -12,7 +12,8 @@ nav = st.navigation({
     "": [st.Page("views/briefing.py", title="Briefing", icon=":material/space_dashboard:", default=True)],
     "Act": [st.Page("views/rivers.py", title="Rivers", icon=":material/water:"),
             st.Page("views/risk_areas.py", title="Risk areas", icon=":material/map:"),
-            st.Page("views/shelters.py", title="Shelters", icon=":material/home_health:")],
+            st.Page("views/shelters.py", title="Shelters", icon=":material/home_health:"),
+            st.Page("views/shelter_plan.py", title="Shelter plan", icon=":material/route:")],
     "Reference": [st.Page("views/then_now.py", title="2021 and today", icon=":material/history:"),
                   st.Page("views/limits.py", title="Data & limits", icon=":material/info:")],
 })
