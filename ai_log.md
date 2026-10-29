@@ -170,6 +170,12 @@ re-runnable script in `notebooks/` (`pipeline.py`, `osm_extract.py`, `dq_report.
 - How we checked it: played the replay in the browser: 12 Jul 16:32 → 13 Jul 07:32 in 15 s at 1 h/s; Rochefort turned to warn at 13 Jul 07:00 and its fire-brigade briefing reached the outbox. Replay timeline (agent): first evacuate Rochefort 13 Jul 18:00, Vesdre 20:00, Ahr 23:00. Cost ~$0.0002 per report.
 - Result: stated on the page: levels never drop in a replay (highest flow so far); daily flows interpolated, times ±12 h; a model replay, not official warnings.
 
+## 30. ML write-up: terrain retry and impact forecast (docs/ML.md sections 8-10)
+- Prompt/intent: write up the terrain risk-model result from outputs/data/ml2_eval.json, and check the confidence intervals before claiming any gain.
+- AI output (short): sections 8 (terrain retry), 9 (flow-to-impact curve per town) and 10 (AI-sheet update) in docs/ML.md.
+- How we checked it: every number read from ml2_eval.json; the 95 % bootstrap intervals changed the planned verdict. The pooled gain over EFAS is real (+0.042, +0.024 to +0.058), but on the Ahr it is not (+0.008, −0.025 to +0.046), so the planned line "terrain helps on the Ahr" was dropped. The per-area names were looked up in ml2_cells.csv (Euskirchen/Erft, Schleiden/Urft); the thresholds were checked in the code (0.25 / 0.6).
+- Result: pitch line "adding terrain improves the pooled ranking, 0.75 → 0.79"; no claim about beating EFAS on the Ahr or the Meuse. Alert levels still come from the flow curve, not from the model.
+
 ## Data-cleaning decisions (from *Python for Data Analysis* ch.7)
 - Duplicates: overlapping flood shapes dissolved; OSM objects merged per campus; a building in two study areas counted once.
 - Missing values: analysed and reported per area (book p.210), not silently filled.
