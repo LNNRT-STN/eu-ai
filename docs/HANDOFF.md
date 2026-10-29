@@ -41,28 +41,28 @@ Engine: `src/live.py` (SQLite: clock, town status, events, check-ins, closures, 
 - An independent reviewer agent (fresh context) before the pitch caught 4 misleading numbers: repeat this.
 
 ## Open work (priority order)
-1. **2021 timeline facts** (agent stopped by the spend limit): create `docs/TIMELINE_2021.md` with sourced times:
-   EFAS notifications (10-14 Jul), DWD warnings, Kreis Ahrweiler evacuation order (evening 14 Jul), Altenahr gauge
-   failure, Vesdre/Eupen dam, Erftstadt-Blessem, Limburg NL. Then show "2021: order at X" next to the replay's
-   "tool: evacuate at Y" in the Crisis room. Caveat to state: the replay uses GloFAS hindcast flows (hindsight), not the
-   forecasts available at the time, and times are ±12 h.
-2. **ML write-up** (agent stopped): append to `docs/ML.md` from `outputs/data/ml2_eval.json`. Results: LightGBM +
-   terrain (height above valley floor, slope) pooled AUC 0.792 vs old 0.752 vs EFAS-100 0.750 (AP 0.096 / 0.082 /
-   0.071); Ahr 0.900 vs 0.874 vs 0.891; Meuse no gain (0.789 vs EFAS 0.798). Verdict to write: terrain helps in steep
-   valleys (Ahr), not on the Meuse; ship as a second layer only where it beats EFAS, or not at all. Check
-   `auc_gain_*_95ci` before claiming a gain.
-3. Region map polish: MapLibre credit box covers the bottom on wide screens (`src/regionmap/frontend/index.html`,
-   `attributionControl` → `{compact: true}` already; also collapse it after load). Pin labels show tiny
-   `people_expected` values for big towns (e.g. Maastricht 9): consider showing residents instead.
-4. Report recipients read oddly ("Fire brigade, Province of Liège (governor)"): fix naming in `src/live.py` (CALL
-   dict copy).
-5. Demo script for 5 minutes (storyboard in `docs/VISUAL_IDEAS.md`): Crisis room replay at 3-6 h/s → click the Ahr →
-   Town plan / 3D → resident lookup (Ahrstraße 2, Ahrbrück) → crew list fills, close a road → Long term. Practise
-   once with Reset. Pre-warm: open each page once (tiles, outlook cache `src/out/outlook_last.pkl`).
-6. Final independent review (fresh agent) + `/impeccable` distill on the Crisis room at 390 px.
+Done in the session of 29 Oct, evening (commits e467c0e..bb57e32, ai_log entries 30-33):
+- 2021 timeline: `docs/TIMELINE_2021.md` (sourced; Ahr and Vesdre times re-checked in the primary documents); a
+  "July 2021: when the orders came" table under the Crisis room map (replay mode), with the tool column taken **by day of
+  the daily flow**. The hourly replay's earlier times come from interpolation and are not claimed.
+- ML write-up: `docs/ML.md` §8-10. The pooled gain is real (+0.042 over EFAS, CI above zero); on the Ahr the gain over
+  EFAS is not significant, and on the Meuse there is none.
+- Districts per town (`live.district`): fixed Maastricht, Weilerswist, Inden, Blankenheim, and the Belgian Limburg and
+  Luxembourg towns. The fire brigade in reports is named by town.
+- Region map: pins show people in the 2021 water; the credits are collapsed. Crisis counters wrap on phones.
+- Resident lookup: full addresses work. "Ahrstraße 28" used to give a false all-clear.
+- `CHALLENGE_BRIEF.md` §2a-2c: the present-state task, the 2021 failures the tool fixes, and each question → page → evidence.
+- `docs/DEMO.md`: the 5-minute script, the pre-warm list and the "do not say" list.
+
+Still open:
+1. Act on the independent review (fresh agent, run 29 Oct evening); see the latest ai_log entry.
+2. Practise `docs/DEMO.md` once with Reset; time it.
+3. Timeline gaps: no clock time for the Steinbachtalsperre order or the Blessem breach. EFAS issue times may be UTC
+   (the JRC captions disagree with its tables).
+4. Mobile: region-map labels run past the map edge at 390 px.
 
 ## Known limits to say out loud
-Satellite 2021 counts are a floor; Vesdre is modelled (EFAS 500-year); residents are an order of magnitude; shelters
+Replay times are hindsight and shown by day; satellite 2021 counts are a floor; Vesdre is modelled (EFAS 500-year); residents are an order of magnitude; shelters
 are OSM candidates; road times are minimums; replay statuses never drop and are ±12 h; simulated check-ins are
 labelled; roles/districts and the warning texts are team summaries to verify (native speaker for FR/DE/NL);
 Sentinel-2 cloudless is CC BY-NC-SA (non-commercial); Urft (Schleiden/Kall) GloFAS point is weak (peak 44 m³/s).
