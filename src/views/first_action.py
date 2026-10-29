@@ -162,7 +162,8 @@ with right:
             "<span>to evacuate, in this order · click one to see the nearest dry sites</span></div></div>")
     cols = ["order", "name", "town", "pct"] if dist else ["order", "name", "district", "pct"]
     shown1 = sites if all1 else sites.head(3)
-    h_list = 36 * len(shown1) + 38
+    # never taller than the space left beside the map: longer lists scroll inside the table
+    h_list = min(36 * len(shown1) + 38, MAP_H - 190 - (150 if site is not None else 0))
     st.dataframe(shown1.assign(pct=shown1.share_of_site_flooded * 100)[cols], key=k1, on_select="rerun",
                  selection_mode="single-row", hide_index=True, height=h_list, column_config={
                      "order": st.column_config.NumberColumn("#", width=40),
@@ -275,7 +276,7 @@ with right:
                 f"<div><b>{len(town_schools)}</b><span>schools in the water</span></div></div></div>")
         shown2 = cands if all2 else cands.head(3)
         st.dataframe(shown2[["label", "cat", "capacity_central"]], key=k2, on_select="rerun", selection_mode="single-row",
-                     hide_index=True, height=36 * len(shown2) + 40,
+                     hide_index=True, height=min(36 * len(shown2) + 40, MAP_H - 230),
                      column_config={"label": st.column_config.TextColumn("Candidate shelter in the town", width="medium"),
                                     "cat": st.column_config.TextColumn("Type", width="small"),
                                     "capacity_central": st.column_config.NumberColumn("Rough capacity", format="localized",
