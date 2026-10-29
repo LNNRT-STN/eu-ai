@@ -10,8 +10,9 @@ st.set_page_config(page_title="Flood desk", page_icon=":material/water:", layout
 core.style()
 
 nav = st.navigation({
-    "": [st.Page("views/first_action.py", title="First action", icon=":material/flag:", default=True)],
-    "For analysts": [st.Page("views/briefing.py", title="Briefing", icon=":material/space_dashboard:"),
+    "": [st.Page("views/evacuate.py", title="Evacuation plan", icon=":material/directions_run:", default=True)],
+    "More": [st.Page("views/first_action.py", title="All towns and care sites", icon=":material/flag:"),
+                     st.Page("views/briefing.py", title="Briefing", icon=":material/space_dashboard:"),
                      st.Page("views/rivers.py", title="Rivers", icon=":material/water:"),
                      st.Page("views/risk_areas.py", title="Risk areas", icon=":material/map:"),
                      st.Page("views/shelters.py", title="Shelters", icon=":material/home_health:")],

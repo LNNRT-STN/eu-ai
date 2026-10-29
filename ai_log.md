@@ -81,6 +81,13 @@ re-runnable script in `notebooks/` (`pipeline.py`, `osm_extract.py`, `dq_report.
 - Result: floor volume chosen. Method spread kept as uncertainty (Ahr 19.8-21.0k, within 6%; Venlo 206-525).
 - Decision taken by the team: one method for every number on the dashboard; the teammate's design and pages kept.
 
+## 15. Evacuation plan page: residents to dry shelters, and the 2021 governance gaps
+- Prompt/intent: make the tool about one job (get residents to a dry shelter) and answer the 2021 failures the team listed: unclear roles across levels, warnings that did not become instructions, missing local plans and drills, people who could not leave alone.
+- AI output (short): new default page `src/views/evacuate.py`: pick a town, see walk / transport / no place (from `app_towns.csv`), the dry shelters each town's people go to with places and towns sharing them (from `bus_plan.csv`), care sites to evacuate first, who gives the order per country, a draft warning message (local language + English) and a printable town plan with a pre-season drill list.
+- How we checked it: walk + transport + no place equals residents per town (Kall 79 + 1,600 + 100 ~ 1,780; `bus_plan` people per town match `bus_covered`, mean difference 1 person). Rendered at 1440 px and 390 px with Playwright (Bad Neuenahr-Ahrweiler, Pepinster modelled, Kall with a gap); download opened and read. Roles and translations checked by a second AI pass against official sources (centredecrise.be, wetten.overheid.nl, hochwasser.rlp.de, hochwasserportal.nrw, bbk.bund.de): three role rows and several translation phrases corrected.
+- Result: roles and message are labelled as team text, not data, to be confirmed against the municipality's emergency plan and by a native speaker. Distances are straight lines from the town centre. No age or income data: stated on the page.
+- Decision taken by the team: Evacuation plan is the home page; earlier pages under "More".
+
 ## Data-cleaning decisions (from *Python for Data Analysis* ch.7)
 - Duplicates: overlapping flood shapes dissolved; OSM objects merged per campus; a building in two study areas counted once.
 - Missing values: analysed and reported per area (book p.210), not silently filled.
