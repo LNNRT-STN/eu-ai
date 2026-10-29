@@ -14,16 +14,20 @@ Claude API key: `.env`, variable `claude_api` (gitignored, server-side only). Lo
 `housing_age.csv` / `buildings_3d.parquet`). OSM extracts: `cache/osm/`.
 
 ## What exists (menu by role)
-| Page | File | State |
-|---|---|---|
-| Crisis room (start) | `src/views/crisis.py` | Scenario player in sidebar (replay July 2021 / live forecast, play, reset, speed); 6 live counters; live 3D region map (`src/regionmap/`, updates in place, click a town → flies in, link to its plan); latest events; outbox of Claude-drafted reports. **Last edit (region map swap) rendered OK, committed in this handoff.** |
-| Town plan | `src/views/evacuate.py` | First action line, verdict, 3D valley hero (`src/map3d.py`), walk / bus / no place, shelter map + list, call order, tabs: getting out (road sim), evacuate first (single-storey, care sites), who gives the order, warning message (local language + EN), plan & drill + HTML download |
-| 3D view | `src/views/view3d.py` | MapLibre terrain + Sentinel-2, layer toggles, July 2021 day slider |
-| Long term | `src/views/long_term.py` | Gaps → measures → cited budgets (`docs/BUDGETS.md`, `docs/INFRA_2021.md`) |
-| Do I need to leave? | `src/views/resident.py` | Street + number → leave / where / how / minutes, spare beds nearby; not found → offer a bed |
-| Offer a bed | `src/views/host.py` | Solidarity register, no personal data |
-| Check-ins and door-knock list | `src/views/checkin.py` | Resident check-in + crew list on `live`, refreshes during replay, crews close/reopen roads |
-| More / Reference | older analyst pages | keep `core.style()`; not polished |
+Launch screen (`src/dashboard.py`): pick a role; `?role=manager|brigade|resident|policy` skips it. Each role sees only
+its pages (sidebar rows with coloured icons; hover shows a ? and what the page is for). 6 pages, 14 before.
+
+| Page | Host file (absorbed modules, `render()`) | Roles | Content |
+|---|---|---|---|
+| Crisis room | `crisis.py` (`first_action`, `briefing`, `rivers`) | manager, brigade, policy | Tabs: Live board (drill clock, coming box, counters, region map, events, briefing drafts, 2021 orders) · Priorities (care sites by district, shelter gap per town and per municipality, CSV) · Rivers (live 30-day outlook; drill heatmap) |
+| Town plan | `evacuate.py` (`shelters`, `view3d`) | manager, brigade, policy | First action, verdict, 3 numbers, plan map; tabs Getting out · Evacuate first · Shelters · Orders & message · 3D; region call order folded |
+| Door-knock list | `checkin.py` (crew only) | manager, brigade | Needs help / no news first, map, roads closed |
+| Am I at risk? | `resident.py` (`host`, resident form from `checkin`) | resident | Tabs Do I need to leave? · I have left / I need help · Offer a bed |
+| 2021, today, next | `then_now.py` (`risk_areas`, `long_term`) | policy, manager | Verdict over three layers; tabs What the water covered · What changed since · What to fix |
+| Data & limits | `limits.py` | all but resident | Sources, limits, checks, model match; detail behind ? |
+
+Explanations sit behind `?` (help=) or one "How this is computed" expander per tab; visible lines are only the caveats
+that change a number's meaning (modelled, simulated, candidate, drill).
 
 Engine: `src/live.py` (SQLite: clock, town status, events, check-ins, closures, outbox), `src/reports.py`
 (claude-haiku-5-5, template fallback, ~$0.0002/report), `src/build_ml2.py` (`impact_forecast`, `load_town_gauge`),

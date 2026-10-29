@@ -211,6 +211,12 @@ re-runnable script in `notebooks/` (`pipeline.py`, `osm_extract.py`, `dq_report.
 - How we checked it: 10 engine tests; a scratch-DB server rendered at 1440 and 390 px at the start (Fri 30 Oct 06:00: 0 towns, "60 more towns reach evacuate, the first on Saturday 31 October", 9 + 49 + 2 = 60) and at 13 Jul 12:00 (Sat 31 Oct: 9 at evacuate, 51 to come). No page errors.
 - Result: every drill screen says it is a drill on the July 2021 flows, computed afterwards, and not an official warning. The flows remain hindsight; the box never calls them a forecast.
 
+## 36. Role launch and 14 pages regrouped into 6 (progressive disclosure)
+- Prompt/intent: the owner asked for an Impeccable review of every page: progressive disclosure, distil without losing functions, colour-coded icons, ? tooltips for explanations in the sidebar and inside pages; then "15 pages is way too much" and "let users on launch first select who they are".
+- AI output (short): the lead built the role launch screen and the role-filtered sidebar (dashboard.py). Four agents, each owning separate files, folded the old pages into tabs: Crisis room (+ First action, Briefing, Rivers), Town plan (+ Shelters, 3D), Am I at risk? (+ Offer a bed, resident check-in), 2021, today, next (+ Risk areas, Long term); Data & limits compacted. Method notes moved behind ? or a "How this is computed" expander.
+- How we checked it: each agent rendered its tabs at 1440 and 390 px; the lead re-rendered every role and page on a fresh server with a scratch DB (no page errors, no tracebacks), played the drill across a tab switch (clock 06:00 → 18:02, no errors), and ran the 10 engine tests.
+- Result: folded as duplicates: Briefing's forecast-step control (now the drill clock) and its facts strip (same numbers as Priorities and the counters); the check-in "Reached by alert" column (always "no feed yet", now explained in the method note). No figure changed; one hard-coded figure (Ahr 7,202) is now read from the data and gives the same value.
+
 ## Data-cleaning decisions (from *Python for Data Analysis* ch.7)
 - Duplicates: overlapping flood shapes dissolved; OSM objects merged per campus; a building in two study areas counted once.
 - Missing values: analysed and reported per area (book p.210), not silently filled.

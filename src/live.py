@@ -11,6 +11,7 @@ level holds its highest value reached so far in the replay (water that has risen
 """
 import hashlib
 import json
+import os
 import sqlite3
 import threading
 import time
@@ -22,7 +23,7 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
-DB = ROOT / "data" / "live.db"
+DB = Path(os.environ.get("LIVE_DB", ROOT / "data" / "live.db"))  # LIVE_DB: a scratch copy for test servers
 CSV = ROOT / "data" / "checkins.csv"
 DATA = ROOT / "outputs" / "data"
 REFS = Path(__file__).resolve().parent / "out" / "meuse" / "gauge_refs.json"
