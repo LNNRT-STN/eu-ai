@@ -4,6 +4,7 @@ the town's 10 km shelter plan (bus_plan.csv), nearest shelter that takes people 
 straight-line distance × 1.3 (road / straight ratio measured 1.2-1.4 in notebooks/evac_sim.py). Spare beds offered
 by residents: data/host_offers.csv. Nothing typed here is stored."""
 import math
+import re
 
 import pandas as pd
 import pydeck as pdk
@@ -39,12 +40,26 @@ towns = anna.load()[1]
 
 st.title("Do I need to leave?")
 st.caption("Type your street. Nothing you type is stored.")
-q = st.text_input("Street", placeholder="e.g. Ahrstraße, Rue de la Station, Hauptstraße", label_visibility="collapsed")
-hit = H[H.street.str.contains(q.strip(), case=False, regex=False)] if len(q.strip()) >= 3 else H.iloc[0:0]
+q = st.text_input("Street", placeholder="e.g. Ahrstraße 28, Rue de la Station, Hauptstraße", label_visibility="collapsed")
+
+
+def norm(x):
+    return x.casefold().replace("ß", "ss").strip()
+
+
+# People type whole addresses ("Ahrstraße 28, Ahrbrück", "5 rue de la Station"): split off the number and the town,
+# or the street would not match and the page would wrongly say the home was dry.
+n = re.search(r"\b\d+\s?[a-zA-Z]?\b", q)
+typed_num = n.group().replace(" ", "").lower() if n else None
+parts = [p.strip() for p in ((q[:n.start()] + q[n.end():]) if n else q).split(",") if p.strip()]
+q_street, q_town = (parts[0] if parts else ""), (parts[1] if len(parts) > 1 else "")
+hit = H[H.street.map(norm).str.contains(norm(q_street), regex=False)] if len(q_street) >= 3 else H.iloc[0:0]
+if q_town and hit.town.map(norm).str.contains(norm(q_town), regex=False).any():
+    hit = hit[hit.town.map(norm).str.contains(norm(q_town), regex=False)]
 streets = (hit.drop_duplicates(["street", "town"]).assign(k=lambda d: d.street + ", " + d.town)
            .sort_values("k").k.tolist()[:30])
 
-if len(q.strip()) >= 3 and not streets:
+if len(q_street) >= 3 and not streets:
     st.success("**Your street is not among the homes in the 2021 water.** You are most likely outside it. Stay alert "
                "to official warnings, and if your home stayed dry, you can offer a bed to a neighbour who has to "
                "leave.", icon=":material/check_circle:")
@@ -57,11 +72,22 @@ if not streets:
     st.stop()
 
 c1, c2 = st.columns([3, 1])
-street_town = c1.selectbox("Your street", streets, label_visibility="collapsed")
+# with a typed number, start on the first street-and-town that has that number
+has = [i for i, k in enumerate(streets) if typed_num and
+       (hit[(hit.street + ", " + hit.town) == k].housenumber.str.replace(" ", "").str.lower() == typed_num).any()]
+street_town = c1.selectbox("Your street", streets, index=has[0] if has else 0, label_visibility="collapsed")
 street, town = street_town.rsplit(", ", 1)
 nums = H[(H.street == street) & (H.town == town)]
 nums = nums.assign(o=nums.housenumber.str.extract(r"(\d+)", expand=False).fillna(0).astype(int)).sort_values(["o", "housenumber"])
-num = c2.selectbox("Number", nums.housenumber.tolist(), label_visibility="collapsed")
+numbers = nums.housenumber.tolist()
+known = [i for i, x in enumerate(numbers) if typed_num and str(x).replace(" ", "").lower() == typed_num]
+num = c2.selectbox("Number", numbers, index=known[0] if known else (None if typed_num else 0),
+                   placeholder="Number", label_visibility="collapsed")
+if num is None:
+    st.info(f"Number {typed_num} is not among the homes in the 2021 water on {street}. Pick your number if it is "
+            "listed; if not, your home was most likely outside the water. Follow official warnings.",
+            icon=":material/info:")
+    st.stop()
 h = nums[nums.housenumber == num].iloc[0]
 modelled = h.area in anna.MODELLED
 

@@ -182,6 +182,12 @@ re-runnable script in `notebooks/` (`pipeline.py`, `osm_extract.py`, `dq_report.
 - How we checked it: listing towns per study area showed wrong districts, not only odd wording: Maastricht under the Province of Liège; Weilerswist (Kreis Euskirchen), Inden (Kreis Düren), Blankenheim (Kreis Euskirchen); Durbuy, Hotton, La Roche, Rendeux (Province of Luxembourg); Kinrooi, Maasmechelen, Riemst (Belgian Limburg); Hamoir (Liège). The 10 engine tests pass (one updated, one added); the Town plan rendered at 1440 px with no errors. Failure lines in the brief without a source yet are marked [VERIFY].
 - Result: districts are still a team summary to check locally; the 2021 failure claims wait for docs/TIMELINE_2021.md.
 
+## 32. Resident lookup gave a false all-clear for full addresses
+- Prompt/intent: check the demo address on screen before writing the demo script.
+- AI output (short): the lookup now splits the house number (before or after the street) and an optional ", town", matches ß/ss, preselects the street-and-town that has the typed number, and asks to pick when the number is not in the list.
+- How we checked it: typing "Ahrstraße 28" (a single-storey home in the water in Ahrbrück) showed "Your street is not among the homes in the 2021 water". The field only matched street names, so any typed number made a flooded home look dry. Re-rendered with five inputs: "Ahrstraße 28", "Ahrstrasse 28, Ahrbrück", "3 Route de la Filature" (Pepinster, modelled; it first opened Olne, so the default street choice was fixed), "Ahrstraße 999" (asks to pick) and "Hauptstraße" (street only).
+- Result: no false all-clear for a full address. The demo address is "Ahrstraße 28, Ahrbrück"; the handoff's "Ahrstraße 2" is not in the data.
+
 ## Data-cleaning decisions (from *Python for Data Analysis* ch.7)
 - Duplicates: overlapping flood shapes dissolved; OSM objects merged per campus; a building in two study areas counted once.
 - Missing values: analysed and reported per area (book p.210), not silently filled.
