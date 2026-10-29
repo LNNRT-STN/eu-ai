@@ -41,6 +41,22 @@ for k, v in {"tab": TABS[0], "site": None, "dfilt": "All", "town": None, "shelte
 
 st.html("""<style>
 .block-container{padding-top:3.75rem;padding-bottom:0}   /* clear the 56 px top bar shown when the sidebar is closed */
+/* fill the window at any size: both columns are as tall as the screen; the list takes whatever room is left */
+:root{--h:calc(100vh - 4.75rem)}
+.block-container{max-width:none;padding-left:1.75rem;padding-right:1.75rem}
+[data-testid=stColumn]:has(.st-key-panel)>[data-testid=stVerticalBlock]{height:var(--h)}
+[data-testid=stLayoutWrapper]:has(>.st-key-panel){flex:1 1 0;min-height:0}
+.st-key-panel{height:100%!important;max-height:none!important}
+[data-testid=stLayoutWrapper]:has(>.st-key-list){flex:1 1 0;min-height:0}
+.st-key-list{height:100%!important;max-height:none!important;overflow-y:auto!important}
+[class*=st-key-map-],[class*=st-key-map-] [data-testid=stFullScreenFrame],[class*=st-key-map-] [data-testid=stDeckGlJsonChart],
+[class*=st-key-map-] [data-testid=stDeckGlJsonChart]>div:not([data-testid]){height:var(--h)!important}
+@media (max-width:1250px){[data-testid=stColumn]:has(.st-key-panel){flex:0 0 47%!important;width:47%!important;min-width:0}
+  [data-testid=stColumn]:has([class*=st-key-map-]){flex:1 1 0!important;width:auto!important;min-width:0}
+  .act h2{font-size:1rem}.lr .m i{width:2.2rem}.lr .tx b{font-size:.85rem}.block-container{padding-left:1rem;padding-right:1rem}}
+@media (max-width:900px){:root{--h:auto}[class*=st-key-map-],[class*=st-key-map-] [data-testid=stFullScreenFrame],
+  [class*=st-key-map-] [data-testid=stDeckGlJsonChart],[class*=st-key-map-] [data-testid=stDeckGlJsonChart]>div:not([data-testid]){height:60vh!important}
+  .st-key-list{height:60vh!important}}
 .kpi{display:grid;grid-template-columns:repeat(3,1fr);background:#fff;border-radius:12px}
 .kpi div{padding:.6rem .8rem;position:relative}
 .kpi div+div::before{content:"";position:absolute;left:0;top:.7rem;bottom:.7rem;border-left:1px solid #e3e3e8}
@@ -76,6 +92,7 @@ st.html("""<style>
 .lr .m{display:flex;align-items:center;gap:.45rem;font-size:.8rem;color:#1d1d1f;font-variant-numeric:tabular-nums;font-weight:600}
 .lr .m i{display:flex;width:3.2rem;height:.38rem;border-radius:3px;background:#ececf0;overflow:hidden}
 .lr .m u{display:block;height:100%}
+.lr .m .v{min-width:2.9rem;text-align:right;font-weight:600}
 .lr.sub{grid-template-columns:1fr auto;padding:.4rem .6rem .4rem 2.75rem}
 .lr.sub .tx b{font-weight:500;font-size:.85rem}
 .det{margin:.1rem .6rem .5rem 2.75rem;padding:.5rem 0 .2rem;border-top:1px solid #e3e3e8;font-size:.82rem;color:#1d1d1f}
@@ -238,7 +255,7 @@ if tab == "Evacuate":
                 on = site is not None and r.name == site["name"]
                 pct = r.share_of_site_flooded * 100
                 row(f"ev-{r.order}", f"<span class='no'>{r.order}</span><div class='tx'><b>{r.name}</b><span>{r.type}"
-                    f" · {r.town}</span></div><div class='m'>{bar([(pct, core.EVACUATE)])}{pct:.0f}%</div>",
+                    f" · {r.town}</span></div><div class='m'>{bar([(pct, core.EVACUATE)])}<b class='v'>{pct:.0f}%</b></div>",
                     on, "site", r.name)
                 if on:
                     near = "".join(f"<div class='r'><span>{d.to_name} · dry {d.type}</span><b>{d.km:.1f} km</b></div>"
@@ -285,7 +302,7 @@ elif tab == "Shelters":
                 split = [(100 * r.covered / r.people, core.SHELTER), (100 * r.no_shelter / r.people, core.EVACUATE)]
                 row(f"tw-{i}", f"<span class='no' style='background:#e5e5ea;color:#3a3a3c'>{i + 1}</span><div class='tx'><b>"
                     f"{r.short}</b><span>{about(r.people)} in the water · {about(r.covered)} have a place</span></div>"
-                    f"<div class='m'>{bar(split)}{about(r.no_shelter)}</div>", on, "town", r.short, "shelter")
+                    f"<div class='m'>{bar(split)}<b class='v'>{about(r.no_shelter)}</b></div>", on, "town", r.short, "shelter")
                 if on:
                     st.html(f"<div class='det'><div class='h'>{len(cands)} candidate shelters · {len(tsch)} schools in "
                             "the water</div></div>")
