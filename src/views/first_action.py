@@ -56,6 +56,40 @@ st.html("""<style>
 .ctx b{color:#1d1d1f;font-variant-numeric:tabular-nums}
 .cap{font-size:.8rem;font-weight:600;color:#1d1d1f;margin:0 .2rem}
 .card{background:#fff;border-radius:12px;padding:.85rem 1rem}
+/* list rows: a whole row is one click target (an invisible button stretched over it) */
+.st-key-list{background:#fff;border-radius:12px;padding:.3rem;gap:0!important}
+[class*=st-key-r-]{position:relative;gap:0}
+[class*=st-key-r-] [data-testid=stElementContainer]:has(button){position:absolute;inset:0;margin:0;width:100%!important;height:100%}
+[class*=st-key-r-] [data-testid=stButton],[class*=st-key-r-] [data-testid=stButton]>*{width:100%;height:100%}
+[class*=st-key-r-] [data-testid=stButton] button{width:100%;height:100%;opacity:0;cursor:pointer}
+.lr{display:grid;grid-template-columns:1.5rem 1fr auto;gap:.65rem;align-items:center;padding:.55rem .6rem;border-radius:9px;
+  transition:background .12s}
+[class*=st-key-r-]:hover .lr{background:#f5f5f7}
+.lr.on{background:rgba(0,113,227,.09)!important}
+.lr .no{width:1.5rem;height:1.5rem;border-radius:50%;display:grid;place-items:center;font-size:.75rem;font-weight:700;
+  color:#fff;background:#d70015;font-variant-numeric:tabular-nums}
+.lr .dot{width:.6rem;height:.6rem;border-radius:50%;justify-self:center}
+.lr .tx{min-width:0}
+.lr .tx b{display:block;font-size:.9rem;font-weight:600;color:#1d1d1f;line-height:1.3}
+.lr .tx span{display:block;font-size:.78rem;color:#6e6e73;line-height:1.35;margin-top:.05rem}
+.lr .tx span.clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.lr .m{display:flex;align-items:center;gap:.45rem;font-size:.8rem;color:#1d1d1f;font-variant-numeric:tabular-nums;font-weight:600}
+.lr .m i{display:flex;width:3.2rem;height:.38rem;border-radius:3px;background:#ececf0;overflow:hidden}
+.lr .m u{display:block;height:100%}
+.lr.sub{grid-template-columns:1fr auto;padding:.4rem .6rem .4rem 2.75rem}
+.lr.sub .tx b{font-weight:500;font-size:.85rem}
+.det{margin:.1rem .6rem .5rem 2.75rem;padding:.5rem 0 .2rem;border-top:1px solid #e3e3e8;font-size:.82rem;color:#1d1d1f}
+.det .h{font-size:.72rem;font-weight:600;color:#6e6e73;text-transform:uppercase;letter-spacing:.03em;margin:.15rem 0 .25rem}
+.det .r{display:flex;justify-content:space-between;gap:.8rem;padding:.22rem 0}
+.det .r span{color:#6e6e73}
+.det .r b{font-variant-numeric:tabular-nums;font-weight:600;text-align:right}
+.det p{margin:.2rem 0;line-height:1.45;font-size:.82rem}
+.det a{color:#0071e3;text-decoration:none}
+/* tabs as text with an underline */
+.st-key-tabs [data-testid=stButtonGroup]>div{gap:0;border-bottom:1px solid #e3e3e8}
+.st-key-tabs button{background:transparent!important;border:none!important;border-radius:0!important;box-shadow:none!important;
+  border-bottom:2px solid transparent!important;color:#6e6e73!important;font-weight:500;padding:.35rem .2rem .5rem!important}
+.st-key-tabs button[aria-checked=true]{border-bottom-color:#1d1d1f!important;color:#1d1d1f!important;font-weight:650}
 .card h3{font-size:1.05rem;font-weight:650;margin:0;padding:0;color:#1d1d1f;line-height:1.3}
 .card .sub{color:#6e6e73;font-size:.85rem;margin-top:.15rem}
 .card .r{display:flex;justify-content:space-between;gap:.8rem;padding:.45rem 0;border-top:1px solid #e3e3e8;font-size:.9rem}
@@ -115,6 +149,24 @@ def bump():
     S.v += 1                                           # new widget keys: clears stale table and map selections
 
 
+def toggle(state, value, *clear):
+    S[state] = None if S[state] == value else value
+    for c in clear:
+        S[c] = None
+    bump()
+
+
+def row(key, html, on, state, value, *clear, sub=False):
+    """One list row; clicking it opens it (or closes it if it is open). Details are drawn right after it."""
+    with st.container(key=f"r-{key}"):
+        st.html(f"<div class='lr{' sub' if sub else ''}{' on' if on else ''}'>{html}</div>")
+        st.button("Open", key=f"b-{key}", on_click=toggle, args=(state, value, *clear))
+
+
+def bar(parts):
+    return "<i>" + "".join(f"<u style='width:{w:.0f}%;background:{c}'></u>" for w, c in parts) + "</i>"
+
+
 def go_district():
     S.site, S.tab = None, "Evacuate"
     bump()
@@ -165,7 +217,9 @@ with left:
                  format_func=lambda d: f"All {len(care)}" if d == "All" else f"{d} {by_d[d]}")
     st.html(f"<p class='ctx'><b>{about(obs['no_shelter'])}</b> with no shelter place within 1.5 km "
             f"· <b>{sum(m[4] == DONE for m in MEASURES)} of {len(MEASURES)}</b> measures since 2021 done</p>")
-    tab = st.segmented_control("View", TABS, key="tab", required=True, label_visibility="collapsed", width="stretch")
+    with st.container(key="tabs"):
+        tab = st.segmented_control("View", TABS, key="tab", required=True, label_visibility="collapsed",
+                                   width="stretch")
     panel = st.container(height=PANEL_H, border=False, key="panel")
 
 layers, view, picks = list(WATER), None, {}
@@ -176,26 +230,22 @@ if tab == "Evacuate":
         dist = S.dfilt or "All"
         sites = evac_order(care if dist == "All" else care[care.district == dist])
         site = sites[sites.name == S.site].iloc[0] if S.site in set(sites.name) else None
-        if site is None:
-            st.html(f"<p class='cap'>Evacuate in this order{'' if dist == 'All' else ' · ' + dist + ' district'}</p>")
-            k = f"sites-{dist}-{S.v}"
-            st.dataframe(sites.assign(pct=sites.share_of_site_flooded * 100)[["order", "name", "town", "pct"]], key=k,
-                         on_select=partial(on_table, k, sites, "site", "name"), selection_mode="single-row",
-                         hide_index=True, height=min(36 * len(sites) + 38, PANEL_H - 72), column_config={
-                             "order": st.column_config.NumberColumn("#", width=34),
-                             "name": st.column_config.TextColumn("Site", width=178),
-                             "town": st.column_config.TextColumn("Town", width=115),
-                             "pct": st.column_config.NumberColumn("Flooded", format="%d%%", width=80)})
-            st.html("<p class='note'>Order: most of the site under water first, hospitals before care homes.</p>")
-        else:
-            dest = recv[recv.from_name == site["name"]]
-            st.button("All sites", icon=":material/arrow_back:", type="tertiary", on_click=set_, args=("site", None))
-            near = "".join(f"<div class='r'><div>{r.to_name}<span>dry {r.type}</span></div><b>{r.km:.1f} km</b></div>"
-                           for r in dest.itertuples()) or "<p>No dry site of the same kind within 30 km.</p>"
-            st.html(f"<div class='card'><h3>{site.order}. {site['name']}</h3><div class='sub'>{site.type} · {site.town}"
-                    f" · {site.district} district · {site.share_of_site_flooded:.0%} of the site under water</div>"
-                    f"<p><b>Nearest dry sites of the same kind</b></p>{near}</div>")
-            st.html("<p class='note'>Free beds and residents are not in any dataset: confirm with each operator.</p>")
+        dest = recv[recv.from_name == site["name"]] if site is not None else recv.iloc[0:0]
+        st.html(f"<p class='cap'>Evacuate in this order{'' if dist == 'All' else ' · ' + dist + ' district'}"
+                "<span class='ctx'> · most flooded first, hospitals before care homes</span></p>")
+        with st.container(height=PANEL_H - 34, key="list", border=False):
+            for r in sites.itertuples():
+                on = site is not None and r.name == site["name"]
+                pct = r.share_of_site_flooded * 100
+                row(f"ev-{r.order}", f"<span class='no'>{r.order}</span><div class='tx'><b>{r.name}</b><span>{r.type}"
+                    f" · {r.town}</span></div><div class='m'>{bar([(pct, core.EVACUATE)])}{pct:.0f}%</div>",
+                    on, "site", r.name)
+                if on:
+                    near = "".join(f"<div class='r'><span>{d.to_name} · dry {d.type}</span><b>{d.km:.1f} km</b></div>"
+                                   for d in dest.itertuples()) or "<p>No dry site of the same kind within 30 km.</p>"
+                    st.html(f"<div class='det'><div class='h'>Nearest dry sites of the same kind</div>{near}"
+                            "<p style='color:#8e8e93'>Free beds are not in any dataset: confirm with each operator.</p>"
+                            "</div>")
     pts = sites.assign(tname=[f"{o}. {n}" for o, n in zip(sites.order, sites.name)],
                        tinfo=[f"{t} · {w} · {s:.0%} under water" for t, w, s in
                               zip(sites.type, sites.town, sites.share_of_site_flooded)])
@@ -220,38 +270,33 @@ elif tab == "Shelters":
     sel = tl[tl.short == S.town].iloc[0] if S.town in set(tl.short) else None
     ring_key = ("<span><i style='border:2px solid #d70015;border-radius:50%;background:none'></i>"
                 "School in the 2021 water</span>")
+    if sel is not None:
+        cands = (shel[(shel.town == sel["name"]) & (shel.area == sel.area)]
+                 .sort_values("capacity_central", ascending=False).reset_index(drop=True))
+        cands["label"] = [n if isinstance(n, str) else f"Unnamed {c}" for n, c in zip(cands.name, cands.cat)]
+        tsch = schools[(schools.town == sel["name"]) & (schools.area == sel.area)]
+        stop = cands[cands.label == S.shelter].iloc[0] if S.shelter in set(cands.label) else None
     with panel:
-        if sel is None:
-            k = f"towns-{S.v}"
-            rnd = lambda c: tl[c].map(lambda n: round(n, -2) if n >= 1000 else round(n, -1) if n >= 100 else round(n))
-            st.dataframe(tl.assign(people=rnd("people"), covered=rnd("covered"), no_shelter=rnd("no_shelter"))
-                         [["short", "people", "covered", "no_shelter"]], key=k, on_select=partial(on_table, k, tl, "town", "short"), selection_mode="single-row", hide_index=True,
-                         height=PANEL_H - 38, column_config={
-                             "short": st.column_config.TextColumn("Town", width=176),
-                             "people": st.column_config.NumberColumn("In water", format="localized", width=76),
-                             "covered": st.column_config.NumberColumn("Has place", format="localized", width=76),
-                             "no_shelter": st.column_config.NumberColumn("No place", format="localized", width=76)})
-            st.html("<p class='note'>Residents in the 2021 water. * modelled: the satellite missed the Vesdre.</p>")
-        else:
-            cands = (shel[(shel.town == sel["name"]) & (shel.area == sel.area)]
-                     .sort_values("capacity_central", ascending=False).reset_index(drop=True))
-            cands["label"] = [n if isinstance(n, str) else f"Unnamed {c}" for n, c in zip(cands.name, cands.cat)]
-            tsch = schools[(schools.town == sel["name"]) & (schools.area == sel.area)]
-            stop = cands[cands.label == S.shelter].iloc[0] if S.shelter in set(cands.label) else None
-            st.button("All towns", icon=":material/arrow_back:", type="tertiary", on_click=set_, args=("town", None))
-            st.html(f"<div class='card'><h3>{sel.label}</h3><div class='sub'>residents in the 2021 water</div>"
-                    f"<div class='trio'><div><b style='color:{core.SHELTER}'>{about(sel.covered)}</b><span>have a "
-                    f"shelter place within 1.5 km</span></div><div><b style='color:{core.EVACUATE}'>"
-                    f"{about(sel.no_shelter)}</b><span>have none</span></div><div><b>{len(tsch)}</b><span>schools in "
-                    "the water</span></div></div></div>")
-            k = f"cands-{sel.short}-{S.v}"
-            st.dataframe(cands[["label", "cat", "capacity_central"]], key=k, on_select=partial(on_table, k, cands, "shelter", "label"), selection_mode="single-row", hide_index=True,
-                         height=min(36 * len(cands) + 38, PANEL_H - 258), column_config={
-                             "label": st.column_config.TextColumn("Candidate shelter", width=234),
-                             "cat": st.column_config.TextColumn("Type", width=105),
-                             "capacity_central": st.column_config.NumberColumn("Places ≈", format="localized",
-                                                                               width=80)})
-            st.html("<p class='note'>Candidates, not official shelters. Places ≈ floor area × 50 % ÷ 4 m² per person.</p>")
+        st.html("<p class='cap'>Residents in the 2021 water<span class='ctx'> · shelter place within 1.5 km: "
+                f"<b style='color:{core.SHELTER}'>has one</b> / <b style='color:{core.EVACUATE}'>none</b></span></p>")
+        with st.container(height=PANEL_H - 34, key="list", border=False):
+            for i, r in enumerate(tl.itertuples()):
+                on = sel is not None and r.short == sel.short
+                split = [(100 * r.covered / r.people, core.SHELTER), (100 * r.no_shelter / r.people, core.EVACUATE)]
+                row(f"tw-{i}", f"<span class='no' style='background:#e5e5ea;color:#3a3a3c'>{i + 1}</span><div class='tx'><b>"
+                    f"{r.short}</b><span>{about(r.people)} in the water · {about(r.covered)} have a place</span></div>"
+                    f"<div class='m'>{bar(split)}{about(r.no_shelter)}</div>", on, "town", r.short, "shelter")
+                if on:
+                    st.html(f"<div class='det'><div class='h'>{len(cands)} candidate shelters · {len(tsch)} schools in "
+                            "the water</div></div>")
+                    for j, c in enumerate(cands.head(8).itertuples()):
+                        row(f"cs-{j}", f"<div class='tx'><b>{c.label}</b><span>{c.cat}</span></div>"
+                            f"<div class='m'>≈ {about(c.capacity_central)}</div>",
+                            stop is not None and c.label == stop.label, "shelter", c.label, sub=True)
+                    more = f"Top 8 of {len(cands)} by size. " if len(cands) > 8 else ""
+                    st.html("<div class='det' style='border:0;color:#8e8e93'>Candidates, not official shelters. "
+                            f"{more}Places ≈ floor area × 50 % ÷ 4 m².</div>")
+            st.html("<p class='note' style='margin:.4rem .6rem'>* modelled: the satellite missed the Vesdre.</p>")
     if sel is None:
         circ = tl.assign(r=lambda d: d.no_shelter ** .5 * .3 + 5, tname=tl.label,
                          tinfo=[f"{fmt(n)} of {fmt(p)} residents with no shelter place within 1.5 km"
@@ -311,30 +356,24 @@ else:
                                                if c) + "</div><div class='slab'>"
                 + "".join(f"<span><i style='background:{COL[s]}'></i><b>{c}</b>{s.lower()}</span>"
                           for s, c in n.items()) + "</div>")
-        if pick is None:
-            if com:
-                st.button(f"All measures · showing {com}", icon=":material/arrow_back:", type="tertiary", on_click=set_,
-                          args=("commune", None))
-            k = f"meas-{com}-{S.v}"
-            st.dataframe(rows_[["status", "where", "what"]], key=k, on_select=partial(on_table, k, rows_, "meas", "id"),
-                         selection_mode="single-row", hide_index=True,
-                         height=min(36 * len(rows_) + 38, PANEL_H - 92 - (44 if com else 0)), column_config={
-                             "status": st.column_config.TextColumn("Status", width=88),
-                             "where": st.column_config.TextColumn("Where", width=70),
-                             "what": st.column_config.TextColumn("What changed", width=250)})
-            st.html("<p class='note'>Desk research, Oct 2026, status as sources report it. Click a commune on the map."
-                    "</p>")
-        else:
-            st.button("Back to the list", icon=":material/arrow_back:", type="tertiary", on_click=set_,
-                      args=("meas", None))
-            where = ", ".join(anna.town(c) for c in pick.communes) or ("Region-wide: not on the map" if pick.area
-                                                                       else "Not on the map")
-            src = (f"<div class='r'><div>Source</div><a href='{pick.url}' target='_blank'>{pick.src}</a></div>"
-                   if pick.url else "<div class='r'><div>Not found in the public record<span>absence in our search is "
-                   "not proof nothing was done</span></div></div>")
-            st.html(f"<div class='card'><h3>{(pick.area + ' · ') if pick.area else ''}{pick.theme}</h3><div class='sub'>"
-                    f"{where}</div><p>{pick.what}</p><div class='r'><div>Status<span>as the source reports it</span></div>"
-                    f"<b>{pick.status}</b></div>{src}</div>")
+        if com:
+            st.button(f"All measures · showing {com}", icon=":material/arrow_back:", type="tertiary", on_click=set_,
+                      args=("commune", None))
+        with st.container(height=PANEL_H - 52 - (40 if com else 0), key="list", border=False):
+            for r in rows_.itertuples():
+                on = pick is not None and r.id == pick.id
+                row(f"ms-{r.id}", f"<span class='dot' style='background:{COL[r.status]}'></span><div class='tx'><b>"
+                    f"{r.where or 'Not found'} · {r.theme}</b><span{'' if on else ' class=clamp'}>{r.what}</span></div>"
+                    f"<div class='m' style='font-weight:500;color:#6e6e73'>{r.status}</div>", on, "meas", r.id)
+                if on:
+                    where = ", ".join(anna.town(c) for c in r.communes) or ("Region-wide: not on the map" if r.area
+                                                                            else "Not on the map")
+                    src = (f"<div class='r'><span>Source</span><a href='{r.url}' target='_blank'>{r.src}</a></div>"
+                           if r.url else "<p style='color:#8e8e93'>Absence in our search is not proof nothing was "
+                           "done.</p>")
+                    st.html(f"<div class='det'><div class='r'><span>Where</span><b>{where}</b></div>"
+                            f"<div class='r'><span>Status, as the source reports it</span><b>{r.status}</b></div>{src}"
+                            "</div>")
     per = M.explode("places").dropna(subset=["places"]).groupby("places")
     cdf = pd.DataFrame({"tname": list(per.groups)}).assign(
         lon=lambda d: d.tname.map(place.lon), lat=lambda d: d.tname.map(place.lat),
@@ -367,5 +406,8 @@ with right:
     st.pydeck_chart(pdk.Deck(layers=layers, initial_view_state=view, map_style=pdk.map_styles.CARTO_LIGHT,
                              views=[pdk.View(type="MapView", controller={"scrollZoom": False})], tooltip=TIP),
                     height=MAP_H, key=mk, on_select=partial(on_map, mk, picks), selection_mode="single-object")
+    # the script rides in the legend's own block (no extra element under the map): it scrolls the open row into
+    # view, since a map click can open a row that is off screen
     st.html("<div class='mapkey'><div class='legend'>" + key_html + core.swatch("rgba(0,113,227,.55)", "2021 water")
-            + "</div></div>")
+            + f"</div></div><script>/*{S.v}*/setTimeout(()=>document.querySelector('.lr.on')?.scrollIntoView("
+            "{block:'nearest',behavior:'smooth'}),400)</script>", unsafe_allow_javascript=True)
