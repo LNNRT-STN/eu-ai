@@ -25,7 +25,7 @@ schools = C[C.type == "school"]
 DISTRICT = {"ahr": "Ahrweiler", "erftstadt": "Rhein-Erft", "schleiden": "Euskirchen"}
 care = C[C.type.isin(["hospital", "care home"])].assign(district=lambda d: d.area.map(DISTRICT))
 by_d = care.district.value_counts()
-MAP_H = 610
+MAP_H = 600
 PANEL_H = MAP_H - 132        # map height minus the number strip and the tabs above the panel: both columns end level
 TABS = ["Evacuate", "Shelters", "Since 2021"]
 TIP = {"html": "<b>{tname}</b><br/>{tinfo}",
@@ -40,7 +40,7 @@ for k, v in {"tab": TABS[0], "site": None, "dfilt": "All", "town": None, "shelte
     S.setdefault(k, v)
 
 st.html("""<style>
-.block-container{padding-top:3.75rem;padding-bottom:.5rem}   /* clear the 56 px top bar shown when the sidebar is closed */
+.block-container{padding-top:3.75rem;padding-bottom:0}   /* clear the 56 px top bar shown when the sidebar is closed */
 .kpi{display:grid;grid-template-columns:repeat(3,1fr);background:#fff;border-radius:12px}
 .kpi div{padding:.6rem .8rem;position:relative}
 .kpi div+div::before{content:"";position:absolute;left:0;top:.7rem;bottom:.7rem;border-left:1px solid #e3e3e8}
@@ -67,7 +67,7 @@ st.html("""<style>
 .mapkey{position:relative;z-index:5;margin:-3.2rem 0 0 .6rem;width:fit-content;max-width:calc(100% - 1.2rem);background:rgba(255,255,255,.94);border-radius:8px;padding:.1rem .7rem .4rem;box-shadow:0 1px 4px rgba(0,0,0,.12)}
 .mapkey .legend{margin:.3rem 0 0}
 .note{color:#8e8e93;font-size:.74rem;line-height:1.4;margin:.35rem .1rem 0}
-[class*=st-key-panel]{background:transparent}
+[class*=st-key-panel]{background:transparent;overflow:hidden!important}  /* only the lists scroll, never the panel */
 </style>""")
 
 
