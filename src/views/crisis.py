@@ -102,7 +102,7 @@ def board():
                         icon=":material/arrow_forward:")
             b.button("Whole region", on_click=lambda: st.session_state.update(cr_sel=None), width="stretch")
         st.caption(":red[●] Evacuate · :orange[●] Warn · :yellow[●] Watch · :blue[●] Normal · dashed edge: modelled "
-                   "(Vesdre) · barrier: road closed. Click a town to fly in. " + ATTRIBUTION)
+                   "(Vesdre) · barrier: road closed · number: people in the 2021 water. Click a town to fly in. " + ATTRIBUTION)
     with right:
         ev = live.events().tail(8).iloc[::-1]
         st.markdown("**Latest**")

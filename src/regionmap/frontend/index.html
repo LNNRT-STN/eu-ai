@@ -88,6 +88,8 @@ function create(d) {
   map.addControl(new maplibregl.ScaleControl({unit: "metric"}), "bottom-right");
   const far = () => document.body.classList.toggle("far", map.getZoom() < 11);
   map.on("zoomend", far); far();
+  // Credits are printed under the map; keep the compact "i" button closed so it does not cover the bottom edge.
+  map.on("load", () => document.querySelectorAll(".maplibregl-ctrl-attrib").forEach(e => e.classList.remove("maplibregl-compact-show")));
   map.on("moveend", declutter);
   map.on("click", "flood-fill", e => {
     const m = e.features[0] && e.features[0].properties.municipality;
@@ -126,8 +128,8 @@ function updatePins(towns, sel) {
       pins.set(k, p);
     }
     const st = STATUS[t.status] ? t.status : "none";
-    const n = fmt(t.people_expected != null ? t.people_expected : t.people);
-    const html = '<i></i><b><em>' + WORD[st] + "</em>" + esc(t.label || k) + (n != null ? " · " + n + " people" : "") + "</b>";
+    const n = fmt(t.people);  // stable 2021 count; "expected now" changes every tick and sits in the tooltip
+    const html = '<i></i><b><em>' + WORD[st] + "</em>" + esc(t.label || k) + (n != null ? " · " + n + " in 2021" : "") + "</b>";
     if (p.html !== html) { p.el.innerHTML = html; p.html = html; }  // touch the DOM only on change
     // classList, not className: MapLibre keeps its own marker classes on this element
     p.el.classList.add("pin");
