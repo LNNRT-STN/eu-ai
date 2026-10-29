@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anna's First Action</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+  :root {
+    --bg:#f4f3ef; --card:#fff; --ink:#1b1f24; --muted:#5d6670; --line:#dcdad4;
+    --flood:#3b82c4; --alert:#c8321f; --ok:#2f7d5b; --warn:#d98a1a; --soft:#fdebe7; --seg:#ebe9e3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:#14171a; --card:#1d2227; --ink:#eceae5; --muted:#9aa3ab; --line:#343b42;
+      --flood:#5aa2e0; --alert:#ff6b55; --ok:#5bc297; --warn:#f0a93b; --soft:#3a1f1a; --seg:#2a3036;
+    }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  .demo { background:var(--warn); color:#1b1f24; font-size:13px; font-weight:600; text-align:center; padding:5px 12px; }
+  .wrap { max-width:1180px; margin:0 auto; padding:0 16px 48px; }
+  .eyebrow { margin:22px 0 4px; font-size:12px; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); }
+  h1 { margin:0 0 16px; font-size:clamp(1.5rem,3.4vw,2.2rem); line-height:1.18; max-width:30ch; }
+  button { font:inherit; color:inherit; }
+  .action { display:flex; gap:16px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+    background:var(--soft); border-left:6px solid var(--alert); border-radius:8px; padding:14px 18px; margin-bottom:14px; }
+  .action .label { font-size:12px; font-weight:700; color:var(--alert); text-transform:uppercase; letter-spacing:.07em; }
+  .action .text { font-size:clamp(1.1rem,2.3vw,1.45rem); font-weight:650; line-height:1.3; }
+  .action .why { color:var(--muted); font-size:14px; margin-top:2px; }
+  .btn { background:var(--ink); color:var(--bg); border:0; border-radius:6px; padding:9px 14px; font-weight:600; cursor:pointer; white-space:nowrap; }
+  .btn.ghost { background:transparent; color:var(--ink); border:1px solid var(--line); }
+  .kpis { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:14px; }
+  .kpi { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:12px 16px; text-align:left; cursor:pointer; }
+  .kpi:hover,.kpi[aria-expanded="true"] { border-color:var(--ink); }
+  .kpi .num { font-size:clamp(2rem,5vw,3.1rem); font-weight:760; line-height:1.05; font-variant-numeric:tabular-nums; }
+  .kpi.bad .num { color:var(--alert); }
+  .kpi .cap { font-size:14px; color:var(--muted); }
+  .kpi .range { font-size:12px; color:var(--muted); margin-top:3px; }
+  .prov { display:none; background:var(--card); border:1px dashed var(--muted); border-radius:8px; padding:10px 16px; margin:-4px 0 14px; font-size:14px; }
+  .prov.open { display:block; }
+  .prov b { display:inline-block; min-width:105px; color:var(--muted); font-weight:600; }
+  .main { display:grid; grid-template-columns:1.35fr 1fr; gap:14px; align-items:start; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:12px 14px; }
+  .card h2 { margin:0 0 8px; font-size:14px; }
+  .card + .card { margin-top:14px; }
+  #map { height:470px; border-radius:6px; border:1px solid var(--line); z-index:0; }
+  .bar2 { display:flex; gap:8px; flex-wrap:wrap; margin:0 0 8px; }
+  .seg { display:inline-flex; background:var(--seg); border-radius:6px; padding:2px; }
+  .seg button { background:transparent; border:0; border-radius:5px; padding:5px 10px; font-size:13px; cursor:pointer; color:var(--muted); }
+  .seg button.on { background:var(--card); color:var(--ink); font-weight:650; box-shadow:0 1px 2px rgba(0,0,0,.15); }
+  .ctrls { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:12px; }
+  .ctrl label { display:flex; justify-content:space-between; font-size:13px; color:var(--muted); }
+  .ctrl label b { color:var(--ink); font-variant-numeric:tabular-nums; }
+  .ctrl input[type=range] { width:100%; accent-color:var(--alert); }
+  .layers { display:flex; gap:14px; flex-wrap:wrap; font-size:13px; margin-top:10px; color:var(--muted); }
+  .layers label { cursor:pointer; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th { text-align:left; font-weight:600; color:var(--muted); font-size:12px; padding:3px 6px; border-bottom:1px solid var(--line); }
+  th.r,td.r { text-align:right; font-variant-numeric:tabular-nums; }
+  td { padding:7px 6px; border-bottom:1px solid var(--line); }
+  tr.row { cursor:pointer; } tr.row:hover td,tr.row.sel td { background:var(--soft); }
+  .stack { display:flex; height:7px; border-radius:4px; overflow:hidden; background:var(--line); margin-top:4px; }
+  .stack i { display:block; height:100%; }
+  .flag { color:var(--alert); font-weight:700; font-size:12px; }
+  .sub { font-size:13px; color:var(--muted); }
+  .two { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:8px 0; }
+  .stat { background:var(--seg); border-radius:6px; padding:8px 10px; }
+  .stat b { display:block; font-size:1.35rem; line-height:1.15; font-variant-numeric:tabular-nums; }
+  .stat span { font-size:12px; color:var(--muted); }
+  ul.list { list-style:none; margin:6px 0 0; padding:0; font-size:13px; }
+  ul.list li { display:flex; justify-content:space-between; gap:8px; padding:4px 0; border-bottom:1px solid var(--line); }
+  .pill { font-size:11px; font-weight:700; padding:1px 8px; border-radius:10px; white-space:nowrap; color:#fff; height:fit-content; }
+  .p-ok { background:var(--ok); } .p-bad { background:var(--alert); } .p-mid { background:var(--warn); color:#1b1f24; } .p-off { background:var(--muted); }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+  .chip { border:1px solid var(--line); background:var(--card); border-radius:16px; padding:3px 10px; font-size:12.5px; cursor:pointer; display:flex; gap:6px; align-items:center; }
+  .chip.on { border-color:var(--ink); }
+  .dot { width:9px; height:9px; border-radius:50%; }
+  .evid { font-size:13px; background:var(--seg); border-radius:6px; padding:8px 10px; margin-top:8px; display:none; }
+  .evid.open { display:block; }
+  .foot { margin-top:18px; font-size:12px; color:var(--muted); }
+  .foot ul { margin:4px 0 0; padding-left:18px; }
+  dialog { max-width:560px; width:92vw; border:1px solid var(--line); border-radius:10px; background:var(--card); color:var(--ink); padding:18px; }
+  dialog::backdrop { background:rgba(0,0,0,.45); }
+  dialog pre { white-space:pre-wrap; font:inherit; background:var(--seg); border-radius:6px; padding:12px; margin:8px 0 12px; }
+  .pin { width:22px; height:22px; border-radius:50%; background:var(--alert); color:#fff; font:700 13px/22px system-ui; text-align:center; border:2px solid #fff; box-shadow:0 0 0 1px var(--alert); }
+  @media (max-width:860px) { .main{grid-template-columns:1fr;} .kpis{grid-template-columns:1fr;} .ctrls{grid-template-columns:1fr;} #map{height:380px;} }
+  @media print { .demo,.action .btn,.ctrls,.layers,#map,.bar2 { display:none; } }
+</style>
+</head>
+<body>
+<div class="demo">DEMO DATA: all numbers, buildings and flood shapes are invented to show how the final tool will behave. Controls are live.</div>
+<div class="wrap">
+  <p class="eyebrow">Cross-border flood warning · for Anna, crisis coordinator</p>
+  <h1 id="bigidea"></h1>
+
+  <div class="action">
+    <div>
+      <div class="label">First action</div>
+      <div class="text" id="aText"></div>
+      <div class="why" id="aWhy"></div>
+    </div>
+    <button class="btn" id="briefTop">Call card for the mayor</button>
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+  <div class="prov" id="prov"></div>
+
+  <div class="main">
+    <div>
+      <div class="card">
+        <div class="bar2">
+          <div class="seg" id="scen"></div>
+          <div class="seg" id="focus"></div>
+        </div>
+        <div id="map"></div>
+        <div class="layers">
+          <label><input type="checkbox" id="lFlood" checked> Flood zone</label>
+          <label><input type="checkbox" id="lShel" checked> Shelters</label>
+          <label><input type="checkbox" id="lFlag" checked> Hospitals / schools in zone</label>
+          <label><input type="checkbox" id="lReach" checked> Walking reach</label>
+        </div>
+        <div class="ctrls">
+          <div class="ctrl"><label>Walking distance <b id="vWalk"></b></label><input type="range" id="walk" min="0.5" max="3" step="0.1" value="1.5"></div>
+          <div class="ctrl"><label>Space per person <b id="vM2"></b></label><input type="range" id="m2" min="2" max="8" step="0.5" value="4"></div>
+          <div class="ctrl"><label>Usable floor share <b id="vUse"></b></label><input type="range" id="use" min="0.3" max="0.9" step="0.05" value="0.6"></div>
+        </div>
+        <div class="sub" style="margin-top:8px">These three are assumptions, not facts. Move them: the numbers above move with them. <button class="btn ghost" id="reset" style="padding:2px 10px;margin-left:6px">Reset</button></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2>Most exposed first <span class="sub">(click a row)</span></h2>
+        <table>
+          <thead><tr><th>Area</th><th class="r">Exposed</th><th class="r">No shelter</th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+        <div class="sub" style="margin-top:6px">
+          <span class="dot" style="display:inline-block;background:var(--ok)"></span> sheltered
+          <span class="dot" style="display:inline-block;background:var(--warn);margin-left:8px"></span> shelter too full
+          <span class="dot" style="display:inline-block;background:var(--alert);margin-left:8px"></span> out of reach
+        </div>
+      </div>
+      <div class="card" id="detail"></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <b>Limits stated up front</b>
+    <ul>
+      <li>Population grid (GHS-POP) is modelled; 2025 values are a projection.</li>
+      <li>Building data is from 2020 and misses rebuilding or demolition since.</li>
+      <li>Shelter capacity and "within reach" are assumptions; the ranges above come from varying them.</li>
+      <li>The 2021 flood extent is an observed snapshot. 100-year and 500-year views are modelled scenarios.</li>
+    </ul>
+  </div>
+</div>
+
+<dialog id="dlg">
+  <b id="dlgTitle"></b>
+  <pre id="dlgText"></pre>
+  <button class="btn" id="copy">Copy</button>
+  <button class="btn ghost" id="print">Print</button>
+  <button class="btn ghost" id="close">Close</button>
+</dialog>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+/* ======================= DEMO DATA (replace with notebook outputs) ======================= */
+const SCENARIOS = [
+  { id:"s100",  name:"100-year flood",       f:0.7,  note:"modelled" },
+  { id:"s2021", name:"2021 flood returns",   f:1.0,  note:"observed extent" },
+  { id:"s500",  name:"500-year flood",       f:1.4,  note:"modelled" }
+];
+const CATS = ["Flood defences","Rebuilt / land use","Evacuation & shelter plans","Critical infrastructure","Risk awareness"];
+// areas: c=[lat,lng], R=km spread of residents, base=exposed residents in the 2021 flood zone
+// shelters: [name, type, dx km, dy km, footprint m2, floors, floodsAt (scenario factor at which it floods)]
+// flagged:  [name, type, dx, dy, floodsAt]; q2: confidence per CATS (v verified, p partly, u unverified)
+const AREAS = [
+  { name:"Pepinster", c:[50.568,5.806], R:1.2, base:6900, region:"vesdre",
+    shelters:[["Sports hall A","sports hall",1.8,0.6,7200,1,9],["School B","school",-0.4,0.9,3600,2,1.2],["Community centre C","community",0.2,-0.3,2800,1,0.9]],
+    flagged:[["School D","school",0.1,0.2,0.9]], q2:"upuuu" },
+  { name:"Verviers", c:[50.589,5.865], R:2.0, base:9800, region:"vesdre",
+    shelters:[["Sports hall E","sports hall",2.6,1.0,12000,1,9],["School F","school",1.2,-1.4,8800,3,1.3],["School G","school",-1.5,0.5,10000,3,9],["Sports hall H","sports hall",3.4,-0.5,8000,1,9]],
+    flagged:[["Hospital A","hospital",0.3,0.1,1.0],["School I","school",-0.4,-0.2,0.9]], q2:"ppvpv" },
+  { name:"Chaudfontaine", c:[50.585,5.645], R:1.0, base:3600, region:"vesdre",
+    shelters:[["Sports complex J","sports hall",0.7,1.5,6000,1,9],["School K","school",-0.6,-0.4,2400,2,0.95]],
+    flagged:[["Care home B","care home",0.1,0.1,1.3]], q2:"ppupu" },
+  { name:"Liège", c:[50.633,5.567], R:3.0, base:14200, region:"vesdre",
+    shelters:[["Arena L","sports hall",-1.8,-1.2,36000,1,9],["Congress hall M","civic",1.0,0.5,24000,2,1.1],["University hall N","school",2.0,-1.8,28000,2,9],["School O","school",0.4,0.3,11200,3,0.9],["Sports hall P","sports hall",1.8,2.2,16000,1,9]],
+    flagged:[["Hospital C","hospital",0.5,-0.3,1.0],["School Q","school",-0.2,0.6,0.9],["Care home R","care home",0.9,0.2,1.2]], q2:"vpppv" },
+  { name:"Ahrweiler", c:[50.543,7.087], R:2.2, base:6100, region:"ahr",
+    shelters:[["Sports hall S","sports hall",1.5,1.8,8800,1,9],["School T","school",-0.6,0.8,12000,2,1.0],["Civic house U","civic",3.2,-1.0,3200,1,9]],
+    flagged:[["Care home V","care home",0.2,0.2,0.9],["School W","school",-0.3,-0.2,1.0]], q2:"uppuv" },
+  { name:"Valkenburg", c:[50.865,5.832], R:1.5, base:4200, region:"limburg",
+    shelters:[["Sports hall X","sports hall",2.4,0.4,9600,1,9],["Town hall Y","civic",0.3,0.2,2400,1,0.9],["School Z","school",-1.4,1.6,4400,2,9]],
+    flagged:[["Care home C","care home",0.1,-0.1,1.1]], q2:"pvpuv" }
+];
+const RIVERS = [ // fake corridors; halfwidth km at the 2021 extent
+  { pts:[[50.610,5.93],[50.589,5.865],[50.568,5.806],[50.575,5.72],[50.585,5.645]], hw:0.45 },
+  { pts:[[50.56,5.50],[50.600,5.545],[50.633,5.567],[50.675,5.62]], hw:0.5 },
+  { pts:[[50.515,6.99],[50.54,7.05],[50.543,7.087],[50.55,7.17]], hw:0.4 },
+  { pts:[[50.89,5.78],[50.865,5.832],[50.84,5.87]], hw:0.3 }
+];
+const FOCUS = { "Vesdre & Meuse":[[50.52,5.45],[50.70,5.97]], "Ahr":[[50.49,6.95],[50.58,7.2]], "Dutch Limburg":[[50.82,5.75],[50.91,5.90]], "All":[[50.45,5.4],[50.95,7.25]] };
+const EVIDENCE = { // demo wording per confidence; the real tool shows title, URL, date
+  v:"Verified in an official source (demo: report title, URL, date go here).",
+  p:"Partly verified: announced or in progress, completion not confirmed.",
+  u:"Could not verify in the public record. Treated as no improvement."
+};
+const MIN_FOOTPRINT = 400;
+const DEFAULTS = { walk:1.5, m2:4, use:0.6 };
+
+/* ======================= MODEL (pure functions) ======================= */
+const KM = 111.2;
+const toLL = (c, dx, dy) => [c[0] + dy/KM, c[1] + dx/(KM*Math.cos(c[0]*Math.PI/180))];
+function overlapFrac(R, w, d) { // share of a residents-disc (radius R) within walking radius w of a point at distance d
+  if (d >= R + w) return 0;
+  if (d <= Math.abs(R - w)) return w >= R ? 1 : (w*w)/(R*R);
+  const A = R*R*Math.acos((d*d + R*R - w*w)/(2*d*R)) + w*w*Math.acos((d*d + w*w - R*R)/(2*d*w))
+          - 0.5*Math.sqrt((-d+R+w)*(d+R-w)*(d-R+w)*(d+R+w));
+  return A/(Math.PI*R*R);
+}
+function evalArea(a, f, p) {
+  const exposed = Math.round(a.base*Math.pow(f,1.5));
+  let reach = 0, capSum = 0;
+  const shelters = a.shelters.map(s => {
+    const [name,type,dx,dy,fp,fl,fAt] = s, d = Math.hypot(dx,dy);
+    const inZone = f >= fAt, big = fp >= MIN_FOOTPRINT;
+    const cap = (!inZone && big) ? Math.round(fp*fl*p.use/p.m2) : 0;
+    const frac = (!inZone && big) ? overlapFrac(a.R, p.walk, d) : 0;
+    reach += frac; if (frac > 0) capSum += cap;
+    return { name, type, dx, dy, cap, inZone, frac, d, status: inZone ? "zone" : frac > 0 ? "ok" : "far" };
+  });
+  reach = Math.min(1, reach);
+  const inReach = exposed*reach, covered = Math.min(inReach, capSum);
+  return { ...a, exposed, shelters, covered: Math.round(covered), noReach: Math.round(exposed - inReach),
+    noCap: Math.round(inReach - covered), uncovered: Math.round(exposed - covered),
+    flagged: a.flagged.map(x => ({ name:x[0], type:x[1], dx:x[2], dy:x[3], inZone: f >= x[4] })) };
+}
+const evalAll = (f, p) => AREAS.map(a => evalArea(a, f, p));
+const sum = (rs, k) => rs.reduce((t, r) => t + r[k], 0);
+function range(f, p) { // pessimistic / optimistic assumptions
+  const lo = evalAll(f, { walk:p.walk*0.7, m2:p.m2*1.5, use:p.use*0.8 });
+  const hi = evalAll(f, { walk:p.walk*1.3, m2:p.m2*0.75, use:Math.min(1, p.use*1.15) });
+  return { uncLo:sum(hi,"uncovered"), uncHi:sum(lo,"uncovered") }; // optimistic gives fewer uncovered
+}
+
+/* ======================= STATE + HELPERS ======================= */
+const $ = id => document.getElementById(id);
+const fmt = n => n.toLocaleString("en-GB");
+const r100 = n => Math.round(n/100)*100;
+const state = { scen:"s2021", focus:"Vesdre & Meuse", sel:null, walk:DEFAULTS.walk, m2:DEFAULTS.m2, use:DEFAULTS.use, kpi:null, evid:null };
+const scen = () => SCENARIOS.find(s => s.id === state.scen);
+const params = () => ({ walk:state.walk, m2:state.m2, use:state.use });
+const share = r => r.uncovered / r.exposed;
+const colorFor = s => s > 0.5 ? "#c8321f" : s > 0.2 ? "#d98a1a" : "#2f7d5b";
+const CONF = { v:["verified","var(--ok)"], p:["partly verified","var(--warn)"], u:["unverified","var(--alert)"] };
+
+/* ======================= MAP ======================= */
+const map = L.map("map", { zoomControl:true, scrollWheelZoom:false });
+const dark = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches;
+L.tileLayer(`https://{s}.basemaps.cartocdn.com/${dark ? "dark_all" : "light_all"}/{z}/{x}/{y}{r}.png`,
+  { attribution:'&copy; OpenStreetMap contributors &copy; CARTO', maxZoom:17 }).addTo(map);
+const G = { flood:L.layerGroup().addTo(map), reach:L.layerGroup().addTo(map), shel:L.layerGroup().addTo(map),
+            flag:L.layerGroup().addTo(map), area:L.layerGroup().addTo(map) };
+
+function corridor(pts, hwKm) {
+  const left = [], right = [];
+  pts.forEach((p, i) => {
+    const a = pts[Math.max(0,i-1)], b = pts[Math.min(pts.length-1,i+1)];
+    const dx = (b[1]-a[1])*KM*Math.cos(p[0]*Math.PI/180), dy = (b[0]-a[0])*KM, n = Math.hypot(dx,dy) || 1;
+    const nx = -dy/n, ny = dx/n; // unit normal in km
+    left.push(toLL(p, nx*hwKm, ny*hwKm)); right.push(toLL(p, -nx*hwKm, -ny*hwKm));
+  });
+  return left.concat(right.reverse());
+}
+
+function drawMap(rs) {
+  Object.values(G).forEach(g => g.clearLayers());
+  const f = scen().f;
+  RIVERS.forEach(r => L.polygon(corridor(r.pts, r.hw*f), { color:"#3b82c4", weight:1, fillColor:"#3b82c4", fillOpacity:.38, interactive:false }).addTo(G.flood));
+  rs.forEach(r => {
+    const sel = r.name === state.sel;
+    L.circleMarker(r.c, { radius: 14 + Math.sqrt(r.exposed)/4.2, color: sel ? "#1b1f24" : "#fff", weight: sel ? 4 : 2,
+      fillColor: colorFor(share(r)), fillOpacity:.88 })
+      .bindTooltip(`<b>${r.name}</b><br>${fmt(r.exposed)} exposed · ${fmt(r.uncovered)} with no shelter`)
+      .on("click", () => select(r.name)).addTo(G.area);
+    r.shelters.forEach(s => {
+      const ll = toLL(r.c, s.dx, s.dy);
+      const col = s.status === "zone" ? "#6b7280" : s.status === "ok" ? "#2f7d5b" : "#d98a1a";
+      L.circleMarker(ll, { radius:6, color:"#fff", weight:1.5, fillColor:col, fillOpacity:1 })
+        .bindTooltip(`${s.name} (${s.type})<br>${s.status === "zone" ? "in flood zone: excluded" : s.status === "far" ? `${fmt(s.cap)} places, out of reach` : `${fmt(s.cap)} places`}`)
+        .addTo(G.shel);
+      if (r.name === state.sel && s.status === "ok")
+        L.circle(ll, { radius: state.walk*1000, color:"#2f7d5b", weight:1.2, dashArray:"5 5", fillColor:"#2f7d5b", fillOpacity:.07, interactive:false }).addTo(G.reach);
+    });
+    r.flagged.filter(x => x.inZone).forEach(x =>
+      L.marker(toLL(r.c, x.dx, x.dy), { icon:L.divIcon({ className:"", html:`<div class="pin">${x.type === "hospital" ? "+" : "!"}</div>`, iconSize:[22,22] }) })
+        .bindTooltip(`${x.name} (${x.type}) sits inside the flood zone`).addTo(G.flag));
+  });
+  toggleLayers();
+}
+function toggleLayers() {
+  [["lFlood","flood"],["lShel","shel"],["lFlag","flag"],["lReach","reach"]].forEach(([cb,g]) =>
+    $(cb).checked ? map.addLayer(G[g]) : map.removeLayer(G[g]));
+}
+
+/* ======================= RENDER ======================= */
+function render() {
+  const f = scen().f, p = params();
+  const rs = evalAll(f, p).sort((a,b) => b.uncovered - a.uncovered);
+  if (!state.sel || !rs.find(r => r.name === state.sel)) state.sel = rs[0].name;
+  const exposed = sum(rs,"exposed"), unc = sum(rs,"uncovered");
+  const flagged = rs.reduce((t,r) => t + r.flagged.filter(x => x.inZone).length, 0);
+  const rg = range(f, p), rgFlag = [ flaggedCount(f*0.95), flaggedCount(f*1.05) ];
+  const top = rs[0];
+
+  // Big idea
+  $("bigidea").textContent = `${scen().name}: about ${fmt(r100(unc))} of ${fmt(r100(exposed))} exposed residents would have no shelter in reach. ${top.name} is the biggest gap.`;
+
+  // First action: the cause decides the action
+  const reachDominant = top.noReach >= top.noCap;
+  const best = [...top.shelters].filter(s => s.status !== "zone").sort((a,b) => b.cap - a.cap)[0];
+  const unverified = top.q2.split("").filter(c => c === "u").length;
+  $("aText").textContent = reachDominant
+    ? `Open ${best.name} and arrange transport for about ${fmt(r100(top.uncovered))} residents of ${top.name} who are beyond walking reach.`
+    : `Open overflow capacity near ${top.name}: its shelters are about ${fmt(r100(top.uncovered))} places short.`;
+  const tf = top.flagged.filter(x => x.inZone).length;
+  $("aWhy").textContent = `Largest uncovered group of any area. ${tf ? `${tf} hospital/school/care-home site${tf>1?"s":""} sit in its flood zone. ` : ""}${unverified} of 5 protection measures there could not be verified.`;
+
+  // KPIs
+  const K = [
+    { id:"exp", num:r100(exposed), lo:r100(exposed*0.9), hi:r100(exposed*1.1), cap:"residents inside the flood zone", bad:false,
+      src:"Flood extent × GHS-POP grid (demo)", method:"Population of grid cells under the flood shape, area-weighted", cell:"notebooks/q1 (placeholder)" },
+    { id:"unc", num:r100(unc), lo:r100(rg.uncLo), hi:r100(rg.uncHi), cap:"of them have no shelter in reach or room", bad:true,
+      src:"Shelters outside the zone ≥ 400 m² (demo)", method:`Reach ${state.walk} km, ${state.m2} m²/person, ${Math.round(state.use*100)}% usable. Range = pessimistic vs optimistic assumptions`, cell:"notebooks/q3 (placeholder)" },
+    { id:"flg", num:flagged, lo:rgFlag[0], hi:rgFlag[1], cap:"hospitals, schools or care homes in the zone", bad:true,
+      src:"Facility lists × flood shape (demo)", method:"Facility inside the flood polygon for the chosen scenario", cell:"notebooks/q3 (placeholder)" }
+  ];
+  $("kpis").innerHTML = K.map(k => `<button class="kpi ${k.bad?"bad":""}" data-id="${k.id}" aria-expanded="${state.kpi===k.id}">
+    <div class="num">${fmt(k.num)}</div><div class="cap">${k.cap}</div>
+    <div class="range">range ${fmt(k.lo)}–${fmt(k.hi)} · click for source</div></button>`).join("");
+  document.querySelectorAll(".kpi").forEach(b => b.onclick = () => { state.kpi = state.kpi === b.dataset.id ? null : b.dataset.id; render(); });
+  const kk = K.find(k => k.id === state.kpi), pv = $("prov");
+  pv.classList.toggle("open", !!kk);
+  if (kk) pv.innerHTML = `<div><b>Source</b>${kk.src}</div><div><b>Method</b>${kk.method}</div><div><b>Uncertainty</b>${fmt(kk.lo)}–${fmt(kk.hi)}</div><div><b>Re-run</b>${kk.cell}</div>`;
+
+  // Ranking
+  $("rows").innerHTML = rs.map(r => {
+    const t = r.exposed || 1, fl = r.flagged.filter(x => x.inZone).length;
+    return `<tr class="row ${r.name===state.sel?"sel":""}" data-name="${r.name}">
+      <td>${r.name} ${fl ? `<span class="flag">⚑${fl}</span>` : ""}
+        <div class="stack"><i style="width:${r.covered/t*100}%;background:var(--ok)"></i><i style="width:${r.noCap/t*100}%;background:var(--warn)"></i><i style="width:${r.noReach/t*100}%;background:var(--alert)"></i></div></td>
+      <td class="r">${fmt(r.exposed)}</td><td class="r"><b>${fmt(r.uncovered)}</b></td></tr>`;
+  }).join("");
+  document.querySelectorAll(".row").forEach(tr => tr.onclick = () => select(tr.dataset.name));
+
+  renderDetail(rs.find(r => r.name === state.sel));
+  drawMap(rs);
+  state.last = { rs, exposed, unc, top };
+}
+function flaggedCount(f) { return AREAS.reduce((t,a) => t + a.flagged.filter(x => f >= x[4]).length, 0); }
+
+function renderDetail(r) {
+  const fl = r.flagged;
+  $("detail").innerHTML = `
+    <h2>${r.name}</h2>
+    <div class="two">
+      <div class="stat"><b>${fmt(r.exposed)}</b><span>exposed residents</span></div>
+      <div class="stat"><b style="color:var(--alert)">${fmt(r.uncovered)}</b><span>with no shelter</span></div>
+      <div class="stat"><b>${fmt(r.noReach)}</b><span>beyond walking reach</span></div>
+      <div class="stat"><b>${fmt(r.noCap)}</b><span>in reach, but shelter full</span></div>
+    </div>
+    <b style="font-size:13px">Shelter candidates</b>
+    <ul class="list">${r.shelters.map(s => `<li><span>${s.name} <span class="sub">${s.type}, ${s.d.toFixed(1)} km</span></span>
+      ${s.status==="zone" ? `<span class="pill p-off">in flood zone</span>` : s.status==="far" ? `<span class="pill p-mid">out of reach</span>` : `<span class="pill p-ok">${fmt(s.cap)} places</span>`}</li>`).join("")}</ul>
+    <b style="font-size:13px;display:block;margin-top:10px">Hospitals / schools / care homes</b>
+    <ul class="list">${fl.map(x => `<li><span>${x.name} <span class="sub">${x.type}</span></span>${x.inZone ? `<span class="pill p-bad">in flood zone</span>` : `<span class="pill p-ok">outside</span>`}</li>`).join("")}</ul>
+    <b style="font-size:13px;display:block;margin-top:10px">What changed since 2021?</b>
+    <div class="chips">${CATS.map((c,i) => { const k = r.q2[i];
+      return `<button class="chip ${state.evid===c?"on":""}" data-c="${c}"><span class="dot" style="background:${CONF[k][1]}"></span>${c}</button>`; }).join("")}</div>
+    <div class="evid ${state.evid ? "open":""}" id="evid">${state.evid ? (() => { const k = r.q2[CATS.indexOf(state.evid)];
+      return `<b>${state.evid}: ${CONF[k][0]}.</b> ${EVIDENCE[k]}`; })() : ""}</div>
+    <div class="sub" style="margin-top:6px">Dot colour: green verified · amber partly · red unverified</div>
+    <button class="btn" id="briefSel" style="margin-top:10px">Call card: ${r.name}</button>`;
+  document.querySelectorAll(".chip").forEach(c => c.onclick = () => { state.evid = state.evid === c.dataset.c ? null : c.dataset.c; renderDetail(r); });
+  $("briefSel").onclick = () => openBrief(r);
+}
+
+function select(name) {
+  state.sel = name; state.evid = null; render();
+  const a = AREAS.find(x => x.name === name); map.flyTo(a.c, 13, { duration:.8 });
+}
+
+/* ======================= CALL CARD ======================= */
+function openBrief(r) {
+  const fl = r.flagged.filter(x => x.inZone), s = scen();
+  const best = [...r.shelters].filter(x => x.status !== "zone").sort((a,b) => b.cap - a.cap)[0];
+  $("dlgTitle").textContent = `Call card: ${r.name}`;
+  $("dlgText").textContent =
+`SITUATION  ${s.name} (${s.note}). About ${fmt(r100(r.exposed))} residents of ${r.name} are in the flood zone.
+GAP        About ${fmt(r100(r.uncovered))} of them have no shelter: ${fmt(r100(r.noReach))} are out of walking reach, ${fmt(r100(r.noCap))} would find the shelter full.
+SITES AT RISK  ${fl.length ? fl.map(x => `${x.name} (${x.type})`).join(", ") : "none flagged"}.
+FIRST STEP ${r.noReach >= r.noCap ? `Open ${best.name} (${fmt(best.cap)} places) and arrange transport for those beyond reach.` : `Open overflow capacity: about ${fmt(r100(r.noCap))} places short.`}
+CAUTION    Demo data. Capacity and reach are assumptions (${state.walk} km, ${state.m2} m²/person). Building data is from 2020.`;
+  $("dlg").showModal();
+}
+$("briefTop").onclick = () => openBrief(evalArea(AREAS.find(a => a.name === state.last.top.name), scen().f, params()));
+$("close").onclick = () => $("dlg").close();
+$("print").onclick = () => window.print();
+$("copy").onclick = () => { try { navigator.clipboard.writeText($("dlgText").textContent); $("copy").textContent = "Copied"; setTimeout(() => $("copy").textContent = "Copy", 1200); } catch(e) {} };
+
+/* ======================= CONTROLS ======================= */
+function seg(el, items, get, set) {
+  el.innerHTML = items.map(i => `<button data-v="${i.v}" class="${get()===i.v?"on":""}">${i.t}</button>`).join("");
+  el.querySelectorAll("button").forEach(b => b.onclick = () => { set(b.dataset.v); seg(el, items, get, set); });
+}
+seg($("scen"), SCENARIOS.map(s => ({ v:s.id, t:s.name })), () => state.scen, v => { state.scen = v; render(); });
+seg($("focus"), Object.keys(FOCUS).map(k => ({ v:k, t:k })), () => state.focus, v => { state.focus = v; map.fitBounds(FOCUS[v]); });
+function bindRange(id, key, out, fmtv) {
+  const el = $(id), show = () => $(out).textContent = fmtv(+el.value);
+  el.oninput = () => { state[key] = +el.value; show(); render(); }; show();
+}
+bindRange("walk","walk","vWalk", v => `${v.toFixed(1)} km`);
+bindRange("m2","m2","vM2", v => `${v} m²`);
+bindRange("use","use","vUse", v => `${Math.round(v*100)}%`);
+$("reset").onclick = () => { Object.assign(state, DEFAULTS); ["walk","m2","use"].forEach(k => $(k).value = DEFAULTS[k]);
+  $("vWalk").textContent = "1.5 km"; $("vM2").textContent = "4 m²"; $("vUse").textContent = "60%"; render(); };
+["lFlood","lShel","lFlag","lReach"].forEach(id => $(id).onchange = toggleLayers);
+
+map.fitBounds(FOCUS[state.focus]);
+render();
+</script>
+</body>
+</html>
