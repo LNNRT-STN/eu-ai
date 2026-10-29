@@ -1,8 +1,8 @@
 """Crisis room: the whole region, live. A replay of July 2021 (or the live forecast) drives each town's alert level;
 at each rise the tool queues briefings for the mayor and the district fire brigade (drafted by Claude from the tool's
 numbers), simulated check-ins arrive, and roads in the 2021 water close. State: src/live.py (data/live.db).
-Status uses the highest river flow reached so far (it never drops in a replay); daily GloFAS flows are placed at noon
-and interpolated, so times are accurate to about ±12 h."""
+Status uses the highest river flow reached so far (it never drops in a replay); daily GloFAS flows are held for their
+whole day, so the replay gives the day, not the hour."""
 import json
 
 import pandas as pd
@@ -70,13 +70,18 @@ def board():
     st.subheader(f"{t:%a %d %b %Y, %H:%M}" + (" · replay of July 2021" if c["mode"] == "replay" else " · live forecast"))
 
     k = st.container(horizontal=True, gap="small")  # wraps on phones instead of stacking six rows
-    k.metric("Towns to evacuate", m["evacuate"], border=True, width=150)
-    k.metric("Towns warned", m["warn"], border=True, width=150)
-    k.metric("People to move", about(m["people_evacuate"]), border=True, width=150,
-             help="Residents in the 2021 water of the towns at 'evacuate', scaled by the impact forecast")
-    k.metric("Reported safe", fmt(m["safe"]), border=True, width=150, help="Check-ins; in the replay they are simulated")
-    k.metric("Need help", fmt(m["needs_help"]), border=True, width=150)
-    k.metric("Roads closed", m["roads_closed"], border=True, width=150)
+    k.metric("Towns to evacuate", m["evacuate"], border=True, width=145)
+    k.metric("Towns warned", m["warn"], border=True, width=145)
+    k.metric("People to move", about(m["people_evacuate"]), border=True, width=185,
+             delta=f"+{about(m['people_evacuate_modelled'])} modelled" if m["people_evacuate_modelled"] else None,
+             delta_color="off", delta_arrow="off",
+             help="Residents inside the 2021 satellite flood of the towns at 'evacuate' (a floor). Below it, kept "
+                  "apart: residents in the modelled Vesdre zone (EFAS 500-year), which the satellite did not map")
+    k.metric("Homes safe", fmt(m["safe"]), border=True, width=145)
+    k.metric("Homes need help", fmt(m["needs_help"]), border=True, width=145)
+    k.metric("Roads closed", m["roads_closed"], border=True, width=145)
+    st.caption(f"{m['evacuate_under_50']} of the towns to evacuate had fewer than 50 residents in the mapped 2021 "
+               "water. Homes: check-ins per home" + (", simulated in the replay." if c["mode"] == "replay" else "."))
 
     left, right = st.columns([3, 2], gap="medium")
     with left:
@@ -102,26 +107,28 @@ def board():
                         icon=":material/arrow_forward:")
             b.button("Whole region", on_click=lambda: st.session_state.update(cr_sel=None), width="stretch")
         st.caption(":red[●] Evacuate · :orange[●] Warn · :yellow[●] Watch · :blue[●] Normal · dashed edge: modelled "
-                   "(Vesdre) · barrier: road closed · number: people in the 2021 water. Click a town to fly in. " + ATTRIBUTION)
+                   "(Vesdre) · barrier: road closed · number: people in the 2021 water (Vesdre: in the modelled zone). Click a town to fly in. " + ATTRIBUTION)
     with right:
         ev = live.events().tail(8).iloc[::-1]
         st.markdown("**Latest**")
         if ev.empty:
             st.caption("Nothing yet. Press Play in the sidebar.")
         for r in ev.itertuples():
-            st.markdown(f"`{pd.Timestamp(r.t):%d %b %H:%M}` **{anna.town(r.municipality)}** → {WORD.get(r.to, r.to)}")
+            when = f"{pd.Timestamp(r.t):%d %b}" if c["mode"] == "replay" else f"{pd.Timestamp(r.t):%d %b %H:%M}"
+            st.markdown(f"`{when}` **{anna.town(r.municipality)}** → {WORD.get(r.to, r.to)}")
         ob = live.outbox().tail(4).iloc[::-1]
-        st.markdown("**Reports sent** (outbox)")
+        st.markdown("**Briefing drafts** (outbox, not sent)")
         if ob.empty:
             st.caption("Briefings for mayors and fire brigades appear here when a town's alert rises.")
         for r in ob.itertuples():
-            with st.expander(f"{pd.Timestamp(r.t):%d %b %H:%M} · {r.recipient}"):
+            with st.expander(f"{pd.Timestamp(r.t):%d %b{'' if c['mode'] == 'replay' else ' %H:%M'}} · {r.recipient}"):
                 st.write(live.report(r.id))
                 st.caption("Drafted by Claude from the tool's numbers; check before sending." if r.source != "template"
                            else "Template (no AI available).")
     st.caption("Alert level: GloFAS river flow on each town's river against its own 2-year flood and July 2021 peak "
-               "(impact forecast, src/build_ml2.py). Levels never drop during a replay; daily flows, so times are "
-               "accurate to about ±12 h. A model replay, not official warnings.")
+               "(impact forecast, src/build_ml2.py). Levels never drop during a replay. The replay steps on daily modelled "
+               "flows (GloFAS reanalysis, computed afterwards), so it gives the day, not the hour. A model replay, not "
+               "official warnings.")
 
 
 st.fragment(board, run_every=1.5 if c["playing"] else None)()

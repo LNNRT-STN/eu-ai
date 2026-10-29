@@ -3,6 +3,7 @@ Homes in the 2021 water: outputs/data/addresses.parquet (OSM addresses matched t
 the town's 10 km shelter plan (bus_plan.csv), nearest shelter that takes people from this town; walking or bus by
 straight-line distance × 1.3 (road / straight ratio measured 1.2-1.4 in notebooks/evac_sim.py). Spare beds offered
 by residents: data/host_offers.csv. Nothing typed here is stored."""
+import json
 import math
 import re
 
@@ -25,6 +26,16 @@ def homes():
     a["single"] = (a.storeys == 1) & (a.height_m != 2.5)
     return (a.groupby(["municipality", "town", "street", "housenumber"], as_index=False)
             .agg(lon=("lon", "mean"), lat=("lat", "mean"), single=("single", "any"), area=("area", "first")))
+
+
+@st.cache_data
+def shelter_town():
+    """Shelter name → its municipality (outputs/data/shelters.geojson), so an opaque OSM name gets a place."""
+    g = json.loads((core.DATA / "shelters.geojson").read_text())["features"]
+    return {f["properties"]["name"]: f["properties"]["muni"] for f in reversed(g) if f["properties"].get("muni")}
+
+
+KIND = {"civic": "civic building", "school": "school", "sports hall": "sports hall"}
 
 
 def offers():
@@ -92,7 +103,7 @@ h = nums[nums.housenumber == num].iloc[0]
 modelled = h.area in anna.MODELLED
 
 # where to go: shelters this town's people are sent to in the 10 km plan, nearest to this home first
-plan = bus[bus.municipality == h.municipality].groupby(["shelter", "s_lon", "s_lat"], as_index=False).people.sum()
+plan = bus[bus.municipality == h.municipality].groupby(["shelter", "cat", "s_lon", "s_lat"], as_index=False).people.sum()
 plan = plan[plan.people >= .5]
 plan["km"] = core.km(h.lon, h.lat, plan.s_lon, plan.s_lat) * ROAD
 go = plan.nsmallest(1, "km").iloc[0] if len(plan) else None
@@ -104,7 +115,10 @@ if go is not None:
     walk = go.km <= 1.5
     mins = go.km / (WALK_KMH if walk else BUS_KMH) * 60
     c = st.columns(3)
-    c[0].metric("Go to", go.shelter, border=True)
+    where = shelter_town().get(go.shelter)
+    c[0].metric("Go to", go.shelter, border=True, delta_color="off", delta_arrow="off",
+                delta=KIND.get(go["cat"], go["cat"]) + (f", {anna.town(where)}" if where else ""),
+                help="Candidate shelter from OpenStreetMap, dry in 2021: not an official shelter")
     c[1].metric("How", "On foot" if walk else "By bus or car", border=True,
                 help="On foot up to 1.5 km by road; further away, the municipality's buses (book a seat via the help "
                      "line).")

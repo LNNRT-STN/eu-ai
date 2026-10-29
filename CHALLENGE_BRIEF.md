@@ -64,7 +64,7 @@ Each failure below must be backed by a cited source (`docs/TIMELINE_2021.md` for
 | Q1 what the water covered | 2021 and today §1; All towns and care sites; Crisis room counters | `outputs/data/area_summary.csv`, `municipalities.csv`, `critical_sites.csv` | Satellite count is a floor; Vesdre modelled; residents an order of magnitude |
 | Q2 what has been done since | 2021 and today §2; Long term | `docs/BUDGETS.md`, `docs/INFRA_2021.md` | Many measures announced, not verified as built |
 | Q3 shelter with today's buildings | Town plan (walk / bus / no place, shelter map), Do I need to leave?, Offer a bed | `outputs/data/shelters.geojson`, `evac_towns.csv`; low / central / high capacity in `area_summary.csv` | OSM candidates, not official shelters; capacity estimated; distances are minimums |
-| Q4 still exposed, first action | Crisis room (live replay, first towns to evacuate); Town plan first action line; Long term measures | `outputs/data/q4_ranking.csv`, `docs/ML.md` §8-9 | Replay uses hindcast flows, not the forecasts of the day; statuses ±12 h |
+| Q4 still exposed, first action | Crisis room (live replay, first towns to evacuate); Town plan first action line; Long term measures | `outputs/data/q4_ranking.csv`, `docs/ML.md` §8-9 | Replay uses hindcast flows, not the forecasts of the day; statuses by day (daily flows) |
 
 ---
 

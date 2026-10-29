@@ -27,7 +27,9 @@ DATA = ROOT / "outputs" / "data"
 REFS = Path(__file__).resolve().parent / "out" / "meuse" / "gauge_refs.json"
 
 START, END = pd.Timestamp("2021-07-12 06:00"), pd.Timestamp("2021-07-18 00:00")
-STATUS = ["watch", "warn", "evacuate"]  # status from level: 0 watch, 1 warn, 2-3 evacuate
+STATUS = ["none", "watch", "warn", "evacuate"]  # none: river at or below its 2-year flow
+ALERT = ("warn", "evacuate")
+MODELLED_AREAS = {"vesdre"}  # as anna.MODELLED: no satellite map, EFAS 500-year model  # the steps that make an event and briefings
 NO_POINT = "no river point"
 RADIUS_KM = 15
 CHECKIN_COLS = ["when", "municipality", "door", "status", "where", "people", "drill"]
@@ -249,12 +251,13 @@ def _refs():
 
 
 def _hourly():
-    """GloFAS daily flows 10-20 Jul 2021, placed at noon, interpolated hourly. Every gauge column that exists."""
+    """GloFAS daily flows 10-20 Jul 2021, each held for its whole day (hourly grid). Not interpolated: a line
+    towards the next day's mean would put tomorrow's flow into today's hours and claim a time the data cannot give."""
     if "hourly" not in _cache:
         r = pd.DataFrame(json.loads((REFS.parent / "replay_2021.json").read_text()))  # as core.load_replay(),
-        r.index = pd.to_datetime(r.index) + pd.Timedelta(hours=12)  # uncached so a rebuild shows up live
-        grid = pd.date_range(r.index[0], r.index[-1], freq="h")
-        _cache["hourly"] = r.reindex(r.index.union(grid)).interpolate("time").reindex(grid)
+        r.index = pd.to_datetime(r.index)  # uncached so a rebuild shows up live
+        grid = pd.date_range(r.index[0], r.index[-1] + pd.Timedelta(hours=23), freq="h")
+        _cache["hourly"] = r.reindex(grid, method="ffill")
     return _cache["hourly"]
 
 
@@ -355,7 +358,7 @@ def _judge(T, fl, t=None):
     build_ml2.impact_forecast when available, else level thresholds and a linear share of the 2021 people."""
     q = T.gauge.map(lambda g: fl.get(g, np.nan) if isinstance(g, str) else np.nan)
     level = _levels(T, q)
-    status = level.map(lambda l: STATUS[min(int(l), 2)]).where(q.notna(), NO_POINT)
+    status = level.map(lambda l: STATUS[min(int(l), 2) + 1]).where(q.notna(), NO_POINT)
     share = ((q - T.q2) / (T.q2021 - T.q2)).clip(0, 1).fillna(0)
     pe = (T.people * share).round()
     m = _ml2()
@@ -364,7 +367,7 @@ def _judge(T, fl, t=None):
             tg = T[["area", "municipality", "gauge", "q2", "q2021"]]
             imp = m.impact_forecast({g: v for g, v in fl.items() if pd.notna(v)}, tg).drop_duplicates("municipality")
             imp = imp.set_index("municipality").reindex(T.municipality)
-            s = imp.status.map({"none": "watch", "watch": "watch", "warn": "warn", "evacuate": "evacuate",
+            s = imp.status.map({"none": "none", "watch": "watch", "warn": "warn", "evacuate": "evacuate",
                                 "no gauge": NO_POINT})
             status = pd.Series(s.values, index=T.index).fillna(status)
             pe = pd.Series(imp.people_expected.values, index=T.index).fillna(pe)
@@ -386,7 +389,8 @@ def _replay():
     lv, stt, pe = np.array(lv), np.array(stt, dtype=object), np.array(pe)
     first = lambda mask: [h.index[mask[:, j].argmax()] if mask[:, j].any() else pd.NaT for j in range(len(T))]
     rank = np.vectorize(lambda s: STATUS.index(s) if s in STATUS else -1)(stt)
-    times = pd.DataFrame({"municipality": T.municipality, "t_warn": first(rank >= 1), "t_evacuate": first(rank >= 2),
+    w, e = STATUS.index("warn"), STATUS.index("evacuate")
+    times = pd.DataFrame({"municipality": T.municipality, "t_warn": first(rank >= w), "t_evacuate": first(rank >= e),
                           "t_level3": first(lv >= 3)}).set_index("municipality")
     _cache["replay"] = dict(index=h.index, level=lv, status=stt, people_expected=pe, times=times, peak=h)
     return _cache["replay"]
@@ -448,21 +452,27 @@ def tick(t=None, mode=None):
         old = dict(c.execute("SELECT municipality, status FROM state").fetchall())
         times = _replay()["times"] if mode == "replay" else None
         for r in T.itertuples():
-            before = old.get(r.municipality, "watch")
+            before = old.get(r.municipality, "none")
             if STATUS.index(r.status) <= STATUS.index(before):
                 continue
-            steps = STATUS[STATUS.index(before) + 1: STATUS.index(r.status) + 1]
-            prev = before
+            steps = [x for x in STATUS[STATUS.index(before) + 1: STATUS.index(r.status) + 1] if x in ALERT]
+            prev, since = before, t
             for s in steps:
                 when = times.at[r.municipality, f"t_{s}"] if mode == "replay" else t
                 when = t if pd.isna(when) else when
                 c.execute('INSERT OR IGNORE INTO events(t,municipality,area,"from","to",mode) VALUES(?,?,?,?,?,?)',
                           (str(when), r.municipality, r.area, prev, s, mode))
                 queued.append((r, prev, s, when))
-                prev = s
+                prev, since = s, when
             c.execute("INSERT OR REPLACE INTO state VALUES(?,?,?,?)", (r.municipality, r.status, int(r.level),
-                                                                       str(queued[-1][3])))
+                                                                       str(since)))
+    # steps reached at the same time (a daily flow can jump from none to evacuate) get one briefing, for the highest
+    # step and from the status before the jump; one per step would collide on the outbox's (recipient, town, time) key
+    last = {}
     for r, prev, s, when in queued:
+        k = (r.municipality, str(when))
+        last[k] = (r, last[k][1] if k in last else prev, s, when)
+    for r, prev, s, when in last.values():
         facts = _facts(r, prev, s, when, t, mode)
         name = _name(r.municipality)
         queue_report("status", f"Mayor of {name}", r.municipality, when, facts)
@@ -484,10 +494,18 @@ def _facts(r, prev, s, when, t, mode):
     if mode == "replay":
         at = towns_status(when, mode).set_index("municipality").loc[r.municipality]
         q, pe = at.flow, at.people_expected
-    return {"town": _name(r.municipality), "status": s, "from": prev,
-            "time": _fmt_t(when), "scenario": "replay of July 2021" if mode == "replay" else "live forecast",
-            "river_point": r.gauge, "flow_m3s": int(round(q)), "two_year_flow_m3s": int(round(raw.q2)),
-            "july_2021_peak_m3s": int(round(raw.q2021)), "people_in_2021_flood_extent": int(r.people),
+    import anna
+    modelled = r.area in anna.MODELLED
+    return {"town": _name(r.municipality), "status": s, "from": "normal" if prev == "none" else prev,
+            # a replay steps on daily flows, so it gives the day only
+            "time": f"{pd.Timestamp(when):%-d %b %Y} (daily river flow)" if mode == "replay" else _fmt_t(when),
+            "scenario": ("replay of July 2021 on modelled river flows computed afterwards (not a forecast)"
+                         if mode == "replay" else "live forecast"),
+            "river_point": r.gauge, "modelled_flow_m3s": int(round(q)), "modelled_two_year_flow_m3s": int(round(raw.q2)),
+            "modelled_july_2021_peak_m3s": int(round(raw.q2021)),
+            ("people_in_modelled_flood_zone" if modelled else "people_in_2021_satellite_flood_extent"): int(r.people),
+            "flood_extent": ("modelled (EFAS 500-year; the satellite did not map this valley)" if modelled
+                             else "observed by satellite in July 2021 (a floor)"),
             "people_expected_in_water": int(pe),
             "district": district(r.area, r.municipality)}
 
@@ -740,6 +758,9 @@ def summary(t=None) -> dict:
     T = towns_status(t)
     ck = checkins()
     return {"warn": int((T.status == "warn").sum()), "evacuate": int((T.status == "evacuate").sum()),
-            "people_evacuate": int(T.people[T.status == "evacuate"].sum()),
+            # observed (satellite) and modelled (Vesdre, EFAS 500-year) are never summed
+            "people_evacuate": int(T.people[(T.status == "evacuate") & ~T.area.isin(MODELLED_AREAS)].sum()),
+            "people_evacuate_modelled": int(T.people[(T.status == "evacuate") & T.area.isin(MODELLED_AREAS)].sum()),
+            "evacuate_under_50": int(((T.status == "evacuate") & (T.people < 50)).sum()),
             "safe": int((ck.status == "safe").sum()), "needs_help": int((ck.status == "needs help").sum()),
             "roads_closed": len(closures()), "reports": len(outbox())}

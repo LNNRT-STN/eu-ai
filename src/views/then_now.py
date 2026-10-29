@@ -1,6 +1,7 @@
 import pandas as pd
 import streamlit as st
 
+import anna
 import core
 from core import about, fmt
 
@@ -80,7 +81,7 @@ core.header("2021 and today", "What the July 2021 flood hit, and what the public
 st.space("small")
 core.banner(core.EVACUATE, f"2021 reached at least {fmt(obs.buildings)} buildings in {fmt((~rank.modelled).sum())} "
             "municipalities. Five years on, most structural protection is still being built.",
-            f"Repairs are done. The works that give rivers room (Vesdre), the Maas dikes (Limburg) and the retention "
+            f"Urgent repairs are done in the Vesdre and the Inde; the Ahr and the Erft are not yet researched here. The works that give rivers room (Vesdre), the Maas dikes (Limburg) and the retention "
             f"basins (Inde) run to 2027–2050. The Vesdre valley, missed by the satellite, holds ≈ "
             f"{about(vesdre.people_2020)} residents in the modelled 500-year zone.", note=False)
 st.space("small")
@@ -93,7 +94,9 @@ core.facts([
     (about(obs.people_2020), "<strong>residents inside the water</strong>, an order of magnitude"),
     (fmt(obs.flood_km2), "<strong>km² of water</strong> mapped by the satellite across nine areas"),
     (fmt(len(care)), f"<strong>hospitals and care homes</strong> in the water, plus "
-                     f"{fmt((sites.in_worst_flood & (sites.type == 'school')).sum())} schools"),
+                     f"{fmt((sites.in_worst_flood & (sites.type == 'school') & ~sites.area.isin(anna.MODELLED)).sum())} schools "
+                     f"(+{fmt((sites.in_worst_flood & (sites.type == 'school') & sites.area.isin(anna.MODELLED)).sum())} "
+                     "modelled in the Vesdre)"),
 ], "Source · " + core.AS_OF["obs"] + " · all satellite passes")
 st.caption("A floor, not a total: the satellite saw little in the narrow Vesdre valley and central Liège. Ahr: "
            f"{fmt(a.set_index('area').buildings['ahr'])} buildings here vs over 9,000 reported (bpb, 2023). Press "

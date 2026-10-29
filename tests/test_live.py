@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 import live  # noqa: E402
 import reports  # noqa: E402
 
-STATUS = {"watch": 0, "warn": 1, "evacuate": 2}
+STATUS = {"none": -1, "watch": 0, "warn": 1, "evacuate": 2}
 
 
 @pytest.fixture(autouse=True)
@@ -60,7 +60,7 @@ def test_status_rises_monotonically(muni):
         pytest.skip(f"no river point for {muni} yet")
     seen = _rises(muni)
     assert seen == sorted(seen), "status must never fall during the replay"
-    assert seen[0][0] == 0 and seen[-1][0] == 2, "from watch to evacuate"
+    assert seen[0][0] <= 0 and seen[-1][0] == 2, "from normal or watch to evacuate"
 
 
 def test_events_and_reports_queued_once():
@@ -70,8 +70,9 @@ def test_events_and_reports_queued_once():
     ev = live.events("Pepinster (BE)")
     assert list(ev.to) == ["warn", "evacuate"]
     ob = live.outbox()
-    assert len(ob[ob.municipality == "Pepinster (BE)"]) == 4  # mayor + fire brigade, for warn and evacuate
     pep = ob[ob.municipality == "Pepinster (BE)"]
+    # one briefing per recipient and time: warn and evacuate on the same day give one, for evacuate
+    assert len(pep) == 2 * pep.t.nunique() and pep.facts.map(lambda f: f["status"]).iloc[-1] == "evacuate"
     assert set(pep.recipient) == {"Mayor of Pepinster", "Fire brigade, Pepinster"}
     assert pep.facts.iloc[0]["district"] == "Province of Liège (governor)"
 
@@ -120,7 +121,7 @@ def test_auto_closures_at_level3():
 
 def test_report_fallback_without_key():
     text, source = reports.draft("status", "Mayor of Pepinster", {"town": "Pepinster", "status": "evacuate",
-                                                                  "time": "13 Jul 2021 18:00", "flow_m3s": 146})
+                                                                  "time": "13 Jul 2021 18:00", "modelled_flow_m3s": 146})
     assert source == "template" and "146" in text and "check before sending" in text
     i = live.queue_report("status", "Mayor of Pepinster", "Pepinster (BE)", pd.Timestamp("2021-07-13 18:00"),
                           {"town": "Pepinster", "status": "evacuate"})

@@ -165,7 +165,7 @@ town's status.
   watch (< 0.25) / warn (0.25-0.6) / evacuate (≥ 0.6). With ensemble members, it also gives the share of
   members at warn or worse.
 - Limits: the July 2021 replay feeds it **hindcast** flows (hindsight), not the forecasts available on the day.
-  GloFAS is daily, so timing is ±12 h. A town's status never steps down during the replay. The Urft point is weak
+  GloFAS is daily, so the replay holds each day's flow and gives the day, not the hour. A town's status never steps down during the replay. The Urft point is weak
   (peak 44 m³/s). The calibration knots come from EFAS, so they carry the EFAS blind spots described above.
 
 ## 10. For the AI sheet (update to section 7)

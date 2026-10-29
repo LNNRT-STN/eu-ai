@@ -24,6 +24,9 @@ Rules:
   that fits the recipient (a mayor: alert and evacuate residents, open shelters; a fire brigade: crews,
   door-knocking, closed roads).
 - Say that river flows come from a model (GloFAS) and are not a gauge reading when flows are mentioned.
+  In a replay the flows were computed afterwards: never call them a forecast, and never call the modelled
+  July 2021 peak the real peak.
+- If the flood extent is modelled, say so whenever you give its number of people.
 - End with this exact line: {FOOTER}"""
 
 _client = None
@@ -59,11 +62,16 @@ def template(kind, recipient, facts):
     lines = [f"To: {recipient}",
              f"{f.get('town', 'Town')}: status {f.get('status', kind)} since {f.get('time', '?')}"
              + (f" (was {f['from']})." if f.get("from") else ".")]
-    if "flow_m3s" in f:
-        lines.append(f"River point {f.get('river_point', '?')}: {f['flow_m3s']} m3/s modelled (GloFAS), "
-                     f"2-year flood {f.get('two_year_flow_m3s', '?')}, July 2021 peak {f.get('july_2021_peak_m3s', '?')}.")
-    if "people_in_2021_water" in f:
-        lines.append(f"About {f['people_in_2021_water']} residents lived inside the 2021 flood extent.")
+    if "modelled_flow_m3s" in f:
+        lines.append(f"River point {f.get('river_point', '?')}: {f['modelled_flow_m3s']} m3/s modelled (GloFAS), "
+                     f"2-year flood {f.get('modelled_two_year_flow_m3s', '?')}, modelled July 2021 peak "
+                     f"{f.get('modelled_july_2021_peak_m3s', '?')}.")
+    if "people_in_2021_satellite_flood_extent" in f:
+        lines.append(f"About {f['people_in_2021_satellite_flood_extent']} residents lived inside the 2021 satellite "
+                     "flood extent (a floor).")
+    if "people_in_modelled_flood_zone" in f:
+        lines.append(f"About {f['people_in_modelled_flood_zone']} residents live in the modelled flood zone "
+                     "(EFAS 500-year; the satellite did not map this valley).")
     if f.get("roads_closed"):
         lines.append(f"Roads closed: {f['roads_closed']}.")
     if f.get("status") == "evacuate":
@@ -111,7 +119,7 @@ def write(kind, recipient, facts) -> str:
 if __name__ == "__main__":
     t, s = draft("status", "Mayor of Pepinster", {"town": "Pepinster", "status": "evacuate", "from": "warn",
                                                    "time": "13 Jul 2021 18:00", "river_point": "Vesdre · Chaudfontaine",
-                                                   "flow_m3s": 146, "two_year_flow_m3s": 66, "july_2021_peak_m3s": 291,
-                                                   "people_in_2021_water": 2163})
+                                                   "modelled_flow_m3s": 146, "modelled_two_year_flow_m3s": 66, "modelled_july_2021_peak_m3s": 291,
+                                                   "people_in_modelled_flood_zone": 2163})
     print(s, last_error, last_usage)
     print(t)

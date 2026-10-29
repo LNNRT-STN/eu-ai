@@ -55,7 +55,8 @@ Done in the session of 29 Oct, evening (commits e467c0e..bb57e32, ai_log entries
 - `docs/DEMO.md`: the 5-minute script, the pre-warm list and the "do not say" list.
 
 Still open:
-1. Act on the independent review (fresh agent, run 29 Oct evening); see the latest ai_log entry.
+1. Review acted on (ai_log 34). Not done: P1-9 source for "people who could not leave alone died" (CHALLENGE_BRIEF §2b
+   [VERIFY]); Town plan "Who gives the order" is a national table, not cross-border.
 2. Practise `docs/DEMO.md` once with Reset; time it.
 3. Timeline gaps: no clock time for the Steinbachtalsperre order or the Blessem breach. EFAS issue times may be UTC
    (the JRC captions disagree with its tables).
@@ -63,6 +64,6 @@ Still open:
 
 ## Known limits to say out loud
 Replay times are hindsight and shown by day; satellite 2021 counts are a floor; Vesdre is modelled (EFAS 500-year); residents are an order of magnitude; shelters
-are OSM candidates; road times are minimums; replay statuses never drop and are ±12 h; simulated check-ins are
+are OSM candidates; road times are minimums; replay statuses never drop and are given by day; simulated check-ins are
 labelled; roles/districts and the warning texts are team summaries to verify (native speaker for FR/DE/NL);
 Sentinel-2 cloudless is CC BY-NC-SA (non-commercial); Urft (Schleiden/Kall) GloFAS point is weak (peak 44 m³/s).

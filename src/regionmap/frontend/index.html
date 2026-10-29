@@ -129,7 +129,7 @@ function updatePins(towns, sel) {
     }
     const st = STATUS[t.status] ? t.status : "none";
     const n = fmt(t.people);  // stable 2021 count; "expected now" changes every tick and sits in the tooltip
-    const html = '<i></i><b><em>' + WORD[st] + "</em>" + esc(t.label || k) + (n != null ? " · " + n + " in 2021" : "") + "</b>";
+    const html = '<i></i><b><em>' + WORD[st] + "</em>" + esc(t.label || k) + (n != null ? " · " + n + (t.modelled ? " modelled" : " in 2021") : "") + "</b>";
     if (p.html !== html) { p.el.innerHTML = html; p.html = html; }  // touch the DOM only on change
     // classList, not className: MapLibre keeps its own marker classes on this element
     p.el.classList.add("pin");
