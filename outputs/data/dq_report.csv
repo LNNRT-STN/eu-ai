@@ -38,7 +38,7 @@ venlo,Shelters excluded only by the EFAS 100-year model (count),43.0,0.0,WARN,"S
 eschweiler,Residents not placed on any home (%),0.2,10.0,PASS,Population cells with no residential building: border cells (other country's buildings not loaded) or OBAT undercount,JRC (GHS-OBAT / GHS-POP)
 eschweiler,Exposed buildings with no height (%),0.0,5.0,PASS,Height raster has no value at the footprint,JRC (GHS-BUILT-H)
 eschweiler,Exposed buildings outside built-up domain (use=0) (%),0.0,5.0,PASS,Building not covered by the 10 m functional classification,JRC (GHS-BUILT-C)
-eschweiler,Unusually crowded exposed buildings (count),2.0,0.0,WARN,One small home holds a whole population cell (few residential buildings in the cell),Team (method choice)
+eschweiler,Unusually crowded exposed buildings (count),1.0,0.0,WARN,One small home holds a whole population cell (few residential buildings in the cell),Team (method choice)
 eschweiler,OSM candidates without a name (%),48.3,40.0,WARN,Volunteer mapping incomplete,OpenStreetMap community / official lists
 eschweiler,Shelter sites with no matching building (%),5.8,20.0,PASS,"Outdoor sports grounds, or OSM point far from any OBAT footprint",Team / OSM
 eschweiler,Shelter buildings with height at the 2.5 m floor (%),4.9,30.0,PASS,"Height floored by design (GHS-OBAT doc p.19): storeys unknown, counted as 1",JRC (GHS-BUILT-H)
@@ -56,7 +56,7 @@ wassenberg,Shelters excluded only by the EFAS 100-year model (count),0.0,0.0,PAS
 schleiden,Residents not placed on any home (%),1.4,10.0,PASS,Population cells with no residential building: border cells (other country's buildings not loaded) or OBAT undercount,JRC (GHS-OBAT / GHS-POP)
 schleiden,Exposed buildings with no height (%),0.0,5.0,PASS,Height raster has no value at the footprint,JRC (GHS-BUILT-H)
 schleiden,Exposed buildings outside built-up domain (use=0) (%),0.0,5.0,PASS,Building not covered by the 10 m functional classification,JRC (GHS-BUILT-C)
-schleiden,Unusually crowded exposed buildings (count),0.0,0.0,PASS,One small home holds a whole population cell (few residential buildings in the cell),Team (method choice)
+schleiden,Unusually crowded exposed buildings (count),186.0,0.0,WARN,One small home holds a whole population cell (few residential buildings in the cell),Team (method choice)
 schleiden,OSM candidates without a name (%),48.1,40.0,WARN,Volunteer mapping incomplete,OpenStreetMap community / official lists
 schleiden,Shelter sites with no matching building (%),9.8,20.0,PASS,"Outdoor sports grounds, or OSM point far from any OBAT footprint",Team / OSM
 schleiden,Shelter buildings with height at the 2.5 m floor (%),9.2,30.0,PASS,"Height floored by design (GHS-OBAT doc p.19): storeys unknown, counted as 1",JRC (GHS-BUILT-H)
@@ -74,7 +74,7 @@ euskirchen,Shelters excluded only by the EFAS 100-year model (count),5.0,0.0,WAR
 erftstadt,Residents not placed on any home (%),0.9,10.0,PASS,Population cells with no residential building: border cells (other country's buildings not loaded) or OBAT undercount,JRC (GHS-OBAT / GHS-POP)
 erftstadt,Exposed buildings with no height (%),0.5,5.0,PASS,Height raster has no value at the footprint,JRC (GHS-BUILT-H)
 erftstadt,Exposed buildings outside built-up domain (use=0) (%),0.5,5.0,PASS,Building not covered by the 10 m functional classification,JRC (GHS-BUILT-C)
-erftstadt,Unusually crowded exposed buildings (count),256.0,0.0,WARN,One small home holds a whole population cell (few residential buildings in the cell),Team (method choice)
+erftstadt,Unusually crowded exposed buildings (count),1.0,0.0,WARN,One small home holds a whole population cell (few residential buildings in the cell),Team (method choice)
 erftstadt,OSM candidates without a name (%),40.3,40.0,WARN,Volunteer mapping incomplete,OpenStreetMap community / official lists
 erftstadt,Shelter sites with no matching building (%),8.6,20.0,PASS,"Outdoor sports grounds, or OSM point far from any OBAT footprint",Team / OSM
 erftstadt,Shelter buildings with height at the 2.5 m floor (%),4.1,30.0,PASS,"Height floored by design (GHS-OBAT doc p.19): storeys unknown, counted as 1",JRC (GHS-BUILT-H)

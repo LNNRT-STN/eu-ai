@@ -4,8 +4,11 @@ For every OBAT building in the Meuse-basin mapped areas (BE Liège/Vesdre, BE Le
 DE Rur/Inde) it flags two lenses:
   obs   = inside the observed July 2021 flood extent (same buildings as build.py)
   rp100 = inside the EFAS modelled 100-year flood zone (cell under the building point)
-Residents are GHS-POP 2020 cells spread equally over the residential buildings in each cell
-(dasymetric; floor-area weights let a few huge, likely misclassified footprints absorb whole cells), then summed per commune (GISCO LAU 2021) and per ~1 km cell.
+Residents are GHS-POP 2020 cells spread over the residential buildings in each cell by floor volume
+(footprint x storeys, storeys = height / 3 m, 1-10), with footprints above an extreme fence (log scale, Q3 + 3 IQR)
+capped so a few huge, likely misclassified footprints cannot absorb whole cells. Same rule as notebooks/common.py;
+an equal split put 1 person per 2.5-5 m2 of footprint into 1% of homes (ai_log.md, entry 12).
+Then summed per commune (GISCO LAU 2021) and per ~1 km cell.
 Writes src/out/meuse/.
 """
 import json
@@ -48,7 +51,7 @@ flooded_ids = set(flooded[flooded.aoi_id.isin(MEUSE_AOIS)].id)
 # 1. All OBAT buildings in the region (spatial-index read), clipped to the mapped areas
 frames = []
 for cc, path in OBAT.items():
-    df = pyogrio.read_dataframe(path, columns=["id", "use"], bbox=bbox)
+    df = pyogrio.read_dataframe(path, columns=["id", "use", "area", "height"], bbox=bbox)
     frames.append(df.assign(country=cc))
     print(f"  {cc}: {len(df):,} OBAT points in region bbox")
 b = gpd.GeoDataFrame(pd.concat(frames, ignore_index=True), crs=4326)
@@ -82,7 +85,7 @@ with rasterio.open(EFAS100) as src:
         wet.astype("uint8"), mask=wet, transform=src.window_transform(win))]
 zone = shapely.intersection(shapely.union_all(zone), aoi.union_all())  # map layer: zone inside the mapped areas
 
-# 4. Residents: each GHS-POP cell spread equally over its residential buildings
+# 4. Residents: each GHS-POP cell spread over its residential buildings by floor volume (capped footprints)
 with rasterio.open(POP) as src:
     win = from_bounds(*bbox, transform=src.transform).round_offsets().round_lengths()
     pop = src.read(1, window=win, boundless=True, fill_value=0)
@@ -91,7 +94,10 @@ with rasterio.open(POP) as src:
 r_, c_ = np.clip(r_, 0, pop.shape[0] - 1), np.clip(c_, 0, pop.shape[1] - 1)
 b["cell"] = r_ * pop.shape[1] + c_
 res = b.use == 1
-w = res.astype(float).values
+la = np.log10(b.loc[res & (b["area"] > 0), "area"])  # ["area"] = OBAT footprint, not .area (geometry)
+fence = 10 ** (la.quantile(.75) + 3 * (la.quantile(.75) - la.quantile(.25)))
+storeys = np.clip(np.floor(b["height"].fillna(2.5) / 3.0), 1, 10)
+w = (b["area"].clip(upper=fence) * storeys).where(res, 0.0).values
 cell_w = pd.Series(w).groupby(b.cell.values).transform("sum").values
 b["residents"] = np.where(w > 0, pop.ravel()[b.cell.values] * w / np.where(cell_w > 0, cell_w, 1), 0.0)
 b["residential"] = res

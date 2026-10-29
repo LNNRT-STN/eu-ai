@@ -43,12 +43,19 @@ def read_buildings(cc, bbox):
 
 
 def attach_people(b, arr, tr):
-    """Dasymetric: each population cell's residents spread over its residential buildings, weighted by footprint area."""
+    """Dasymetric: each population cell's residents spread over its residential buildings, weighted by floor volume
+    (footprint x storeys, storeys = height / 3 m, 1-10). Footprints above an extreme fence (log scale, Q3 + 3 IQR) are
+    capped. Chosen over an equal split (puts 1 person per 2.5-5 m2 into 1% of homes) and plain footprint (one
+    building absorbs a cell): see ai_log.md entry 12."""
     col = np.floor((b["lon"].values - tr.c) / tr.a).astype(int)
     row = np.floor((b["lat"].values - tr.f) / tr.e).astype(int)
     ok = (row >= 0) & (row < arr.shape[0]) & (col >= 0) & (col < arr.shape[1])
     b = b.assign(row=row, col=col)[ok].copy()
     b["cellpop"] = arr[b["row"].values, b["col"].values]
-    w = b["area"].where(b["use"] == 1, 0.0)
+    res = b["use"] == 1
+    la = np.log10(b.loc[res & (b["area"] > 0), "area"])
+    fence = 10 ** (la.quantile(.75) + 3 * (la.quantile(.75) - la.quantile(.25))) if len(la) >= 8 else np.inf
+    storeys = np.clip(np.floor(b["height"].fillna(2.5) / 3.0), 1, 10)
+    w = (b["area"].clip(upper=fence) * storeys).where(res, 0.0)
     b["people"] = (b["cellpop"] * w / w.groupby([b["row"], b["col"]]).transform("sum").replace(0, np.nan)).fillna(0.0)
     return b

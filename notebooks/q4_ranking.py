@@ -1,6 +1,9 @@
 """Q4: where do we still stand exposed? Transparent ranking per municipality, no hidden weights.
-Rank = residents with no shelter (central assumptions, main flood). Shown next to it, never blended in:
-why (too far / shelter full), vulnerable sites flooded, data source (observed vs modelled), Q2 evidence (pending).
+Rank = residents with no shelter (central assumptions) in the 2021 flood as seen by ALL satellite passes (variant
+"worst" in the pipeline). It is the headline because it is closer to the official 2021 figures (Ahr: 7,202 buildings
+vs ">9,000"; the first pass alone gives 3,300). The first pass ("main") is kept as a lower bound.
+Shown next to the rank, never blended in: why (too far / shelter full), vulnerable sites flooded, data source
+(observed vs modelled), Q2 evidence (pending).
 Run from eu-ai/ after pipeline.py:  .venv/Scripts/python.exe -I notebooks/q4_ranking.py
 """
 import json
@@ -10,11 +13,11 @@ D = "outputs/data/"
 m = pd.read_csv(D + "municipalities.csv"); s = pd.read_csv(D + "area_summary.csv"); c = pd.read_csv(D + "critical_sites.csv")
 MODELLED = {"vesdre"}
 
-main = m[m.variant == "main"].copy()
-main["no_shelter"] = main.no_reach + main.full
-worst = m[m.variant == "worst"].assign(no_shelter_worst=lambda d: d.no_reach + d.full)[["area", "municipality", "people", "no_shelter_worst"]] \
-    .rename(columns={"people": "people_worst"})
-r = main.merge(worst, on=["area", "municipality"], how="left")
+allp = m[m.variant == "worst"].copy()
+allp["no_shelter"] = allp.no_reach + allp.full
+first = m[m.variant == "main"].assign(no_shelter_first_pass=lambda d: d.no_reach + d.full)[
+    ["area", "municipality", "people", "no_shelter_first_pass"]].rename(columns={"people": "people_first_pass"})
+r = allp.merge(first, on=["area", "municipality"], how="left")
 r["why"] = r.apply(lambda x: "shelters too far" if x.no_reach > x.full else ("shelters full" if x.full > 0 else "-"), axis=1)
 # vulnerable sites (hospital / care home) and schools with at least 5% of the site under water, worst-case flood
 cc = c[c.share_of_site_flooded >= 0.05]
@@ -32,7 +35,7 @@ r = r[(r.people >= 1) & (r.municipality != "(outside mapped municipalities)")]
 r = r.sort_values(["no_shelter", "hospitals_carehomes_flooded"], ascending=False).reset_index(drop=True)
 r.insert(0, "rank", r.index + 1)
 cols = ["rank", "municipality", "area", "source", "people", "covered", "no_shelter", "why", "no_reach", "full",
-        "people_worst", "no_shelter_worst", "hospitals_carehomes_flooded", "schools_flooded", "vulnerable_sites", "q2_evidence"]
+        "people_first_pass", "no_shelter_first_pass", "hospitals_carehomes_flooded", "schools_flooded", "vulnerable_sites", "q2_evidence"]
 r[cols].to_csv(D + "q4_ranking.csv", index=False, encoding="utf-8-sig")
 
 # municipality centroids (Eurostat GISCO LAU 2021) so the app can order towns along each river
@@ -65,7 +68,7 @@ m2.to_csv(D + "app_towns.csv", index=False, encoding="utf-8-sig")
 
 # headline numbers per flood variant, central assumptions; observed and modelled kept apart
 def tot(d): return dict(people=int(d.people_2020.sum()), sheltered=int(d.central_covered.sum()),
-                        no_shelter=int((d.central_no_reach + d.central_full).sum()),
+                        no_shelter=int((d.central_no_reach + d.central_full).sum()), too_far=int(d.central_no_reach.sum()), full=int(d.central_full.sum()),
                         no_shelter_range=[int(d.people_2020.sum() - d.high_covered.sum()), int(d.people_2020.sum() - d.low_covered.sum())],
                         coordination_gain=int((d.central_covered - d.central_covered_nearest_first).sum()))
 def sites(v):
@@ -77,9 +80,9 @@ def sites(v):
                 top_town=by_town.index[0] if len(by_town) else None, top_town_count=int(by_town.iloc[0]) if len(by_town) else 0)
 head = {v: dict(observed=tot(s[(s.variant == v) & ~s.area.isin(MODELLED)]),
                 modelled_vesdre=tot(s[(s.variant == v) & s.area.isin(MODELLED)]), sites=sites(v)) for v in ("main", "worst")}
-head["top10_main"] = r[cols[:10]].head(10).to_dict("records")
+head["top10"] = r[cols[:10]].head(10).to_dict("records")
 json.dump(head, open(D + "q4_headline.json", "w"), indent=2, default=str)
 pd.set_option("display.width", 250); pd.set_option("display.max_colwidth", 60)
-print(r[["rank", "municipality", "source", "people", "no_shelter", "why", "no_shelter_worst", "hospitals_carehomes_flooded", "schools_flooded"]].head(15).to_string(index=False))
+print(r[["rank", "municipality", "source", "people", "no_shelter", "why", "no_shelter_first_pass", "hospitals_carehomes_flooded", "schools_flooded"]].head(15).to_string(index=False))
 print(json.dumps({k: v for k, v in head.items() if k != "top10"}, indent=1))
 print(r[r.hospitals_carehomes_flooded > 0][["municipality", "vulnerable_sites"]].to_string(index=False))

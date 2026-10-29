@@ -71,8 +71,25 @@ re-runnable script in `notebooks/` (`pipeline.py`, `osm_extract.py`, `dq_report.
 - Wallonia: observed EMS polygons hold only ~200 buildings vs ~48,000 buildings hit (Wallonia, July 2022): the Belgian satellite layer misses most of the disaster. With the Vesdre model we reach ~8,500, still a fraction.
 - Venlo: 216 buildings / 525 residents in the observed flood vs 10,700 residents evacuated (precautionary evacuation, not flooding).
 
+## 12. Two pipelines, two methods: which is correct?
+- Prompt/intent: a teammate's dashboard (branch `briefing-dashboard`) used other choices. Decide on evidence, not by matching either side.
+- Flood extent: all satellite passes (PRODUCT + MONIT) is now the headline; first pass kept as a lower bound. Evidence: Ahr 7,202 buildings with all passes vs 3,300 with the first, against ">9,000" official (bpb 2023).
+- Spreading residents over homes, tested on Ahr, Erftstadt and Venlo:
+  - equal split: 1% of homes get 1 person per 2.5-5 m2 of footprint (p99 0.21-0.41 people/m2), physically implausible;
+  - footprint weights: one building absorbs up to 1,197 people;
+  - floor volume (footprint x storeys, extreme footprints capped): p99 0.03-0.05 people/m2, totals between the two.
+- Result: floor volume chosen. Method spread kept as uncertainty (Ahr 19.8-21.0k, within 6%; Venlo 206-525).
+- Decision taken by the team: one method for every number on the dashboard; the teammate's design and pages kept.
+
 ## Data-cleaning decisions (from *Python for Data Analysis* ch.7)
 - Duplicates: overlapping flood shapes dissolved; OSM objects merged per campus; a building in two study areas counted once.
 - Missing values: analysed and reported per area (book p.210), not silently filled.
 - Outliers: shelter floor area above an extreme fence (log scale, Q3 + 3 IQR) is capped and listed by name (book p.223-224); storeys capped at 10.
 - Data-quality indicators with thresholds, cause and owner: `outputs/data/dq_report.csv` (*Fraud Analytics* ch.7, p.345-347).
+
+## 13. Dashboard integration, checked by rendering it
+- Prompt/intent: add the First action page to the teammate's Streamlit app, inheriting its design (Impeccable: extend an established world), with charts per the data-viz skill.
+- AI output (short): page, data loader, limits text, navigation; chart colours first proposed from the team palette (red + orange).
+- How we checked it: palette validator (red vs orange failed the normal-vision floor, 13.6 < 15; replaced by grey / orange / dark brown, all checks pass); Streamlit test runner on every state (default, town picked, first pass only); real renders captured with Playwright in Edge at 1440 px and 390 px.
+- Result: corrected four issues found in the renders: map circles covering half the region; fact 1 wording contradicting fact 4; two numbers that summed observed and modelled areas (removed); a stale data cache that kept serving old numbers after a rebuild (cache now keyed on file times).
+- Decision taken by the team: First action is the default page; the teammate's Meuse pages stay, rebuilt with the same residents method.
