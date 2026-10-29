@@ -26,15 +26,12 @@ close the 2021 governance gaps (roles, warning → instruction, plans and drills
 4. Offer a bed (`src/views/host.py`): solidarity register, no personal data, local file; beds within 10 km on the plan.
 5. Housing age + 3D single-storey view in "Evacuate first" and the plan download.
 6. Getting out (road sim: time to leave the water, to the shelter, routes back through water, busiest road, trains) + map layers; rail row on Long term.
+7. Distill: Getting out in a tab, key fact in the verdict; copy fixes; detector clean.
 
 ## In progress (delegated, background agents; each writes only its own files)
-- Addresses: `outputs/data/addresses.parquet` (`notebooks/addresses.py`): OSM street + house number per flooded
-  building (bid). → Safe check-in page + door-knock list.
 
 ## Backlog (highest value first)
-- Distill the Evacuation plan: it is long now. One-minute read: call list, verdict, three numbers, getting out, map. Consider
-  moving 'Getting out' details into a tab, keep one line in view.
-- NEXT (owner request): Safe check-in + door-knock list. Residents report "evacuated, I'm at X"; fire brigade sees
+- NEXT (owner request; addresses landed: 89 % matched, NL 13 %): Safe check-in + door-knock list. Residents report "evacuated, I'm at X"; fire brigade sees
   buildings in the water with no check-in, single-storey first, by sector, exportable. No names; local file only.
 - Wire each agent's output in as it lands; render; verify totals against app_towns.
 - "Better prepared than 2021?" one line on the page: brief Q2/Q4 asks it; only verified facts, else say "not verified".

@@ -118,6 +118,11 @@ re-runnable script in `notebooks/` (`pipeline.py`, `osm_extract.py`, `dq_report.
 - How we checked it: road vs straight-line distance median 1.2-1.4 in every town; people totals equal app_towns exactly; rail result compared with Deutsche Bahn's rebuild of the Ahr line (19 rail bridges in our layer, 22 rebuilt by DB). In the render an unnamed road showed as "tertiary" (OSM class) and was relabelled "an unnamed tertiary road"; plurals fixed.
 - Result: the striking finding: in narrow valleys most routes go back through the 2021 water (Dernau 100 %, Trooz 95 %, Bad Neuenahr-Ahrweiler 37 %): evacuate before the river rises. Times are minimums. We do not show the simulation's walk/bus split, because it uses the 10 km plan and would contradict the walking plan's counts.
 
+## 21. Distill and polish for a broad audience (impeccable)
+- Prompt/intent: the home page had grown long; owner asked for simple UI and UX usable by a broad audience.
+- AI output (short): first screen = call list → town → verdict → three numbers → map; "Getting out" moved into a tab, its key fact (share of routes crossing the water again) moved into the verdict, which turns red when it is 50 % or more.
+- How we checked it: renders at 1440 and 390 px (Trooz, Bad Neuenahr-Ahrweiler); the impeccable detector is clean on all three new pages. Fixed copy where the card said "1.5–10 km away" but the list showed 11–12 km (10 km is from each home, the list from the town centre); dropped "0 stations".
+
 ## Data-cleaning decisions (from *Python for Data Analysis* ch.7)
 - Duplicates: overlapping flood shapes dissolved; OSM objects merged per campus; a building in two study areas counted once.
 - Missing values: analysed and reported per area (book p.210), not silently filled.

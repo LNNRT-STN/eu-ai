@@ -101,8 +101,7 @@ st.html("""<style>
 @media (max-width:900px){.ev-n{grid-template-columns:1fr}}
 </style>""")
 
-core.header("Evacuation plan", "If the July 2021 flood came back: who leaves, which dry shelter they go to, "
-            "who gives the order.")
+core.header("Evacuation plan", "If the July 2021 flood came back: who leaves, where they go, who gives the order.")
 st.space("small")
 
 
@@ -166,11 +165,23 @@ care = care.sort_values(["share_of_site_flooded"], ascending=False)
 weak = care[care.type.isin(["hospital", "care home"])]
 schools = care[care.type == "school"]
 
+# ------------------------------------------------------------------ getting out: road simulation + rail in the water
+# OSM falls back to the road class when a road has no name
+road = lambda n: f"An unnamed {n} road" if n in {"motorway", "trunk", "primary", "secondary", "tertiary", "residential",
+                                                   "unclassified", "service", "living_street", "footway", "path", "track"} else n
+ev = EVAC[(EVAC.municipality == t.municipality) & (EVAC.area == t.area)]
+inf = INFRA[(INFRA.municipality == t.municipality) & (INFRA.area == t.area)]
+rail_km = inf.loc[inf.kind == "rail", "km_in_flood"].sum()
+stations = int(inf.loc[inf.kind == "station", "count"].sum())
+bridges = int(inf.loc[inf.kind.isin(["bridge_road", "bridge_rail"]), "count"].sum())
 verdict = (f"{t['name']}: move about {about(t.people)} residents to {len(plan)} dry shelters"
            + (f"; {about(left)} still have no place within 10 km" if left >= 5 else ", all of them have a place"))
 sub = (f"{about(walk)} can walk to one (within 1.5 km); {about(ride)} need a bus or car (up to 10 km)."
        + (f" Evacuate {len(weak)} hospital{'s' if len(weak) != 1 else ''} or care home{'s' if len(weak) != 1 else ''} "
           "first." if len(weak) else ""))
+if len(ev) and ev.reroute_share.iloc[0] >= .5:
+    sub += (f" {ev.reroute_share.iloc[0]:.0%} of routes to a shelter cross the 2021 water again: leave before the river "
+            "rises.")
 note = ("Modelled: the satellite missed the Vesdre, so the EFAS 500-year flood zone stands in."
         if modelled else "Observed: all Copernicus satellite passes of July 2021, a floor, not the peak.")
 
@@ -197,47 +208,16 @@ def river_line():
 
 
 river_line()
-core.banner("#d70015" if left >= 5 or len(weak) else "#0071e3", verdict, sub + f"<small>{note}</small>", note=False)
+urgent = left >= 5 or len(weak) or (len(ev) and ev.reroute_share.iloc[0] >= .5)
+core.banner("#d70015" if urgent else "#0071e3", verdict, sub + f"<small>{note}</small>", note=False)
 st.space("small")
 
 st.html("<div class='ev-n'>"
         f"<div><b style='color:{core.SHELTER}'>{about(walk)}</b><span><i>walk</i> to a shelter within 1.5 km</span></div>"
-        f"<div><b style='color:#0071e3'>{about(ride)}</b><span><i>need transport</i> to a shelter 1.5–10 km away</span></div>"
+        f"<div><b style='color:#0071e3'>{about(ride)}</b><span><i>need a bus or car</i>: their shelter is 1.5–10 km from home</span></div>"
         + (f"<div><b style='color:{core.EVACUATE}'>{about(left)}</b><span><i>no place</i> within 10 km: ask the next "
          "municipality</span></div></div>" if left >= 5 else
          "<div><b>0</b><span><i>no place</i> within 10 km: everyone fits</span></div></div>"))
-st.space("small")
-
-# ------------------------------------------------------------------ getting out: road simulation + rail in the water
-# OSM falls back to the road class when a road has no name
-road = lambda n: f"An unnamed {n} road" if n in {"motorway", "trunk", "primary", "secondary", "tertiary", "residential",
-                                                   "unclassified", "service", "living_street", "footway", "path", "track"} else n
-ev = EVAC[(EVAC.municipality == t.municipality) & (EVAC.area == t.area)]
-inf = INFRA[(INFRA.municipality == t.municipality) & (INFRA.area == t.area)]
-rail_km = inf.loc[inf.kind == "rail", "km_in_flood"].sum()
-stations = int(inf.loc[inf.kind == "station", "count"].sum())
-bridges = int(inf.loc[inf.kind.isin(["bridge_road", "bridge_rail"]), "count"].sum())
-rows = []
-if len(ev):
-    e = ev.iloc[0]
-    rows += [("<b>Leave the 2021 water on foot</b>", f"Half the residents within {e.exit_med_min_4kmh:.0f} min, 9 in 10 within "
-              f"{e.exit_p90_min_4kmh:.0f} min; {e.exit_p90_min_3kmh:.0f} min at an older person's pace (3 km/h).",
-              f"<b>{e.exit_p90_min_4kmh:.0f} min</b>"),
-             ("<b>Reach the shelter</b>", f"On foot or by bus: half within {e.route_med_min:.0f} min, 9 in 10 within "
-              f"{e.route_p90_min:.0f} min. Bus at 30 km/h without boarding: a minimum.", f"<b>{e.route_p90_min:.0f} min</b>"),
-             ("<b>Routes back through the water</b>", f"{e.reroute_share:.0%} of residents would cross the 2021 water again "
-              f"on the way to their shelter, over {int(e.flood_bridges_used)} bridge{'s' if e.flood_bridges_used != 1 else ''} in it. Move them before the river "
-              "rises.", f"<b>{e.reroute_share:.0%}</b>"),
-             ("<b>Busiest road</b>", f"{road(e.busiest_road)}: about {about(e.busiest_road_people)} people "
-              f"{'on foot' if e.busiest_road_mode == 'walk' else 'by bus'}. Put a marshal there.", "")]
-rows.append(("<b>Trains</b>", f"{rail_km:.1f} km of track and {stations} station{'s' if stations != 1 else ''} sat in the 2021 "
-             "water: no train evacuation from here." if rail_km >= .1 else "No railway in the 2021 water here.",
-             f"<b>{bridges}</b> bridges" if bridges else ""))
-core.group(rows, "Getting out")
-st.html("<p class='asof'>" + ("Road simulation on today's OpenStreetMap roads: residents spread evenly over the streets "
-        "in the 2021 water, walking 4 km/h, each sent to the shelter in the plan. " if len(ev) else
-        "Road simulation only for towns with at least 300 residents in the water. ")
-        + "Bridges: road and rail bridges in the 2021 water today; in the water does not mean damaged.</p>")
 st.space("small")
 
 # ------------------------------------------------------------------ map + shelter list
@@ -334,8 +314,37 @@ def spare_beds():
 spare_beds()
 st.space("medium")
 
-# ------------------------------------------------------------------ the four steps that broke in 2021
-first, order, msg, prep = st.tabs(["Evacuate first", "Who gives the order", "Warning message", "Plan and drill"])
+# ------------------------------------------------------------------ the steps that broke in 2021, one tab each
+
+def getting_out():
+    """Road simulation (towns with at least 300 residents in the water) and today's rail and bridges in the water."""
+    rows = []
+    if len(ev):
+        e = ev.iloc[0]
+        rows += [("<b>Leave the 2021 water on foot</b>", f"Half the residents within {e.exit_med_min_4kmh:.0f} min, 9 in 10 within "
+                  f"{e.exit_p90_min_4kmh:.0f} min; {e.exit_p90_min_3kmh:.0f} min at an older person's pace (3 km/h).",
+                  f"<b>{e.exit_p90_min_4kmh:.0f} min</b>"),
+                 ("<b>Reach the shelter</b>", f"On foot or by bus: half within {e.route_med_min:.0f} min, 9 in 10 within "
+                  f"{e.route_p90_min:.0f} min. Bus at 30 km/h without boarding: a minimum.", f"<b>{e.route_p90_min:.0f} min</b>"),
+                 ("<b>Routes back through the water</b>", f"{e.reroute_share:.0%} of residents would cross the 2021 water again "
+                  f"on the way to their shelter, over {int(e.flood_bridges_used)} bridge{'s' if e.flood_bridges_used != 1 else ''} in it. Move them before the river "
+                  "rises.", f"<b>{e.reroute_share:.0%}</b>"),
+                 ("<b>Busiest road</b>", f"{road(e.busiest_road)}: about {about(e.busiest_road_people)} people "
+                  f"{'on foot' if e.busiest_road_mode == 'walk' else 'by bus'}. Put a marshal there.", "")]
+    rows.append(("<b>Trains</b>", f"{rail_km:.1f} km of track" + (f" and {stations} station{'s' if stations != 1 else ''}" if stations else "")
+                 + " sat in the 2021 water: no train evacuation from here." if rail_km >= .1 else "No railway in the 2021 water here.",
+                 f"<b>{bridges}</b> bridges" if bridges else ""))
+    core.group(rows)
+    st.html("<p class='asof'>" + ("Road simulation on today's OpenStreetMap roads: residents spread evenly over the streets "
+            "in the 2021 water, walking 4 km/h, each sent to the shelter in the plan. " if len(ev) else
+            "Road simulation only for towns with at least 300 residents in the water. ")
+            + "Bridges: road and rail bridges in the 2021 water today; in the water does not mean damaged.</p>")
+
+
+out, first, order, msg, prep = st.tabs(["Getting out", "Evacuate first", "Who gives the order", "Warning message",
+                                        "Plan and drill"])
+with out:
+    getting_out()
 
 with first:
     # homes with no upper floor: OBAT height under ~4.5 m; 2.5 m is OBAT's fill-in value, so it counts as unknown
