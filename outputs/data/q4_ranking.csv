@@ -1,0 +1,63 @@
+﻿rank,municipality,area,source,people,covered,no_shelter,why,no_reach,full,people_first_pass,no_shelter_first_pass,hospitals_carehomes_flooded,schools_flooded,vulnerable_sites,q2_evidence,lon,lat
+1,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,observed (EMS 2021),15933,4864,11069,shelters full,8,11061,4514.0,357.0,7,11,(no name in OSM); Augustinum Seniorenresidenz Bad Neuenahr; DRK Fachklinik Bad Neuenahr; Dr. v. Ehrenwall'sche Klinik; Krankenhaus Maria Hilf Bad Neuenahr-Ahrweiler; Orthopädische Fachklinik Kurköln; Villa Sibilla,pending (researchers),7.1228,50.5291
+2,Pepinster (BE),vesdre,MODELLED (EFAS 100-yr),3318,900,2418,shelters full,590,1828,3133.0,2234.0,0,4,,pending (researchers),5.7981,50.5714
+3,"Schleiden, Stadt (DE)",schleiden,observed (EMS 2021),3477,1179,2298,shelters too far,2159,139,3477.0,2298.0,2,4,Franziskus - Haus; Lebenshilfe HPZ,pending (researchers),6.4542,50.5597
+4,Trooz (BE),vesdre,MODELLED (EFAS 100-yr),2483,186,2297,shelters full,54,2243,2354.0,2167.0,0,3,,pending (researchers),5.6815,50.5683
+5,Kall (DE),schleiden,observed (EMS 2021),1780,79,1701,shelters too far,1188,513,1780.0,1701.0,1,2,EvA Pflegewohnhaus,pending (researchers),6.5585,50.5158
+6,"Sinzig, Stadt (DE)",ahr,observed (EMS 2021),2033,707,1326,shelters full,0,1326,2.0,0.0,0,3,,pending (researchers),7.2187,50.522
+7,Limburg (BE),vesdre,MODELLED (EFAS 100-yr),1405,392,1014,shelters full,18,996,1309.0,917.0,0,2,,pending (researchers),5.9382,50.6155
+8,Dernau (DE),ahr,observed (EMS 2021),1215,201,1014,shelters full,253,761,1210.0,1009.0,0,1,,pending (researchers),7.0458,50.5241
+9,Altenahr (DE),ahr,observed (EMS 2021),817,52,765,shelters full,1,764,800.0,748.0,1,0,Ahrschleife Seniorenzentrum,pending (researchers),6.988,50.5235
+10,Theux (BE),vesdre,MODELLED (EFAS 100-yr),563,143,420,shelters full,0,420,551.0,408.0,0,0,,pending (researchers),5.8128,50.5011
+11,Chaudfontaine (BE),vesdre,MODELLED (EFAS 100-yr),2989,2734,255,shelters full,0,255,2827.0,205.0,0,3,,pending (researchers),5.6332,50.5772
+12,Rech (DE),ahr,observed (EMS 2021),219,0,220,shelters full,110,110,219.0,219.0,0,0,,pending (researchers),7.0367,50.5126
+13,Schuld (DE),ahr,observed (EMS 2021),196,0,196,shelters too far,196,0,7.0,7.0,0,0,,pending (researchers),6.8844,50.4489
+14,Mayschoß (DE),ahr,observed (EMS 2021),166,32,134,shelters full,0,134,32.0,0.0,0,0,,pending (researchers),7.0174,50.5192
+15,Hönningen (DE),ahr,observed (EMS 2021),73,8,64,shelters too far,64,0,71.0,63.0,0,1,,pending (researchers),6.9472,50.4619
+16,Insul (DE),ahr,observed (EMS 2021),125,75,50,shelters full,0,50,125.0,50.0,0,0,,pending (researchers),6.9096,50.4398
+17,Dison (BE),vesdre,MODELLED (EFAS 100-yr),236,196,39,shelters too far,39,0,236.0,39.0,0,0,,pending (researchers),5.8763,50.6131
+18,Roermond (NL),venlo,observed (EMS 2021),125,92,33,shelters too far,33,0,125.0,33.0,0,0,,pending (researchers),6.017,51.2105
+19,Verviers (BE),vesdre,MODELLED (EFAS 100-yr),4703,4674,29,shelters too far,28,1,4628.0,28.0,0,4,,pending (researchers),5.8725,50.5922
+20,Müsch (DE),ahr,observed (EMS 2021),22,0,22,shelters too far,22,0,,,0,0,,pending (researchers),6.8303,50.3862
+21,Fuchshofen (DE),ahr,observed (EMS 2021),20,0,20,shelters too far,20,0,,,0,0,,pending (researchers),6.8573,50.4245
+22,Olne (BE),vesdre,MODELLED (EFAS 100-yr),45,27,18,shelters full,0,18,45.0,18.0,0,0,,pending (researchers),5.7381,50.5902
+23,Rochefort (BE),rochefort,observed (EMS 2021),15,0,15,shelters too far,15,0,13.0,13.0,0,0,,pending (researchers),5.1689,50.162
+24,Wezet (BE),liege,observed (EMS 2021),126,112,14,shelters full,0,14,126.0,14.0,0,0,,pending (researchers),5.6993,50.7408
+25,Hotton (BE),rochefort,observed (EMS 2021),10,0,10,shelters too far,10,0,9.0,9.0,0,0,,pending (researchers),5.4367,50.2669
+26,Maastricht (NL),liege,observed (EMS 2021),14,7,7,shelters too far,7,0,,,0,0,,pending (researchers),5.6998,50.8605
+27,La Roche-en-Ardenne (BE),rochefort,observed (EMS 2021),7,0,7,shelters too far,7,0,2.0,2.0,0,0,,pending (researchers),5.5621,50.1573
+28,Inden (DE),eschweiler,observed (EMS 2021),6,0,6,shelters too far,6,0,6.0,6.0,0,0,,pending (researchers),6.3744,50.864
+29,Neupré (BE),liege,observed (EMS 2021),5,0,5,shelters too far,5,0,5.0,5.0,0,0,,pending (researchers),5.493,50.5459
+30,Blankenheim (DE),ahr,observed (EMS 2021),3,0,3,shelters too far,3,0,,,0,0,,pending (researchers),6.6912,50.4014
+31,Esneux (BE),liege,observed (EMS 2021),37,35,2,shelters too far,2,0,33.0,2.0,0,0,,pending (researchers),5.5752,50.5432
+32,Dümpelfeld (DE),ahr,observed (EMS 2021),2,0,2,shelters full,0,2,2.0,2.0,0,0,,pending (researchers),6.9467,50.4397
+33,Wershofen (DE),ahr,observed (EMS 2021),2,0,2,shelters too far,2,0,,,0,0,,pending (researchers),6.8278,50.4435
+34,Maasmechelen (BE),liege,observed (EMS 2021),1,0,1,shelters too far,1,0,1.0,1.0,0,0,,pending (researchers),5.6607,50.9587
+35,Maasgouw (NL),venlo,observed (EMS 2021),1,0,1,shelters too far,1,0,1.0,1.0,0,0,,pending (researchers),5.8938,51.1579
+36,"Erftstadt, Stadt (DE)",erftstadt,observed (EMS 2021),2615,2615,0,-,0,0,2615.0,0.0,4,1,Marien-Hospital; MÜNCH - Stift - APZ; Schönes Leben Erftstadt; TELOS Fachklinik Liblar,pending (researchers),6.7785,50.7952
+37,Luik (BE),vesdre,MODELLED (EFAS 100-yr),4105,4104,0,-,0,0,4003.0,0.0,0,2,,pending (researchers),5.5949,50.6263
+38,Venlo (NL),venlo,observed (EMS 2021),234,234,0,-,0,0,234.0,0.0,0,0,,pending (researchers),6.1527,51.393
+39,Ahrbrück (DE),ahr,observed (EMS 2021),171,171,0,-,0,0,152.0,0.0,0,0,,pending (researchers),6.98,50.4782
+40,"Bad Münstereifel, Stadt (DE)",euskirchen,observed (EMS 2021),161,161,0,-,0,0,161.0,0.0,0,0,,pending (researchers),6.8205,50.5307
+41,"Euskirchen, Stadt (DE)",euskirchen,observed (EMS 2021),87,87,0,-,0,0,87.0,0.0,0,0,,pending (researchers),6.8094,50.6319
+42,"Wassenberg, Stadt (DE)",wassenberg,observed (EMS 2021),76,76,0,-,0,0,76.0,0.0,0,0,,pending (researchers),6.1403,51.1117
+43,"Eschweiler, Stadt (DE)",eschweiler,observed (EMS 2021),57,57,0,-,0,0,57.0,0.0,0,2,,pending (researchers),6.2713,50.8305
+44,Oupeye (BE),liege,observed (EMS 2021),29,29,0,-,0,0,28.0,0.0,0,0,,pending (researchers),5.6407,50.7148
+45,Weilerswist (DE),erftstadt,observed (EMS 2021),18,18,0,-,0,0,18.0,0.0,0,0,,pending (researchers),6.8511,50.7396
+46,Esneux (BE),vesdre,MODELLED (EFAS 100-yr),16,16,0,-,0,0,16.0,0.0,0,0,,pending (researchers),5.5752,50.5432
+47,Peel en Maas (NL),venlo,observed (EMS 2021),13,13,0,-,0,0,13.0,0.0,0,0,,pending (researchers),5.9823,51.3297
+48,"Stolberg (Rhld.), Kupferstadt (DE)",eschweiler,observed (EMS 2021),13,13,0,-,0,0,13.0,0.0,0,1,,pending (researchers),6.2679,50.7459
+49,Hamoir (BE),rochefort,observed (EMS 2021),11,11,0,-,0,0,11.0,0.0,0,0,,pending (researchers),5.5441,50.436
+50,"Heinsberg, Stadt (DE)",wassenberg,observed (EMS 2021),10,10,0,-,0,0,10.0,0.0,0,0,,pending (researchers),6.106,51.0633
+51,Bitsingen (BE),liege,observed (EMS 2021),4,4,0,-,0,0,4.0,0.0,0,0,,pending (researchers),5.6215,50.7712
+52,Kelmis (BE),liege,observed (EMS 2021),4,4,0,-,0,0,4.0,0.0,0,0,,pending (researchers),6.0206,50.7247
+53,Kinrooi (BE),liege,observed (EMS 2021),3,3,0,-,0,0,,,0,0,,pending (researchers),5.7409,51.1542
+54,Riemst (BE),liege,observed (EMS 2021),3,3,0,-,0,0,,,0,0,,pending (researchers),5.6045,50.8045
+55,Antweiler (DE),ahr,observed (EMS 2021),2,2,0,-,0,0,,,0,0,,pending (researchers),6.8275,50.4065
+56,Durbuy (BE),rochefort,observed (EMS 2021),2,2,0,-,0,0,2.0,0.0,0,0,,pending (researchers),5.5099,50.364
+57,Maasgouw (NL),liege,observed (EMS 2021),1,1,0,-,0,0,,,0,0,,pending (researchers),5.8938,51.1579
+58,Rendeux (BE),rochefort,observed (EMS 2021),1,1,0,-,0,0,,,0,0,,pending (researchers),5.5259,50.2128
+59,Horst aan de Maas (NL),venlo,observed (EMS 2021),1,1,0,-,0,0,1.0,0.0,0,0,,pending (researchers),6.0216,51.4447
+60,Leudal (NL),venlo,observed (EMS 2021),1,1,0,-,0,0,1.0,0.0,0,0,,pending (researchers),5.8983,51.2382
+61,Roerdalen (NL),venlo,observed (EMS 2021),1,1,0,-,0,0,1.0,0.0,0,0,,pending (researchers),6.032,51.1428
+62,"Kerpen, Kolpingstadt (DE)",erftstadt,observed (EMS 2021),1,1,0,-,0,0,1.0,0.0,0,0,,pending (researchers),6.6698,50.8741
