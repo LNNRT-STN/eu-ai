@@ -1,6 +1,6 @@
 """Priority score per commune for the home page (views/briefing.py), and the July 2021 river replay. Run after
 build_meuse.py, build_regions.py and build_sites.py: python src/build_priority.py → out/meuse/priority.geojson,
-out/meuse/replay_2021.json
+out/meuse/replay_2021.json, outputs/data/town_gauge.csv (--replay: only the last two)
 
 Score, 0–10, built so a mayor can redo it by hand (thresholds are the team's choice, not an official standard):
   people in the EFAS 100-year zone   ≥ 50: 1 · ≥ 500: 2 · ≥ 2,000: 3 · ≥ 10,000: 4
@@ -9,7 +9,7 @@ Score, 0–10, built so a mayor can redo it by hand (thresholds are the team's c
   care sites at risk                 1–2: 1 · 3 or more: 2
 Level: 7–10 act first · 4–6 prepare · 1–3 watch. Shelter pressure (people per dry candidate site within 5 km) is
 shown next to the score but kept out of it: OSM has no sites for the German side, which would inflate its score."""
-import json
+import json, sys
 from pathlib import Path
 
 import geopandas as gpd
@@ -25,12 +25,61 @@ LOCAL_NAME = {"Luik": "Liège", "Wezet": "Visé", "Limburg": "Limbourg", "Bitsin
 UNDER_DETECTED = {"Pepinster", "Verviers", "Chaudfontaine", "Trooz", "Liège"}  # as build_regions.py
 LEVELS = [(7, "Act first"), (4, "Prepare"), (1, "Watch"), (0, "Low")]
 pts = lambda v, steps: sum(v >= s for s in steps)
+# river that floods each town in outputs/data/app_towns.csv (worst variant); its gauge is that river's nearest point.
+# Close calls: Liège lies at the Vesdre/Ourthe/Meuse confluence, so Meuse · Liège (just downstream) carries all three;
+# Bitsingen (Geer) has no Geer point and the Geer meets the Meuse at Maastricht; Stolberg (Vicht) drains to the Inde;
+# Kelmis' Geul point is ~15 km downstream.
+TOWN_RIVER = {m: river for river, ms in {
+    "Ahr": ["Bad Neuenahr-Ahrweiler, Stadt (DE)", "Sinzig, Stadt (DE)", "Dernau (DE)", "Altenahr (DE)", "Rech (DE)",
+            "Schuld (DE)", "Ahrbrück (DE)", "Mayschoß (DE)", "Insul (DE)", "Hönningen (DE)", "Müsch (DE)",
+            "Fuchshofen (DE)", "Blankenheim (DE)", "Antweiler (DE)", "Dümpelfeld (DE)", "Wershofen (DE)"],
+    "Vesdre": ["Verviers (BE)", "Pepinster (BE)", "Chaudfontaine (BE)", "Trooz (BE)", "Limburg (BE)", "Dison (BE)",
+               "Olne (BE)"],
+    "Hoëgne": ["Theux (BE)"],
+    "Ourthe": ["Esneux (BE)", "Neupré (BE)", "Hamoir (BE)", "Hotton (BE)", "La Roche-en-Ardenne (BE)", "Durbuy (BE)",
+               "Rendeux (BE)"],
+    "Lesse": ["Rochefort (BE)"],
+    "Meuse": ["Luik (BE)", "Wezet (BE)", "Oupeye (BE)", "Maastricht (NL)", "Bitsingen (BE)", "Kinrooi (BE)", "Riemst (BE)",
+              "Maasgouw (NL)", "Maasmechelen (BE)", "Venlo (NL)", "Roermond (NL)", "Peel en Maas (NL)",
+              "Horst aan de Maas (NL)", "Leudal (NL)"],
+    "Rur": ["Wassenberg, Stadt (DE)", "Heinsberg, Stadt (DE)", "Roerdalen (NL)"],
+    "Inde": ["Eschweiler, Stadt (DE)", "Inden (DE)", "Stolberg (Rhld.), Kupferstadt (DE)"],
+    "Erft": ["Erftstadt, Stadt (DE)", "Euskirchen, Stadt (DE)", "Bad Münstereifel, Stadt (DE)", "Weilerswist (DE)",
+             "Kerpen, Kolpingstadt (DE)"],
+    "Urft": ["Schleiden, Stadt (DE)", "Kall (DE)"],
+    "Geul": ["Kelmis (BE)"]}.items() for m in ms}
 
 
 def km(lon0, lat0, lon, lat):
     p0, p, dl = np.radians(lat0), np.radians(lat), np.radians(np.asarray(lon) - lon0)
     return 6371 * np.arccos(np.clip(np.sin(p0) * np.sin(p) + np.cos(p0) * np.cos(p) * np.cos(dl), -1, 1))
 
+
+def replay():
+    """GloFAS river flow 10–20 July 2021 at every forecast point (the "forecast" the home page replays), and each
+    town's river point."""
+    r = forecast._get(forecast.FLOOD, forecast.GAUGES, retries=5, daily="river_discharge", start_date="2021-07-10",
+                      end_date="2021-07-20")
+    (DST / "replay_2021.json").write_text(json.dumps({k: dict(zip(v["daily"]["time"], v["daily"]["river_discharge"]))
+                                                      for k, v in r.items()}, indent=1))
+    t = pd.read_csv(OUT.parent.parent / "outputs" / "data" / "app_towns.csv").query("variant == 'worst'")
+    rows = []
+    for m, area, lon, lat in t[["municipality", "area", "lon", "lat"]].itertuples(index=False):
+        river = TOWN_RIVER.get(m)
+        g = {k: v for k, v in forecast.GAUGES.items() if k.split(" · ")[0] == river}
+        d = {k: km(lon, lat, v[1], v[0]) for k, v in g.items()}
+        best = min(d, key=d.get) if d else None
+        rows.append({"municipality": m, "area": area, "gauge": best, "km": round(d[best], 1) if best else None,
+                     "river": river})
+    out = pd.DataFrame(rows)
+    out.to_csv(OUT.parent.parent / "outputs" / "data" / "town_gauge.csv", index=False)
+    if out.gauge.isna().any():
+        print("no river point:", out[out.gauge.isna()].municipality.tolist())
+
+
+if "--replay" in sys.argv[1:]:
+    replay()
+    sys.exit()
 
 com = pd.read_parquet(DST / "communes.parquet")
 zone, obs = com[com.lens == "rp100"].set_index("lau_id"), com[com.lens == "obs"].set_index("lau_id")
@@ -69,7 +118,4 @@ print(p.groupby("level").size().to_dict())
 print(p.sort_values(["score", "people"], ascending=False)[["commune", "country", "people", "share", "hit_2021", "care",
                                                             "score", "level", "dry_5km"]].head(15).to_string())
 
-# GloFAS river flow 10–20 July 2021 at the ten forecast points: the "forecast" the home page replays
-r = forecast._get(forecast.FLOOD, forecast.GAUGES, daily="river_discharge", start_date="2021-07-10", end_date="2021-07-20")
-(DST / "replay_2021.json").write_text(json.dumps({k: dict(zip(v["daily"]["time"], v["daily"]["river_discharge"]))
-                                                  for k, v in r.items()}, indent=1))
+replay()

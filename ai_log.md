@@ -158,6 +158,12 @@ re-runnable script in `notebooks/` (`pipeline.py`, `osm_extract.py`, `dq_report.
 - How we checked it: found and not-found paths rendered; Ahrstraße 2, Ahrbrück → DüNaLü, by bus, about 15 min (shelter from Ahrbrück's own 10 km plan; road distance = straight line × 1.3, ratio measured 1.2-1.4 in the road simulation). st.map dots were invisible (metre-sized): replaced by a pydeck map with a home→shelter line.
 - Result: "not on the list" is never presented as "safe": the satellite missed water in narrow valleys, said on the page.
 
+## 28. River points for every town (Ahr, Erft, Urft, Hoëgne, Ourthe, Geul)
+- Prompt/intent: the replay must drive every town's alert level; the worst-hit towns had no GloFAS point.
+- AI output (short): an agent added 9 GloFAS points (Open-Meteo, same method: highest-flow 0.05° cell near the town) with 2-year flows, the model's own 2021 peaks and the 10-20 July replay; outputs/data/town_gauge.csv maps all 62 towns to the point on their own river.
+- How we checked it: Ahr peaks on 14 July at 5-6× its 2-year flow (Schuld 5.2, Altenahr 5.8, Bad Bodendorf 6.1); the Bad Bodendorf cell was picked by hand because the neighbouring Rhine cells carry ~2,400 m³/s. Flagged as weak: Urft at Gemünd peaks at only 44 m³/s (cell above the reservoir; Schleiden/Kall alerts may come late), Geul point 18 km from Kelmis, Stolberg's Vicht not resolved.
+- Result: approximate matches (Kall 15 km; Bitsingen on the Geer uses Meuse · Liège) kept and labelled.
+
 ## Data-cleaning decisions (from *Python for Data Analysis* ch.7)
 - Duplicates: overlapping flood shapes dissolved; OSM objects merged per campus; a building in two study areas counted once.
 - Missing values: analysed and reported per area (book p.210), not silently filled.
