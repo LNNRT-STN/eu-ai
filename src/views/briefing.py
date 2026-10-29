@@ -46,7 +46,7 @@ if soon:
     by = pd.Series(soon, index=[int((peak[g] - day).days * 24) for g in soon]).groupby(level=0).agg(list)
     detail += " " + " ".join(f"Peak in {h} h: {place(gs)}." for h, gs in by.items())
 color = forecast.LEVELS[3 if soon and not high else int(now.max())][1] if now.max() or soon else core.SHELTER
-st.html(f"<div class='banner' style='--halo:{color}33'><i class='dot' style='background:{color}'></i><div>"
+st.html(f"<div class='banner' style='--c:{color}'><i class='dot'></i><div>"
         f"<h2>{head}</h2><p>{detail.strip()}</p><small>Replay day {day:%a %d %b %Y} · training scenario, not a warning · "
         "Live outlook today: " + ("unavailable" if gauges is None else core.status(gauges, rain, err)[1].lower())
         + "</small></div></div>")
@@ -58,13 +58,14 @@ dry = sites[(sites.role == "shelter") & ((side == "All") | (sites.country == sid
 first = p[p.level == "Act first"]
 core.facts([
     (fmt(len(first)), f"<strong>communes act first</strong> (score 7+): {', '.join(first.commune.head(3)) or 'none'}"
-                      + ("…" if len(first) > 3 else "")),
+                      + ("…" if len(first) > 3 else ""), core.PRIORITY["Act first"][0]),
     (about(p.people.sum()), f"<strong>people in the 100-year zone</strong>, across {fmt((p.people > 0).sum())} communes. "
-                            "2021 reached further in places."),
-    (fmt(len(ev)), "<strong>hospitals and care homes</strong> in or next to the zone. Slowest to evacuate."),
+                            "2021 reached further in places.", core.ZONE),
+    (fmt(len(ev)), "<strong>hospitals and care homes</strong> in or next to the zone. Slowest to evacuate.",
+     core.EVACUATE, True),
     ("–" if side == "DE" else fmt(len(dry)), "<strong>dry schools and town halls</strong> could take people. Capacity "
                                              "unknown." if side != "DE" else
-     "<strong>dry sites unknown</strong>: OpenStreetMap has no schools or town halls here."),
+     "<strong>dry sites unknown</strong>: OpenStreetMap has no schools or town halls here.", core.SHELTER, True),
 ], "Source · " + " · ".join(core.AS_OF[k] for k in ("zone", "obs", "osm")))
 st.space("small")
 
@@ -133,7 +134,7 @@ with left:
                 *(["<b>People in the flood zone per ~1 km block</b>" + "".join(core.swatch(h, lab) for _, lab, h in core.CLASSES)]
                   if sel is not None else []),
                 "<b>River point</b>" + "".join(core.swatch(c, lab, True) for lab, c in forecast.LEVELS)
-                + core.swatch("rgba(0,113,227,.35)", "100-year flood zone")
+                + core.swatch(core.ZONE, "100-year flood zone")
                 + (core.swatch(core.EVACUATE, "Care site at risk", True) if show_care else "")
                 + (core.swatch(core.SHELTER, "Dry candidate site", True) if show_dry else ""))
 
@@ -143,8 +144,7 @@ with right:
                           f"{p.set_index('lau_id').commune[x]} · {p.set_index('lau_id').score[x]}/10",
                           label_visibility="collapsed")
     if sel is None:
-        core.group([(f"<span class='pill' style='background:{c};color:{'#1d1d1f' if lab in ('Watch', 'Low') else '#fff'}'>"
-                     f"{lab}</span>", what, f"{fmt((p.level == lab).sum())}") for lab, (c, what) in core.PRIORITY.items()],
+        core.group([(core.chip(lab, c), what, f"{fmt((p.level == lab).sum())}") for lab, (c, what) in core.PRIORITY.items()],
                    "Communes per level")
         st.space("small")
         with st.expander("How the score works"):
@@ -156,11 +156,9 @@ with right:
             ], foot="The team's thresholds, simple enough to redo by hand. Not an official standard.")
     else:
         c, what = core.PRIORITY[sel.level]
-        ink = "#1d1d1f" if sel.level in ("Watch", "Low") else "#fff"
         st.html(f"<div class='group'><div class='row'><div class='t'><b style='font-size:1.15rem'>{sel.commune}</b>"
                 f"<span>{core.COUNTRY[sel.country]} · {fmt(sel.population)} residents</span></div><div class='v'>"
-                f"<div class='score'>{sel.score}<small>/10</small></div><span class='pill' style='background:{c};"
-                f"color:{ink}'>{sel.level}</span></div></div><div class='row'><div class='t'><b>Next step</b><span>{what}"
+                f"<div class='score'>{sel.score}<small>/10</small></div>{core.chip(sel.level, c)}</div></div><div class='row'><div class='t'><b>Next step</b><span>{what}"
                 "</span></div></div></div>")
         st.space("small")
         core.group([
@@ -214,7 +212,8 @@ st.html("<div class='gh'>All communes, highest priority first · select a row to
 tab = p.drop(columns="geometry").sort_values(["score", "people"], ascending=False).reset_index(drop=True)
 st.session_state.table_ids = list(tab.lau_id)
 show = tab.assign(country=tab.country.map(core.COUNTRY))
-st.dataframe(show[["commune", "country", "level", "score", "people", "care", "dry_5km", "per_site"]],
+st.dataframe(core.paint(show[["commune", "country", "level", "score", "people", "care", "dry_5km", "per_site"]], "level",
+                        {k: c for k, (c, _) in core.PRIORITY.items()}),
              hide_index=True, height=380, on_select=from_table, selection_mode="single-row", key="table", column_config={
                  "commune": "Commune", "country": st.column_config.TextColumn("Country", width="small"),
                  "level": st.column_config.TextColumn("Priority", width="small"),
@@ -235,8 +234,9 @@ st.space("medium")
 st.html("<div class='gh'>When each river peaks · % of its own July 2021 peak</div>")
 order = ["Lesse · Rochefort", "Ourthe · Tabreux", "Vesdre · Verviers", "Vesdre · Chaudfontaine", "Meuse · Liège",
          "Meuse · Maastricht", "Meuse · Roermond", "Meuse · Venlo", "Inde · Eschweiler", "Rur · Wassenberg"]
-heat = pd.DataFrame([(t, g, flow.loc[t, g] / ref[g][1], forecast.LEVELS[lvl.loc[t, g]][0]) for t in flow.index
-                     for g in order], columns=["day", "gauge", "pct", "status"])
+heat = pd.DataFrame([(t, g, flow.loc[t, g] / ref[g][1], *forecast.LEVELS[lvl.loc[t, g]]) for t in flow.index
+                     for g in order], columns=["day", "gauge", "pct", "status", "fill"])
+heat["ink"] = heat.fill.map(core.ink)
 heat = heat[(heat.day >= DAY0) & (heat.day <= DAY0 + pd.Timedelta(days=5))]
 heat["d"] = heat.day.dt.strftime("%a %d")  # plain labels: a year-less time unit would print 2012 weekdays
 x = alt.X("d:O", sort=list(heat.d.unique()), title=None, axis=alt.Axis(labelAngle=0, orient="top"))
@@ -249,7 +249,7 @@ st.altair_chart(alt.layer(
         tooltip=[alt.Tooltip("gauge:N", title="River"), alt.Tooltip("day:T", format="%a %d %b"),
                  alt.Tooltip("status:N"), alt.Tooltip("pct:Q", format=".0%", title="Of July 2021 peak")]),
     base.mark_text(fontSize=11).encode(text=alt.Text("pct:Q", format=".0%"),
-                                       color=alt.condition("datum.pct >= 0.5", alt.value("#fff"), alt.value("#1d1d1f"))),
+                                       color=alt.Color("ink:N", scale=None)),
     alt.Chart(pd.DataFrame({"d": [f"{day:%a %d}"]})).mark_rect(fill=None, stroke="#1d1d1f", strokeWidth=2).encode(
         x=alt.X("d:O", sort=list(heat.d.unique()))),
 ).properties(height=330, background="#ffffff", padding={"left": 12, "right": 12, "top": 8, "bottom": 8}).configure_view(stroke=None)

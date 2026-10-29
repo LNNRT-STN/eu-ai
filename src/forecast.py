@@ -19,8 +19,10 @@ GAUGES = {"Meuse · Liège": (50.675, 5.625), "Meuse · Maastricht": (50.925, 5.
 # headwaters where the July 2021 rain fell
 RAIN_AREAS = {"Upper Vesdre (Eupen)": (50.55, 6.05), "Upper Ourthe": (50.25, 5.65), "Eifel / upper Rur": (50.55, 6.35),
               "Amblève (Stavelot)": (50.40, 5.93)}
-LEVELS = [("Normal", "#8db8ec"), ("Above 2-year flood", "#f5a47d"), ("Above half of July 2021", "#eb6834"),
-          ("At or above July 2021", "#7a2c10")]
+# river status in the water family, light blue → deep violet (EFAS marks its severe level purple): never the orange
+# of residents or the red/amber of commune priority, so the three keys on one map can't be confused
+LEVELS = [("Normal", "#b9d3f2"), ("Above 2-year flood", "#7c9cf0"), ("Above half of July 2021", "#6c3fd1"),
+          ("At or above July 2021", "#3f1170")]
 
 
 def _get(url, pts, **params):
