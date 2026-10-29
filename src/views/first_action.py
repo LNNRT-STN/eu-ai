@@ -69,7 +69,12 @@ sel = None if pick in (None, "All") else top[top.short == pick].iloc[0]
 
 focus = None                                   # the site or shelter clicked in a list, shown on the map
 if sel is not None:
-    sites = care[(care.town == sel["name"]) & (care.area == sel.area)].reset_index(drop=True)
+    # evacuation order: most of the site under water first; on a tie, hospitals before care homes
+    sites = (care[(care.town == sel["name"]) & (care.area == sel.area)]
+             .assign(_h=lambda d: (d.type != "hospital").astype(int))
+             .sort_values(["share_of_site_flooded", "_h", "name"], ascending=[False, True, True])
+             .drop(columns="_h").reset_index(drop=True))
+    sites.insert(0, "order", range(1, len(sites) + 1))
     near = shel[shel.area == sel.area].assign(km=lambda d: core.km(sel.lon, sel.lat, d.lon, d.lat))
     near = near[near.km <= 6].sort_values("capacity_central", ascending=False).reset_index(drop=True)
     near["label"] = [n if isinstance(n, str) else f"Unnamed {c}" for n, c in zip(near.name, near.cat)]
@@ -171,9 +176,10 @@ with right:
                 f"<span>with no shelter place: {why}</span></div></div>")
         h_e = 36 * min(len(sites), 4) + 38 if len(sites) else 0
         if len(sites):
-            st.dataframe(sites.assign(pct=sites.share_of_site_flooded * 100)[["name", "pct"]], key=kE,
+            st.dataframe(sites.assign(pct=sites.share_of_site_flooded * 100)[["order", "name", "pct"]], key=kE,
                          on_select=lambda: clicked(kE, "evac"), selection_mode="single-row", hide_index=True,
                          height=h_e, column_config={
+                             "order": st.column_config.NumberColumn("#", width=40),
                              "name": st.column_config.TextColumn("Evacuate first", width="medium"),
                              "pct": st.column_config.NumberColumn("Under water", format="%d%%", width="small")})
         st.dataframe(near[["label", "capacity_central"]], key=kS, on_select=lambda: clicked(kS, "shel"),
@@ -181,7 +187,8 @@ with right:
                      column_config={"label": st.column_config.TextColumn("Dry shelters nearby", width="medium"),
                                     "capacity_central": st.column_config.NumberColumn("Places", format="localized",
                                                                                       width="small")})
-        st.html("<p class='asof'>Click a name to find it on the map. Places are estimates.</p>")
+        st.html("<p class='asof'>Click a name to find it on the map. Order: most of the site under water first, "
+                "hospitals before care homes; confirm residents and mobility with each operator. Places are estimates.</p>")
 st.space("small")
 
 # 4. next steps
