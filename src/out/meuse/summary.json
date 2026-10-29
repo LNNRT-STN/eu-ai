@@ -9,40 +9,40 @@
   "obs": {
    "buildings": 558,
    "residential": 506,
-   "residents": 677,
+   "residents": 680,
    "communes": 36,
    "by_country": {
     "BE": {
      "buildings": 214,
-     "residents": 304
+     "residents": 256
     },
     "NL": {
      "buildings": 222,
-     "residents": 209
+     "residents": 254
     },
     "DE": {
      "buildings": 122,
-     "residents": 163
+     "residents": 170
     }
    }
   },
   "rp100": {
    "buildings": 144531,
    "residential": 137001,
-   "residents": 262515,
+   "residents": 265557,
    "communes": 68,
    "by_country": {
     "BE": {
      "buildings": 84304,
-     "residents": 158228
+     "residents": 165588
     },
     "NL": {
      "buildings": 56421,
-     "residents": 98658
+     "residents": 94406
     },
     "DE": {
      "buildings": 3806,
-     "residents": 5629
+     "residents": 5564
     }
    }
   }

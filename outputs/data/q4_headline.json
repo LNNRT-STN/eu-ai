@@ -2,6 +2,7 @@
   "main": {
     "observed": {
       "people": 16048,
+      "people_2025": 15857,
       "sheltered": 9508,
       "no_shelter": 6539,
       "too_far": 3852,
@@ -10,10 +11,13 @@
         4615,
         12155
       ],
-      "coordination_gain": 763
+      "coordination_gain": 763,
+      "bus_covered": 15944,
+      "bus_no_shelter": 104
     },
     "modelled_vesdre": {
       "people": 19102,
+      "people_2025": 19250,
       "sheltered": 13084,
       "no_shelter": 6018,
       "too_far": 729,
@@ -22,7 +26,9 @@
         2381,
         9008
       ],
-      "coordination_gain": 920
+      "coordination_gain": 920,
+      "bus_covered": 19101,
+      "bus_no_shelter": 1
     },
     "sites": {
       "vulnerable": 10,
@@ -34,6 +40,7 @@
   "worst": {
     "observed": {
       "people": 29951,
+      "people_2025": 29721,
       "sheltered": 10962,
       "no_shelter": 18990,
       "too_far": 4116,
@@ -42,10 +49,13 @@
         12326,
         24682
       ],
-      "coordination_gain": 303
+      "coordination_gain": 303,
+      "bus_covered": 29847,
+      "bus_no_shelter": 104
     },
     "modelled_vesdre": {
       "people": 19864,
+      "people_2025": 20012,
       "sheltered": 13372,
       "no_shelter": 6491,
       "too_far": 729,
@@ -54,7 +64,9 @@
         2747,
         9608
       ],
-      "coordination_gain": 1014
+      "coordination_gain": 1014,
+      "bus_covered": 19863,
+      "bus_no_shelter": 1
     },
     "sites": {
       "vulnerable": 15,

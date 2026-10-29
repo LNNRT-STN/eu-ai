@@ -1,19 +1,20 @@
 """Action dashboard for crisis and risk managers in the July 2021 flood areas. Reads the cleaned data in
-outputs/data; the river outlook needs forecast.py (once) and build_priority.py (replay). Run: streamlit run src/dashboard.py"""
+outputs/data; the river outlook needs forecast.py (once) and build_priority.py (replay). The First action page reads
+notebooks/pipeline.py, dq_report.py and q4_ranking.py outputs. Run: streamlit run src/dashboard.py"""
 import streamlit as st
 
 import core
 
-st.set_page_config(page_icon=":material/water:", layout="wide",
+st.set_page_config(page_title="Flood desk", page_icon=":material/water:", layout="wide",
                    initial_sidebar_state="auto")
 core.style()
 
 nav = st.navigation({
-    "": [st.Page("views/briefing.py", title="Briefing", icon=":material/space_dashboard:", default=True)],
-    "Act": [st.Page("views/rivers.py", title="Rivers", icon=":material/water:"),
-            st.Page("views/risk_areas.py", title="Risk areas", icon=":material/map:"),
-            st.Page("views/shelters.py", title="Shelters", icon=":material/home_health:"),
-            st.Page("views/shelter_plan.py", title="Shelter plan", icon=":material/route:")],
+    "": [st.Page("views/first_action.py", title="First action", icon=":material/flag:", default=True)],
+    "For analysts": [st.Page("views/briefing.py", title="Briefing", icon=":material/space_dashboard:"),
+                     st.Page("views/rivers.py", title="Rivers", icon=":material/water:"),
+                     st.Page("views/risk_areas.py", title="Risk areas", icon=":material/map:"),
+                     st.Page("views/shelters.py", title="Shelters", icon=":material/home_health:")],
     "Reference": [st.Page("views/then_now.py", title="2021 and today", icon=":material/history:"),
                   st.Page("views/limits.py", title="Data & limits", icon=":material/info:")],
 })

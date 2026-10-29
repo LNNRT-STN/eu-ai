@@ -1,5 +1,6 @@
 import streamlit as st
 
+import anna
 import core
 from core import fmt
 
@@ -30,9 +31,12 @@ limits = [
      "water is not the same as damaged. No age data."),
     ("Shelters are candidates", "OSM schools, sports halls and civic buildings with at least 200 m² of floor, dry in "
      "2021 and outside the EFAS 100-year zone. Capacity is floor area × usable share ÷ m² per person, not an official "
-     "figure. Sites above 20,000 m² (merged campuses, race circuits) count as 20,000 m²."),
+     "figure. Sites above 20,000 m² (merged campuses, race circuits) count as 20,000 m²; the First action page caps "
+     "oversized floors at the outlier fence instead. None is an official shelter."),
     ("Walking reach is a straight line", "1.5 km (1 and 2.5 km in the low and high cases). It understates walks in steep "
-     "valleys and ignores flooded roads and bridges."),
+     "valleys and ignores flooded roads and bridges. People who cannot walk need transport."),
+    ("The 100-year zone is a model", "EFAS ignores dikes and flood walls (overstates exposure in Dutch Limburg) and skips "
+     "streams under 500 km². It is not a forecast."),
     ("Care sites", "OSM hospitals, care homes and schools; only sites with at least 5 % of their area in the water count."),
     ("The outlook is a heads-up", "GloFAS (~5 km) handles the Meuse well, small valleys poorly; it puts the 2021 Vesdre "
      "peak far below what was observed. The ten river points are all in the Meuse basin: no outlook for the Ahr or "
@@ -57,5 +61,26 @@ st.dataframe(dq[["area", "indicator", "value", "warn_above", "likely_cause", "wh
                             "value": st.column_config.NumberColumn("Value", format="%.1f", width="small"),
                             "warn_above": st.column_config.NumberColumn("Warn above", format="%.1f", width="small"),
                             "likely_cause": "Likely cause", "who_can_fix": "Who can fix"})
+st.space("small")
+
+# how the numbers were checked: official figures first (outside view), then the model against the satellite
+head, towns, crit, shel, flood, summary, qc = anna.load()
+obs = summary[(summary.variant == "worst") & ~summary.area.isin(anna.MODELLED)].set_index("area")
+first = summary[summary.variant == "main"].set_index("area")
+be = obs.loc[["liege", "rochefort"]].buildings.sum()
+val = qc["efas_validation"]["ahr"]["RP100"]
+core.group([
+    ("<b>Ahr</b>", f"{core.fmt(obs.loc['ahr'].buildings)} buildings in the satellite water (all passes; "
+                   f"{core.fmt(first.loc['ahr'].buildings)} with the first pass). Official: "
+                   f"{anna.OFFICIAL['ahr'][0]} ({anna.OFFICIAL['ahr'][1]}).", "Lower, as expected"),
+    ("<b>Wallonia</b>", f"{core.fmt(be)} buildings in the satellite water. Official: {anna.OFFICIAL['wallonia'][0]} "
+                        f"({anna.OFFICIAL['wallonia'][1]}).", "Satellite misses most"),
+    ("<b>Venlo</b>", f"{core.fmt(obs.loc['venlo'].people_2020)} residents in the satellite water. Official: "
+                     f"{anna.OFFICIAL['venlo'][0]} ({anna.OFFICIAL['venlo'][1]}).", "Not comparable"),
+    ("<b>100-year model vs 2021, Ahr</b>", f"The model floods {val['recall']:.0%} of the buildings the satellite saw "
+                                           f"flooded; {val['precision']:.0%} of the buildings it floods were seen "
+                                           "flooded. 2021 went beyond the model.", "Rough proxy"),
+], "How we checked the numbers", "Official figures verified at the source document. Every check, and every error "
+                                 "the AI made and how it was caught: ai_log.md.")
 st.caption("Full method: outputs/data/README.md and docs/METHODOLOGY.md. Code written with Claude (Claude Code), "
            "checked by the team; see the AI sheet.")

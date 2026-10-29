@@ -1,0 +1,192 @@
+{
+  "area": "DE Ahr (EMSR517 AOI15)",
+  "exposed_in_prod": {
+    "buildings": 3287,
+    "people": 6894
+  },
+  "exposed_in_all": {
+    "buildings": 7167,
+    "people": 20109
+  },
+  "osm": {
+    "raw": 958,
+    "sites": 679,
+    "by_cat": {
+      "school": 251,
+      "civic": 215,
+      "sports hall": 174,
+      "care home": 24,
+      "hospital": 15
+    }
+  },
+  "critical_in_flood": [
+    {
+      "cat": "care home",
+      "name": "Ahrschleife Seniorenzentrum"
+    },
+    {
+      "cat": "care home",
+      "name": "Augustinum Seniorenresidenz Bad Neuenahr"
+    },
+    {
+      "cat": "care home",
+      "name": "(no name)"
+    },
+    {
+      "cat": "care home",
+      "name": "Villa Sibilla"
+    },
+    {
+      "cat": "hospital",
+      "name": "(no name)"
+    },
+    {
+      "cat": "hospital",
+      "name": "Dr. v. Ehrenwall'sche Klinik"
+    },
+    {
+      "cat": "hospital",
+      "name": "Krankenhaus Maria Hilf Bad Neuenahr-Ahrweiler"
+    },
+    {
+      "cat": "hospital",
+      "name": "DRK Fachklinik Bad Neuenahr"
+    },
+    {
+      "cat": "hospital",
+      "name": "Orthop\u00e4dische Fachklinik Kurk\u00f6ln"
+    },
+    {
+      "cat": "school",
+      "name": "(no name)"
+    },
+    {
+      "cat": "school",
+      "name": "Grundschule St. Martin"
+    },
+    {
+      "cat": "school",
+      "name": "St\u00e4dtische Kindertagesst\u00e4tte Rappelkiste Bachem"
+    },
+    {
+      "cat": "school",
+      "name": "Erich-K\u00e4stner-Realschule-Plus"
+    },
+    {
+      "cat": "school",
+      "name": "Peter-Joerres-Gymnasium"
+    },
+    {
+      "cat": "school",
+      "name": "Carpe Diem Privatschule"
+    },
+    {
+      "cat": "school",
+      "name": "(no name)"
+    },
+    {
+      "cat": "school",
+      "name": "(no name)"
+    },
+    {
+      "cat": "school",
+      "name": "Aloisius-Grundschule Ahrweiler"
+    },
+    {
+      "cat": "school",
+      "name": "Don-Bosco-Schule"
+    },
+    {
+      "cat": "school",
+      "name": "(no name)"
+    },
+    {
+      "cat": "school",
+      "name": "Philipp Freiherr von Boeselager Realschule Plus"
+    },
+    {
+      "cat": "school",
+      "name": "Haus 4"
+    },
+    {
+      "cat": "school",
+      "name": "Haus 1"
+    },
+    {
+      "cat": "school",
+      "name": "Geb\u00e4ude C"
+    },
+    {
+      "cat": "school",
+      "name": "Grundschule Bad Neuenahr"
+    },
+    {
+      "cat": "school",
+      "name": "Kindertagesst\u00e4tte Blandine-Merten-Haus"
+    },
+    {
+      "cat": "school",
+      "name": "Janusz-Korczak-Schule"
+    },
+    {
+      "cat": "school",
+      "name": "Kindergarten Stadt Sinzig"
+    },
+    {
+      "cat": "school",
+      "name": "Grundschule Sinzig"
+    },
+    {
+      "cat": "school",
+      "name": "Kita Abenteuerland"
+    },
+    {
+      "cat": "school",
+      "name": "Evangelische Kindertagesst\u00e4tte \u201eArche Noah\u201c"
+    }
+  ],
+  "coverage": {
+    "in_prod:low": {
+      "people": 6894,
+      "covered": 1384,
+      "no_reach": 1623,
+      "full": 3887,
+      "capacity": 62814
+    },
+    "in_prod:central": {
+      "people": 6894,
+      "covered": 4767,
+      "no_reach": 359,
+      "full": 1767,
+      "capacity": 98146
+    },
+    "in_prod:high": {
+      "people": 6894,
+      "covered": 6105,
+      "no_reach": 24,
+      "full": 765,
+      "capacity": 157034
+    },
+    "in_all:low": {
+      "people": 20109,
+      "covered": 2946,
+      "no_reach": 4844,
+      "full": 12318,
+      "capacity": 62814
+    },
+    "in_all:central": {
+      "people": 20109,
+      "covered": 7617,
+      "no_reach": 601,
+      "full": 11890,
+      "capacity": 98146
+    },
+    "in_all:high": {
+      "people": 20109,
+      "covered": 12131,
+      "no_reach": 236,
+      "full": 7741,
+      "capacity": 157034
+    }
+  }
+}
