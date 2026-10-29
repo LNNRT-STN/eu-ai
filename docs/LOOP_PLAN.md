@@ -27,12 +27,14 @@ close the 2021 governance gaps (roles, warning → instruction, plans and drills
 5. Housing age + 3D single-storey view in "Evacuate first" and the plan download.
 6. Getting out (road sim: time to leave the water, to the shelter, routes back through water, busiest road, trains) + map layers; rail row on Long term.
 7. Distill: Getting out in a tab, key fact in the verdict; copy fixes; detector clean.
+8. Safe check-in + door-knock list (addresses from OSM), drill mode, alert-feed placeholder.
 
 ## In progress (delegated, background agents; each writes only its own files)
 
 ## Backlog (highest value first)
-- NEXT (owner request; addresses landed: 89 % matched, NL 13 %): Safe check-in + door-knock list. Residents report "evacuated, I'm at X"; fire brigade sees
-  buildings in the water with no check-in, single-storey first, by sector, exportable. No names; local file only.
+- NEXT (owner request): controls in the left sidebar (one Town picker shared by all pages), Streamlit best practice,
+  minimal custom CSS: st.metric / st.container(border=True) / st.alert / markdown tables / :color[] legends instead of
+  custom HTML on Evacuation plan, Long term, Safe check-in, Offer a bed. Older "More" pages keep core helpers.
 - Wire each agent's output in as it lands; render; verify totals against app_towns.
 - "Better prepared than 2021?" one line on the page: brief Q2/Q4 asks it; only verified facts, else say "not verified".
 - Map: avoid label overlap of numbered shelters (town centre now marked).

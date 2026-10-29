@@ -123,6 +123,12 @@ re-runnable script in `notebooks/` (`pipeline.py`, `osm_extract.py`, `dq_report.
 - AI output (short): first screen = call list → town → verdict → three numbers → map; "Getting out" moved into a tab, its key fact (share of routes crossing the water again) moved into the verdict, which turns red when it is 50 % or more.
 - How we checked it: renders at 1440 and 390 px (Trooz, Bad Neuenahr-Ahrweiler); the impeccable detector is clean on all three new pages. Fixed copy where the card said "1.5–10 km away" but the list showed 11–12 km (10 km is from each home, the list from the town centre); dropped "0 stations".
 
+## 22. Safe check-in and door-knock list (owner request)
+- Prompt/intent: residents report they have left and where they are; fire crews see homes with no news and go there, single-storey first; alert delivery by SMS/phone shown where it would plug in.
+- AI output (short): an agent matched OSM addresses to the flooded OBAT buildings (89 % matched; NL 13 %; 14.7 % of matches over 15 m), `notebooks/addresses.py`; page `src/views/checkin.py`: resident form (street, number, where now, people, or "I need help leaving"), crew list and map (needs help → no news, single-storey first → left), CSV for crews, "Reached by alert: no feed yet", drill button (simulated check-ins tagged DRILL) and reset.
+- How we checked it: end-to-end in the browser: check-in saved; drill filled about 63 %; reset left only the real check-in. Found and fixed: drill rows stored numbers instead of addresses (index misalignment); 29 OSM addresses have a number but no street, now "House no. 23 (no street name)". Test data deleted.
+- Result: no names or phone numbers stored; check-ins stay local (data/, gitignored).
+
 ## Data-cleaning decisions (from *Python for Data Analysis* ch.7)
 - Duplicates: overlapping flood shapes dissolved; OSM objects merged per campus; a building in two study areas counted once.
 - Missing values: analysed and reported per area (book p.210), not silently filled.
