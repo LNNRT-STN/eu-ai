@@ -152,6 +152,12 @@ re-runnable script in `notebooks/` (`pipeline.py`, `osm_extract.py`, `dq_report.
 - Fixed: (P0) "44 schools" summed observed and modelled: now 26 (+18 modelled); (P0) "walk" metric vs the shelter table came from two different plans: labelled "walking check" vs "10 km plan"; (P0) shelters up to 16 km "within 10 km": column is now "Centre km", the limit is from each home; (P0) check-in "homes" counted addresses: now doors vs homes, Venlo note only for Dutch towns; (P1) one first-action sentence (call + book buses + move care homes), the All towns page no longer says "Do now" for a different action; (P1) last good river outlook kept on disk and shown with its time when Open-Meteo is down; (P1) "Better prepared than 2021?" answered from sourced desk research (partly); (P2) care sites and schools one purple on every map; "2–10 km" → "1.5–10 km".
 - Not changed: mobile tables still scroll sideways for the last columns (Streamlit dataframe); "Reached by alert" stays an explicit placeholder by owner decision.
 
+## 27. Phase 2: resident lookup, visual research
+- Prompt/intent: owner brief: one live tool for crisis room, residents, responders; residents look up their address and see whether to leave, where and how, or whether to host.
+- AI output (short): page `src/views/resident.py` (street search over OSM addresses in the 2021 water → leave / where / how / minutes, spare beds within 10 km, single-storey warning; not found → most likely outside, offer a bed, with the limit stated); desk research `docs/VISUAL_IDEAS.md` (12 ideas ranked by impact per hour, 5-minute storyboard).
+- How we checked it: found and not-found paths rendered; Ahrstraße 2, Ahrbrück → DüNaLü, by bus, about 15 min (shelter from Ahrbrück's own 10 km plan; road distance = straight line × 1.3, ratio measured 1.2-1.4 in the road simulation). st.map dots were invisible (metre-sized): replaced by a pydeck map with a home→shelter line.
+- Result: "not on the list" is never presented as "safe": the satellite missed water in narrow valleys, said on the page.
+
 ## Data-cleaning decisions (from *Python for Data Analysis* ch.7)
 - Duplicates: overlapping flood shapes dissolved; OSM objects merged per campus; a building in two study areas counted once.
 - Missing values: analysed and reported per area (book p.210), not silently filled.

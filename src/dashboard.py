@@ -13,6 +13,7 @@ nav = st.navigation({
     "": [st.Page("views/evacuate.py", title="Evacuation plan", icon=":material/directions_run:", default=True),
          st.Page("views/view3d.py", title="3D view", icon=":material/landscape:"),
          st.Page("views/long_term.py", title="Long term", icon=":material/construction:"),
+         st.Page("views/resident.py", title="Do I need to leave?", icon=":material/home_pin:"),
          st.Page("views/checkin.py", title="Safe check-in", icon=":material/how_to_reg:"),
          st.Page("views/host.py", title="Offer a bed", icon=":material/volunteer_activism:")],
     "More": [st.Page("views/first_action.py", title="All towns and care sites", icon=":material/flag:"),
@@ -22,7 +23,7 @@ nav = st.navigation({
                      st.Page("views/shelters.py", title="Shelters", icon=":material/home_health:")],
     "Reference": [st.Page("views/then_now.py", title="2021 and today", icon=":material/history:"),
                   st.Page("views/limits.py", title="Data & limits", icon=":material/info:")],
-})
+}, expanded=True)
 
 # one Town picker for every page that works on a town; _town keeps the choice while other pages are open
 TOWN_PAGES = {"Evacuation plan", "Safe check-in", "3D view"}
