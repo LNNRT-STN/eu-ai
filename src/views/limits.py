@@ -4,6 +4,8 @@ import anna
 import core
 from core import fmt
 
+core.style()  # the older analyst pages keep their custom look; the main pages use the theme only
+
 core.header("Data & limits", "What every number on this dashboard comes from, and what it cannot tell you.")
 st.space("small")
 

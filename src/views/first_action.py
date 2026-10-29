@@ -11,6 +11,8 @@ import anna
 import core
 from core import about, fmt
 
+core.style()  # the older analyst pages keep their custom look; the main pages use the theme only
+
 head, towns, crit, shel, flood, summary, qc = anna.load()
 recv, bus = anna.load_moves()
 V = "worst"                                               # all satellite passes: closest to official 2021 figures

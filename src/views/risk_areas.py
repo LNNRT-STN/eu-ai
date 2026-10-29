@@ -3,6 +3,8 @@ import streamlit as st
 import core
 from core import about, fmt
 
+core.style()  # the older analyst pages keep their custom look; the main pages use the theme only
+
 d = core.load()
 areas, towns, sites, shelters = d["areas"], d["towns"], d["sites"], d["shelters"]
 gauges, *_ = core.outlook()

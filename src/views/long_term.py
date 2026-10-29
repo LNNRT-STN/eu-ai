@@ -38,33 +38,15 @@ INFRABEL = "https://infrabel.be/sites/default/files/generated/files/report/Rappo
 BMV = "https://www.bmv.de/SharedDocs/DE/Artikel/K/zuege-fahren-wieder-gerolstein-koeln.html"
 WALREP = "https://www.wallonie.be/sites/default/files/2022-11/Inondations%20rapport%20de%20la%20commission%20parlementaire.pdf"
 
-src = lambda url, label, ok=True: (f"<a href='{url}' target='_blank'>{label}</a>"
-                                   + ("" if ok else " <span class='lt-partly'>partly verified</span>"))
+src = lambda url, label, ok=True: f"[{label}]({url})" + ("" if ok else " :orange-badge[partly verified]")
 
-st.html("""<style>
-.lt-partly{display:inline-block;font-size:.72rem;font-weight:600;color:#8a5a00;background:#fff4d6;border-radius:6px;
-  padding:0 .35rem;margin-left:.2rem;vertical-align:.08em}
-.lt{background:#fff;border-radius:14px;overflow:hidden}
-.lt .r{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.2fr) minmax(0,1.3fr);gap:1.2rem;padding:.9rem 1.1rem;
-  position:relative}
-.lt .r+.r::before{content:"";position:absolute;top:0;left:1.1rem;right:0;border-top:1px solid #e3e3e8}
-.lt .h{padding:.6rem 1.1rem;font-size:.78rem;font-weight:600;color:#6e6e73}
-.lt b{display:block;font-weight:600;color:#1d1d1f;font-size:.98rem;line-height:1.35}
-.lt span{display:block;color:#6e6e73;font-size:.88rem;line-height:1.45;margin-top:.15rem}
-.lt a{color:#0066cc}
-.lt span.lt-partly{display:inline-block;margin-top:0;color:#8a5a00}
-@media (max-width:900px){.lt .r{grid-template-columns:1fr;gap:.4rem}.lt .h{display:none}}
-</style>""")
-
-core.header("Long term", "What to fix before the next flood, and the money that already exists for it.")
-st.space("small")
-core.banner("#0071e3", "Rebuilding money exists; prevention and preparedness are where the gaps are",
+st.title("Long term")
+st.caption("What to fix before the next flood, and the money that already exists for it.")
+st.info("**Rebuilding money exists; prevention and preparedness are where the gaps are.** "
             f"In the data: {about(obs['no_shelter'])} residents in the 2021 water have no shelter place on foot "
             f"(plus {about(mod['no_shelter'])} modelled in the Vesdre), across {gap_towns} towns; {care} hospitals and "
             f"care homes sat in the water. Five years on, about a fifth of Germany's rebuilding fund is paid out, and "
-            f"the Ahr's three priority retention basins (about €300 m) have no funding.",
-            note=False)
-st.space("small")
+            f"the Ahr's three priority retention basins (about €300 m) have no funding.", icon=":material/info:")
 
 ROWS = [
     ("Shelter places out of walking reach",
@@ -106,22 +88,20 @@ ROWS = [
      f"({src(AHR, 'Wochenblatt', False)}). Wallonia: €13 m for retention basins in 2026 ({src(WAL, 'wallonie.be')}). "
      f"Limburg (NL): €600 m regional water-system agreement, 2022 ({src(WRL, 'Staatscourant', False)})."),
 ]
-st.html("<div class='lt'><div class='r h'><div>Gap</div><div>Measure</div><div>Money that exists</div></div>"
-        + "".join(f"<div class='r'><div><b>{g}</b><span>{e}</span></div><div><span style='color:#1d1d1f;margin:0'>{m}"
-                  f"</span></div><div><span style='margin:0'>{f}</span></div></div>" for g, e, m, f in ROWS)
-        + "</div>")
-st.space("medium")
+for g, e, m, f in ROWS:
+    with st.container(border=True):
+        c = st.columns([1.1, 1.2, 1.4])
+        c[0].markdown(f"**{g}**  \n{e}")
+        c[1].markdown(f":gray[Measure]  \n{m}")
+        c[2].markdown(f":gray[Money that exists]  \n{f}")
 
-core.group([
-    ("<b>EU Solidarity Fund</b>", f"Germany €612.6 m, Belgium €87.7 m, Netherlands €4.7 m, agreed Dec 2022 · "
-     f"{src(EC, 'European Commission')}", "Repair"),
-    ("<b>Germany: rebuilding fund (Aufbauhilfe 2021)</b>", f"Up to €30 bn; about €6.2 bn paid out by July 2026 "
-     f"(NRW €2.6 bn, RLP €2.5 bn) · {src(ZDF, 'ZDF, citing the finance ministry')}", "Repair"),
-    ("<b>North Rhine-Westphalia</b>", f"About €4.7 bn approved of about €12.3 bn available · {src(NRW, 'Land NRW')}",
-     "Repair"),
-    ("<b>Wallonia</b>", f"€2.8 bn direct cost to the regional budget; losses over €5 bn · {src(UVCW, 'UVCW')}",
-     "Repair"),
-], "Money already committed since 2021")
-st.html("<p class='asof'>External sources, not challenge data: desk research of 29 Oct 2026, every row in "
+st.subheader("Money already committed since 2021")
+st.markdown(f"""| Fund | Amount | For |
+|---|---|---|
+| **EU Solidarity Fund** | Germany €612.6 m, Belgium €87.7 m, Netherlands €4.7 m, agreed Dec 2022 · {src(EC, 'European Commission')} | Repair |
+| **Germany: rebuilding fund (Aufbauhilfe 2021)** | Up to €30 bn; about €6.2 bn paid out by July 2026 (NRW €2.6 bn, RLP €2.5 bn) · {src(ZDF, 'ZDF, citing the finance ministry')} | Repair |
+| **North Rhine-Westphalia** | About €4.7 bn approved of about €12.3 bn available · {src(NRW, 'Land NRW')} | Repair |
+| **Wallonia** | €2.8 bn direct cost to the regional budget; losses over €5 bn · {src(UVCW, 'UVCW')} | Repair |""")
+st.caption("External sources, not challenge data: desk research of 29 Oct 2026, every row in "
         "docs/BUDGETS.md with its URL. Amounts are copied as published and never added up across rows (different "
-        "scopes and dates). “Partly verified” means a secondary source or a search snippet: re-check before citing.</p>")
+        "scopes and dates). “Partly verified” means a secondary source or a search snippet: re-check before citing.")

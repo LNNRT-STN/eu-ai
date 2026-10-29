@@ -3,11 +3,11 @@ outputs/data; the river outlook needs forecast.py (once) and build_priority.py (
 notebooks/pipeline.py, dq_report.py and q4_ranking.py outputs. Run: streamlit run src/dashboard.py"""
 import streamlit as st
 
+import anna
 import core
 
 st.set_page_config(page_title="Flood desk", page_icon=":material/water:", layout="wide",
                    initial_sidebar_state="auto")
-core.style()
 
 nav = st.navigation({
     "": [st.Page("views/evacuate.py", title="Evacuation plan", icon=":material/directions_run:", default=True),
@@ -23,7 +23,18 @@ nav = st.navigation({
                   st.Page("views/limits.py", title="Data & limits", icon=":material/info:")],
 })
 
+# one Town picker for every page that works on a town; _town keeps the choice while other pages are open
+TOWN_PAGES = {"Evacuation plan", "Safe check-in", "3D view"}
 with st.sidebar:
+    if nav.title in TOWN_PAGES:
+        tw = anna.load()[1]
+        tw = tw[(tw.variant == "worst") & (tw.people >= 10)].sort_values("people", ascending=False)
+        st.session_state.setdefault("_town", tw.municipality.iloc[0])
+        st.session_state.town = st.session_state._town
+        lab = dict(zip(tw.municipality, tw.label + " · " + tw.people.map(core.about) + " in the 2021 water"))
+        st.selectbox("Town", list(lab), format_func=lab.get, key="town",
+                     on_change=lambda: st.session_state.update(_town=st.session_state.town))
+        st.divider()
     gauges, *_, fetched, err = core.outlook()
     st.caption("July 2021 flood areas · BE · NL · DE")
     if fetched is not None:

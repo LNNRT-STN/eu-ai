@@ -4,6 +4,8 @@ import streamlit as st
 import core
 from core import about, fmt
 
+core.style()  # the older analyst pages keep their custom look; the main pages use the theme only
+
 d = core.load()
 a = d["areas"][d["areas"].variant == "worst"]
 obs, vesdre = a[a.area != "vesdre"].sum(numeric_only=True), a[a.area == "vesdre"].iloc[0]

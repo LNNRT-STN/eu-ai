@@ -3,6 +3,8 @@ import pandas as pd
 import streamlit as st
 
 import core
+
+core.style()  # the older analyst pages keep their custom look; the main pages use the theme only
 import forecast
 from core import about, fmt
 

@@ -51,9 +51,10 @@ D = doors()
 munis = (towns[towns.variant == "worst"].sort_values("people", ascending=False).municipality
          .drop_duplicates().loc[lambda m: m.isin(D.municipality)].tolist())
 
-core.header("Safe check-in", "Residents say they have left. Fire crews see who has not, and go there first.")
-st.space("small")
-muni = st.selectbox("Town", munis, format_func=anna.town, key="ci_town")
+st.title("Safe check-in")
+st.caption("Residents say they have left. Fire crews see who has not, and go there first.")
+muni = st.session_state.get("town") if st.session_state.get("town") in munis else munis[0]
+st.header(anna.town(muni))
 here = D[D.municipality == muni]
 me, crew = st.tabs(["I have left my home", "Door-knock list for crews"])
 
@@ -87,8 +88,8 @@ with me:
                          "upstairs and call 112.")
             else:
                 st.success(f"Thank you. {door} is marked as left, so crews can skip it.")
-    st.html("<p class='asof'>No name or phone number is stored. In a real roll-out this form is reached from the link in "
-            "the BE-Alert or NL-Alert SMS, or by phone through the municipal help line.</p>")
+    st.caption("No name or phone number is stored. In a real roll-out this form is reached from the link in the "
+               "BE-Alert or NL-Alert SMS, or by phone through the municipal help line.")
 
 # ------------------------------------------------------------------ crews
 with crew:
@@ -122,14 +123,11 @@ with crew:
 
     n = L.status.value_counts()
     single_open = int((L.single & (L.status == "no news")).sum())
-    st.html("<div class='ev-n'>"
-            f"<div><b style='color:{core.EVACUATE}'>{fmt(n.get('needs help', 0))}</b><span><i>need help</i>: go "
-            "first</span></div>"
-            f"<div><b style='color:{core.PEOPLE}'>{fmt(n.get('no news', 0))}</b><span><i>no news</i>, "
-            f"{fmt(single_open)} of them single-storey</span></div>"
-            f"<div><b style='color:{core.SHELTER}'>{fmt(n.get('safe', 0))}</b><span><i>have left</i></span></div></div>")
-    st.space("small")
-    color = {"needs help": core.rgb(core.EVACUATE), "no news": core.rgb(core.PEOPLE, 210), "safe": core.rgb(core.SHELTER, 150)}
+    c = st.columns(3)
+    c[0].metric("Need help: go first", fmt(n.get("needs help", 0)), border=True)
+    c[1].metric("No news", fmt(n.get("no news", 0)), border=True, help=f"{fmt(single_open)} of them single-storey")
+    c[2].metric("Have left", fmt(n.get("safe", 0)), border=True)
+    color = {"needs help": core.rgb(core.EVACUATE), "no news": core.rgb("#c93400", 210), "safe": core.rgb(core.SHELTER, 150)}
     pts = L.assign(c=L.status.map(color), tname=L.door,
                    tinfo=[f"{s}{' · single-storey' if one else ''}" for s, one in zip(L.status, L.single)])
     left, right = st.columns([3, 2], gap="small")
@@ -140,8 +138,8 @@ with crew:
             initial_view_state=pdk.ViewState(longitude=here.lon.median(), latitude=here.lat.median(), zoom=14),
             map_style=pdk.map_styles.CARTO_LIGHT, tooltip={"html": "<b>{tname}</b><br/>{tinfo}"},
             views=[pdk.View(type="MapView", controller={"scrollZoom": False})]), height=440)
-        core.legend(core.swatch(core.EVACUATE, "Needs help", True) + core.swatch(core.PEOPLE, "No news", True)
-                    + core.swatch(core.SHELTER, "Has left", True))
+        st.caption(":red[●] Needs help · :orange[●] No news · "
+                   ":green[●] Has left")
     with right:
         todo = L[L.status != "safe"]
         st.dataframe(todo[["door", "status", "single", "alert"]], hide_index=True, height=440, column_config={
@@ -154,7 +152,7 @@ with crew:
                            file_name=f"door_knock_{anna.town(muni).replace(' ', '_')}.csv", mime="text/csv",
                            icon=":material/download:")
     no_addr = int((~here.has_address).sum())
-    st.html(f"<p class='asof'>{fmt(len(here))} homes in the 2021 water here; {fmt(no_addr)} have no OpenStreetMap address "
+    st.caption(f"{fmt(len(here))} homes in the 2021 water here; {fmt(no_addr)} have no OpenStreetMap address "
             "and are listed by map point (Venlo area: most homes). 'Reached by alert': BE-Alert SMS delivery reports or "
             "call results would plug in here; cell broadcast cannot confirm delivery. Order: help requests, then homes "
-            "with no news, single-storey first.</p>")
+            "with no news, single-storey first.")

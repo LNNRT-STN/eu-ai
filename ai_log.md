@@ -129,6 +129,11 @@ re-runnable script in `notebooks/` (`pipeline.py`, `osm_extract.py`, `dq_report.
 - How we checked it: end-to-end in the browser: check-in saved; drill filled about 63 %; reset left only the real check-in. Found and fixed: drill rows stored numbers instead of addresses (index misalignment); 29 OSM addresses have a number but no street, now "House no. 23 (no street name)". Test data deleted.
 - Result: no names or phone numbers stored; check-ins stay local (data/, gitignored).
 
+## 23. Sidebar controls, native Streamlit, minimal CSS (owner request)
+- Prompt/intent: easy controls in the left sidebar, Streamlit best practice, minimal custom CSS.
+- AI output (short): one Town picker in the sidebar shared by Evacuation plan, Safe check-in and the 3D view (session-state pattern so the choice survives other pages); main pages rebuilt with st.title, st.metric(border), st.error/st.info, st.container(border), markdown tables, :orange-badge[] and :color[] legends; real checkboxes for the drill checklist. core.style() now runs only on the older "More" pages.
+- How we checked it: all six pages rendered at 1440 and 390 px with no exception; impeccable detector clean on the four main pages. Caught in render: two escaped-newline syntax slips, and Material "circle" icons that ignore text colour (legend now uses filled marks inside :color[]).
+
 ## Data-cleaning decisions (from *Python for Data Analysis* ch.7)
 - Duplicates: overlapping flood shapes dissolved; OSM objects merged per campus; a building in two study areas counted once.
 - Missing values: analysed and reported per area (book p.210), not silently filled.

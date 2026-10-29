@@ -27,9 +27,9 @@ def offers():
 towns = anna.load()[1]
 munis = sorted(towns.municipality.unique(), key=anna.town)
 
-core.header("Offer a bed", "Live outside the flood zone? Offer a room or a spare bed to someone who has to leave home. "
-            "Older and ill people rest better in a home than in a sports hall.")
-st.space("small")
+st.title("Offer a bed")
+st.caption("Live outside the flood zone? Offer a room or a spare bed to someone who has to leave home. Older and ill "
+           "people rest better in a home than in a sports hall.")
 
 left, right = st.columns([3, 2], gap="large")
 with left, st.form("offer", border=False):
@@ -55,9 +55,10 @@ with right:
     o = offers()
     o = o[o.outside_2021.astype(bool)] if len(o) else o
     n = lambda k, w: f"{k} {w}{'s' if k != 1 else ''}"
-    core.group([("<b>Beds offered</b>", n(len(o), "home"), f"<b>{int(o.beds.sum()) if len(o) else 0}</b>"),
-                *[(FITS[k], "", n(int(o.loc[o[k].astype(bool), "beds"].sum()) if len(o) else 0, "bed")) for k in FITS]],
-               "So far, all towns")
+    st.metric("Beds offered so far, all towns", int(o.beds.sum()) if len(o) else 0, border=True,
+              help=n(len(o), "home"))
+    st.markdown("\n".join(f"- {FITS[k]}: {n(int(o.loc[o[k].astype(bool), 'beds'].sum()) if len(o) else 0, 'bed')}"
+                          for k in FITS))
     with st.expander("Withdraw an offer"):
         code = st.text_input("Reference code", max_chars=6).strip().upper()
         if st.button("Withdraw", disabled=not code):
@@ -68,6 +69,6 @@ with right:
                 st.rerun()
             else:
                 st.error("No offer with this code. Check the six characters.")
-st.html("<p class='asof'>Prototype of a solidarity register, run in practice by the municipality: it checks each "
+st.caption("Prototype of a solidarity register, run in practice by the municipality: it checks each "
         "host, collects contacts under the GDPR and matches guests. Offered beds are not shelters and are not counted "
-        "in the shelter plan; the Evacuation plan shows them next to it.</p>")
+        "in the shelter plan; the Evacuation plan shows them next to it.")

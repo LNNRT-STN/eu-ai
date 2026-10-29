@@ -3,6 +3,8 @@ import streamlit as st
 import core
 from core import about, fmt
 
+core.style()  # the older analyst pages keep their custom look; the main pages use the theme only
+
 d = core.load()
 shelters, towns = d["shelters"], d["towns"]
 hit = towns[towns.variant == "worst"].sort_values("people", ascending=False).drop_duplicates("municipality")
