@@ -134,6 +134,12 @@ re-runnable script in `notebooks/` (`pipeline.py`, `osm_extract.py`, `dq_report.
 - AI output (short): one Town picker in the sidebar shared by Evacuation plan, Safe check-in and the 3D view (session-state pattern so the choice survives other pages); main pages rebuilt with st.title, st.metric(border), st.error/st.info, st.container(border), markdown tables, :orange-badge[] and :color[] legends; real checkboxes for the drill checklist. core.style() now runs only on the older "More" pages.
 - How we checked it: all six pages rendered at 1440 and 390 px with no exception; impeccable detector clean on the four main pages. Caught in render: two escaped-newline syntax slips, and Material "circle" icons that ignore text colour (legend now uses filled marks inside :color[]).
 
+## 24. 3D view (FireTrace as design reference, MapLibre instead of Mapbox)
+- Prompt/intent: owner's prime example is FireTrace (firemap-two.vercel.app): clean 3D terrain dashboard that makes a homeowner feel the urgency. Free alternative to Mapbox requested.
+- AI output (short): an agent built `src/views/view3d.py`: MapLibre GL JS 5.6.0 in a Streamlit component, AWS Terrain Tiles (Terrarium) for elevation, EOX Sentinel-2 cloudless 2021 (CC BY-NC-SA 4.0) or Esri World Imagery, the 2021 water, homes (single-storey red), shelters, roads, rail and care sites draped on the terrain; sidebar layer toggles; a July 2021 day slider with the GloFAS replay where a river point is within 15 km.
+- How we checked it: FireTrace has no public repository and no licence, so it was used as a design reference only (no code, not its Mapbox token). Renders checked for Bad Neuenahr-Ahrweiler, Trooz (modelled, dashed edge) and Schleiden (town carried over from the sidebar). Single-storey count matches the Evacuation plan (264 Bad Neuenahr, 1,351 Schleiden). Relabelled "Care sites to evacuate" (18 in Bad Neuenahr) to "Care sites and schools": 11 of the 18 are schools, which close rather than evacuate. Found by the agent: MapLibre workers fail in Streamlit's null-origin iframe; loading from a blob: URL fixes it.
+- Result: water opacity on the slider is a visual cue, not a flood simulation; homes are OBAT points drawn as blocks, not outlines; needs internet for tiles.
+
 ## Data-cleaning decisions (from *Python for Data Analysis* ch.7)
 - Duplicates: overlapping flood shapes dissolved; OSM objects merged per campus; a building in two study areas counted once.
 - Missing values: analysed and reported per area (book p.210), not silently filled.

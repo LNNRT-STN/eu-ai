@@ -29,13 +29,15 @@ close the 2021 governance gaps (roles, warning → instruction, plans and drills
 7. Distill: Getting out in a tab, key fact in the verdict; copy fixes; detector clean.
 8. Safe check-in + door-knock list (addresses from OSM), drill mode, alert-feed placeholder.
 9. Sidebar Town picker; main pages native Streamlit, no custom CSS (old pages keep core.style()).
+10. 3D view (MapLibre, terrain + satellite, water draped, layer toggles, July 2021 slider); sidebar footer after page controls.
 
 ## In progress (delegated, background agents; each writes only its own files)
 
 ## Backlog (highest value first)
-- 3D view (agent, `src/views/view3d.py`): FireTrace-style (https://firemap-two.vercel.app/, design reference only,
-  no code reuse, no licence), MapLibre GL JS + AWS Terrarium terrain + open satellite tiles; add to nav as "3D view"
-  (TOWN_PAGES already lists it). Owner wants it as the prime example: homeowner urgency.
+- Bring the FireTrace feel to the home page: a compact 3D preview of the chosen town at the top of the Evacuation plan
+  (homeowner urgency in the first viewport), linking to the full 3D view.
+- Mobile pass of the 3D view (390 px).
+(none)
 - Wire each agent's output in as it lands; render; verify totals against app_towns.
 - "Better prepared than 2021?" one line on the page: brief Q2/Q4 asks it; only verified facts, else say "not verified".
 - Map: avoid label overlap of numbered shelters (town centre now marked).

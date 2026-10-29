@@ -82,13 +82,13 @@ st.title(f"{t['name']} in 3D")
 st.caption(f"The July 2021 water on the valley floor{' (modelled: EFAS 500-year zone, no satellite map here)' if modelled else ''}. "
            "Drag to pan, right-drag or Ctrl-drag to tilt and turn, scroll to zoom.")
 
-opacity, day = .55, None
+opacity, day = .45, None
 if gauge:
     days = list(rep.index)
     q = rep[gauge]
     day = st.select_slider("Day, July 2021", days, value=q.idxmax(), format_func=lambda d: f"{d:%a %d %b}")
     lo, hi = q.min(), q.max()
-    opacity = .12 + .6 * (q[day] - lo) / (hi - lo) if hi > lo else .55
+    opacity = .1 + .4 * (q[day] - lo) / (hi - lo) if hi > lo else .45
 
 map_col, facts = st.columns([3, 1], gap="medium")
 
@@ -100,7 +100,7 @@ with facts:
                   help=f"No upper floor to escape to. {fmt(n_unknown)} more homes have no reliable height (OBAT 2.5 m).")
         st.metric("Dry shelters", fmt(len(plan)), help="Candidate sites in the 10 km bus plan, dry in 2021 and "
                                                         "in the EFAS 100-year model; not official")
-        st.metric("Care sites to evacuate", fmt(len(care)), help="Hospitals, care homes, schools with at least 5 % "
+        st.metric("Care sites and schools", fmt(len(care)), help="Hospitals, care homes, schools with at least 5 % "
                                                                   "of the site in the 2021 water")
     if gauge:
         with st.container(border=True):
@@ -124,7 +124,7 @@ if len(hb):
     y0, y1 = hb.lat.quantile([.05, .95])
     cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
     span = max(x1 - x0, (y1 - y0) * 1.6, .01)
-    zoom = min(15.5, math.log2(1000 * 360 / (512 * span)) - .2)
+    zoom = min(15.5, math.log2(1000 * 360 / (512 * span)) + .4)
 else:
     cx, cy, zoom = t.lon, t.lat, 13
 
@@ -135,14 +135,14 @@ D = dict(
     roads=feats(EDGES, t.municipality) if on["roads"] else None,
     rail=feats(RAIL, t.municipality) if on["rail"] else None,
     shelters=[dict(n=r.shelter, x=r.s_lon, y=r.s_lat, p=round(r.people)) for r in plan.itertuples()] if on["shelters"] else [],
-    care=[dict(n=r.name, k=r.type, x=r.lon, y=r.lat, s=r.share_of_site_flooded) for r in care.itertuples()] if on["care"] else [],
+    care=[dict(n=r.name, k=r.type, x=r.lon, y=r.lat, s=r.share_of_site_flooded) for r in care.sort_values("share_of_site_flooded", ascending=False).itertuples()] if on["care"] else [],
     exag=exag, center=[float(cx), float(cy)], zoom=round(float(zoom), 2), key=f"v3d|{t.municipality}",
     imagery=imagery,
 )
 
 HTML = """<!doctype html><html><head><meta charset="utf-8">
-<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
-<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<link href="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css" rel="stylesheet">
+<script src="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
 <style>
 html,body{margin:0;height:100%;font:13px/1.35 "Source Sans Pro",system-ui,sans-serif}
 #m{position:absolute;inset:0;border-radius:12px;overflow:hidden}
@@ -150,7 +150,7 @@ html,body{margin:0;height:100%;font:13px/1.35 "Source Sans Pro",system-ui,sans-s
 .pin i{width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.5);flex:none}
 .pin b{background:rgba(255,255,255,.92);color:#1d1d1f;padding:2px 7px;border-radius:6px;font-weight:600;
   white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.25);max-width:190px;overflow:hidden;text-overflow:ellipsis}
-.key{position:absolute;left:10px;bottom:28px;background:rgba(255,255,255,.92);border-radius:10px;padding:8px 10px;
+.key{position:absolute;left:10px;top:10px;font-size:12px;background:rgba(255,255,255,.92);border-radius:10px;padding:8px 10px;
   box-shadow:0 1px 4px rgba(0,0,0,.25);color:#1d1d1f}
 .key div{display:flex;align-items:center;gap:7px;margin:2px 0}
 .key s{display:inline-block;width:14px;height:10px;border-radius:2px;text-decoration:none}
@@ -197,13 +197,13 @@ map.once("style.load", () => {
       "line-dasharray": D.modelled ? [3, 2] : [1, 0]}});
     key.push(["#1e7bff", D.modelled ? "2021 water, modelled (EFAS 500-year)" : "2021 water (satellite, all passes)"]);
   }
-  if (D.rail) {
+  if (D.rail && D.rail.features.length) {
     map.addSource("rail", {type: "geojson", data: D.rail});
     map.addLayer({id: "rail", type: "line", source: "rail", paint: {"line-color": "#1d1d1f", "line-width": 4}});
     map.addLayer({id: "rail2", type: "line", source: "rail", paint: {"line-color": "#fff", "line-width": 2, "line-dasharray": [2, 2]}});
     key.push(["#1d1d1f", "Rail in the water"]);
   }
-  if (D.roads) {
+  if (D.roads && D.roads.features.length) {
     map.addSource("roads", {type: "geojson", data: D.roads});
     map.addLayer({id: "roads", type: "line", source: "roads", layout: {"line-cap": "round"},
       paint: {"line-color": "#eb6834", "line-width": ["interpolate", ["linear"], ["get", "people"], 0, 2, 3000, 7]}});
@@ -229,15 +229,22 @@ map.once("style.load", () => {
   };
   D.shelters.forEach((s, i) => pin(s.x, s.y, "#248a3d", s.n, s.n + ": about " + s.p + " people in the bus plan", i < 4));
   if (D.shelters.length) key.push(["#248a3d", "Dry shelter (top 4 named)"]);
-  D.care.forEach(c => pin(c.x, c.y, "#7a2c10", c.n, c.k + ", " + Math.round(c.s * 100) + "% of the site in the 2021 water", true));
-  if (D.care.length) key.push(["#7a2c10", "Care site in the water"]);
+  D.care.forEach((c, i) => pin(c.x, c.y, "#7a2c10", c.n, c.n + " (" + c.k + "), " + Math.round(c.s * 100) + "% of the site in the 2021 water", i < 3));
+  if (D.care.length) key.push(["#7a2c10", "Care site in the water (top 3 named)"]);
   document.getElementById("k").innerHTML = key.map(([c, l]) => '<div><s style="background:' + c + '"></s>' + l + "</div>").join("")
     || "<div>No layers on</div>";
 });
 </script></body></html>"""
 
 with map_col:
-    components.html(HTML.replace("__DATA__", json.dumps(D, default=float).replace("</", "<\\/")), height=640)
+    # The component iframe is about:srcdoc, whose location.origin reads "null" while its workers get the app's
+    # origin, so MapLibre drops every worker message (no terrain, no GeoJSON). Loading the map from a blob: URL
+    # inside it gives page and workers the same origin.
+    page = HTML.replace("__DATA__", json.dumps(D, default=float).replace("</", "<\\/"))
+    components.html("<style>html,body{margin:0;height:100%}</style><iframe id='f' title='3D map' "
+                    "style='border:0;width:100%;height:100%'></iframe><script>document.getElementById('f').src="
+                    "URL.createObjectURL(new Blob([" + json.dumps(page).replace("</", "<\\/")
+                    + "],{type:'text/html'}));</script>", height=640)
     st.caption("Elevation: AWS Terrain Tiles (Mapzen, Terrarium; SRTM, EU-DEM and other open sources). Imagery: "
                + ("Sentinel-2 cloudless 2021 by EOX IT Services GmbH (contains modified Copernicus Sentinel data), "
                   "CC BY-NC-SA 4.0, non-commercial use." if imagery == "Sentinel-2" else

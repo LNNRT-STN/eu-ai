@@ -11,6 +11,7 @@ st.set_page_config(page_title="Flood desk", page_icon=":material/water:", layout
 
 nav = st.navigation({
     "": [st.Page("views/evacuate.py", title="Evacuation plan", icon=":material/directions_run:", default=True),
+         st.Page("views/view3d.py", title="3D view", icon=":material/landscape:"),
          st.Page("views/long_term.py", title="Long term", icon=":material/construction:"),
          st.Page("views/checkin.py", title="Safe check-in", icon=":material/how_to_reg:"),
          st.Page("views/host.py", title="Offer a bed", icon=":material/volunteer_activism:")],
@@ -35,6 +36,12 @@ with st.sidebar:
         st.selectbox("Town", list(lab), format_func=lab.get, key="town",
                      on_change=lambda: st.session_state.update(_town=st.session_state.town))
         st.divider()
+
+nav.run()
+
+# footer last, so each page's own sidebar controls sit right under the Town picker
+with st.sidebar:
+    st.divider()
     gauges, *_, fetched, err = core.outlook()
     st.caption("July 2021 flood areas · BE · NL · DE")
     if fetched is not None:
@@ -42,5 +49,3 @@ with st.sidebar:
     if st.button("Refresh outlook", icon=":material/refresh:", type="tertiary"):
         core._outlook.clear()
         st.rerun()
-
-nav.run()
