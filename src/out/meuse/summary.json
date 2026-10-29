@@ -1,0 +1,50 @@
+{
+ "bbox": [
+  4.96688423300003,
+  50.03325500900007,
+  6.429411537000021,
+  51.453193516000056
+ ],
+ "lenses": {
+  "obs": {
+   "buildings": 558,
+   "residential": 506,
+   "residents": 677,
+   "communes": 36,
+   "by_country": {
+    "BE": {
+     "buildings": 214,
+     "residents": 304
+    },
+    "NL": {
+     "buildings": 222,
+     "residents": 209
+    },
+    "DE": {
+     "buildings": 122,
+     "residents": 163
+    }
+   }
+  },
+  "rp100": {
+   "buildings": 144531,
+   "residential": 137001,
+   "residents": 262515,
+   "communes": 68,
+   "by_country": {
+    "BE": {
+     "buildings": 84304,
+     "residents": 158228
+    },
+    "NL": {
+     "buildings": 56421,
+     "residents": 98658
+    },
+    "DE": {
+     "buildings": 3806,
+     "residents": 5629
+    }
+   }
+  }
+ }
+}

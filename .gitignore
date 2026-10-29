@@ -4,3 +4,8 @@ data/
 src/out/
 __pycache__/
 .DS_Store
+# the deployed dashboard reads these built files (small, open-licence derivatives); the rest of out/ stays local
+!src/out/
+src/out/*
+!src/out/meuse/
+src/out/meuse/ml_*
