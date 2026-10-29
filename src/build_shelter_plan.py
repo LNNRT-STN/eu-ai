@@ -100,18 +100,17 @@ for oid, e in els.items():
     lv = pd.to_numeric(t.get("building:levels"), errors="coerce")
     rows.append((oid, kind(t), t.get("name", ""), "building" in t, 1 if pd.isna(lv) else min(max(lv, 1), MAX_LEVELS), g))
 f = gpd.GeoDataFrame(rows, columns=["osm_id", "type", "name", "is_bldg", "levels", "geometry"], crs=4326).to_crs(EQUAL_AREA)
-sites = f[f.type.notna()].copy()
+sites = f[f["type"].notna()].copy()
 bldg = f[f.is_bldg & (f.geom_type != "Point")].copy()
 bldg["floor"] = bldg.area * bldg.levels
 
-# each building belongs to the site it sits in (campus), else to a point site within 25 m, else to itself
+# each building belongs to the site it sits in (campus); a point site takes its one nearest building within 25 m
 inside = gpd.sjoin(bldg.set_geometry(bldg.representative_point())[["osm_id", "floor", "geometry"]],
-                   sites[sites.geom_type != "Point"][["osm_id", "type", "geometry"]].rename(columns={"osm_id": "site"}),
-                   predicate="within")
-inside = inside.sort_values("floor").drop_duplicates("osm_id", keep="first")  # nested campuses: count once
-near = gpd.sjoin_nearest(bldg[~bldg.osm_id.isin(inside.osm_id)][["osm_id", "floor", "geometry"]],
-                         sites[sites.geom_type == "Point"][["osm_id", "geometry"]].rename(columns={"osm_id": "site"}),
-                         max_distance=25)
+                   sites[sites.geom_type != "Point"][["osm_id", "geometry"]].rename(columns={"osm_id": "site"}),
+                   predicate="within").drop_duplicates("osm_id")  # nested campuses: count once
+near = gpd.sjoin_nearest(sites[sites.geom_type == "Point"][["osm_id", "geometry"]].rename(columns={"osm_id": "site"}),
+                         bldg[~bldg.osm_id.isin(inside.osm_id)][["osm_id", "floor", "geometry"]],
+                         max_distance=25).drop_duplicates("site")
 floor = pd.concat([inside[["site", "floor"]], near[["site", "floor"]]]).groupby("site").floor.sum()
 own = sites.is_bldg & (sites.geom_type != "Point") & ~sites.osm_id.isin(inside.osm_id)  # a tagged building, standalone
 sites["floor"] = sites.osm_id.map(floor).fillna(0) + np.where(own, sites.area * sites.levels, 0)
@@ -136,20 +135,20 @@ lau = lau[lau.CNTR_CODE.isin(["BE", "DE", "NL"])].cx[x0:x1, y0:y1].rename(column
 lau["commune"] = lau.commune.replace(LOCAL_NAME)
 sites = gpd.sjoin(sites, lau[["lau_id", "commune", "geometry"]], predicate="within").drop(columns="index_right")
 sites = sites[~sites.lau_id.str.startswith(NOT_MEUSE)].drop_duplicates("osm_id")
-sites["name"] = sites.name.where(sites.name.str.strip() != "", "Unnamed " + sites.type.str.lower())
+sites["name"] = sites.name.where(sites.name.str.strip() != "", "Unnamed " + sites["type"].str.lower())
 sites["flood_2021"] = np.select([sites.in2021, sites.wet2021], ["In the water", "Within 100 m"], "Dry")
 sites["model_zone"] = sites.efas.map({"RP10": "10-year zone", "RP100": "100-year zone", "RP500": "500-year zone only",
                                       "none": "Outside all zones"})
 zone = sites.efas.isin(["RP10", "RP100"])
 
 # 1. at-risk schools and care sites (flag list)
-care = sites.type.isin(["School", "Hospital", "Care home"])
+care = sites["type"].isin(["School", "Hospital", "Care home"])
 risk = sites[care & (sites.wet2021 | zone)]
 risk[["osm_id", "type", "name", "commune", "lau_id", "lon", "lat", "flood_2021", "model_zone"]].sort_values(
     ["type", "commune", "name"]).to_parquet(DST / "at_risk.parquet", index=False)
 
 # 2. shelters
-sh = sites[sites.type.isin(["School", "Sports hall", "Community centre", "Town hall / civic"])
+sh = sites[sites["type"].isin(["School", "Sports hall", "Community centre", "Town hall / civic"])
            & ~sites.wet2021 & ~zone & (sites.floor >= MIN_FLOOR)].reset_index(drop=True)
 sh["sid"] = sh.index
 sh[["sid", "osm_id", "type", "name", "commune", "lau_id", "lon", "lat", "floor", "model_zone"]].to_parquet(
@@ -158,13 +157,13 @@ sh[["sid", "osm_id", "type", "name", "commune", "lau_id", "lon", "lat", "floor",
 # 3. cell → shelter road distances (cells from build_meuse.py, both lenses)
 cells = pd.read_parquet(DST / "cells.parquet")
 cells = cells[cells.residents > 0].assign(lon=lambda d: (d.lon0 + d.lon1) / 2, lat=lambda d: (d.lat0 + d.lat1) / 2)
-cxy = np.radians(cells[["lat", "lon"]].drop_duplicates().to_numpy())
+pos = cells[["lat", "lon"]].drop_duplicates().reset_index(drop=True)
+cxy = np.radians(pos.to_numpy())
 sxy = np.radians(sh[["lat", "lon"]].to_numpy())
 c_lat, c_lon = cxy[:, :1], cxy[:, 1:]
 a = np.sin((sxy[:, 0] - c_lat) / 2) ** 2 + np.cos(c_lat) * np.cos(sxy[:, 0]) * np.sin((sxy[:, 1] - c_lon) / 2) ** 2
 road = 2 * 6371 * np.arcsin(np.sqrt(a)) * DETOUR
 i, j = np.nonzero(road <= MAX_KM)
-pos = pd.DataFrame(np.degrees(cxy), columns=["lat", "lon"])
 edges = pd.DataFrame({"lat": pos.lat.to_numpy()[i], "lon": pos.lon.to_numpy()[i], "sid": j, "km": road[i, j].round(2)})
 edges = cells[["lens", "cell", "lon", "lat"]].merge(edges, on=["lon", "lat"])[["lens", "cell", "sid", "km"]]
 edges.to_parquet(DST / "shelter_edges.parquet", index=False)
@@ -172,7 +171,7 @@ cg = gpd.GeoDataFrame(cells, geometry=gpd.points_from_xy(cells.lon, cells.lat), 
 cg = gpd.sjoin_nearest(cg.to_crs(EQUAL_AREA), lau[["lau_id", "commune", "geometry"]].to_crs(EQUAL_AREA)).drop_duplicates(["lens", "cell"])
 cg[["lens", "cell", "lon", "lat", "residents", "lau_id", "commune"]].to_parquet(DST / "shelter_cells.parquet", index=False)
 
-print(f"{len(sh)} shelters, {sh.floor.sum():,.0f} m² floor; by type:\n{sh.groupby('type').floor.agg(['size', 'sum']).to_string()}")
-print(f"{len(sites[sites.type.isin(['School', 'Sports hall', 'Community centre', 'Town hall / civic'])])} candidate sites before filters")
+print(f"{len(sh)} shelters, {sh.floor.sum():,.0f} m² floor; by type:\n{sh.groupby("type").floor.agg(['size', 'sum']).to_string()}")
+print(f"{len(sites[sites["type"].isin(['School', 'Sports hall', 'Community centre', 'Town hall / civic'])])} candidate sites before filters")
 print(f"at risk:\n{risk.groupby('type').size().to_string()}")
 print(f"{len(edges):,} edges")

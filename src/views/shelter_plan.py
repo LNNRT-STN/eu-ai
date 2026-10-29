@@ -9,6 +9,7 @@ import core
 from core import about, fmt
 
 USABLE = 0.5  # share of floor area people can sleep on (corridors, stairs, toilets, furniture take the rest)
+MAX_BEDS = 1500  # one site holds at most a large reception centre; stops campuses and race circuits counting as cities
 SPACE = {3.5: "3.5 m² · Sphere minimum, several days", 2.0: "2 m² · one night, tightly packed",
          4.5: "4.5 m² · Sphere cold climate / longer stays"}
 FULL = "#c4501f"
@@ -27,7 +28,7 @@ def plan(lens, reach, m2):
     Variables x_e = people sent along cell→shelter edge e (road km ≤ reach). Rows: a cell sends ≤ its residents,
     a shelter takes ≤ its capacity. Cost km − 1,000 per person, so one more person sheltered always beats distance."""
     sh, edges, cells, _ = inputs()
-    cap = (sh.floor * USABLE / m2).to_numpy()
+    cap = (sh.floor * USABLE / m2).clip(upper=MAX_BEDS).to_numpy()
     c = cells[cells.lens == lens].reset_index(drop=True)
     e = edges[(edges.lens == lens) & (edges.km <= reach)].merge(c[["cell"]].reset_index(names="row"), on="cell")
     flow = np.zeros(len(e))
@@ -55,7 +56,7 @@ lens = c1.segmented_control("Who needs shelter", list(core.LENS), format_func=co
 reach = c2.select_slider("Furthest trip by road", [2, 5, 10, 15, 20, 25], value=10, format_func="{} km".format,
                          help="Straight-line distance × 1.3 for the road network. 2 km ≈ a walk, 10 km ≈ a bus run.")
 m2 = c3.selectbox("Space per person", list(SPACE), format_func=SPACE.get,
-                  help=f"Capacity = floor area × {USABLE:.0%} usable ÷ space per person.")
+                  help=f"Capacity = floor area × {USABLE:.0%} usable ÷ space per person, at most {MAX_BEDS:,} per site.")
 
 c, s, e = plan(lens, reach, m2)
 need, got = c.residents.sum(), c.sheltered.sum()
@@ -77,7 +78,7 @@ left, right = st.columns([3, 2], gap="medium")
 with left:
     big = e.people.max() if len(e) else 1
     pos = s.set_index("sid")[["lon", "lat"]]
-    arcs = e.merge(c[["cell", "lon", "lat"]], on="cell").join(pos, on="sid", rsuffix="_to")
+    arcs = e.merge(c[["cell", "lon", "lat"]], on="cell").join(pos.add_suffix("_to"), on="sid")
     arcs["w"] = 1 + 5 * np.sqrt(arcs.people / big)
     arcs["tip"] = [f"<b>{about(p)} people</b> → {n}<br>{k:.1f} km by road"
                    for p, n, k in zip(arcs.people, s.set_index("sid").name.reindex(arcs.sid), arcs.km)]
@@ -143,7 +144,8 @@ with st.expander("How the plan is made"):
 2. **Where to.** OpenStreetMap schools, sports halls, community centres and town halls that stayed dry in July 2021
    (not within 100 m of the water), sit outside the EFAS 10- and 100-year zones, and have at least 300 m² of floor.
 3. **How many fit.** Floor = building footprints × floors (OSM `building:levels`, 1 when missing).
-   Beds = floor × {USABLE:.0%} usable ÷ {m2} m² per person.
+   Beds = floor × {USABLE:.0%} usable ÷ {m2} m² per person, capped at {MAX_BEDS:,} per site
+   (OSM campuses and sports parks include buildings no one would open).
 4. **Who goes where.** One optimisation for the whole basin: first shelter as many people as possible, then keep the
    total distance travelled lowest. A shelter that fills up sends the next people to the next-nearest one.
    Road km = straight line × 1.3; no closed bridges or flooded roads.
