@@ -1,6 +1,5 @@
 import altair as alt
 import pandas as pd
-import pydeck as pdk
 import streamlit as st
 
 import core
@@ -100,7 +99,13 @@ with left:
         show_dry = st.toggle("Dry candidate sites")
     g = pd.DataFrame([(k, la, lo, int(now[k]), flow.loc[day, k] / ref[k][1]) for k, (la, lo) in forecast.GAUGES.items()
                       if side == "All" or SIDE[k.split(" · ")[1]] == side], columns=["gauge", "lat", "lon", "lvl", "pct"])
-    layers = core.water("worst") if show_water else []
+    pick = None if sel is None else sel.municipality
+    layers = [core.regions(p.assign(
+        fill=[core.rgb(core.GAP[x][0], 150 if m == pick else 40 if pick else 85) for x, m in zip(p.gap, p.municipality)],
+        tip=[f"{m} · {x}\n≈ {about(n)} people in the water" + (" (modelled)" if mo else "")
+             + f"\n≈ {about(ns)} without a shelter place\nClick for details" for m, x, n, ns, mo in
+             zip(p.municipality, p.gap, p.people, p.no_shelter, p.modelled)]), "fill", pick)]
+    layers += core.water("worst") if show_water else []
     if show_dry:
         layers.append(core.points(dry.assign(tip=[f"{n}\n{t} · {m}\n≈ {c:,.0f} places" for n, t, m, c in
                                                   zip(dry.name, dry.type, dry.muni, dry.capacity_central)]),
@@ -110,10 +115,6 @@ with left:
         tip=[f"{m} · {x}\n≈ {about(n)} people in the water" + (" (modelled)" if mo else "")
              + f"\n≈ {about(ns)} without a shelter place" for m, x, n, ns, mo in
              zip(p.municipality, p.gap, p.people, p.no_shelter, p.modelled)]), "people", "fill", 18))
-    if sel is not None:
-        layers.append(pdk.Layer("ScatterplotLayer", sel.to_frame().T[["lon", "lat"]].astype(float),
-                                get_position=["lon", "lat"], filled=False, stroked=True, get_line_color=[29, 29, 31],
-                                line_width_min_pixels=3, get_radius=22, radius_units="'pixels'"))
     if show_care:
         layers.append(core.points(ev.assign(tip=[f"{n}\n{t} · {m}\n{s:.0%} of the site in the water"
                                                  for n, t, m, s in zip(ev.name, ev.type, ev.municipality,
@@ -124,7 +125,7 @@ with left:
                                             f"July 2021 peak" for r in g.itertuples()]), "fill", 8, 2))
     v = core.view(core.bbox(), None if sel is None else (sel.lon, sel.lat), 11)
     core.deck(layers, v, 540, on_select=from_map, selection_mode="single-object", key="map")
-    core.legend("<b>Municipality, size = people in the water</b>"
+    core.legend("<b>Municipality: area coloured by shelter gap, circle size = people in the water · click for details</b>"
                 + "".join(core.swatch(c, lab, True) for lab, (c, _) in core.GAP.items()),
                 "<b>River point</b>" + "".join(core.swatch(c, lab, True) for lab, c in forecast.LEVELS)
                 + (core.swatch(core.WATER, "2021 water") + core.swatch(core.MODEL, "Vesdre, modelled") if show_water else "")
@@ -158,8 +159,10 @@ with right:
                 f"{core.chip(sel.gap, c)}</div></div><div class='row'><div class='t'><b>Next step</b><span>{what}"
                 "</span></div></div></div>")
         st.space("small")
+        o = core.outlines()[sel.municipality]["properties"]
         core.group([
-            ("<b>People in the water</b>", "All satellite passes" + (" · EFAS 100-year model" if sel.modelled else ""),
+            ("<b>Residents</b>", f"Eurostat 2021 · {o['area_km2']:,.0f} km²", fmt(o["population_2021"])),
+            ("<b>People in the water</b>", f"{sel.people / o['population_2021']:.0%} of residents · all satellite passes" + (" · EFAS 100-year model" if sel.modelled else ""),
              f"≈ {about(sel.people)}"),
             ("<b>First pass only</b>", "Lower bound", "–" if pd.isna(sel.people_first_pass) else
              f"≈ {about(sel.people_first_pass)}"),

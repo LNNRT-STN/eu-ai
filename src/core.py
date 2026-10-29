@@ -188,6 +188,13 @@ def flood(variant):
 
 
 @st.cache_data
+def outlines():
+    """GISCO LAU 2021 outline, residents and size of every municipality, by name (build_outlines.py)."""
+    return {f["properties"]["municipality"]: f for f in
+            json.loads((DATA / "municipality_outlines.geojson").read_text())["features"]}
+
+
+@st.cache_data
 def load_replay():
     """GloFAS daily flows at the river points, 10–20 July 2021 (build_priority.py)."""
     r = pd.DataFrame(json.loads((DST / "replay_2021.json").read_text()))
@@ -267,6 +274,20 @@ def towns(df, size, color, scale=14):
                      get_fill_color=color, get_radius="r", radius_units="'pixels'", stroked=True,
                      get_line_color=[255, 255, 255], line_width_min_pixels=1, pickable=True, auto_highlight=True,
                      id=f"towns-{size}")
+
+
+def regions(df, fill, sel=None):
+    """Municipalities as their outline, one feature per row of `df` (every column kept for tooltips and clicks).
+    `sel`: the selected municipality, drawn with a heavy outline."""
+    shapes = outlines()
+    feats = [{"type": "Feature", "geometry": shapes[r["municipality"]]["geometry"],
+              "properties": {**r, "line": [29, 29, 31, 255 if r["municipality"] == sel else 110],
+                             "w": 3 if r["municipality"] == sel else 1}}
+             for r in json.loads(df.to_json(orient="records")) if r["municipality"] in shapes]
+    return pdk.Layer("GeoJsonLayer", {"type": "FeatureCollection", "features": feats}, filled=True, stroked=True,
+                     get_fill_color=f"properties.{fill}", get_line_color="properties.line", get_line_width="properties.w",
+                     line_width_units="'pixels'", pickable=True, auto_highlight=True,
+                     highlight_color=[29, 29, 31, 45], id=f"regions-{fill}")
 
 
 def deck(layers, v, height=600, **kw):
