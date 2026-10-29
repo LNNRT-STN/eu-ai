@@ -188,6 +188,12 @@ re-runnable script in `notebooks/` (`pipeline.py`, `osm_extract.py`, `dq_report.
 - How we checked it: typing "Ahrstraße 28" (a single-storey home in the water in Ahrbrück) showed "Your street is not among the homes in the 2021 water". The field only matched street names, so any typed number made a flooded home look dry. Re-rendered with five inputs: "Ahrstraße 28", "Ahrstrasse 28, Ahrbrück", "3 Route de la Filature" (Pepinster, modelled; it first opened Olne, so the default street choice was fixed), "Ahrstraße 999" (asks to pick) and "Hauptstraße" (street only).
 - Result: no false all-clear for a full address. The demo address is "Ahrstraße 28, Ahrbrück"; the handoff's "Ahrstraße 2" is not in the data.
 
+## 33. 2021 timeline and the "2021 order vs tool" comparison in the Crisis room
+- Prompt/intent: sourced times for EFAS, DWD and the evacuation orders (Ahr, Vesdre, Erft, Limburg NL), shown next to the replay.
+- AI output (short): a research agent wrote docs/TIMELINE_2021.md (one table per region, each fact verified / reported / not found, gaps listed); the lead added a three-river table under the Crisis room map (replay mode only).
+- How we checked it: the lead re-read the two headline sources directly. RLP Vorlage 18/5776: 17.40 alarm level 4, about 22.04 level 5, "ab 21.00 Uhr" an explicit call was needed, 23.09 recommendation. Walloon inquiry report: 16 h 34 the governor's order, 17 h 57 the general order for the Vesdre valley. Both match. The tool side changed the claim: the hourly replay put the Ahr at evacuate on 13 Jul 17:00, but on the daily flows alone it is 14 Jul (the earlier hours come from interpolating towards the next day's mean). The table shows the day only.
+- Result: the pitch line that holds is that EFAS warned on 13 July, and on the river flows the Vesdre and the Erft were at evacuate a day before the 2021 order, while the Ahr order came late the same day. The flows are hindsight, and the screen says so. Open gaps: no clock time for the Steinbachtalsperre order or the Blessem breach; EFAS issue times may be UTC (JRC captions disagree with its tables).
+
 ## Data-cleaning decisions (from *Python for Data Analysis* ch.7)
 - Duplicates: overlapping flood shapes dissolved; OSM objects merged per campus; a building in two study areas counted once.
 - Missing values: analysed and reported per area (book p.210), not silently filled.

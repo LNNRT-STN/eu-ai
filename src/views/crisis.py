@@ -125,3 +125,29 @@ def board():
 
 
 st.fragment(board, run_every=1.5 if c["playing"] else None)()
+
+# 2021 for comparison: sourced times from docs/TIMELINE_2021.md (all verified in the cited document)
+JRC = "https://european-flood.emergency.copernicus.eu/sites/default/files/2023-12/JRC135679_CEMS_EFAS_DetailedAssessmentReport_RhineMeuseFloodsJuly2021_FINAL.pdf"
+Y2021 = [("ahr", "Ahr", f"13 Jul 11:25, flash-flood notice for the Koblenz region ([JRC]({JRC}))",
+          "14 Jul 23:09, Kreis Ahrweiler: leave 50 m either side of the Ahr "
+          "([Landtag RLP](https://dokumente.landtag.rlp.de/landtag/vorlagen/5776-V-18.pdf))"),
+         ("vesdre", "Vesdre", f"13 Jul 11:26, flash-flood notice for Liège province ([JRC]({JRC}))",
+          "14 Jul 17:57, Province of Liège: general order for the Vesdre valley ([Walloon Parliament](https://www."
+          "wallonie.be/sites/default/files/2022-11/Inondations%20rapport%20de%20la%20commission%20parlementaire.pdf))"),
+         ("erftstadt", "Erft", f"None received: NRW was not yet an EFAS partner ([JRC]({JRC}))",
+          "15 Jul about 08:10, Erftstadt: evacuate Blessem and Bliesheim "
+          "([Stadt Erftstadt](https://www.radioerft.de/files/pdf2/pm-stellungnahme-zur-wdr-berichterstattung-am-23.08.2021.pdf))")]
+if c["mode"] == "replay":
+    st.subheader("July 2021: when the orders came")
+    # the day whose daily flow (placed at noon) first puts a town of the river at evacuate; the hourly replay
+    # interpolates towards the next day's mean, which would claim hours the daily data cannot give
+    rp, area = live._replay(), live._towns().area.values
+    noon = [i for i, t in enumerate(rp["index"]) if t.hour == 12]
+    day = {a: next((rp["index"][i] for i in noon if (rp["status"][i][area == a] == "evacuate").any()), None)
+           for a, *_ in Y2021}
+    st.markdown("| River | EFAS warned | 2021 evacuation order | Tool: river at evacuate level |\n|---|---|---|---|\n" +
+                "\n".join(f"| {name} | {efas} | {order} | {f'{day[a]:%d Jul}' if day[a] is not None else 'not reached'} |"
+                           for a, name, efas, order in Y2021))
+    st.caption("Tool column: the first day whose mean river flow (GloFAS reanalysis, known only afterwards) puts a town "
+               "of that river at evacuate. It gives the day, not the hour, and it is not the forecast available at "
+               "the time. Sources and more times: docs/TIMELINE_2021.md.")

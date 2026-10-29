@@ -48,8 +48,8 @@ Each failure below must be backed by a cited source (`docs/TIMELINE_2021.md` for
 
 | 2021 failure | What the tool does instead | Where |
 |---|---|---|
-| Warnings existed days ahead (EFAS) but were not turned into local action **[VERIFY times]** | River flow per town → status (watch / warn / evacuate) → a briefing for the mayor and fire brigade, drafted at once | Crisis room (`src/views/crisis.py`, `src/live.py`) |
-| Evacuation orders came late, after the water reached towns (e.g. Kreis Ahrweiler, evening of 14 July) **[VERIFY times]** | Replay shows when the tool would have said "evacuate" next to when the 2021 order came (hindsight flows, ±12 h; stated on screen) | Crisis room replay |
+| EFAS warned on 10-13 July (flash-flood notices for the Ahr and Liège regions on 13 Jul, 11:25-11:26); NRW received none (`docs/TIMELINE_2021.md`) | River flow per town → status (watch / warn / evacuate) → a briefing for the mayor and fire brigade, drafted at once | Crisis room (`src/views/crisis.py`, `src/live.py`) |
+| Evacuation orders came late: Vesdre 14 Jul 17:57, Ahr 14 Jul 23:09 (prosecutor: needed from 21:00), Erftstadt-Blessem 15 Jul ~08:10 (`docs/TIMELINE_2021.md`) | Replay shows when the tool would have said "evacuate" next to when the 2021 order came (day of the daily river flow, hindsight; stated on screen) | Crisis room replay |
 | Warnings said "flood" but not what to do or where to go **[VERIFY]** | Ready warning message per town in the local language, with the shelter and the route | Town plan → Warning message |
 | Unclear who gives the order across municipalities **[VERIFY]** | "Who gives the order" per town: mayor, then Kreis / governor / safety region | Town plan → Who gives the order |
 | People who could not leave alone died (e.g. care home in Sinzig) **[VERIFY]** | Evacuate first: care sites in the water, single-storey homes (no upper floor to flee to) | Town plan → Evacuate first, 3D view |
