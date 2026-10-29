@@ -48,8 +48,8 @@ with right:
 sel = sh.iloc[pick.selection.rows[0]] if pick.selection.rows else None
 with left:
     layers = core.water(geo, "rp100") + [core.points(
-        sh.assign(tip=[f"<b>{n}</b><br>{t} · {c}<br>model: {z}" for n, t, c, z in zip(sh.name, sh.type, sh.commune, sh.model_zone)]),
-        core.rgb(core.SHELTER), 5)]
+        sh.assign(tip=[f"<b>{n}</b><br>{t} · {c}<br>model: {z}" for n, t, c, z in zip(sh.name, sh.type, sh.commune, sh.model_zone)],
+        fill=[core.rgb(core.KIND[k]) for k in sh.type]), "fill", 5)]
     if focus:
         layers.append(core.points(z.to_frame().T.assign(tip=f"<b>{z.commune}</b><br>centre of homes in the 100-year zone"),
                                   core.rgb(core.EVACUATE), 8))
@@ -57,7 +57,7 @@ with left:
         layers.append(core.points(sel.to_frame().T.assign(tip=f"<b>{sel['name']}</b>"), core.rgb("#0071e3"), 9, 3))
     v = (sel.lon, sel.lat) if sel is not None else focus
     core.deck(layers, core.view(s, v) if v else core.view(s), 460)
-    core.legend(core.swatch(core.SHELTER, "Candidate shelter", True)
+    core.legend("".join(core.swatch(core.KIND[k], k, True) for k in kinds if k in set(sh.type))
                 + (core.swatch(core.EVACUATE, "Homes at risk", True) if focus else "")
                 + core.swatch("rgba(0,113,227,.4)", "Modelled 100-year zone"))
     if sel is not None:

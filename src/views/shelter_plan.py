@@ -12,7 +12,7 @@ USABLE = 0.5  # share of floor area people can sleep on (corridors, stairs, toil
 MAX_BEDS = 1500  # one site holds at most a large reception centre; stops campuses and race circuits counting as cities
 SPACE = {3.5: "3.5 m² · Sphere minimum, several days", 2.0: "2 m² · one night, tightly packed",
          4.5: "4.5 m² · Sphere cold climate / longer stays"}
-FULL = "#c4501f"
+GREY = "#6e6e73"  # neutral dot for the status keys; the fill colour is the building type
 
 
 @st.cache_data
@@ -83,8 +83,10 @@ with left:
     arcs["tip"] = [f"<b>{about(p)} people</b> → {n}<br>{k:.1f} km by road"
                    for p, n, k in zip(arcs.people, s.set_index("sid").name.reindex(arcs.sid), arcs.km)]
     s["r"] = 3 + 9 * np.sqrt(s.capacity / s.capacity.max())
-    s["fill"] = [core.rgb(FULL) if l >= cap - 0.5 and l > 0 else core.rgb(core.SHELTER) if l > 0.5
-                 else core.rgb(core.OFFLINE, 160) for l, cap in zip(s.load, s.capacity)]
+    full = (s.load >= s.capacity - 0.5) & (s.load > 0)
+    s["fill"] = [core.rgb(core.KIND[k], 255 if l > 0.5 else 70) for k, l in zip(s.type, s.load)]
+    s["ring"] = [core.rgb("#1d1d1f") if f else [255, 255, 255, 255] for f in full]
+    s["lw"] = np.where(full, 2.5, 1)
     s["tip"] = [f"<b>{n}</b><br>{t} · {cm}<br>{about(l)} of {about(k)} beds used"
                 for n, t, cm, l, k in zip(s.name, s.type, s.commune, s.load, s.capacity)]
     lost = c[c.left >= 1].assign(r=lambda d: 3 + 9 * np.sqrt(d.left / max(d.left.max(), 1)),
@@ -95,14 +97,15 @@ with left:
         pdk.Layer("LineLayer", arcs, get_source_position=["lon", "lat"], get_target_position=["lon_to", "lat_to"],
                   get_color=[36, 138, 61, 150], get_width="w", width_units="'pixels'", pickable=True),
         pdk.Layer("ScatterplotLayer", s, get_position=["lon", "lat"], get_fill_color="fill", get_radius="r",
-                  radius_units="'pixels'", stroked=True, get_line_color=[255, 255, 255], line_width_min_pixels=1,
-                  pickable=True),
+                  radius_units="'pixels'", stroked=True, get_line_color="ring", get_line_width="lw",
+                  line_width_units="'pixels'", pickable=True),
         pdk.Layer("ScatterplotLayer", lost, get_position=["lon", "lat"], get_fill_color=core.rgb(core.EVACUATE, 220),
                   get_radius="r", radius_units="'pixels'", stroked=True, get_line_color=[255, 255, 255],
                   line_width_min_pixels=1, pickable=True)]
     core.deck(layers, core.view(s_all), 560)
-    core.legend(core.swatch(core.SHELTER, "Shelter in use", True) + core.swatch(FULL, "Shelter full", True)
-                + core.swatch(core.OFFLINE, "Dry site, not needed", True) + core.swatch(core.EVACUATE, "Residents without a bed", True)
+    core.legend("".join(core.swatch(h, k, True) for k, h in core.KIND.items() if k in set(s.type)),
+                core.swatch(GREY, "Shelter in use", True) + core.swatch(f"{GREY};box-shadow:0 0 0 2px #1d1d1f", "Shelter full", True)
+                + core.swatch("rgba(110,110,115,.3)", "Dry site, not needed", True) + core.swatch(core.EVACUATE, "Residents without a bed", True)
                 + core.swatch("rgba(36,138,61,.6)", "Trip, thicker = more people"),
                 core.swatch("rgba(0,113,227,.4)", "Observed 2021 water" if lens == "obs" else "Modelled 100-year zone"))
 

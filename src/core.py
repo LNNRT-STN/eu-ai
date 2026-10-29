@@ -22,6 +22,9 @@ IMPACT = [("Not reached by mapped water", "#e4e1d9"), ("Low", "#fbd3bf"), ("Mode
           ("High", "#eb6834"), ("Severe", "#7a2c10")]
 MISSED = "#8f8c84"  # flooded in reality, missed by the satellite: never draw these as "not reached"
 SHELTER, EVACUATE, OFFLINE = "#248a3d", "#d70015", "#aeaeb2"
+# shelter sites by building type; hues kept clear of water blue, risk orange, evacuate red and trip green
+KIND = {"School": "#0e7c86", "Sports hall": "#c28a00", "Community centre": "#b0418f", "Town hall / civic": "#4a4e69"}
+KIND["Town hall"] = KIND["Town hall / civic"]  # sites.parquet label
 # priority score levels (build_priority.py): label, colour, what the commune does now
 PRIORITY = {"Act first": ("#d70015", "Start evacuation planning for homes and care sites in the flood zone."),
             "Prepare": ("#eb6834", "Warn residents in the flood zone, check dry sites and transport."),
