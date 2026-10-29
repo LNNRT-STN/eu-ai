@@ -1,5 +1,5 @@
-"""Action dashboard for Meuse crisis and risk managers. Run build.py, build_meuse.py, build_regions.py,
-build_sites.py (and forecast.py once), then: streamlit run src/dashboard.py"""
+"""Action dashboard for crisis and risk managers in the July 2021 flood areas. Reads the cleaned data in
+outputs/data; the river outlook needs forecast.py (once) and build_priority.py (replay). Run: streamlit run src/dashboard.py"""
 import streamlit as st
 
 import core
@@ -20,7 +20,7 @@ nav = st.navigation({
 
 with st.sidebar:
     gauges, *_, fetched, err = core.outlook()
-    st.caption("Meuse basin · BE · NL · DE")
+    st.caption("July 2021 flood areas · BE · NL · DE")
     if fetched is not None:
         st.caption(f"Outlook from {fetched:%H:%M}, Open-Meteo GloFAS")
     if st.button("Refresh outlook", icon=":material/refresh:", type="tertiary"):

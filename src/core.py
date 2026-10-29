@@ -12,33 +12,35 @@ import streamlit as st
 import forecast
 
 OUT = Path(__file__).resolve().parent / "out"
-DST = OUT / "meuse"
+DST = OUT / "meuse"  # live-outlook files only: river reference flows and the July 2021 river replay
+DATA = Path(__file__).resolve().parents[1] / "outputs" / "data"  # cleaned exposure and shelter data (its README.md)
 COUNTRY = {"BE": "Belgium", "NL": "Netherlands", "DE": "Germany"}
-LENS = {"rp100": "100-year zone · modelled", "obs": "July 2021 · observed"}
-# residents per ~1 km cell; one orange hue, light → dark, same breaks in both views so they compare
-CLASSES = [(1, "1–10", "#fbd3bf"), (10, "10–50", "#f5a47d"), (50, "50–250", "#eb6834"),
-           (250, "250–1,000", "#c4501f"), (1000, "> 1,000", "#7a2c10")]
-IMPACT = [("Not reached by mapped water", "#e4e1d9"), ("Low", "#fbd3bf"), ("Moderate", "#f5a47d"),
-          ("High", "#eb6834"), ("Severe", "#7a2c10")]
+# two flood maps per area; vesdre has no satellite polygons, so its two are EFAS 100-year (main) and 500-year (worst)
+VARIANT = {"worst": "July 2021 · all satellite passes", "main": "July 2021 · first pass only"}
+REACH = {"low": "1 km walk · 5 m² · 40 % usable", "central": "1.5 km walk · 4 m² · 50 % usable",
+         "high": "2.5 km walk · 3 m² · 60 % usable"}
 MISSED = "#8f8c84"  # flooded in reality, missed by the satellite: never draw these as "not reached"
 SHELTER, EVACUATE, OFFLINE = "#248a3d", "#d70015", "#aeaeb2"
+PEOPLE = "#eb6834"  # residents in the water, one orange everywhere
 # shelter sites by building type; hues kept clear of water blue, risk orange, evacuate red and trip green
-KIND = {"School": "#0e7c86", "Sports hall": "#c28a00", "Community centre": "#b0418f", "Town hall / civic": "#4a4e69"}
-KIND["Town hall"] = KIND["Town hall / civic"]  # sites.parquet label
-# priority score levels (build_priority.py): label, colour, what the commune does now
-PRIORITY = {"Act first": ("#d70015", "Start evacuation planning for homes and care sites in the flood zone."),
-            "Prepare": ("#eb6834", "Warn residents in the flood zone, check dry sites and transport."),
-            "Watch": ("#e8b13a", "Follow the river outlook, keep the crisis cell on standby."),
-            "Low": ("#d9d6cf", "Few or no homes in the flood zone.")}
+KIND = {"School": "#0e7c86", "Sports hall": "#c28a00", "Town hall / civic": "#4a4e69"}
+CAT = {"school": "School", "sports hall": "Sports hall", "civic": "Town hall / civic"}
+# shelter gap per municipality (q4_ranking `why`): label, colour, what the commune does now
+GAP = {"No shelter in reach": ("#d70015", "Pre-agree sites further away, or plan buses to a neighbouring commune."),
+       "Shelters full": ("#eb6834", "Open more or larger sites in walking reach, or share them with the next commune."),
+       "Covered": ("#d9d6cf", "Shelters in walking reach can take everyone in the flood.")}
+WHY = {"shelters too far": "No shelter in reach", "shelters full": "Shelters full", "-": "Covered"}
 # how fresh each source is, shown under every panel
-AS_OF = {"zone": "EFAS 100-year zone (model) · GHS-POP 2020 residents", "obs": "Copernicus EMS satellite map, 15–20 Jul 2021",
-         "osm": "OpenStreetMap sites, extracted Oct 2026", "replay": "GloFAS river flow, 12–20 Jul 2021 (model)"}
+AS_OF = {"obs": "Copernicus EMS satellite map, 15–20 Jul 2021 · GHS-OBAT · GHS-POP 2020",
+         "model": "Vesdre: EFAS 100-/500-year zone (model)", "osm": "OpenStreetMap sites, extracted 29 Oct 2026",
+         "replay": "GloFAS river flow, 12–20 Jul 2021 (model)"}
 rgb = lambda h, a=255: [int(h[i:i + 2], 16) for i in (1, 3, 5)] + [a]
 _lum = lambda h: sum(w * (c / 12.92 if c <= .04045 else ((c + .055) / 1.055) ** 2.4)
                      for w, c in zip((.2126, .7152, .0722), (v / 255 for v in rgb(h)[:3])))
 ink = lambda h: "#fff" if _lum(h) < .18 else "#1d1d1f"  # text on a filled colour: whichever contrasts more
 chip = lambda lab, h: f"<span class='pill' style='background:{h};color:{ink(h)}'>{lab}</span>"
-ZONE = "rgba(0,113,227,.35)"  # the 100-year zone as drawn on the maps
+WATER = "rgba(0,113,227,.35)"  # observed 2021 water as drawn on the maps
+MODEL = "rgba(143,140,132,.4)"  # modelled water (Vesdre, missed by the satellite) in the MISSED grey
 fmt = lambda n: f"{n:,.0f}"
 about = lambda n: fmt(round(n, -2) if n >= 1000 else round(n, -1) if n >= 100 else n)  # residents are an order of magnitude
 
@@ -144,53 +146,50 @@ def steps(items, title=""):
                 st.page_link(page, label=t)
 
 
+country = lambda m: m.str[-3:-1]  # "Pepinster (BE)" → "BE"
+plain = lambda m: m.str.replace(r" \(..\)$", "", regex=True)
+
+
 @st.cache_data
 def load():
-    s = json.loads((DST / "summary.json").read_text())
-    communes = pd.read_parquet(DST / "communes.parquet")
-    cells = pd.read_parquet(DST / "cells.parquet")
-    sites = pd.read_parquet(DST / "sites.parquet")
-    geo = {n: json.loads((DST / f"{n}.geojson").read_text()) for n in ("flood", "aoi", "rp100")}
-    if (DST / "regions.geojson").exists():
-        r = gpd.read_file(DST / "regions.geojson")
-        dmg = lambda x: (f"<br>EMS damage grading: {x.gra_destroyed:.0f} destroyed, {x.gra_damaged:.0f} damaged, "
-                         f"{x['gra_possibly damaged']:.0f} possibly damaged" if x.graded else "<br>No damage grading here (Germany only)")
-        r["fill"] = [rgb(MISSED, 200) if m else rgb(IMPACT[c][1], 190) for m, c in zip(r.under_detected, r.cls)]
-        r["tip"] = [f"<b>{x.commune}</b> · " + ("flooded, but missed by the satellite map" if x.under_detected else x.class_label)
-                    + f"<br>≈ {x.residents:,.0f} residents in the water ({x.pop_share:.2%} of {x.population:,.0f})"
-                    + f"<br>{x.buildings:,.0f} buildings in the water" + dmg(x) for _, x in r.iterrows()]
-        geo["regions"] = json.loads(r.to_json())
-    return s, communes, cells, sites, geo
+    """Cleaned data (outputs/data): areas, towns per flood map, ranking, care sites, shelters, quality checks."""
+    csv = lambda n: pd.read_csv(DATA / f"{n}.csv", encoding="utf-8-sig")
+    areas, towns, rank, sites = csv("area_summary"), csv("app_towns"), csv("q4_ranking"), csv("critical_sites")
+    towns["country"], rank["country"], sites["country"] = country(towns.municipality), country(rank.municipality), \
+        country(sites.municipality)
+    towns["modelled"] = towns.source == "modelled"
+    rank["modelled"] = rank.source.str.startswith("MODELLED")
+    rank["gap"] = rank.why.map(WHY)
+    sites = sites[sites.share_of_site_flooded >= .05]  # below 5 % the site only touches the water's edge
+    sh = gpd.read_file(DATA / "shelters.geojson")
+    pt = sh.geometry.to_crs(3035).centroid.to_crs(4326)  # a few campuses are polygons
+    sh = pd.DataFrame(sh.drop(columns="geometry")).assign(
+        lon=pt.x.round(5), lat=pt.y.round(5), type=sh.cat.map(CAT), name=sh["name"].fillna("(no name in OSM)"),
+        country=country(sh.muni.fillna("(??)")))
+    js = lambda n: json.loads((DATA / f"{n}.json").read_text())
+    return dict(areas=areas, towns=towns, rank=rank, sites=sites, shelters=sh, head=js("q4_headline"),
+                qc=js("qc_and_validation"), dq=csv("dq_report"))
 
 
 @st.cache_data
-def load_brief():
-    """Priority score per commune and the July 2021 river flows (build_priority.py)."""
-    p = gpd.read_file(DST / "priority.geojson")
-    p["fill"] = [rgb(PRIORITY[l][0], 200) for l in p.level]
-    p["tip"] = [f"<b>{x.commune}</b> · {x.level}, {x.score}/10<br>≈ {about(x.people)} people in the flood zone "
-                f"({x.share:.0%})<br>{x.care} care sites at risk" for _, x in p.iterrows()]
+def flood(variant):
+    """Flood extent of every area for one map, observed and modelled told apart by colour."""
+    feats = []
+    for a in ("ahr", "erftstadt", "eschweiler", "euskirchen", "liege", "rochefort", "schleiden", "venlo", "vesdre",
+              "wassenberg"):
+        for f in json.loads((DATA / f"flood_{a}_{variant}.geojson").read_text())["features"]:
+            m = a == "vesdre"
+            feats.append({**f, "properties": {"area": a, "fill": rgb(MISSED, 100) if m else rgb("#0071e3", 85),
+                                              "line": rgb(MISSED, 190) if m else rgb("#0071e3", 150)}})
+    fc = {"type": "FeatureCollection", "features": feats}
+    return fc, list(gpd.GeoDataFrame.from_features(feats).total_bounds)
+
+
+@st.cache_data
+def load_replay():
+    """GloFAS daily flows at the river points, 10–20 July 2021 (build_priority.py)."""
     r = pd.DataFrame(json.loads((DST / "replay_2021.json").read_text()))
-    return p, r.set_axis(pd.to_datetime(r.index))
-
-
-@st.cache_data
-def cell_communes():
-    """Commune (lau_id) of each ~1 km cell, by the cell centre."""
-    c = pd.read_parquet(DST / "cells.parquet").drop_duplicates("cell")
-    pts = gpd.GeoDataFrame(c[["cell"]], geometry=gpd.points_from_xy((c.lon0 + c.lon1) / 2, (c.lat0 + c.lat1) / 2), crs=4326)
-    p = gpd.read_file(DST / "priority.geojson")[["lau_id", "geometry"]].to_crs(4326)
-    return gpd.sjoin(pts, p, predicate="within")[["cell", "lau_id"]].drop_duplicates("cell")
-
-
-def blocks(cel, opacity=215):
-    """Residents per ~1 km cell as coloured squares, same classes in every view."""
-    cls = lambda v: max(i for i, (lo, _, _) in enumerate(CLASSES) if v >= lo)
-    cel = cel.assign(poly=[[[a, d], [b, d], [b, c], [a, c]] for a, b, c, d in zip(cel.lon0, cel.lon1, cel.lat0, cel.lat1)],
-                     fill=[rgb(CLASSES[cls(v)][2], opacity) for v in cel.residents],
-                     tip=[f"≈ {round(r):,} residents<br>{n:,} buildings" for r, n in zip(cel.residents, cel.buildings)])
-    return pdk.Layer("PolygonLayer", cel, get_polygon="poly", get_fill_color="fill", get_line_color=[255, 255, 255, 220],
-                     line_width_min_pixels=0.5, stroked=True, pickable=True, auto_highlight=True)
+    return r.set_axis(pd.to_datetime(r.index))
 
 
 @st.cache_data(ttl=3 * 3600, show_spinner="Fetching river and rain forecasts…")
@@ -235,29 +234,37 @@ def km(lon0, lat0, lon, lat):
     return 6371 * np.arccos(np.clip(np.sin(p0) * np.sin(p) + np.cos(p0) * np.cos(p) * np.cos(dl), -1, 1))
 
 
-def view(s, focus=None):
+def view(bbox, focus=None, zoom=11.5):
     if focus is not None:
-        return pdk.ViewState(longitude=focus[0], latitude=focus[1], zoom=11.5)
-    x0, y0, x1, y1 = s["bbox"]
+        return pdk.ViewState(longitude=focus[0], latitude=focus[1], zoom=zoom)
+    x0, y0, x1, y1 = bbox
     zoom = min(math.log2(900 * 360 / (512 * (x1 - x0))), math.log2(620 * 360 / (512 * (y1 - y0) * 1.55))) - 0.2
     return pdk.ViewState(longitude=(x0 + x1) / 2, latitude=(y0 + y1) / 2, zoom=zoom)
 
 
-def water(geo, lens):
-    layers = [pdk.Layer("GeoJsonLayer", geo["aoi"], filled=False, stroked=True, get_line_color=[110, 110, 115, 170],
-                        line_width_min_pixels=1, get_dash_array=[4, 3])]
-    if lens == "obs":
-        layers.append(pdk.Layer("GeoJsonLayer", geo["flood"], filled=True, stroked=True, get_fill_color=[0, 113, 227, 80],
-                                get_line_color=[0, 113, 227, 150], line_width_min_pixels=1))
-    else:
-        layers.append(pdk.Layer("GeoJsonLayer", geo["rp100"], filled=True, stroked=False, get_fill_color=[0, 113, 227, 95]))
-    return layers
+def water(variant="worst"):
+    fc, _ = flood(variant)
+    return [pdk.Layer("GeoJsonLayer", fc, filled=True, stroked=True, get_fill_color="properties.fill",
+                      get_line_color="properties.line", line_width_min_pixels=1)]
+
+
+def bbox(variant="worst"):
+    return flood(variant)[1]
 
 
 def points(df, color, radius=6, line=2):
     return pdk.Layer("ScatterplotLayer", df, get_position=["lon", "lat"], get_fill_color=color,
                      get_line_color=[255, 255, 255], line_width_min_pixels=line, stroked=True, get_radius=radius,
                      radius_units="'pixels'", pickable=True)
+
+
+def towns(df, size, color, scale=14):
+    """Municipalities as circles at their centroid, area ∝ `size` (no commune outlines in the cleaned data)."""
+    big = max(df[size].max(), 1)
+    return pdk.Layer("ScatterplotLayer", df.assign(r=3 + scale * np.sqrt(df[size] / big)), get_position=["lon", "lat"],
+                     get_fill_color=color, get_radius="r", radius_units="'pixels'", stroked=True,
+                     get_line_color=[255, 255, 255], line_width_min_pixels=1, pickable=True, auto_highlight=True,
+                     id=f"towns-{size}")
 
 
 def deck(layers, v, height=600, **kw):

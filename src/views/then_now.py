@@ -4,8 +4,10 @@ import streamlit as st
 import core
 from core import about, fmt
 
-s, communes, cells, sites, geo = core.load()
-obs, zone = s["lenses"]["obs"], s["lenses"]["rp100"]
+d = core.load()
+a = d["areas"][d["areas"].variant == "worst"]
+obs, vesdre = a[a.area != "vesdre"].sum(numeric_only=True), a[a.area == "vesdre"].iloc[0]
+rank, sites = d["rank"], d["sites"]
 
 # Q2 desk research, Oct 2026: (area, theme, what changed, communes named, status, source label, url).
 # Status is what the source says, not what we checked on the ground.
@@ -15,7 +17,7 @@ MEASURES = [
     ("Vesdre · BE", "Defences", "Phase 1: about 50 urgent works, mainly repairs and rebuilt river banks.", [], DONE,
      "L'Avenir, 25 Jun 2026", "https://www.lavenir.net/actu/environnement/2026/06/25/cinq-ans-apres-les-inondations-cataclysmiques-en-wallonie-le-gouvernement-fait-le-bilan-de-ce-qui-est-fait-et-de-ce-quil-reste-a-faire-BKHPCUNNCJBRNMEVO2ZVCW6DJE/"),
     ("Vesdre · BE", "Defences", "Phase 2: 14 works that give the river room (riverbed, banks), €453 M of which €300 M "
-     "EIB loan. Launched 2026.", ["Chaudfontaine", "Theux", "Spa", "Pepinster", "Limbourg"], UNDERWAY,
+     "EIB loan. Launched 2026.", ["Chaudfontaine", "Theux", "Spa", "Pepinster", "Limburg"], UNDERWAY,
      "La Libre, 25 Jun 2026", "https://www.lalibre.be/dernieres-depeches/2026/06/25/inondations-en-wallonie-apres-les-travaux-durgence-14-chantiers-structurants-lances-en-2026-UAE76R5FWRDUBDTNXUCWPWJ5CU/"),
     ("Vesdre · BE", "Defences", "Verviers, Eupen and Trooz wait for the hydraulic model to finish. No start date.",
      ["Verviers", "Eupen", "Trooz"], PLANNED, "L'Avenir, 25 Jun 2026",
@@ -68,50 +70,44 @@ GAPS = [
     ("Schools and households", "No school programme or household-preparedness campaign found for these valleys."),
     ("BE-Alert", "Recommended by researchers; no source confirms a reform since 2021."),
     ("Rebuilt vs. left empty", "No commune publishes how many 2021 homes were rebuilt, bought out or abandoned."),
-    ("The Ahr", "Outside the Meuse basin and this tool's maps: not covered here."),
+    ("The Ahr and the Erft", "In the maps since the cleaned data (Oct 2026); no desk research on measures there yet."),
 ]
 
 core.header("2021 and today", "What the July 2021 flood hit, and what the public record shows has changed in "
                                "those places since.")
 st.space("small")
-core.banner(core.EVACUATE, f"2021 reached at least {fmt(obs['buildings'])} buildings in {obs['communes']} communes. "
-            "Five years on, most structural protection is still being built.",
+core.banner(core.EVACUATE, f"2021 reached at least {fmt(obs.buildings)} buildings in {fmt((~rank.modelled).sum())} "
+            "municipalities. Five years on, most structural protection is still being built.",
             f"Repairs are done. The works that give rivers room (Vesdre), the Maas dikes (Limburg) and the retention "
-            f"basins (Inde) run to 2027–2050. Meanwhile the modelled 100-year zone still holds ≈ "
-            f"{about(zone['residents'])} residents.", note=False)
+            f"basins (Inde) run to 2027–2050. The Vesdre valley, missed by the satellite, holds ≈ "
+            f"{about(vesdre.people_2020)} residents in the modelled 500-year zone.", note=False)
 st.space("small")
 
 # Q1 ------------------------------------------------------------------------------------------------------------
 st.subheader("1 · What the 2021 flood hit")
-reg = pd.DataFrame([f["properties"] for f in geo["regions"]["features"]])
-dmg = reg[["gra_destroyed", "gra_damaged"]].sum()
+care = sites[sites.in_worst_flood & (sites.type != "school")]
 core.facts([
-    (fmt(obs["buildings"]), f"<strong>buildings inside the mapped water</strong>, {fmt(obs['residential'])} of them homes"),
-    (about(obs["residents"]), "<strong>residents inside the water</strong>, an order of magnitude"),
-    (fmt(obs["communes"]), f"<strong>communes reached</strong>: BE {obs['by_country']['BE']['buildings']}, "
-                           f"NL {obs['by_country']['NL']['buildings']}, DE {obs['by_country']['DE']['buildings']} buildings"),
-    (fmt(dmg.sum()), f"<strong>buildings graded damaged</strong> ({fmt(dmg.gra_destroyed)} destroyed), Germany only"),
-], "Source · " + core.AS_OF["obs"] + " · GHS-OBAT 2020 · GHS-POP 2020")
-missed = ", ".join(reg[reg.under_detected].commune)
-st.caption(f"A floor, not a total: the satellite saw little in the narrow Vesdre valley and central Liège. Flooded "
-           f"but missed: {missed}. Press figures for the same places run far higher (Verviers alone: about 10,000 "
-           f"people displaced, Etopia 2025).")
+    (fmt(obs.buildings), f"<strong>buildings inside the mapped water</strong>, {fmt(obs.residential)} of them homes"),
+    (about(obs.people_2020), "<strong>residents inside the water</strong>, an order of magnitude"),
+    (fmt(obs.flood_km2), "<strong>km² of water</strong> mapped by the satellite across nine areas"),
+    (fmt(len(care)), f"<strong>hospitals and care homes</strong> in the water, plus "
+                     f"{fmt((sites.in_worst_flood & (sites.type == 'school')).sum())} schools"),
+], "Source · " + core.AS_OF["obs"] + " · all satellite passes")
+st.caption("A floor, not a total: the satellite saw little in the narrow Vesdre valley and central Liège. Ahr: "
+           f"{fmt(a.set_index('area').buildings['ahr'])} buildings here vs over 9,000 reported (bpb, 2023). Press "
+           "figures for the Vesdre run far higher (Verviers alone: about 10,000 people displaced, Etopia 2025).")
 
-wide = communes.pivot_table(index=["lau_id", "commune", "country"], columns="lens",
-                            values=["buildings", "residents"], fill_value=0)
-wide.columns = [f"{v}_{l}" for v, l in wide.columns]
-wide = wide.reset_index().merge(reg[["lau_id", "under_detected"]], on="lau_id", how="left")
 named = {c for *_, cs, _, _, _ in MEASURES for c in cs}
-hit = wide[(wide.buildings_obs > 0) | wide.under_detected.fillna(False)].assign(
-    seen=lambda d: d.under_detected.map({True: "Missed by satellite"}).fillna("Mapped"),
-    found=lambda d: d.commune.isin(named).map({True: "See below", False: "–"}),
-    country=lambda d: d.country.map(core.COUNTRY)).sort_values(["buildings_obs", "residents_rp100"], ascending=False)
-st.dataframe(hit[["commune", "country", "seen", "buildings_obs", "residents_obs", "residents_rp100", "found"]],
+hit = rank.assign(name=core.plain(rank.municipality)).assign(
+    seen=lambda d: d.modelled.map({True: "Missed by satellite · modelled", False: "Mapped"}),
+    found=lambda d: d.name.isin(named).map({True: "See below", False: "–"}),
+    country=lambda d: d.country.map(core.COUNTRY)).sort_values("people", ascending=False)
+st.dataframe(hit[["municipality", "country", "seen", "people", "people_first_pass", "found"]],
              hide_index=True, height=360, column_config={
-                 "commune": "Commune", "country": "Country", "seen": "July 2021",
-                 "buildings_obs": st.column_config.NumberColumn("Buildings in 2021 water", format="%d"),
-                 "residents_obs": st.column_config.NumberColumn("Residents in 2021 water", format="%d"),
-                 "residents_rp100": st.column_config.NumberColumn("Residents in 100-year zone", format="%d"),
+                 "municipality": "Municipality", "country": "Country", "seen": "July 2021",
+                 "people": st.column_config.NumberColumn("Residents in the water", format="localized",
+                                                         help="All satellite passes"),
+                 "people_first_pass": st.column_config.NumberColumn("First pass only", format="localized"),
                  "found": st.column_config.TextColumn("Change on record", help="Named in a measure in section 2.")})
 st.space("small")
 

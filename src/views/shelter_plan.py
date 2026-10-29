@@ -1,160 +1,108 @@
-import numpy as np
+import altair as alt
 import pandas as pd
-import pydeck as pdk
 import streamlit as st
-from scipy.optimize import linprog
-from scipy.sparse import coo_matrix
 
 import core
 from core import about, fmt
 
-USABLE = 0.5  # share of floor area people can sleep on (corridors, stairs, toilets, furniture take the rest)
-MAX_BEDS = 1500  # one site holds at most a large reception centre; stops campuses and race circuits counting as cities
-SPACE = {3.5: "3.5 m² · Sphere minimum, several days", 2.0: "2 m² · one night, tightly packed",
-         4.5: "4.5 m² · Sphere cold climate / longer stays"}
-GREY = "#6e6e73"  # neutral dot for the status keys; the fill colour is the building type
+d = core.load()
+areas, rank, munis, shelters, sites = d["areas"], d["rank"], d["towns"], d["shelters"], d["sites"]
+STATUS = {"Shelter place": core.SHELTER, "Shelters in reach full": core.GAP["Shelters full"][0],
+          "No shelter in reach": core.GAP["No shelter in reach"][0]}
 
+core.header("Shelter plan", "If the water comes back, can everyone in it walk to a dry shelter with room? People are "
+                            "matched to shelters by the best possible plan for each area, every place within reach used.")
 
-@st.cache_data
-def inputs():
-    d = core.DST
-    return (pd.read_parquet(d / "shelters.parquet"), pd.read_parquet(d / "shelter_edges.parquet"),
-            pd.read_parquet(d / "shelter_cells.parquet"), pd.read_parquet(d / "at_risk.parquet"))
+c1, c2 = st.columns([1, 1], vertical_alignment="bottom")
+variant = c1.segmented_control("Who needs shelter", list(core.VARIANT), format_func=core.VARIANT.get, default="worst",
+                               required=True)
+case = c2.segmented_control("Assumptions", list(core.REACH), format_func=str.capitalize, default="central",
+                            required=True, help=" · ".join(f"{k.capitalize()}: {v}" for k, v in core.REACH.items()))
 
+a = areas[areas.variant == variant].assign(
+    modelled=lambda x: x.area == "vesdre", people=lambda x: x.people_2020, covered=lambda x: x[f"{case}_covered"],
+    no_reach=lambda x: x[f"{case}_no_reach"], full=lambda x: x[f"{case}_full"],
+    gain=lambda x: x[f"{case}_covered"] - x[f"{case}_covered_nearest_first"])
+obs, mod = a[~a.modelled].sum(numeric_only=True), a[a.modelled].iloc[0]
+core.facts([(about(obs.people), "<strong>people to shelter</strong> in the observed water, " + core.REACH[case]),
+            (f"{obs.covered / obs.people:.0%}", f"<strong>get a place in walking reach</strong> (≈ {about(obs.covered)})",
+             core.SHELTER, True),
+            (about(obs.no_reach + obs.full), f"<strong>left over</strong>: {about(obs.no_reach)} with no shelter in reach, "
+                                             f"{about(obs.full)} because the shelters in reach are full",
+             core.EVACUATE, True),
+            (about(obs.gain), "<strong>more placed by coordinating</strong> than if everyone walks to the nearest "
+                              "shelter")],
+           f"Modelled Vesdre, kept apart: ≈ {about(mod.people)} people, {mod.covered / mod.people:.0%} placed. "
+           "Source · " + core.AS_OF["obs"] + " · " + core.AS_OF["osm"])
+st.space("small")
 
-@st.cache_data(show_spinner="Planning who goes where…")
-def plan(lens, reach, m2):
-    """Capacitated transport problem: shelter as many residents as possible, then keep total person-km lowest.
-    Variables x_e = people sent along cell→shelter edge e (road km ≤ reach). Rows: a cell sends ≤ its residents,
-    a shelter takes ≤ its capacity. Cost km − 1,000 per person, so one more person sheltered always beats distance."""
-    sh, edges, cells, _ = inputs()
-    cap = (sh.floor * USABLE / m2).clip(upper=MAX_BEDS).to_numpy()
-    c = cells[cells.lens == lens].reset_index(drop=True)
-    e = edges[(edges.lens == lens) & (edges.km <= reach)].merge(c[["cell"]].reset_index(names="row"), on="cell")
-    flow = np.zeros(len(e))
-    if len(e):
-        n = len(e)
-        a = coo_matrix((np.ones(2 * n), (np.r_[e.row, len(c) + e.sid], np.r_[np.arange(n), np.arange(n)])),
-                       shape=(len(c) + len(sh), n))
-        r = linprog(e.km - 1000, A_ub=a.tocsr(), b_ub=np.r_[c.residents, cap], bounds=(0, None), method="highs")
-        flow = r.x if r.success else flow
-    e = e.assign(people=flow)[flow > 0.05]
-    c["sheltered"] = c.cell.map(e.groupby("cell").people.sum()).fillna(0)
-    c["reachable"] = c.cell.isin(edges[(edges.lens == lens) & (edges.km <= reach)].cell)
-    s = sh.assign(capacity=cap, load=sh.sid.map(e.groupby("sid").people.sum()).fillna(0))
-    return c, s, e
-
-
-sh, edges, cells, risk = inputs()
-s_all, *_, geo = core.load()
-core.header("Shelter plan", "If the water comes back, where does everyone go? Residents of each ~1 km block are sent to "
-                            "the nearest dry building with room left, until every bed within reach is taken.")
-
-c1, c2, c3 = st.columns([2, 2, 2], vertical_alignment="bottom")
-lens = c1.segmented_control("Who needs shelter", list(core.LENS), format_func=core.LENS.get, required=True,
-                            default="obs" if st.query_params.get("view") == "observed" else "rp100")
-reach = c2.select_slider("Furthest trip by road", [2, 5, 10, 15, 20, 25], value=10, format_func="{} km".format,
-                         help="Straight-line distance × 1.3 for the road network. 2 km ≈ a walk, 10 km ≈ a bus run.")
-m2 = c3.selectbox("Space per person", list(SPACE), format_func=SPACE.get,
-                  help=f"Capacity = floor area × {USABLE:.0%} usable ÷ space per person, at most {MAX_BEDS:,} per site.")
-
-c, s, e = plan(lens, reach, m2)
-need, got = c.residents.sum(), c.sheltered.sum()
-out_reach = c[~c.reachable].residents.sum()
-full = need - got - out_reach
-used = s[s.load > 0.5]
-avg_km = (e.people * e.km).sum() / got if got else 0
-core.facts([(about(need), "residents to move, " + ("inside the July 2021 mapped water" if lens == "obs"
-                                                  else "inside the modelled 100-year zone")),
-            (f"{got / need:.0%}" if need else "–", f"get a bed within <strong>{reach} km</strong> "
-                                                   f"(≈ {about(got)} people, {avg_km:.1f} km on average)"),
-            (about(need - got), f"left over: {about(out_reach)} with no shelter in reach, {about(max(full, 0))} "
-                                "because the shelters in reach are full"),
-            (fmt(len(used)), f"shelters to open, of {fmt(len(s))} dry sites · {fmt(s.capacity.sum())} beds in all")],
-           core.AS_OF["zone" if lens == "rp100" else "obs"] + " · " + core.AS_OF["osm"] + " footprints")
-
-c["left"] = c.residents - c.sheltered
-left, right = st.columns([3, 2], gap="medium")
+left, right = st.columns([1, 1], gap="medium")
 with left:
-    big = e.people.max() if len(e) else 1
-    pos = s.set_index("sid")[["lon", "lat"]]
-    arcs = e.merge(c[["cell", "lon", "lat"]], on="cell").join(pos.add_suffix("_to"), on="sid")
-    arcs["w"] = 1 + 5 * np.sqrt(arcs.people / big)
-    arcs["tip"] = [f"<b>{about(p)} people</b> → {n}<br>{k:.1f} km by road"
-                   for p, n, k in zip(arcs.people, s.set_index("sid").name.reindex(arcs.sid), arcs.km)]
-    s["r"] = 3 + 9 * np.sqrt(s.capacity / s.capacity.max())
-    full = (s.load >= s.capacity - 0.5) & (s.load > 0)
-    s["fill"] = [core.rgb(core.KIND[k], 255 if l > 0.5 else 70) for k, l in zip(s.type, s.load)]
-    s["ring"] = [core.rgb("#1d1d1f") if f else [255, 255, 255, 255] for f in full]
-    s["lw"] = np.where(full, 2.5, 1)
-    s["tip"] = [f"<b>{n}</b><br>{t} · {cm}<br>{about(l)} of {about(k)} beds used"
-                for n, t, cm, l, k in zip(s.name, s.type, s.commune, s.load, s.capacity)]
-    lost = c[c.left >= 1].assign(r=lambda d: 3 + 9 * np.sqrt(d.left / max(d.left.max(), 1)),
-                                 tip=lambda d: [f"<b>{about(l)} residents without a bed</b><br>{cm}"
-                                                + ("" if rc else f"<br>no shelter within {reach} km")
-                                                for l, cm, rc in zip(d.left, d.commune, d.reachable)])
-    layers = core.water(geo, lens) + [
-        pdk.Layer("LineLayer", arcs, get_source_position=["lon", "lat"], get_target_position=["lon_to", "lat_to"],
-                  get_color=[36, 138, 61, 150], get_width="w", width_units="'pixels'", pickable=True),
-        pdk.Layer("ScatterplotLayer", s, get_position=["lon", "lat"], get_fill_color="fill", get_radius="r",
-                  radius_units="'pixels'", stroked=True, get_line_color="ring", get_line_width="lw",
-                  line_width_units="'pixels'", pickable=True),
-        pdk.Layer("ScatterplotLayer", lost, get_position=["lon", "lat"], get_fill_color=core.rgb(core.EVACUATE, 220),
-                  get_radius="r", radius_units="'pixels'", stroked=True, get_line_color=[255, 255, 255],
-                  line_width_min_pixels=1, pickable=True)]
-    core.deck(layers, core.view(s_all), 560)
-    core.legend("".join(core.swatch(h, k, True) for k, h in core.KIND.items() if k in set(s.type)),
-                core.swatch(GREY, "Shelter in use", True) + core.swatch(f"{GREY};box-shadow:0 0 0 2px #1d1d1f", "Shelter full", True)
-                + core.swatch("rgba(110,110,115,.3)", "Dry site, not needed", True) + core.swatch(core.EVACUATE, "Residents without a bed", True)
-                + core.swatch("rgba(36,138,61,.6)", "Trip, thicker = more people"),
-                core.swatch("rgba(0,113,227,.4)", "Observed 2021 water" if lens == "obs" else "Modelled 100-year zone"))
+    st.html("<div class='gh'>Per area · " + core.REACH[case] + "</div>")
+    long = a.melt(id_vars=["name", "people"], value_vars=["covered", "full", "no_reach"], var_name="k", value_name="n")
+    long["status"] = long.k.map({"covered": "Shelter place", "full": "Shelters in reach full",
+                                 "no_reach": "No shelter in reach"})
+    order = list(a.sort_values("people", ascending=False).name)
+    st.altair_chart(alt.Chart(long).mark_bar(cornerRadius=2).encode(
+        y=alt.Y("name:N", sort=order, title=None, axis=alt.Axis(labelLimit=220)),
+        x=alt.X("n:Q", stack="zero", title="People"),
+        color=alt.Color("status:N", scale=alt.Scale(domain=list(STATUS), range=list(STATUS.values())),
+                        legend=alt.Legend(orient="bottom", title=None)),
+        order=alt.Order("k:N"),
+        tooltip=[alt.Tooltip("name:N", title="Area"), "status:N", alt.Tooltip("n:Q", format=",.0f", title="People")],
+    ).properties(height=340, background="#ffffff").configure_view(stroke=None)
+     .configure_axis(gridColor="#ececf0", domain=False, labelColor="#1d1d1f", titleColor="#6e6e73"), width="stretch")
+    st.caption("Vesdre valley: modelled, not observed. Do not add it to the other areas.")
 
 with right:
-    t = used.assign(pct=used.load / used.capacity).sort_values("load", ascending=False)
-    st.dataframe(t[["name", "type", "commune", "load", "capacity", "pct"]], hide_index=True, height=420, column_config={
-        "name": "Shelter to open", "type": st.column_config.TextColumn("Type", width="small"), "commune": "Commune",
-        "load": st.column_config.NumberColumn("People", format="%.0f", width="small"),
-        "capacity": st.column_config.NumberColumn("Beds", format="%.0f", width="small"),
-        "pct": st.column_config.ProgressColumn("Full", format="percent", min_value=0, max_value=1, width="small")})
-    trips = arcs.assign(shelter=s.set_index("sid").name.reindex(arcs.sid).to_numpy(),
-                        commune=c.set_index("cell").commune.reindex(arcs.cell).to_numpy())
-    st.download_button("Download plan (block → shelter)", trips[["commune", "lon", "lat", "shelter", "lon_to", "lat_to", "people", "km"]]
-                       .round(4).to_csv(index=False), f"shelter_plan_{lens}_{reach}km.csv", icon=":material/download:",
-                       type="tertiary", width="stretch")
+    m = munis[(munis.variant == variant) & (munis.no_shelter >= 1)].sort_values("no_shelter", ascending=False)
+    layers = core.water(variant) + [
+        core.points(shelters.assign(fill=[core.rgb(core.KIND[k], 200) for k in shelters.type],
+                                    tip=[f"<b>{n}</b><br>{t} · ≈ {c:,.0f} places" for n, t, c in
+                                         zip(shelters.name, shelters.type, shelters.capacity_central)]), "fill", 3, 0),
+        core.towns(m.assign(tip=[f"<b>{x}</b><br>≈ {about(n)} without a place: {about(r)} too far, {about(f)} full"
+                                 for x, n, r, f in zip(m.municipality, m.no_shelter, m.no_reach, m.full)]),
+                   "no_shelter", core.rgb(core.EVACUATE, 220), 18)]
+    core.deck(layers, core.view(core.bbox(variant)), 400)
+    core.legend("".join(core.swatch(h, k, True) for k, h in core.KIND.items())
+                + core.swatch(core.EVACUATE, "People without a place, central case", True),
+                core.swatch(core.WATER, "2021 water") + core.swatch(core.MODEL, "Vesdre, modelled water"))
 
-gap = c.groupby("commune").agg(residents=("residents", "sum"), left=("left", "sum"),
-                               no_reach=("residents", lambda r: r[~c.loc[r.index, "reachable"]].sum()))
-gap = gap[gap.left >= 1].sort_values("left", ascending=False)
 st.subheader("Where the plan falls short", anchor=False)
-if gap.empty:
-    st.success(f"Every resident has a bed within {reach} km.", icon=":material/check_circle:")
+if m.empty:
+    st.success("Every resident has a shelter place within walking reach.", icon=":material/check_circle:")
 else:
-    core.group([(f"<b>{cm}</b>", f"{about(g.no_reach)} have no shelter within {reach} km · "
-                 f"{about(max(g.left - g.no_reach, 0))} find the shelters in reach full",
-                 f"<b>{about(g.left)}</b> of {about(g.residents)}") for cm, g in gap.head(8).iterrows()],
-               foot="Fixes: a longer bus run (raise the trip slider), pre-agree extra sites with the neighbouring "
-                    "commune, or ask the province for a regional reception centre.")
+    core.group([(f"<b>{x}</b>" + (" · modelled" if mo else ""), f"{about(r)} have no shelter within 1.5 km · "
+                 f"{about(f)} find the shelters in reach full", f"<b>{about(n)}</b> of {about(p)}")
+                for x, n, r, f, p, mo in m.head(8)[["municipality", "no_shelter", "no_reach", "full", "people",
+                                                     "modelled"]].itertuples(index=False)],
+               foot="Central assumptions, per municipality. Fixes: buses to sites further away, pre-agree extra sites "
+                    "with the neighbouring commune, or ask the province for a regional reception centre.")
+    st.download_button("Download shortfall per municipality", m.drop(columns=["lon", "lat"]).to_csv(index=False),
+                       f"shelter_shortfall_{variant}.csv", icon=":material/download:", type="tertiary")
 
-st.subheader("Schools and care sites in the flood zone", anchor=False)
+st.subheader("Care sites and schools in the water", anchor=False)
 st.caption("These cannot be used as shelters, and hospitals and care homes need their own evacuation first.")
-st.dataframe(risk[["name", "type", "commune", "flood_2021", "model_zone"]], hide_index=True, column_config={
-    "name": "Site", "type": st.column_config.TextColumn("Type", width="small"), "commune": "Commune",
-    "flood_2021": "July 2021", "model_zone": "Model"})
+st.dataframe(sites[sites[f"in_{variant}_flood"]].sort_values("share_of_site_flooded", ascending=False)[
+    ["name", "type", "municipality", "share_of_site_flooded"]], hide_index=True, column_config={
+    "name": "Site", "type": st.column_config.TextColumn("Type", width="small"), "municipality": "Municipality",
+    "share_of_site_flooded": st.column_config.ProgressColumn("In the water", format="percent", min_value=0,
+                                                             max_value=1, width="small")})
 
 with st.expander("How the plan is made"):
-    st.markdown(f"""
-1. **Who moves.** GHS-POP residents in each ~1 km block inside the {'July 2021 mapped water' if lens == 'obs' else 'EFAS 100-year zone'}.
-2. **Where to.** OpenStreetMap schools, sports halls, community centres and town halls that stayed dry in July 2021
-   (not within 100 m of the water), sit outside the EFAS 10- and 100-year zones, and have at least 300 m² of floor.
-3. **How many fit.** Floor = building footprints × floors (OSM `building:levels`, 1 when missing).
-   Beds = floor × {USABLE:.0%} usable ÷ {m2} m² per person, capped at {MAX_BEDS:,} per site
-   (OSM campuses and sports parks include buildings no one would open).
-4. **Who goes where.** One optimisation for the whole basin: first shelter as many people as possible, then keep the
-   total distance travelled lowest. A shelter that fills up sends the next people to the next-nearest one.
-   Road km = straight line × 1.3; no closed bridges or flooded roads.
+    st.markdown("""
+1. **Who moves.** GHS-POP 2020 residents spread over the residential buildings inside the July 2021 water, by floor
+   volume (footprint × storeys). Vesdre: EFAS 100-year zone (first-pass view) or 500-year zone (all passes).
+2. **Where to.** OpenStreetMap schools, sports halls and civic buildings, merged per campus, at least 200 m² of
+   floor, dry in the 2021 water and outside the EFAS 100-year zone.
+3. **How many fit.** Floor area × usable share ÷ space per person: low 40 % and 5 m², central 50 % and 4 m²,
+   high 60 % and 3 m².
+4. **Who goes where.** Maximum flow per area: as many people as possible get a place within walking reach (1, 1.5
+   or 2.5 km in a straight line). “More placed by coordinating” compares this with everyone walking to the nearest
+   shelter.
 
 **Limits.** Not an official shelter list: commune emergency plans (PLANU/PGUI in Belgium, Rampbestrijdingsplan in NL,
-Katastrophenschutzplan in DE) name the real sites. OSM misses some buildings and many floor counts, so beds can be
-over- or under-counted. Not everyone goes to a public shelter: in 2021 most people stayed with family or friends,
-so this is a worst case. Toilets, showers, beds, heating, accessibility and staff are not modelled.
+Katastrophenschutzplan in DE) name the real sites. Straight-line distance understates walks in steep valleys. Not
+everyone goes to a public shelter: in 2021 most people stayed with family or friends, so this is a worst case. No age
+data; toilets, heating, accessibility and staff are not modelled. Full method: outputs/data/README.md.
 """)
