@@ -2,6 +2,7 @@ altair==6.3.0
 exactextract==0.3.0
 geopandas==1.2.0
 lightgbm==4.7.0
+matplotlib==3.11.2
 numpy==2.5.4
 pandas==3.1.0
 pyarrow==26.0.0
@@ -10,6 +11,6 @@ pyogrio==0.13.0
 rasterio==1.5.2
 requests==2.34.2
 scikit-learn==1.9.1
-scipy==1.17.1
+scipy==1.18.1
 shapely==2.2.0
 streamlit==1.66.1

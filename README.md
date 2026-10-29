@@ -1,39 +1,37 @@
-# Meuse & Vesdre flood dashboard
+# July 2021 flood dashboard
 
-European AI Challenge 2026 · policy tool. A Streamlit dashboard for a crisis manager in the Meuse basin
-(Belgium, the Netherlands, Germany). It answers three questions:
+European AI Challenge 2026 · policy tool. A Streamlit dashboard for a crisis manager in the areas hit by the July 2021
+floods (Belgium, the Netherlands, Germany: Meuse, Vesdre, Ahr, Erft, Rur, Inde). It answers three questions:
 
-1. **Is a flood coming this month?** Live river and rain outlook, compared with July 2021.
-2. **Who sat in the water in July 2021?** Buildings and residents inside the satellite-mapped flood, per ~1 km cell or per commune.
-3. **Who lives where the river can reach?** The same counts inside the EFAS modelled 100-year flood zone.
+1. **Is a flood coming this month?** Live river and rain outlook for the Meuse basin, compared with July 2021.
+2. **Who sat in the water in July 2021?** People, buildings and care sites inside the satellite-mapped flood, per municipality.
+3. **Where can they go?** Dry candidate shelters, their capacity, and who has no place within walking distance.
 
 ## Run it
 
-Data access: local environment with the challenge files in `data/working_data/` (Annex 1, option 2).
+Data access: local environment (Annex 1, option 2). The dashboard reads the cleaned data in `outputs/data/` (see its
+README for method and limits); only the river outlook uses `src/out/meuse/` (`gauge_refs.json`, `replay_2021.json`).
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-python src/build.py           # buildings and residents in the 2021 flood, per EMS area
-python src/build_meuse.py     # Meuse scope: per commune, per ~1 km cell, 2021 and 100-year views
-python src/build_regions.py   # 2021 impact score per commune (map colours)
-python src/forecast.py        # once: river reference flows (~4 min, paced for the Open-Meteo free tier)
-
-python src/build_sites.py      # candidate shelters and care sites at risk (from enrich.py output)
-python src/build_priority.py   # 0–10 priority score per commune + July 2021 river replay (home page)
+python src/forecast.py         # once: river reference flows (~4 min, paced for the Open-Meteo free tier)
+python src/build_priority.py   # July 2021 river replay for the Briefing (also needs the challenge files in data/working_data/)
 
 streamlit run src/dashboard.py   # http://localhost:8501
 ```
 
-Outputs go to `src/out/` (gitignored), so every teammate runs the build steps once. `?view=modelled` in the URL
-opens the 100-year view. Without internet the dashboard still works, but without the outlook.
+Both outlook files are committed, so the two build steps are only needed to refresh them. Without internet the
+dashboard still works, but without the live outlook.
 
 ## Files
 
 | File | What it does |
 |---|---|
-| `src/dashboard.py`, `src/core.py`, `src/views/` | The action dashboard: Briefing (home: “If July 2021 happens again”), Rivers, Risk areas, Shelters, Data & limits. |
+| `src/dashboard.py`, `src/core.py`, `src/views/` | The action dashboard: Briefing (home: “If July 2021 happens again”), Rivers, Risk areas, Shelters, Shelter plan, 2021 and today, Data & limits. Reads `outputs/data/`. |
+| `outputs/data/` | Cleaned exposure, shelter and data-quality files (built on branch `analysis-pipeline`); method in its README. |
+| `src/build_charts.py` | Static charts and the action risk map for the brief → `outputs/charts/` (PNG + SVG). Reads only `outputs/data/`. |
 | `src/build_priority.py` | Priority score per commune (rules in its docstring) → `out/meuse/priority.geojson`; GloFAS flows 10–20 July 2021 → `out/meuse/replay_2021.json`. |
 | `src/build_sites.py` | Candidate shelters (OSM schools, town halls dry in 2021 and outside the 10/100-year zones) and care sites at risk → `out/meuse/sites.parquet`. |
 | `src/forecast.py` | Open-Meteo calls: river forecast, rain forecast, reference flows (`python src/forecast.py` builds `out/meuse/gauge_refs.json`). |

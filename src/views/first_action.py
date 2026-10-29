@@ -20,7 +20,7 @@ C = crit[crit.share_of_site_flooded.ge(.05) & crit.in_worst_flood.astype(bool)]
 care = C[C.type.isin(["hospital", "care home"])]
 DISTRICT = {"ahr": "Ahrweiler", "erftstadt": "Rhein-Erft", "schleiden": "Euskirchen"}
 by_d = care.groupby(care.area.map(DISTRICT)).size().sort_values(ascending=False)
-_, flow = core.load_brief()
+flow = core.load_replay()
 lead = (flow.idxmax().max() - flow.idxmax().min()).days
 MAP_H = 480
 TIP = {"html": "<b>{tname}</b><br/>{tinfo}",
