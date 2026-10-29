@@ -31,6 +31,7 @@ dashboard still works, but without the live outlook.
 |---|---|
 | `src/dashboard.py`, `src/core.py`, `src/views/` | The action dashboard: Briefing (home: “If July 2021 happens again”), Rivers, Risk areas, Shelters, Shelter plan, 2021 and today, Data & limits. Reads `outputs/data/`. |
 | `outputs/data/` | Cleaned exposure, shelter and data-quality files (built on branch `analysis-pipeline`); method in its README. |
+| `src/build_charts.py` | Static charts and the action risk map for the brief → `outputs/charts/` (PNG + SVG). Reads only `outputs/data/`. |
 | `src/build_priority.py` | Priority score per commune (rules in its docstring) → `out/meuse/priority.geojson`; GloFAS flows 10–20 July 2021 → `out/meuse/replay_2021.json`. |
 | `src/build_sites.py` | Candidate shelters (OSM schools, town halls dry in 2021 and outside the 10/100-year zones) and care sites at risk → `out/meuse/sites.parquet`. |
 | `src/forecast.py` | Open-Meteo calls: river forecast, rain forecast, reference flows (`python src/forecast.py` builds `out/meuse/gauge_refs.json`). |
