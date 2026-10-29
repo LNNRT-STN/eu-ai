@@ -4,7 +4,7 @@ import streamlit as st
 
 import core
 
-st.set_page_config(page_title="Meuse flood desk", page_icon=":material/water:", layout="wide",
+st.set_page_config(page_icon=":material/water:", layout="wide",
                    initial_sidebar_state="auto")
 core.style()
 

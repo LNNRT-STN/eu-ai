@@ -61,16 +61,11 @@ if sel is not None:
             st.switch_page("views/shelters.py")
 
 cel = cells[(cells.lens == lens) & (cells.residents >= 1)]
-cls = lambda v: max(i for i, (lo, _, _) in enumerate(core.CLASSES) if v >= lo)
-cel = cel.assign(poly=[[[a, d], [b, d], [b, c_], [a, c_]] for a, b, c_, d in zip(cel.lon0, cel.lon1, cel.lat0, cel.lat1)],
-                 fill=[core.rgb(core.CLASSES[cls(v)][2], 215) for v in cel.residents],
-                 tip=[f"≈ {round(r):,} residents<br>{n:,} buildings" for r, n in zip(cel.residents, cel.buildings)])
 layers = core.water(geo, lens) + [
     pdk.Layer("GeoJsonLayer", geo["regions"], filled=True, stroked=True, get_fill_color="properties.fill",
               get_line_color=[255, 255, 255, 230], line_width_min_pixels=1, pickable=True, auto_highlight=True)
     if by_commune else
-    pdk.Layer("PolygonLayer", cel, get_polygon="poly", get_fill_color="fill", get_line_color=[255, 255, 255, 220],
-              line_width_min_pixels=0.5, stroked=True, pickable=True, auto_highlight=True)]
+    core.blocks(cel)]
 if show_care:
     layers.append(core.points(ev.assign(tip=[f"<b>{n}</b><br>{t} · {c}<br>2021: {f} · model: {z}" for n, t, c, f, z in
                                              zip(ev.name, ev.type, ev.commune, ev.flood_2021, ev.model_zone)]),

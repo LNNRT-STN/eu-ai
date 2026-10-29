@@ -104,10 +104,13 @@ with left:
         layers.append(pdk.Layer("GeoJsonLayer", geo["flood"], filled=True, get_fill_color=[0, 60, 160, 150]))
     layers.append(pdk.Layer(
         "GeoJsonLayer", p.drop(columns=["lon", "lat"]).__geo_interface__, id="communes", pickable=True,
-        auto_highlight=True, filled=True, stroked=True, get_fill_color="properties.fill", opacity=.75,
+        auto_highlight=True, filled=True, stroked=True, get_fill_color="properties.fill", opacity=.75 if sel is None else .3,
         get_line_color=[255, 255, 255, 230], line_width_min_pixels=1, extruded=tall,
         get_elevation="properties.people * 0.25"))
     if sel is not None:
+        mine = core.cell_communes().query("lau_id == @sel.lau_id").cell
+        here = cells[(cells.lens == "rp100") & (cells.residents >= 1) & cells.cell.isin(mine)]
+        layers.append(core.blocks(here, 235))
         layers.append(pdk.Layer("GeoJsonLayer", p[p.lau_id == sel.lau_id].drop(columns=["lon", "lat"]).__geo_interface__,
                                 filled=False, stroked=True, get_line_color=[29, 29, 31], line_width_min_pixels=3))
     if show_care:
@@ -127,6 +130,8 @@ with left:
         v.pitch, v.bearing = 45, -12
     core.deck(layers, v, 540, on_select=from_map, selection_mode="single-object", key="map")
     core.legend("<b>Priority</b>" + "".join(core.swatch(c, lab) for lab, (c, _) in core.PRIORITY.items()),
+                *(["<b>People in the flood zone per ~1 km block</b>" + "".join(core.swatch(h, lab) for _, lab, h in core.CLASSES)]
+                  if sel is not None else []),
                 "<b>River point</b>" + "".join(core.swatch(c, lab, True) for lab, c in forecast.LEVELS)
                 + core.swatch("rgba(0,113,227,.35)", "100-year flood zone")
                 + (core.swatch(core.EVACUATE, "Care site at risk", True) if show_care else "")
@@ -167,11 +172,38 @@ with right:
             ("<b>Care sites at risk</b>", f"{sel.care} hospitals or care homes", f"+{sel.pts_care}"),
         ], "Why this score")
         st.space("small")
+        st.space("small")
+        top = here.sort_values("residents", ascending=False)
+        n_half = int((top.residents.cumsum() < top.residents.sum() / 2).sum()) + 1 if len(top) else 0
+        lens = communes[communes.lau_id == sel.lau_id].set_index("lens")
+        val = lambda l, c: about(lens.loc[l, c]) if l in lens.index else "0"
+        reg = next((f["properties"] for f in geo.get("regions", {}).get("features", [])
+                    if f["properties"]["lau_id"] == sel.lau_id), None)
+        rows = [("<b>Where the people are</b>", f"Half of them in {n_half} of {len(top)} blocks of ~1 km, marked on the map"
+                 if len(top) else "No block with residents in the 100-year zone", ""),
+                ("<b>100-year zone · model</b>", f"{val('rp100', 'buildings')} buildings", f"≈ {val('rp100', 'residents')}"),
+                ("<b>July 2021 · satellite</b>", f"{val('obs', 'buildings')} buildings"
+                 + (" · flooded, but missed by the satellite" if sel.missed else ""), f"≈ {val('obs', 'residents')}")]
+        if reg and reg["graded"]:
+            rows.append(("<b>July 2021 damage</b>", "Copernicus EMS grading of buildings",
+                         f"{reg['gra_destroyed']:.0f} destroyed · {reg['gra_damaged']:.0f} damaged"))
+        core.group(rows, "Residents in the water, in detail", core.AS_OF["zone"] + " · " + core.AS_OF["obs"])
+        at_risk = sites[(sites.role == "evacuate") & (sites.lau_id == sel.lau_id)]
+        if len(at_risk):
+            st.space("small")
+            core.group([(f"<b>{n}</b>", f"{ty} · July 2021: {f.lower()} · model: {z}", "") for n, ty, f, z in
+                        zip(at_risk.name, at_risk.type, at_risk.flood_2021, at_risk.model_zone)], "Care sites to evacuate first")
+        st.space("small")
+        sh = sites[sites.role == "shelter"]
+        sh = sh.assign(d=core.km(sel.lon, sel.lat, sh.lon, sh.lat)).nsmallest(5, "d")
         shelter = ("Unknown: no OSM sites on the German side" if pd.isna(sel.dry_5km) else
                    f"{fmt(sel.dry_5km)} sites, ≈ {about(sel.per_site)} people per site" if sel.dry_5km else
                    "None within 5 km: look further or across the border")
-        core.group([("<b>Dry candidate sites within 5 km</b>", shelter, "")], "Where people could go",
-                   "Schools and town halls that stayed dry in 2021. Confirm capacity with the commune.")
+        core.group([("<b>Dry candidate sites within 5 km</b>", shelter, "")]
+                   + [(f"{n}", f"{ty} · {c}", f"{d:.1f} km") for n, ty, c, d in zip(sh.name, sh.type, sh.commune, sh.d)],
+                   "Where people could go · nearest dry sites",
+                   "Schools and town halls that stayed dry in 2021, distance from the commune centre. Confirm capacity "
+                   "with the commune.")
         if sel.lau_id in set(communes[communes.lens == "rp100"].lau_id) and st.button(
                 "Show dry sites nearby", icon=":material/home_health:", type="primary", width="stretch"):
             st.session_state.near = sel.lau_id

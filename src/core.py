@@ -36,7 +36,7 @@ about = lambda n: fmt(round(n, -2) if n >= 1000 else round(n, -1) if n >= 100 el
 
 CSS = """<style>
 :root{--label:#1d1d1f;--label2:#6e6e73;--label3:#8e8e93;--sep:#e3e3e8;--group:#fff;--bg:#f2f2f7;--tint:#0071e3}
-.block-container{padding:2.25rem 2.5rem 4rem;max-width:1320px}
+.block-container{padding:4.25rem 2.5rem 4rem;max-width:1320px}
 [data-testid=stSidebar]{border-right:1px solid var(--sep)}
 [data-testid=stSidebarNav] a{border-radius:8px;padding:.35rem .6rem}
 [data-testid=stSidebarNav] a[aria-current=page]{background:rgba(0,113,227,.1)}
@@ -44,7 +44,7 @@ CSS = """<style>
 [data-testid=stNavSectionHeader]{font-size:.75rem;color:var(--label3);font-weight:600;text-transform:none;letter-spacing:0}
 ::selection{background:rgba(0,113,227,.2)}
 *:focus-visible{outline:2px solid var(--tint)!important;outline-offset:2px}
-.pg h1{font-size:2.125rem;font-weight:700;letter-spacing:-.022em;line-height:1.1;margin:0;padding:0;color:var(--label)}
+.pg h1{font-size:2.125rem;font-weight:700;letter-spacing:-.022em;line-height:1.2;margin:0;padding:0;color:var(--label);overflow-wrap:anywhere}
 .pg p{color:var(--label2);font-size:1rem;margin:.4rem 0 0;max-width:72ch;line-height:1.45}
 .banner{display:flex;gap:.9rem;align-items:flex-start;background:var(--group);border-radius:14px;padding:1.1rem 1.25rem;
   box-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.04)}
@@ -162,6 +162,25 @@ def load_brief():
                 f"({x.share:.0%})<br>{x.care} care sites at risk" for _, x in p.iterrows()]
     r = pd.DataFrame(json.loads((DST / "replay_2021.json").read_text()))
     return p, r.set_axis(pd.to_datetime(r.index))
+
+
+@st.cache_data
+def cell_communes():
+    """Commune (lau_id) of each ~1 km cell, by the cell centre."""
+    c = pd.read_parquet(DST / "cells.parquet").drop_duplicates("cell")
+    pts = gpd.GeoDataFrame(c[["cell"]], geometry=gpd.points_from_xy((c.lon0 + c.lon1) / 2, (c.lat0 + c.lat1) / 2), crs=4326)
+    p = gpd.read_file(DST / "priority.geojson")[["lau_id", "geometry"]].to_crs(4326)
+    return gpd.sjoin(pts, p, predicate="within")[["cell", "lau_id"]].drop_duplicates("cell")
+
+
+def blocks(cel, opacity=215):
+    """Residents per ~1 km cell as coloured squares, same classes in every view."""
+    cls = lambda v: max(i for i, (lo, _, _) in enumerate(CLASSES) if v >= lo)
+    cel = cel.assign(poly=[[[a, d], [b, d], [b, c], [a, c]] for a, b, c, d in zip(cel.lon0, cel.lon1, cel.lat0, cel.lat1)],
+                     fill=[rgb(CLASSES[cls(v)][2], opacity) for v in cel.residents],
+                     tip=[f"≈ {round(r):,} residents<br>{n:,} buildings" for r, n in zip(cel.residents, cel.buildings)])
+    return pdk.Layer("PolygonLayer", cel, get_polygon="poly", get_fill_color="fill", get_line_color=[255, 255, 255, 220],
+                     line_width_min_pixels=0.5, stroked=True, pickable=True, auto_highlight=True)
 
 
 @st.cache_data(ttl=3 * 3600, show_spinner="Fetching river and rain forecasts…")
