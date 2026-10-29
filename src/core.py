@@ -46,7 +46,8 @@ MAX_FLOOR = 20_000  # m²: above this OSM merged a whole campus or tagged a race
 about = lambda n: fmt(round(n, -2) if n >= 1000 else round(n, -1) if n >= 100 else n)  # residents are an order of magnitude
 
 CSS = """<style>
-:root{--label:#1d1d1f;--label2:#6e6e73;--label3:#8e8e93;--sep:#e3e3e8;--group:#fff;--bg:#f2f2f7;--tint:#0071e3}
+/* secondary text and icons in EU navy (ec.europa.eu colour guidelines); action, status and alerts keep their hues */
+:root{--label:#1d1d1f;--label2:#4f6580;--label3:#5a6e87;--sep:#e3e3e8;--group:#fff;--bg:#f2f2f7;--tint:#0071e3}
 .block-container{padding:4.25rem 2.5rem 4rem;max-width:1320px}
 [data-testid=stSidebar]{border-right:1px solid var(--sep)}
 [data-testid=stSidebarNav] a{border-radius:8px;padding:.35rem .6rem}
@@ -77,7 +78,7 @@ CSS = """<style>
 .ico{flex:none;width:2rem;height:2rem;border-radius:8px;display:grid;place-items:center;color:#fff}
 .ms{font-family:'Material Symbols Rounded';font-size:1.2rem;line-height:1;font-weight:400;font-variation-settings:'FILL' 1}
 .chev .ms{font-size:1.4rem}
-.chev{flex:none;color:#c7c7cc}
+.chev{flex:none;color:#a3b0c0}
 .foot{color:var(--label3);font-size:.8rem;margin:.5rem 0 0 1rem;line-height:1.45}
 .legend{display:flex;flex-wrap:wrap;gap:.3rem 1rem;font-size:.8rem;color:var(--label2);margin:.6rem .25rem 0}
 .legend span{display:inline-flex;align-items:center;gap:.4rem}

@@ -6,7 +6,7 @@
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2026-10-29T15:46:30.721062</dc:date>
+    <dc:date>2026-10-29T22:21:38.293126</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
@@ -43,7 +43,7 @@ L 222.763636 99.163636
 L 222.763636 123.163636 
 L 158.4 123.163636 
 z
-" clip-path="url(#p03dfa7ded7)" style="fill: #2a78d6; stroke: #2a78d6; stroke-linejoin: miter"/>
+" clip-path="url(#pb06f68df27)" style="fill: #2a78d6; stroke: #2a78d6; stroke-linejoin: miter"/>
    </g>
    <g id="patch_4">
     <path d="M 158.4 142.8 
@@ -51,7 +51,7 @@ L 231.958442 142.8
 L 231.958442 166.8 
 L 158.4 166.8 
 z
-" clip-path="url(#p03dfa7ded7)" style="fill: #2a78d6; stroke: #2a78d6; stroke-linejoin: miter"/>
+" clip-path="url(#pb06f68df27)" style="fill: #2a78d6; stroke: #2a78d6; stroke-linejoin: miter"/>
    </g>
    <g id="patch_5">
     <path d="M 158.4 186.436364 
@@ -59,7 +59,7 @@ L 397.464935 186.436364
 L 397.464935 210.436364 
 L 158.4 210.436364 
 z
-" clip-path="url(#p03dfa7ded7)" style="fill: #2a78d6; stroke: #2a78d6; stroke-linejoin: miter"/>
+" clip-path="url(#pb06f68df27)" style="fill: #2a78d6; stroke: #2a78d6; stroke-linejoin: miter"/>
    </g>
    <g id="patch_6">
     <path d="M 222.763636 99.163636 
@@ -67,7 +67,7 @@ L 222.763636 99.163636
 L 222.763636 123.163636 
 L 222.763636 123.163636 
 z
-" clip-path="url(#p03dfa7ded7)" style="fill: url(#h5b636e04f0); stroke: #2a78d6; stroke-linejoin: miter"/>
+" clip-path="url(#pb06f68df27)" style="fill: url(#h7451f892a2); stroke: #2a78d6; stroke-linejoin: miter"/>
    </g>
    <g id="patch_7">
     <path d="M 231.958442 142.8 
@@ -75,7 +75,7 @@ L 231.958442 142.8
 L 231.958442 166.8 
 L 231.958442 166.8 
 z
-" clip-path="url(#p03dfa7ded7)" style="fill: url(#h5b636e04f0); stroke: #2a78d6; stroke-linejoin: miter"/>
+" clip-path="url(#pb06f68df27)" style="fill: url(#h7451f892a2); stroke: #2a78d6; stroke-linejoin: miter"/>
    </g>
    <g id="patch_8">
     <path d="M 397.464935 186.436364 
@@ -83,7 +83,7 @@ L 562.971429 186.436364
 L 562.971429 210.436364 
 L 397.464935 210.436364 
 z
-" clip-path="url(#p03dfa7ded7)" style="fill: url(#h5b636e04f0); stroke: #2a78d6; stroke-linejoin: miter"/>
+" clip-path="url(#pb06f68df27)" style="fill: url(#h7451f892a2); stroke: #2a78d6; stroke-linejoin: miter"/>
    </g>
    <g id="matplotlib.axis_1"/>
    <g id="matplotlib.axis_2">
@@ -133,7 +133,7 @@ L 281.251406 85.635
 L 281.251406 79.335 
 L 268.651406 79.335 
 z
-" style="fill: url(#h5b636e04f0); stroke: #2a78d6; stroke-linejoin: miter"/>
+" style="fill: url(#h7451f892a2); stroke: #2a78d6; stroke-linejoin: miter"/>
     </g>
     <g id="text_8">
      <text style="font-size: 9px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #0b0b0b" x="288.451406" y="85.635" transform="rotate(-0 288.451406 85.635)">Vesdre, modelled</text>
@@ -144,19 +144,19 @@ z
    <text style="font-weight: 700; font-size: 14px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #0b0b0b" x="14.4" y="31.65" transform="rotate(-0 14.4 31.65)">15 hospitals and care homes stood in the 2021 water</text>
   </g>
   <g id="text_10">
-   <text style="font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #52514e" x="14.4" y="52.72" transform="rotate(-0 14.4 52.72)">Sites with at least 5 % of their footprint flooded: evacuate these first</text>
+   <text style="font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #4f6580" x="14.4" y="52.72" transform="rotate(-0 14.4 52.72)">Sites with at least 5 % of their footprint flooded: evacuate these first</text>
   </g>
   <g id="text_11">
-   <text style="font-size: 7.5px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #8a8984" x="14.4" y="236.16" transform="rotate(-0 14.4 236.16)">Source: OpenStreetMap × Copernicus EMS flood extent; Vesdre: EFAS 500-year model. OSM misses some care homes: a floor.</text>
+   <text style="font-size: 7.5px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #5a6e87" x="14.4" y="236.16" transform="rotate(-0 14.4 236.16)">Source: OpenStreetMap × Copernicus EMS flood extent; Vesdre: EFAS 500-year model. OSM misses some care homes: a floor.</text>
   </g>
  </g>
  <defs>
-  <clipPath id="p03dfa7ded7">
+  <clipPath id="pb06f68df27">
    <rect x="158.4" y="93.6" width="424.8" height="122.4"/>
   </clipPath>
  </defs>
  <defs>
-  <pattern id="h5b636e04f0" patternUnits="userSpaceOnUse" x="0" y="0" width="72" height="72">
+  <pattern id="h7451f892a2" patternUnits="userSpaceOnUse" x="0" y="0" width="72" height="72">
    <rect x="0" y="0" width="73" height="73" fill="#fcfcfb"/>
    <path d="M -36 36 
 L 36 -36 

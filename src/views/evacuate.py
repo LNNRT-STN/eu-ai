@@ -19,7 +19,7 @@ import map3d
 import forecast
 import live
 from core import about, fmt
-from views import shelters as shelter_list, view3d
+from views import host, shelters as shelter_list, view3d
 
 head, towns, crit, shel, flood, *_ = anna.load()
 recv, bus = anna.load_moves()
@@ -34,6 +34,7 @@ feats = lambda g, m: {"type": "FeatureCollection", "features": [f for f in g["fe
 V = "worst"                       # the bus plan exists only for all satellite passes (EFAS 500-year for the Vesdre)
 T = (towns[(towns.variant == V) & (towns.people >= 10)].sort_values("people", ascending=False).reset_index(drop=True))
 CC = {"BE": "Belgium", "NL": "Netherlands", "DE": "Germany"}
+BED = "#d9a400"                   # spare beds offered by residents: yellow, clear of shelter green and water blue
 
 # Who does what, per country. Team summary of the national crisis rules, not challenge data: check it against the
 # municipality's own emergency plan. (role, who, how)
@@ -128,6 +129,16 @@ care = crit[(crit.municipality == t.municipality) & (crit.area == t.area) & crit
             & crit.share_of_site_flooded.ge(.05)]
 care = care.sort_values(["share_of_site_flooded"], ascending=False)
 weak = care[care.type.isin(["hospital", "care home"])]
+
+# ------------------------------------------------------------------ spare beds residents offered (views/host.py)
+# no address is stored: each offer sits at its host town's centre; kept if that centre is within 10 km of this town
+ctr_all = towns.drop_duplicates("municipality").set_index("municipality")[["lon", "lat"]]
+beds = host.offers()
+beds = beds[beds.outside_2021.astype(bool) & beds.municipality.isin(ctr_all.index)] if len(beds) else beds
+beds = (beds.assign(lon=ctr_all.lon.reindex(beds.municipality).values, lat=ctr_all.lat.reindex(beds.municipality).values)
+        .assign(km=lambda d: core.km(t.lon, t.lat, d.lon, d.lat).round(1) if len(d) else []))
+beds = beds[beds.km <= 10].sort_values(["km", "when"]).reset_index(drop=True) if len(beds) else beds
+free = beds[beds.status.isin(host.OPEN)] if len(beds) else beds  # Guest placed and Withdrawn are no longer free
 schools = care[care.type == "school"]
 
 # ------------------------------------------------------------------ getting out: road simulation + rail in the water
@@ -231,6 +242,15 @@ if len(plan):
                          line_width_min_pixels=2, stroked=True, pickable=True),
                pdk.Layer("TextLayer", lab, get_position=["lon", "lat"], get_text="txt", get_size=12,
                          get_color=[255, 255, 255], font_weight=700, get_alignment_baseline="'center'")]
+if len(free):
+    fb = (free.groupby("municipality").agg(lon=("lon", "first"), lat=("lat", "first"), n=("beds", "sum"),
+                                           homes=("code", "size"), km=("km", "first")).reset_index())
+    fb = fb.assign(tname=[f"{int(n)} spare bed{'s' if n != 1 else ''} in {anna.town(m)}" for n, m in zip(fb.n, fb.municipality)],
+                   tinfo=[f"{h} home{'s' if h != 1 else ''} · {k:.1f} km · offered by residents, no address shown"
+                          for h, k in zip(fb.homes, fb.km)], r=lambda d: d.n ** .5 * 4 + 6)
+    layers.append(pdk.Layer("ScatterplotLayer", fb, get_position=["lon", "lat"], get_radius="r", radius_units="'pixels'",
+                            get_fill_color=core.rgb(BED, 220), get_line_color=[255, 255, 255], line_width_min_pixels=2,
+                            stroked=True, pickable=True, id="spare-beds"))
 ctr = pd.DataFrame([{"lon": t.lon, "lat": t.lat, "tname": f"{t['name']} centre",
                      "tinfo": "distances in the list are straight lines from here"}])
 layers.append(pdk.Layer("ScatterplotLayer", ctr, get_position=["lon", "lat"], get_radius=7, radius_units="'pixels'",
@@ -248,30 +268,50 @@ st.pydeck_chart(pdk.Deck(layers=layers, map_style=pdk.map_styles.CARTO_LIGHT, to
 st.caption(":green[●] Dry candidate shelter, size = people sent there (numbered as in the Shelters tab) · "
            + (":violet[●] Hospital, care home or school in the 2021 water · " if len(care) else "")
            + f":blue[■] 2021 water{' (modelled)' if modelled else ''} · "
-           ":material/radio_button_unchecked: Town centre · :orange[━] Busiest evacuation roads · "
+           + (":yellow[●] Spare beds offered by residents (at their town centre) · " if len(free) else "")
+           + ":material/radio_button_unchecked: Town centre · :orange[━] Busiest evacuation roads · "
            ":material/remove: Railway in the 2021 water",
            help="Map © OpenStreetMap contributors, © CARTO. Shelters, roads and rail: OpenStreetMap; water: Copernicus "
                 "EMS (observed) or EFAS (modelled, Vesdre).")
 
 
+def save_beds(key):
+    """Persist the manager's edits (status, beds) by reference code, then show a fresh editor."""
+    ed = st.session_state[key]["edited_rows"]
+    host.update({beds.code[r]: kv for r, kv in ed.items()})
+    st.session_state.beds_v = st.session_state.get("beds_v", 0) + 1
+
+
 def spare_beds():
-    """Beds residents offered (Offer a bed page) in this town or a town whose centre is within 10 km."""
-    try:
-        o = pd.read_csv(core.DATA.parents[1] / "data" / "host_offers.csv")
-    except (FileNotFoundError, pd.errors.EmptyDataError):
+    """Beds residents offered (Offer a bed tab of the resident page) within 10 km: the manager checks each home and
+    records the guest placed. Only Offered and Checked beds count and show on the map."""
+    if beds.empty:
         return
-    ctr = towns.drop_duplicates("municipality").set_index("municipality")[["lon", "lat"]]
-    o = o[o.outside_2021.astype(bool) & o.municipality.isin(ctr.index)]
-    if o.empty:
-        return
-    d = core.km(t.lon, t.lat, ctr.loc[o.municipality, "lon"].values, ctr.loc[o.municipality, "lat"].values)
-    near_o = o[d <= 10]
-    if len(near_o):
-        n, h, old = int(near_o.beds.sum()), len(near_o), int(near_o.loc[near_o.older.astype(bool), "beds"].sum())
-        st.success(f"**{n} spare bed{'s' if n != 1 else ''} offered by residents** within 10 km "
-                   f"({h} home{'s' if h != 1 else ''}; {old} suit{'s' if old == 1 else ''} an older or less mobile "
-                   "person). Not checked yet, and not counted in the shelter places: use them first for people who "
-                   "cannot stay in a hall.", icon=":material/bed:")
+    n, h = int(free.beds.sum()), len(free)
+    st.markdown(f":orange[:material/bed:] **{n} spare bed{'s' if n != 1 else ''} still free with residents within "
+                f"10 km** ({h} home{'s' if h != 1 else ''})",
+                help="Offered on the resident page: no name or address, only the town and a reference code. Not "
+                     "counted in the shelter places. Use them first for people who cannot stay in a hall. Check the "
+                     "home, then record the guest placed: placed beds leave the count and the map.")
+    fit = lambda r: ", ".join(v for k, v in {"step_free": "step-free", "older": "older", "family": "family",
+                                             "pets": "pets"}.items() if bool(r[k])) or "anyone"
+    key = f"beds_{st.session_state.get('beds_v', 0)}"
+    st.data_editor(pd.DataFrame({"code": beds.code, "town": beds.municipality.map(anna.town), "km": beds.km,
+                                 "beds": beds.beds.astype(int), "fits": beds.apply(fit, axis=1),
+                                 "status": beds.status}),
+                   key=key, on_change=save_beds, args=(key,), hide_index=True, disabled=["code", "town", "km", "fits"],
+                   column_config={"code": st.column_config.TextColumn("Code", width="small",
+                                                                      help="The host's reference code: ask for it to match a guest"),
+                                  "town": "Host town",
+                                  "km": st.column_config.NumberColumn("km", format="%.1f", width="small",
+                                                                      help="Straight line between town centres"),
+                                  "beds": st.column_config.NumberColumn("Beds", min_value=0, max_value=10, step=1,
+                                                                        width="small"),
+                                  "fits": st.column_config.TextColumn("Can take"),
+                                  "status": st.column_config.SelectboxColumn("Status", options=host.STATUS,
+                                                                             required=True,
+                                                                             help="Offered → Checked (home visited) → "
+                                                                                  "Guest placed")})
 
 
 def how(text):
@@ -450,7 +490,7 @@ with order:
 <style>body{{font:14px/1.45 -apple-system,'Segoe UI',Roboto,Arial,sans-serif;color:#1d1d1f;max-width:800px;margin:2rem auto;
 padding:0 1rem}}h1{{font-size:1.6rem;margin:0}}h2{{font-size:1.1rem;margin:1.6rem 0 .4rem}}table{{border-collapse:collapse;
 width:100%}}td,th{{border-bottom:1px solid #ddd;padding:.3rem .4rem;text-align:left;vertical-align:top}}
-.n{{color:#6e6e73;font-size:.85rem}}.box{{border:1px solid #ccc;border-radius:8px;padding:.6rem .8rem}}</style></head><body>
+.n{{color:#4f6580;font-size:.85rem}}.box{{border:1px solid #ccc;border-radius:8px;padding:.6rem .8rem}}</style></head><body>
 <h1>Evacuation plan · {escape(t['name'])}</h1>
 <p class="n">Draft from the July 2021 flood data, {date.today():%d %b %Y}. {escape(note)}</p>
 <h2>Who leaves</h2><p>About {about(t.people)} residents lived in the 2021 water. {about(walk)} can walk to a shelter

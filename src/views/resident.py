@@ -197,7 +197,7 @@ def lookup():
     else:
         st.warning("No dry shelter within 10 km in our data: ask the municipal help line where to go.")
 
-    o = host.offers()
+    o = host.available()  # placed guests and withdrawn offers no longer count
     towns = anna.load()[1]
     o = o[o.municipality.isin(towns.municipality)] if len(o) else o
     if len(o):
@@ -205,7 +205,7 @@ def lookup():
         d = core.km(h.lon, h.lat, ctr.loc[o.municipality, "lon"].values, ctr.loc[o.municipality, "lat"].values)
         near = o[d <= 10]
         if len(near):
-            st.info(f"**{int(near.beds.sum())} spare bed{'s' if near.beds.sum() != 1 else ''} offered by residents "
+            st.info(f"**{int(near.beds.sum())} spare bed{'s' if near.beds.sum() != 1 else ''} still free with residents "
                     "within 10 km.** If you are older, ill or have small children, ask the help line for one instead "
                     "of a hall.", icon=":material/bed:")
     st.markdown(f":orange[:material/how_to_reg:] Once you have left, or if you need help to leave, tell the fire "

@@ -116,11 +116,17 @@ def board():
             selected=st.session_state.get("cr_sel")), key="crisis_map", height=470)
         if sel and sel.get("selected") and sel.get("clicks") != st.session_state.get("cr_clicks"):
             st.session_state.cr_clicks = sel["clicks"]
-            st.session_state.cr_sel = st.session_state.town = st.session_state._town = sel["selected"]
+            st.session_state.cr_sel = sel["selected"]
+            if T.people.get(sel["selected"], 0) >= 10:  # only towns the sidebar Town picker lists
+                st.session_state.town = st.session_state._town = sel["selected"]
         if st.session_state.get("cr_sel"):
             a, b = st.columns([3, 1])
-            a.page_link("views/evacuate.py", label=f"Open the plan for {anna.town(st.session_state.cr_sel)}",
-                        icon=":material/arrow_forward:")
+            sel_t = st.session_state.cr_sel
+            if T.people.get(sel_t, 0) >= 10:  # the Town plan covers towns with 10 or more people in the water
+                a.page_link("views/evacuate.py", label=f"Open the plan for {anna.town(sel_t)}",
+                            icon=":material/arrow_forward:")
+            else:
+                a.caption(f"{anna.town(sel_t)}: under 10 people in the 2021 water, no town plan.")
             b.button("Whole region", on_click=lambda: st.session_state.update(cr_sel=None), width="stretch")
         st.caption(":red[●] Evacuate · :orange[●] Warn · :yellow[●] Watch · :blue[●] Normal · dashed edge: modelled "
                    "(Vesdre) · click a town to fly in",

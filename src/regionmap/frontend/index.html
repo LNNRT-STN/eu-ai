@@ -11,7 +11,7 @@ html,body{margin:0;height:100%;font:13px/1.35 "Source Sans Pro",system-ui,sans-s
   white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.25)}
 .pin b em{font-style:normal;font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:.02em;margin-right:4px}
 .pin.watch i{background:#f2c94c}.pin.warn i{background:#f2994a}.pin.evacuate i{background:#d70015}.pin.none i{background:#0071e3}
-.pin.evacuate b em{color:#d70015}.pin.warn b em{color:#a85400}.pin.watch b em{color:#7a5d00}.pin.none b em{color:#6e6e73}
+.pin.evacuate b em{color:#d70015}.pin.warn b em{color:#a85400}.pin.watch b em{color:#7a5d00}.pin.none b em{color:#4f6580}
 .pin.sel b{outline:2px solid #1d1d1f}
 .pin.sel i{transform:scale(1.35)}
 body.far .pin.none:not(.sel) b{display:none}
@@ -20,7 +20,17 @@ body.far .pin.none:not(.sel) b{display:none}
 .bar s{width:22px;height:10px;border:1px solid #1d1d1f;border-radius:2px;
   background:repeating-linear-gradient(45deg,#1d1d1f 0 4px,#fff 4px 8px)}
 .bar b{background:#fff;color:#1d1d1f;font-size:11px;padding:0 4px;border-radius:3px;border:1px solid #1d1d1f}
+.mode{position:absolute;top:10px;left:10px;z-index:3;display:flex;gap:2px;padding:2px;border-radius:9px;
+  background:#e5e5ea;box-shadow:0 1px 4px rgba(0,0,0,.22)}
+.mode button{border:0;background:transparent;font:inherit;font-size:12px;font-weight:600;color:#3a3a3c;
+  padding:4px 11px;border-radius:7px;cursor:pointer}
+.mode button[aria-pressed=true]{background:#fff;color:#1d1d1f;box-shadow:0 1px 2px rgba(0,0,0,.18)}
+.mode button:focus-visible{outline:2px solid #0071e3;outline-offset:1px}
 </style></head><body><div id="m"></div>
+<div class="mode" role="group" aria-label="Map style">
+  <button type="button" data-mode="map" aria-pressed="true">Map</button>
+  <button type="button" data-mode="sat" aria-pressed="false">Satellite 3D</button>
+</div>
 <script>
 // ---- Streamlit component protocol (v1), by hand: see streamlit/static ComponentInstance.js ----
 const send = (type, data) => parent.postMessage(Object.assign({isStreamlitMessage: true, type}, data), "*");
@@ -30,7 +40,7 @@ const select = m => send("streamlit:setComponentValue", {value: {selected: m, cl
 const STATUS = {none: "#0071e3", watch: "#f2c94c", warn: "#f2994a", evacuate: "#d70015"};
 const WORD = {none: "No alert", watch: "Watch", warn: "Warn", evacuate: "Evacuate"};
 const RANK = {none: 0, watch: 1, warn: 2, evacuate: 3};
-const OVERVIEW = [5.45, 50.33, 7.3, 50.92];  // Liège - Aachen - Ahr
+const OVERVIEW = [4.97, 50.05, 7.3, 51.45];  // fallback: Rochefort - Venlo - Ahr (all ten areas)
 const NONE = ["boolean", false];
 const EMPTY = {type: "FeatureCollection", features: []};
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
@@ -39,15 +49,31 @@ const fmt = n => n == null ? null : Math.round(n).toLocaleString("en-GB");
 let map = null, ready = false, pending = null, prev = {};
 const pins = new Map(), bars = new Map();
 let floodSig = null, closSig = null, cur = null;  // cur = municipality the camera is on (or null)
+let bounds = null;  // [w, s, e, n] of every town and all the water: the "whole region" view
+// "map": flat light basemap, status colours read best (default). "sat": Sentinel-2 imagery on 3D terrain.
+let mode = "map";
+try { if (localStorage.getItem("regionmap.mode") === "sat") mode = "sat"; } catch (e) {}
+const flat = () => mode === "map";
+
+function extent(towns, fc) {
+  let w = 180, s = 90, e = -180, n = -90;
+  const add = c => { if (c[0] < w) w = c[0]; if (c[0] > e) e = c[0]; if (c[1] < s) s = c[1]; if (c[1] > n) n = c[1]; };
+  const walk = c => typeof c[0] === "number" ? add(c) : c.forEach(walk);
+  for (const t of towns) if (t.lon != null && t.lat != null) add([t.lon, t.lat]);
+  for (const f of (fc && fc.features) || []) if (f.geometry) walk(f.geometry.coordinates);
+  return w < e ? [w, s, e, n] : null;
+}
 
 function overviewCam(d, animate) {
-  const b = d.overview || OVERVIEW;
-  const c = map.cameraForBounds([[b[0], b[1]], [b[2], b[3]]], {padding: 30});
-  const opt = {center: c.center, zoom: c.zoom, pitch: 45, bearing: 0};
+  const b = d.overview || bounds || OVERVIEW;
+  // top padding clears the Map / Satellite switch; right leaves room for the labels of the eastern (Ahr) towns
+  const c = map.cameraForBounds([[b[0], b[1]], [b[2], b[3]]], {padding: {top: 48, bottom: 28, left: 28, right: 150}});
+  const opt = {center: c.center, zoom: c.zoom, pitch: flat() ? 0 : 45, bearing: 0};
   animate ? map.flyTo(Object.assign(opt, {duration: 2200})) : map.jumpTo(opt);
 }
 function townCam(t, animate) {
-  const opt = {center: [t.lon, t.lat], zoom: 13.5, pitch: 60, bearing: -15};
+  const opt = flat() ? {center: [t.lon, t.lat], zoom: 13, pitch: 0, bearing: 0}
+                     : {center: [t.lon, t.lat], zoom: 13.5, pitch: 60, bearing: -15};
   animate ? map.flyTo(Object.assign(opt, {duration: 2500, essential: true})) : map.jumpTo(opt);
 }
 function goTo(m, d, animate) {
@@ -56,10 +82,17 @@ function goTo(m, d, animate) {
   t ? townCam(t, animate) : overviewCam(d, animate);
 }
 
-function create(d) {
-  map = new maplibregl.Map({
-    container: "m", hash: false, maxPitch: 80, center: [6.3, 50.6], zoom: 8.5,
-    style: {version: 8, sources: {
+// CARTO Positron (vector, keyless; the basemap the pydeck maps use). Its fills and lines go under the water, its
+// place names over it. Unreachable: the map still draws, with the satellite view only.
+const POSITRON = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
+let baseIds = [];
+
+function create() {
+  fetch(POSITRON).then(r => r.ok ? r.json() : null).catch(() => null).then(p => build(p));
+}
+
+function build(p) {
+  const own = {version: 8, sources: {
         img: {type: "raster", tileSize: 256, maxzoom: 15,
           tiles: ["https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2021_3857/default/g/{z}/{y}/{x}.jpg"],
           attribution: '<a href="https://s2maps.eu" target="_blank">Sentinel-2 cloudless 2021</a> by EOX IT Services GmbH (modified Copernicus Sentinel data 2021), CC BY-NC-SA 4.0'},
@@ -81,7 +114,17 @@ function create(d) {
         {id: "closure-case", type: "line", source: "closures", filter: ["==", ["geometry-type"], "LineString"],
           layout: {"line-cap": "butt"}, paint: {"line-color": "#ffffff", "line-width": 6}},
         {id: "closure-line", type: "line", source: "closures", filter: ["==", ["geometry-type"], "LineString"],
-          paint: {"line-color": "#1d1d1f", "line-width": 4, "line-dasharray": [1.5, 1]}}]},
+          paint: {"line-color": "#1d1d1f", "line-width": 4, "line-dasharray": [1.5, 1]}}]};
+  let style = own;
+  if (p) {
+    const under = p.layers.filter(l => l.type !== "symbol"), names = p.layers.filter(l => l.type === "symbol");
+    baseIds = p.layers.map(l => l.id);
+    const at = own.layers.findIndex(l => l.id === "flood-edge");
+    style = Object.assign({}, p, {sources: Object.assign({}, p.sources, own.sources),
+      layers: [...under, ...own.layers.slice(0, at), ...names, ...own.layers.slice(at)]});
+  }
+  map = new maplibregl.Map({
+    container: "m", hash: false, maxPitch: 80, center: [6.3, 50.6], zoom: 8.5, style,
     attributionControl: {compact: true}
   });
   map.addControl(new maplibregl.NavigationControl({visualizePitch: true}), "top-right");
@@ -98,15 +141,46 @@ function create(d) {
   map.on("mouseenter", "flood-fill", () => map.getCanvas().style.cursor = "pointer");
   map.on("mouseleave", "flood-fill", () => map.getCanvas().style.cursor = "");
   map.once("style.load", () => {
-    map.setTerrain({source: "dem", exaggeration: 1.5});
     if (map.setSky) map.setSky({"sky-color": "#a9c8ee", "horizon-color": "#e8eef5", "fog-color": "#e8eef5",
       "sky-horizon-blend": 0.6, "horizon-fog-blend": 0.6, "fog-ground-blend": 0.2});
+    applyMode();
     const at = document.querySelector(".maplibregl-ctrl-attrib");  // start folded: the page caption credits the sources
     if (at) at.classList.remove("maplibregl-compact-show");
     ready = true;
     const d = pending; pending = null; update(d, true);
   });
 }
+
+// Layers, terrain and edge colours for the current mode. White edges read on imagery, not on a light map.
+function applyMode() {
+  const vis = (id, on) => map.setLayoutProperty(id, "visibility", on ? "visible" : "none");
+  baseIds.forEach(id => vis(id, flat())); vis("img", !flat());
+  map.setPaintProperty("hs", "hillshade-exaggeration", flat() ? 0.12 : 0.25);
+  map.setPaintProperty("hs", "hillshade-shadow-color", flat() ? "#8e8e93" : "#1d1d1f");
+  const edge = flat() ? "#1d1d1f" : "#ffffff";
+  map.setPaintProperty("flood-edge", "line-color", edge);
+  map.setPaintProperty("flood-edge", "line-opacity", flat() ? 0.35 : 0.7);
+  map.setPaintProperty("flood-edge-modelled", "line-color", edge);
+  map.setPaintProperty("flood-edge-modelled", "line-opacity", flat() ? 0.75 : 1);
+  map.setTerrain(flat() ? null : {source: "dem", exaggeration: 1.5});
+  map.setMaxPitch(flat() ? 0 : 80);
+  flat() ? map.dragRotate.disable() : map.dragRotate.enable();
+  flat() ? map.touchZoomRotate.disableRotation() : map.touchZoomRotate.enableRotation();
+  document.querySelectorAll(".mode button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === mode)));
+  // new credits unfold the compact "i" box; fold it again (the page caption credits the sources)
+  map.once("idle", () => document.querySelectorAll(".maplibregl-ctrl-attrib").forEach(e => e.classList.remove("maplibregl-compact-show")));
+}
+function setMode(m) {
+  if (m === mode) return;
+  mode = m;
+  try { localStorage.setItem("regionmap.mode", m); } catch (e) {}
+  if (!ready) return;
+  applyMode();
+  if (flat()) map.easeTo({pitch: 0, bearing: 0, duration: 600});
+  else map.easeTo({pitch: cur ? 60 : 45, bearing: cur ? -15 : 0, duration: 900});
+}
+document.querySelectorAll(".mode button").forEach(b => b.addEventListener("click", () => setMode(b.dataset.mode)));
+document.querySelectorAll(".mode button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === mode)));
 
 function paintSel(m) {
   map.setFilter("flood-sel", m ? ["==", ["get", "municipality"], m] : NONE);
@@ -207,7 +281,8 @@ function updateClosures(fc) {
 function update(d, first) {
   const towns = d.towns || [];
   const fsig = d.flood ? (d.flood.features || []).length + ":" + JSON.stringify(d.flood).length : "0";
-  if (fsig !== floodSig) { floodSig = fsig; map.getSource("flood").setData(d.flood || EMPTY); }
+  if (fsig !== floodSig) { floodSig = fsig; map.getSource("flood").setData(d.flood || EMPTY); bounds = null; }
+  if (!bounds) bounds = extent(towns, d.flood);
   updateWater(towns);
   updateClosures(d.closures);
   const sel = d.selected || null;
@@ -222,6 +297,7 @@ function update(d, first) {
   if (cam && cam !== (prev.camera ? JSON.stringify(prev.camera) : null)) {
     const c = d.camera, o = {duration: first ? 0 : 2500};
     ["center", "zoom", "pitch", "bearing"].forEach(k => { if (c[k] != null) o[k] = c[k]; });
+    if (flat()) { o.pitch = 0; o.bearing = 0; }
     first ? map.jumpTo(o) : map.flyTo(o);
   }
   prev = d;
@@ -234,7 +310,7 @@ window.addEventListener("message", ev => {
   const d = a.data || {};
   const h = a.height || 560;
   if (h !== lastH) { lastH = h; document.getElementById("m").style.height = h + "px"; send("streamlit:setFrameHeight", {height: h}); }
-  if (!map) { pending = d; create(d); return; }
+  if (!map) { if (!pending) create(); pending = d; return; }  // the style loads once; keep only the newest data
   if (!ready) { pending = d; return; }
   update(d, false);
 });

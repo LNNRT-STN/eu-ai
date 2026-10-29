@@ -9,7 +9,7 @@ data = {
   "closures": GeoJSON FeatureCollection of Point / LineString closed roads (optional),
   "selected": municipality or None (change it to fly there; None = region overview),
   "camera":  optional {center: [lon, lat], zoom, pitch, bearing}; applied whenever it changes,
-  "overview": optional [west, south, east, north] for the region view,
+  "overview": optional [west, south, east, north] for the region view (default: every town and all the water),
 }
 Returns None until the user clicks a town pin or its water, then {"selected": municipality, "clicks": n}
 (n grows with every click, so a repeated click on the same town is detectable).
@@ -20,8 +20,8 @@ import streamlit.components.v1 as components
 
 _component = components.declare_component("regionmap", path=str(Path(__file__).parent / "frontend"))
 
-ATTRIBUTION = ("Imagery: Sentinel-2 cloudless 2021 by EOX IT Services GmbH (contains modified Copernicus Sentinel "
-               "data), CC BY-NC-SA 4.0. Elevation: AWS Terrain Tiles (Mapzen, Terrarium). Map: MapLibre GL JS (BSD).")
+ATTRIBUTION = ("Map: © OpenStreetMap contributors © CARTO. Imagery: Sentinel-2 cloudless 2021 by EOX IT Services GmbH (contains modified Copernicus Sentinel "
+               "data), CC BY-NC-SA 4.0. Elevation: AWS Terrain Tiles (Mapzen, Terrarium). Renderer: MapLibre GL JS (BSD).")
 
 
 def region_map(data: dict, key: str, height: int = 560) -> dict | None:

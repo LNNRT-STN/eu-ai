@@ -49,7 +49,7 @@ ROLES = {
                "What 2021 hit, what has changed since, and how the region would do if it came back.",
                ["assess", "crisis", "plan", "limits"]),
 }
-HEX = {"red": "#d70015", "orange": "#c93400", "blue": "#0071e3", "violet": "#7b3fd1", "gray": "#6e6e73"}
+EU, EU_YELLOW = "#203e5f", "#ffcc00"  # EU navy for icons, EU yellow for the role tiles' accent bar
 TOWN_PAGES = {"Town plan", "Door-knock list"}
 
 if st.query_params.get("role") in ROLES and "role" not in st.session_state:
@@ -58,12 +58,13 @@ role = st.session_state.get("role")
 
 # coloured icons: each nav row and role tile is a keyed container, styled by its key
 st.html("<style>" + "".join(
-    f".st-key-nav-{k} [data-testid=stIconMaterial]{{color:{HEX[c]}}}" for k, (*_, c, _h) in PAGES.items()) + "".join(
-    f".st-key-role-{k}{{border-top:3px solid {HEX[c]}!important}}" for k, (_, _, c, *_r) in ROLES.items()) + """
+    f".st-key-nav-{k} [data-testid=stIconMaterial]{{color:{EU}}}" for k in PAGES) + "".join(
+    f".st-key-role-{k}{{border-top:3px solid {EU_YELLOW}!important}}.st-key-role-{k} [data-testid=stIconMaterial]{{color:{EU}}}"
+    for k in ROLES) + """
 [class*=st-key-nav-] [data-testid=stPageLink] a{padding:.3rem .55rem;border-radius:8px;position:relative}
 /* the page's explanation is a tooltip on the row; a ? appears on hover to say so */
 [class*=st-key-nav-] [data-testid=stPageLink] a::after{content:"?";position:absolute;right:.55rem;top:50%;
-  transform:translateY(-50%);width:1.05rem;height:1.05rem;border-radius:50%;border:1.5px solid #8e8e93;color:#6e6e73;
+  transform:translateY(-50%);width:1.05rem;height:1.05rem;border-radius:50%;border:1.5px solid #5a6e87;color:#4f6580;
   font-size:.7rem;font-weight:700;display:grid;place-items:center;opacity:0;transition:opacity .15s ease-out}
 [class*=st-key-nav-] [data-testid=stPageLink] a:hover::after,
 [class*=st-key-nav-] [data-testid=stPageLink] a:focus-visible::after{opacity:1}

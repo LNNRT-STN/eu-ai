@@ -197,20 +197,31 @@ def set_speed(x):
 
 
 def set_mode(m):
+    """Switching mode starts a clean scenario: the other mode's alerts, closures and simulated check-ins go."""
     assert m in ("replay", "live")
+    if m != clock()["mode"]:
+        reset()
     _set(mode=m, t=_now() if m == "live" else START, playing=int(m == "live"))
 
 
-def reset(t0="2021-07-12 06:00"):
+def reset(t0="2021-07-12 06:00", rewind=False):
     """Back to t0 in replay mode, paused. Clears events, status, outbox, closures and simulated check-ins;
-    check-ins made by people (and by the check-in page's own drill) stay."""
+    check-ins made by people (and by the check-in page's own drill) stay. rewind (going back on the day slider): keep
+    what people did up to t0 (roads closed by hand, check-ins), drop what they did after it."""
+    t0 = str(_ts(t0))
     with _db(write=True) as c:
         _row(c)
-        c.execute("UPDATE clock SET mode='replay', t=?, playing=0, wall=? WHERE id=1", (str(_ts(t0)), time.time()))
-        for tb in ("events", "state", "outbox", "closures"):
+        c.execute("UPDATE clock SET mode='replay', t=?, playing=0, wall=? WHERE id=1", (t0, time.time()))
+        for tb in ("events", "state", "outbox"):
             c.execute(f"DELETE FROM {tb}")
+        if rewind:
+            c.execute("DELETE FROM closures WHERE auto=1 OR t > ?", (t0,))
+            c.execute("UPDATE closures SET open=0, reopened_t=NULL WHERE reopened_t > ?", (t0,))
+            c.execute('DELETE FROM checkins WHERE sim=0 AND "when" > ?', (t0,))
+        else:
+            c.execute("DELETE FROM closures")
         c.execute("DELETE FROM checkins WHERE sim=1")
-        c.execute("DELETE FROM meta WHERE k LIKE 'done:%'")
+        c.execute("DELETE FROM meta WHERE k LIKE 'done:%' OR k LIKE 'sim_off:%'")
 
 
 def seek(t):
@@ -219,7 +230,7 @@ def seek(t):
     drafted come back from the drafts cache."""
     t, k = min(max(_ts(t), START), END), clock()
     if k["mode"] != "replay" or t < k["t"]:
-        reset(t)
+        reset(t, rewind=k["mode"] == "replay")
     _set(t=t, playing=int(k["playing"] and k["mode"] == "replay" and t < END))
     tick(t, "replay")
 
@@ -590,10 +601,11 @@ def _simulate_checkins(T, t):
     tm = _replay()["times"]
     with _db(write=True) as c:
         have = dict(c.execute("SELECT municipality, COUNT(*) FROM checkins WHERE sim=1 GROUP BY 1").fetchall())
+        off = {k[8:] for (k,) in c.execute("SELECT k FROM meta WHERE k LIKE 'sim_off:%'")}  # cleared by hand
         total = sum(have.values())
         for m in ev.municipality:
             d = D[D.municipality == m].door.to_numpy()
-            if not len(d) or total >= SIM_CAP:
+            if not len(d) or total >= SIM_CAP or m in off or "*" in off:
                 continue
             t0 = tm.at[m, "t_evacuate"]
             hours = (t - t0) / pd.Timedelta(hours=1) if pd.notna(t0) else 0
@@ -627,8 +639,15 @@ def checkins(muni=None) -> pd.DataFrame:
     return df
 
 
+def latest(ck: pd.DataFrame) -> pd.DataFrame:
+    """Each home's newest check-in (by entry order): a crew's correction replaces the resident's earlier report.
+    A real report always beats a simulated one, whatever their order."""
+    return ck.sort_values(["sim", "id"], ascending=[False, True]).drop_duplicates(["municipality", "door"], keep="last")
+
+
 def add_checkin(municipality, door, status="safe", where=None, people=1, drill=False, when=None) -> int:
-    assert status in ("safe", "needs help")
+    """status "no news" undoes a home's earlier reports (a crew's correction)."""
+    assert status in ("safe", "needs help", "no news")
     when = when if when is not None else clock()["t"]
     with _db(write=True) as c:
         cur = c.execute('INSERT INTO checkins("when",municipality,door,status,"where",people,drill) VALUES(?,?,?,?,?,?,?)',
@@ -637,10 +656,12 @@ def add_checkin(municipality, door, status="safe", where=None, people=1, drill=F
 
 
 def clear_drill(muni=None):
-    """Remove drill check-ins (simulated ones included), for one town or all."""
+    """Remove drill check-ins (simulated ones included), for one town or all; no new simulated ones arrive there
+    until the next reset."""
     with _db(write=True) as c:
         c.execute("DELETE FROM checkins WHERE drill=1" + (" AND municipality=?" if muni else ""),
                   (muni,) if muni else ())
+        c.execute("INSERT OR REPLACE INTO meta VALUES(?,?)", (f"sim_off:{muni or '*'}", "1"))
 
 
 # ---------- road closures ----------
@@ -779,11 +800,11 @@ def summary(t=None) -> dict:
     """Counts for a header strip: towns at warn / evacuate, people in them, check-ins safe / needing help,
     roads closed, reports queued."""
     T = towns_status(t)
-    ck = checkins()
+    ck = latest(checkins())
     return {"warn": int((T.status == "warn").sum()), "evacuate": int((T.status == "evacuate").sum()),
             # observed (satellite) and modelled (Vesdre, EFAS 500-year) are never summed
             "people_evacuate": int(T.people[(T.status == "evacuate") & ~T.area.isin(MODELLED_AREAS)].sum()),
             "people_evacuate_modelled": int(T.people[(T.status == "evacuate") & T.area.isin(MODELLED_AREAS)].sum()),
             "evacuate_under_50": int(((T.status == "evacuate") & (T.people < 50)).sum()),
             "safe": int((ck.status == "safe").sum()), "needs_help": int((ck.status == "needs help").sum()),
-            "roads_closed": len(closures()), "reports": len(outbox())}
+            "roads_closed": int(closures().lon.notna().sum()), "reports": len(outbox())}  # roads: those on the map

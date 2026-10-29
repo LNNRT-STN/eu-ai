@@ -73,26 +73,26 @@ def fit(df):
 CSS = """<style>
 .act{background:#fff;border-radius:16px;padding:1.1rem 1.4rem;display:flex;gap:1rem;align-items:center}
 .act i{flex:none;width:.9rem;height:.9rem;border-radius:50%;background:#d70015;box-shadow:0 0 0 5px #d7001522}
-.act.next i{background:#8e8e93;box-shadow:0 0 0 5px #8e8e9322}
+.act.next i{background:#203e5f;box-shadow:0 0 0 5px #203e5f22}
 .act h2{font-size:1.35rem;font-weight:700;letter-spacing:-.02em;line-height:1.2;margin:0;padding:0;color:#1d1d1f}
-.act p{margin:.3rem 0 0;color:#6e6e73;font-size:.98rem}
+.act p{margin:.3rem 0 0;color:#4f6580;font-size:.98rem}
 .act p b{color:#1d1d1f}
 .bars{background:#fff;border-radius:16px;padding:1rem 1.2rem}
 .bars .r{display:grid;grid-template-columns:9.5rem 1fr 3.6rem;gap:.6rem;align-items:center;padding:.45rem 0}
 .bars .n{font-weight:600;color:#1d1d1f;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bars .t{display:block;font-weight:400;color:#8e8e93;font-size:.78rem}
+.bars .t{display:block;font-weight:400;color:#5a6e87;font-size:.78rem}
 .bars .v{text-align:right;font-weight:600;font-variant-numeric:tabular-nums;color:#1d1d1f}
-.bars .cap{font-size:.8rem;font-weight:600;color:#6e6e73;margin:0 0 .3rem}
+.bars .cap{font-size:.8rem;font-weight:600;color:#4f6580;margin:0 0 .3rem}
 .one b{display:block;font-size:2.2rem;font-weight:700;letter-spacing:-.03em;line-height:1.05;color:#1d1d1f}
-.one span{display:block;margin-top:.3rem;color:#6e6e73;font-size:.95rem}
+.one span{display:block;margin-top:.3rem;color:#4f6580;font-size:.95rem}
 .trio{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-top:.6rem}
 .trio div{background:#f2f2f7;border-radius:10px;padding:.5rem .7rem}
 .trio b{display:block;font-size:1.25rem;font-weight:700;color:#1d1d1f;font-variant-numeric:tabular-nums}
-.trio span{display:block;font-size:.75rem;color:#6e6e73}
+.trio span{display:block;font-size:.75rem;color:#4f6580}
 .dc{background:#fff;border-radius:16px;padding:1rem 1.2rem;border:2px solid transparent;transition:border-color .15s}
 .dc b{display:block;font-size:2.2rem;font-weight:700;letter-spacing:-.03em;line-height:1;color:#d70015}
 .dc h3{font-size:1.05rem;font-weight:650;margin:.35rem 0 0;padding:0;color:#1d1d1f}
-.dc span{display:block;margin-top:.2rem;color:#6e6e73;font-size:.88rem}
+.dc span{display:block;margin-top:.2rem;color:#4f6580;font-size:.88rem}
 .dc.on{border-color:#d70015}
 [class*=st-key-dcard-]{position:relative;gap:0}
 [class*=st-key-dcard-] [data-testid=stElementContainer]:has(button){position:absolute;inset:0;margin:0;width:100%!important;height:100%}

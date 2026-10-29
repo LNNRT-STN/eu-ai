@@ -12,7 +12,7 @@ from core import about, fmt
 
 def _legend(parts):
     """Inline-styled legend row (the page does not load core.style's CSS)."""
-    st.html("<div style='display:flex;flex-wrap:wrap;gap:.3rem 1rem;font-size:.8rem;color:#6e6e73;margin:.4rem .25rem 0'>"
+    st.html("<div style='display:flex;flex-wrap:wrap;gap:.3rem 1rem;font-size:.8rem;color:#4f6580;margin:.4rem .25rem 0'>"
             + "".join(f"<span style='display:inline-flex;align-items:center;gap:.4rem'><i style='width:.75rem;"
                       f"height:.75rem;display:inline-block;background:{h};border-radius:{'50%' if r else '3px'}'></i>"
                       f"{escape(lab)}</span>" for h, lab, r in parts) + "</div>")

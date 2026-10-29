@@ -127,3 +127,56 @@ def test_report_fallback_without_key():
                           {"town": "Pepinster", "status": "evacuate"})
     assert "Pepinster" in live.report(i)
     assert live.outbox().set_index("id").at[i, "source"] == "template"
+
+
+def test_crew_correction_replaces_report():
+    m = "Pepinster (BE)"
+    live.add_checkin(m, "Rue de Pepinster 1", "needs help", "", 2)
+    assert live.summary()["needs_help"] == 1
+    live.add_checkin(m, "Rue de Pepinster 1", "safe", "Checked by a crew", 2)
+    s = live.summary()
+    assert (s["safe"], s["needs_help"]) == (1, 0)  # one home, counted once: its newest report
+    live.add_checkin(m, "Rue de Pepinster 1", "no news")
+    s = live.summary()
+    assert (s["safe"], s["needs_help"]) == (0, 0)
+
+
+def test_real_report_beats_simulated():
+    m = "Bad Neuenahr-Ahrweiler, Stadt (DE)"
+    D = live._doors()
+    door = D[D.municipality == m].door.iloc[0]
+    live.add_checkin(m, door, "needs help", "", 1, when=pd.Timestamp("2021-07-12 07:00"))
+    live.tick(pd.Timestamp("2021-07-16 12:00"), "replay")
+    last = live.latest(live.checkins(m)).set_index("door")
+    assert last.at[door, "status"] == "needs help"
+
+
+def test_clear_simulated_stays_cleared():
+    m = "Bad Neuenahr-Ahrweiler, Stadt (DE)"
+    live.tick(pd.Timestamp("2021-07-15 12:00"), "replay")
+    assert len(live.checkins(m))
+    live.clear_drill(m)
+    live.tick(pd.Timestamp("2021-07-16 12:00"), "replay")
+    assert not live.checkins(m).sim.any()
+    live.reset()
+    live.tick(pd.Timestamp("2021-07-15 12:00"), "replay")
+    assert live.checkins(m).sim.any()  # reset turns the simulation back on
+
+
+def test_seek_back_keeps_earlier_hand_closures():
+    live.reset()
+    live.seek("2021-07-13 06:00")
+    a = live.close_road("Rue de Pepinster", "Pepinster (BE)")
+    live.seek("2021-07-15 06:00")
+    b = live.close_road("Rue de Pepinster", "Pepinster (BE)")
+    live.seek("2021-07-14 06:00")
+    ids = set(live.closures().id)
+    assert a in ids and b not in ids
+
+
+def test_mode_switch_clears_scenario():
+    live.seek("2021-07-15 12:00")
+    assert len(live.events())
+    live.set_mode("live")
+    live.set_mode("replay")
+    assert live.events().empty and not live.checkins().sim.any()

@@ -69,7 +69,7 @@ def outlook():
                 y="q:Q", text="lab:N", x=alt.value(0), color=alt.Color("txt:N", scale=None)),  # 2-year label at 4.5:1
             alt.Chart(pd.DataFrame({"t": [pd.Timestamp.today().normalize()]})).mark_rule(color="#8e8e93").encode(x="t:T"),
         ).properties(height=300, background="#ffffff").configure_view(stroke=None)
-         .configure_axis(gridColor="#ececf0", domain=False, labelColor="#6e6e73", titleColor="#6e6e73"), width="stretch")
+         .configure_axis(gridColor="#ececf0", domain=False, labelColor="#4f6580", titleColor="#4f6580"), width="stretch")
         core.group([("Now", f"{core.fmt(g.now)} m³/s"),
                     ("Wettest forecast run", core.chip(forecast.LEVELS[g.level_worst][0],
                                                        forecast.LEVELS[g.level_worst][1]))])

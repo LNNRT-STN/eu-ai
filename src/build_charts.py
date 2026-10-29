@@ -18,7 +18,7 @@ DATA = ROOT / "outputs" / "data"
 OUT = ROOT / "outputs" / "charts"
 
 # dataviz reference palette (light): slots 1-3 validate as a set; text stays in ink, never series colour
-INK, INK2, MUTED, SURFACE = "#0b0b0b", "#52514e", "#8a8984", "#fcfcfb"
+INK, INK2, MUTED, SURFACE = "#0b0b0b", "#4f6580", "#5a6e87", "#fcfcfb"
 BLUE, ORANGE, VIOLET, NEUTRAL = "#2a78d6", "#eb6834", "#6250d6", "#c3c2b7"
 SOURCE = "Source: Copernicus EMS, EFAS, GHS-OBAT, GHS-POP 2020 (challenge data); OpenStreetMap. Team analysis. " \
          "Residents are an order of magnitude."
@@ -140,9 +140,9 @@ def care_sites():
     save(fig, "04_care_sites_flooded")
 
 
-# shelter gap classes: ColorBrewer YlOrRd, the yellow-to-red scale of JRC / EEA risk maps
-CLASSES = [(1, "1–249", "#ffffb2"), (250, "250–499", "#fecc5c"), (500, "500–999", "#fd8d3c"),
-           (1000, "1,000–1,999", "#f03b20"), (2000, "2,000+", "#bd0026")]
+# shelter gap classes: EU yellow to EU navy (ec.europa.eu colour guidelines), lightness falls with every class
+CLASSES = [(1, "1–249", "#fee5b1"), (250, "250–499", "#ffcc00"), (500, "500–999", "#8a9bb0"),
+           (1000, "1,000–1,999", "#3d5675"), (2000, "2,000+", "#1a2634")]
 NO_GAP = "#e9e8e4"
 
 

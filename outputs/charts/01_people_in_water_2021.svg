@@ -6,7 +6,7 @@
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2026-10-29T15:46:30.577599</dc:date>
+    <dc:date>2026-10-29T22:21:38.197625</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
@@ -43,7 +43,7 @@ L 562.971429 101.676989
 L 562.971429 80.672727 
 L 158.4 80.672727 
 z
-" clip-path="url(#p8f0000441a)" style="fill: #2a78d6; stroke: #2a78d6; stroke-width: 1.2; stroke-linejoin: miter"/>
+" clip-path="url(#p02b2ed63e3)" style="fill: #2a78d6; stroke: #2a78d6; stroke-width: 1.2; stroke-linejoin: miter"/>
    </g>
    <g id="patch_4">
     <path d="M 158.4 135.55483 
@@ -51,7 +51,7 @@ L 259.66807 135.55483
 L 259.66807 114.550568 
 L 158.4 114.550568 
 z
-" clip-path="url(#p8f0000441a)" style="fill: #2a78d6; stroke: #2a78d6; stroke-width: 1.2; stroke-linejoin: miter"/>
+" clip-path="url(#p02b2ed63e3)" style="fill: #2a78d6; stroke: #2a78d6; stroke-width: 1.2; stroke-linejoin: miter"/>
    </g>
    <g id="patch_5">
     <path d="M 158.4 169.43267 
@@ -59,7 +59,7 @@ L 209.139984 169.43267
 L 209.139984 148.428409 
 L 158.4 148.428409 
 z
-" clip-path="url(#p8f0000441a)" style="fill: #2a78d6; stroke: #2a78d6; stroke-width: 1.2; stroke-linejoin: miter"/>
+" clip-path="url(#p02b2ed63e3)" style="fill: #2a78d6; stroke: #2a78d6; stroke-width: 1.2; stroke-linejoin: miter"/>
    </g>
    <g id="patch_6">
     <path d="M 158.4 203.310511 
@@ -67,7 +67,7 @@ L 178.780753 203.310511
 L 178.780753 182.30625 
 L 158.4 182.30625 
 z
-" clip-path="url(#p8f0000441a)" style="fill: #2a78d6; stroke: #2a78d6; stroke-width: 1.2; stroke-linejoin: miter"/>
+" clip-path="url(#p02b2ed63e3)" style="fill: #2a78d6; stroke: #2a78d6; stroke-width: 1.2; stroke-linejoin: miter"/>
    </g>
    <g id="patch_7">
     <path d="M 158.4 254.127273 
@@ -75,7 +75,7 @@ L 541.049598 254.127273
 L 541.049598 233.123011 
 L 158.4 233.123011 
 z
-" clip-path="url(#p8f0000441a)" style="fill: url(#ha457efa448); stroke: #2a78d6; stroke-width: 1.2; stroke-linejoin: miter"/>
+" clip-path="url(#p02b2ed63e3)" style="fill: url(#h20ac79a2e9); stroke: #2a78d6; stroke-width: 1.2; stroke-linejoin: miter"/>
    </g>
    <g id="matplotlib.axis_1"/>
    <g id="matplotlib.axis_2">
@@ -130,20 +130,20 @@ z
    <text style="font-weight: 700; font-size: 14px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #0b0b0b" x="14.4" y="31.65" transform="rotate(-0 14.4 31.65)">About 30,000 residents lived in buildings the 2021 flood reached</text>
   </g>
   <g id="text_12">
-   <text style="font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #52514e" x="14.4" y="52.72" transform="rotate(-0 14.4 52.72)">Residents of flooded buildings, July 2021</text>
+   <text style="font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #4f6580" x="14.4" y="52.72" transform="rotate(-0 14.4 52.72)">Residents of flooded buildings, July 2021</text>
   </g>
   <g id="text_13">
-   <text style="font-size: 7.5px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; fill: #8a8984" transform="translate(14.4 280.800234)">* Liège, Rochefort, Venlo, Eschweiler, Wassenberg, Euskirchen-Rheinbach. Vesdre: no satellite map, EFAS 500-year model, not in the total.</text>
-   <text style="font-size: 7.5px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; fill: #8a8984" transform="translate(14.4 293.76)">Source: Copernicus EMS, EFAS, GHS-OBAT, GHS-POP 2020 (challenge data); OpenStreetMap. Team analysis. Residents are an order of magnitude.</text>
+   <text style="font-size: 7.5px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; fill: #5a6e87" transform="translate(14.4 280.800234)">* Liège, Rochefort, Venlo, Eschweiler, Wassenberg, Euskirchen-Rheinbach. Vesdre: no satellite map, EFAS 500-year model, not in the total.</text>
+   <text style="font-size: 7.5px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; fill: #5a6e87" transform="translate(14.4 293.76)">Source: Copernicus EMS, EFAS, GHS-OBAT, GHS-POP 2020 (challenge data); OpenStreetMap. Team analysis. Residents are an order of magnitude.</text>
   </g>
  </g>
  <defs>
-  <clipPath id="p8f0000441a">
+  <clipPath id="p02b2ed63e3">
    <rect x="158.4" y="72" width="424.8" height="190.8"/>
   </clipPath>
  </defs>
  <defs>
-  <pattern id="ha457efa448" patternUnits="userSpaceOnUse" x="0" y="0" width="72" height="72">
+  <pattern id="h20ac79a2e9" patternUnits="userSpaceOnUse" x="0" y="0" width="72" height="72">
    <rect x="0" y="0" width="73" height="73" fill="#fcfcfb"/>
    <path d="M -36 36 
 L 36 -36 
