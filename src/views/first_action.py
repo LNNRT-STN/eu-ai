@@ -40,7 +40,7 @@ for k, v in {"tab": TABS[0], "site": None, "dfilt": "All", "town": None, "shelte
     S.setdefault(k, v)
 
 st.html("""<style>
-.block-container{padding-top:2.6rem;padding-bottom:1rem}
+.block-container{padding-top:3.75rem;padding-bottom:.5rem}   /* clear the 56 px top bar shown when the sidebar is closed */
 .kpi{display:grid;grid-template-columns:repeat(3,1fr);background:#fff;border-radius:12px}
 .kpi div{padding:.6rem .8rem;position:relative}
 .kpi div+div::before{content:"";position:absolute;left:0;top:.7rem;bottom:.7rem;border-left:1px solid #e3e3e8}
