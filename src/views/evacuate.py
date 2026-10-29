@@ -15,6 +15,7 @@ import anna
 import core
 import map3d
 import forecast
+import live
 from core import about, fmt
 
 head, towns, crit, shel, flood, *_ = anna.load()
@@ -94,15 +95,9 @@ st.title("Evacuation plan")
 st.caption("If the July 2021 flood came back: who leaves, where they go, who gives the order.")
 
 
-# Who Anna calls: the authority that orders an evacuation across municipalities, per study area (team summary of the
-# administrative map; check against the emergency plan). The mayor is called too.
-CALL = {"ahr": "Kreis Ahrweiler", "erftstadt": "Rhein-Erft-Kreis", "schleiden": "Kreis Euskirchen",
-        "euskirchen": "Kreis Euskirchen", "eschweiler": "StädteRegion Aachen", "wassenberg": "Kreis Heinsberg",
-        "venlo": "Safety region Limburg-Noord", "liege": "Province of Liège (governor)",
-        "vesdre": "Province of Liège (governor)", "rochefort": "Province of Namur (governor)"}
 cs_all = crit[crit.in_worst_flood.astype(bool) & crit.share_of_site_flooded.ge(.05) & crit.type.isin(["hospital", "care home"])]
 first_n = cs_all.groupby(["area", "municipality"]).size()
-calls = (T.assign(care=[int(first_n.get((a, m), 0)) for a, m in zip(T.area, T.municipality)], call=T.area.map(CALL),
+calls = (T.assign(care=[int(first_n.get((a, m), 0)) for a, m in zip(T.area, T.municipality)], call=[live.district(a, m) for a, m in zip(T.area, T.municipality)],
                   short=T.label.str.replace(" (modelled)", " *"))
          .sort_values(["no_shelter", "care"], ascending=False).head(6))
 

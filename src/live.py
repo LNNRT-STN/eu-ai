@@ -41,6 +41,19 @@ CALL = {"ahr": "Kreis Ahrweiler", "erftstadt": "Rhein-Erft-Kreis", "schleiden": 
         "euskirchen": "Kreis Euskirchen", "eschweiler": "StädteRegion Aachen", "wassenberg": "Kreis Heinsberg",
         "venlo": "Safety region Limburg-Noord", "liege": "Province of Liège (governor)",
         "vesdre": "Province of Liège (governor)", "rochefort": "Province of Namur (governor)"}
+# Towns whose district differs from their study area's (team summary of the administrative map; check locally).
+CALL_TOWN = {"Weilerswist (DE)": "Kreis Euskirchen", "Blankenheim (DE)": "Kreis Euskirchen", "Inden (DE)": "Kreis Düren",
+             "Maastricht (NL)": "Safety region Zuid-Limburg", "Maasgouw (NL)": "Safety region Limburg-Noord",
+             "Kinrooi (BE)": "Province of Limburg (governor)", "Maasmechelen (BE)": "Province of Limburg (governor)",
+             "Riemst (BE)": "Province of Limburg (governor)", "Hamoir (BE)": "Province of Liège (governor)",
+             "Durbuy (BE)": "Province of Luxembourg (governor)", "Hotton (BE)": "Province of Luxembourg (governor)",
+             "La Roche-en-Ardenne (BE)": "Province of Luxembourg (governor)",
+             "Rendeux (BE)": "Province of Luxembourg (governor)"}
+
+
+def district(area, municipality):
+    """Who orders an evacuation across municipalities for this town (Kreis, safety region or governor)."""
+    return CALL_TOWN.get(municipality, CALL.get(area, area))
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS clock(id INTEGER PRIMARY KEY CHECK(id=1), mode TEXT, t TEXT, playing INTEGER, speed REAL,
@@ -453,7 +466,7 @@ def tick(t=None, mode=None):
         facts = _facts(r, prev, s, when, t, mode)
         name = _name(r.municipality)
         queue_report("status", f"Mayor of {name}", r.municipality, when, facts)
-        queue_report("status", f"Fire brigade, {CALL.get(r.area, r.area)}", r.municipality, when, facts)
+        queue_report("status", f"Fire brigade, {name}", r.municipality, when, facts)
     _auto_close(T, t, mode)
     if mode == "replay":
         _simulate_checkins(T, t)
@@ -476,7 +489,7 @@ def _facts(r, prev, s, when, t, mode):
             "river_point": r.gauge, "flow_m3s": int(round(q)), "two_year_flow_m3s": int(round(raw.q2)),
             "july_2021_peak_m3s": int(round(raw.q2021)), "people_in_2021_flood_extent": int(r.people),
             "people_expected_in_water": int(pe),
-            "district": CALL.get(r.area, r.area)}
+            "district": district(r.area, r.municipality)}
 
 
 def _edges():

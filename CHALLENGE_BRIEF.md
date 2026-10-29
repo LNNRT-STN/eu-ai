@@ -27,6 +27,45 @@
 
 > Give Anna an evidence-based, easy-to-understand answer to: **"Are we better prepared than in 2021, where are we still exposed, and what is the FIRST action I should take in response to this flood warning?"**
 
+### 2a. The task in one line (key, from the case sheet)
+
+> Produce a **present-state assessment** of the July 2021 floods: **what the water covered**, **what has been done
+> in those areas since**, and **how the region would do if the same event returned tomorrow**.
+
+Three time layers, and every page of the tool must sit in one of them and say which:
+
+| Layer | Question | Evidence type |
+|---|---|---|
+| **Then** (July 2021) | Q1: what the water covered | Observed (Copernicus EMS) + modelled where the satellite was blind (Vesdre: EFAS 500-year), never summed |
+| **Since** (2021 → Oct 2026) | Q2: what has been done | Desk research, every row sourced and marked verified / partly / unverified |
+| **Tomorrow** (same event, today's buildings) | Q3: can we shelter them; Q4: where we still stand exposed, first action | Simulation on today's buildings, roads and shelters; replay of the 2021 river flows |
+
+### 2b. Our stance: the tool fixes what went wrong in 2021
+
+We do not only describe the 2021 flood: the tool is built to correct the failures that turned it into a disaster.
+Each failure below must be backed by a cited source (`docs/TIMELINE_2021.md` for times, `docs/INFRA_2021.md`,
+`docs/BUDGETS.md`). Lines marked **[VERIFY]** still need their source.
+
+| 2021 failure | What the tool does instead | Where |
+|---|---|---|
+| Warnings existed days ahead (EFAS) but were not turned into local action **[VERIFY times]** | River flow per town → status (watch / warn / evacuate) → a briefing for the mayor and fire brigade, drafted at once | Crisis room (`src/views/crisis.py`, `src/live.py`) |
+| Evacuation orders came late, after the water reached towns (e.g. Kreis Ahrweiler, evening of 14 July) **[VERIFY times]** | Replay shows when the tool would have said "evacuate" next to when the 2021 order came (hindsight flows, ±12 h; stated on screen) | Crisis room replay |
+| Warnings said "flood" but not what to do or where to go **[VERIFY]** | Ready warning message per town in the local language, with the shelter and the route | Town plan → Warning message |
+| Unclear who gives the order across municipalities **[VERIFY]** | "Who gives the order" per town: mayor, then Kreis / governor / safety region | Town plan → Who gives the order |
+| People who could not leave alone died (e.g. care home in Sinzig) **[VERIFY]** | Evacuate first: care sites in the water, single-storey homes (no upper floor to flee to) | Town plan → Evacuate first, 3D view |
+| No shelter or route planned; roads and bridges went under | Dry candidate shelters within reach, capacity, who has no place; routes that cross 2021 water; rail and bridges cut | Town plan, Getting out |
+| No overview of who is safe and who still needs a door knock | Resident check-in, crew door-knock list, road closures shared live | Check-ins and door-knock list, Do I need to leave? |
+| Recovery money exists but is not tied to the gaps | Gap → measure → cited budget line | Long term (`docs/BUDGETS.md`) |
+
+### 2c. Where each question is answered (for the jury and the brief)
+
+| Question | In the tool | Evidence files | Known gaps to say |
+|---|---|---|---|
+| Q1 what the water covered | 2021 and today §1; All towns and care sites; Crisis room counters | `outputs/data/area_summary.csv`, `municipalities.csv`, `critical_sites.csv` | Satellite count is a floor; Vesdre modelled; residents an order of magnitude |
+| Q2 what has been done since | 2021 and today §2; Long term | `docs/BUDGETS.md`, `docs/INFRA_2021.md` | Many measures announced, not verified as built |
+| Q3 shelter with today's buildings | Town plan (walk / bus / no place, shelter map), Do I need to leave?, Offer a bed | `outputs/data/shelters.geojson`, `evac_towns.csv`; low / central / high capacity in `area_summary.csv` | OSM candidates, not official shelters; capacity estimated; distances are minimums |
+| Q4 still exposed, first action | Crisis room (live replay, first towns to evacuate); Town plan first action line; Long term measures | `outputs/data/q4_ranking.csv`, `docs/ML.md` §8-9 | Replay uses hindcast flows, not the forecasts of the day; statuses ±12 h |
+
 ---
 
 ## 3. Deliverables

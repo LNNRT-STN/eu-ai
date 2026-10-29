@@ -176,6 +176,12 @@ re-runnable script in `notebooks/` (`pipeline.py`, `osm_extract.py`, `dq_report.
 - How we checked it: every number read from ml2_eval.json; the 95 % bootstrap intervals changed the planned verdict. The pooled gain over EFAS is real (+0.042, +0.024 to +0.058), but on the Ahr it is not (+0.008, −0.025 to +0.046), so the planned line "terrain helps on the Ahr" was dropped. The per-area names were looked up in ml2_cells.csv (Euskirchen/Erft, Schleiden/Urft); the thresholds were checked in the code (0.25 / 0.6).
 - Result: pitch line "adding terrain improves the pooled ranking, 0.75 → 0.79"; no claim about beating EFAS on the Ahr or the Meuse. Alert levels still come from the flow curve, not from the model.
 
+## 31. Report recipients and districts per town; brief framed as "fix 2021"
+- Prompt/intent: reports read "Fire brigade, Province of Liège (governor)"; owner asked the brief to state the present-state task and that the tool corrects the 2021 failures.
+- AI output (short): fire brigade named after the town; one `live.district(area, town)` with per-town overrides, used by the Crisis room reports and the Town plan call list; CHALLENGE_BRIEF.md §2a-2c (three time layers, 2021 failure → tool feature, question → page → evidence file).
+- How we checked it: listing towns per study area showed wrong districts, not only odd wording: Maastricht under the Province of Liège; Weilerswist (Kreis Euskirchen), Inden (Kreis Düren), Blankenheim (Kreis Euskirchen); Durbuy, Hotton, La Roche, Rendeux (Province of Luxembourg); Kinrooi, Maasmechelen, Riemst (Belgian Limburg); Hamoir (Liège). The 10 engine tests pass (one updated, one added); the Town plan rendered at 1440 px with no errors. Failure lines in the brief without a source yet are marked [VERIFY].
+- Result: districts are still a team summary to check locally; the 2021 failure claims wait for docs/TIMELINE_2021.md.
+
 ## Data-cleaning decisions (from *Python for Data Analysis* ch.7)
 - Duplicates: overlapping flood shapes dissolved; OSM objects merged per campus; a building in two study areas counted once.
 - Missing values: analysed and reported per area (book p.210), not silently filled.

@@ -71,7 +71,15 @@ def test_events_and_reports_queued_once():
     assert list(ev.to) == ["warn", "evacuate"]
     ob = live.outbox()
     assert len(ob[ob.municipality == "Pepinster (BE)"]) == 4  # mayor + fire brigade, for warn and evacuate
-    assert ob.recipient.str.contains("Province of Liège").any()
+    pep = ob[ob.municipality == "Pepinster (BE)"]
+    assert set(pep.recipient) == {"Mayor of Pepinster", "Fire brigade, Pepinster"}
+    assert pep.facts.iloc[0]["district"] == "Province of Liège (governor)"
+
+
+def test_district_overrides_area():
+    assert live.district("liege", "Maastricht (NL)") == "Safety region Zuid-Limburg"
+    assert live.district("erftstadt", "Weilerswist (DE)") == "Kreis Euskirchen"
+    assert live.district("ahr", "Schuld (DE)") == "Kreis Ahrweiler"
 
 
 def test_checkin_round_trip():
