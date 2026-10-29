@@ -26,7 +26,7 @@ DISTRICT = {"ahr": "Ahrweiler", "erftstadt": "Rhein-Erft", "schleiden": "Euskirc
 care = C[C.type.isin(["hospital", "care home"])].assign(district=lambda d: d.area.map(DISTRICT))
 by_d = care.district.value_counts()
 MAP_H = 600
-PANEL_H = MAP_H - 132        # map height minus the number strip and the tabs above the panel: both columns end level
+PANEL_H = MAP_H - 198        # map height minus the first-action card, context line and tabs: both columns end level
 TABS = ["Evacuate", "Shelters", "Since 2021"]
 TIP = {"html": "<b>{tname}</b><br/>{tinfo}",
        "style": {"backgroundColor": "#1d1d1f", "color": "#fff", "fontSize": "13px", "borderRadius": "8px"}}
@@ -47,6 +47,14 @@ st.html("""<style>
 .kpi b{display:block;font-size:1.35rem;font-weight:700;letter-spacing:-.02em;line-height:1.1;color:#1d1d1f;
   font-variant-numeric:tabular-nums}
 .kpi span{display:block;font-size:.75rem;color:#6e6e73;line-height:1.3;margin-top:.15rem}
+.act{display:flex;gap:.7rem;align-items:flex-start}
+.act i{flex:none;width:.75rem;height:.75rem;border-radius:50%;background:#d70015;box-shadow:0 0 0 4px #d7001522;margin-top:.42rem}
+.act h2{font-size:1.18rem;font-weight:700;letter-spacing:-.015em;line-height:1.3;margin:0;padding:0;color:#1d1d1f}
+[class*=st-key-act]{background:#fff;border-radius:12px;padding:.8rem .95rem .7rem;gap:.55rem}
+[class*=st-key-act] [data-testid=stButtonGroup]{margin-left:1.45rem}
+.ctx{color:#6e6e73;font-size:.8rem;margin:0 .2rem;line-height:1.35}
+.ctx b{color:#1d1d1f;font-variant-numeric:tabular-nums}
+.cap{font-size:.8rem;font-weight:600;color:#1d1d1f;margin:0 .2rem}
 .card{background:#fff;border-radius:12px;padding:.85rem 1rem}
 .card h3{font-size:1.05rem;font-weight:650;margin:0;padding:0;color:#1d1d1f;line-height:1.3}
 .card .sub{color:#6e6e73;font-size:.85rem;margin-top:.15rem}
@@ -107,6 +115,11 @@ def bump():
     S.v += 1                                           # new widget keys: clears stale table and map selections
 
 
+def go_district():
+    S.site, S.tab = None, "Evacuate"
+    bump()
+
+
 def set_(key, value):
     S[key] = value
     bump()
@@ -144,11 +157,14 @@ def on_map(key, layer_to_state):
 # ------------------------------------------------------------------------------------------------ the screen
 left, right = st.columns([2, 3], gap="medium")
 with left:
-    st.html("<div class='kpi'>"
-            f"<div><b>{len(care)}</b><span>hospitals and care homes to evacuate</span></div>"
-            f"<div><b>{about(obs['no_shelter'])}</b><span>residents with no shelter place within 1.5 km</span></div>"
-            f"<div><b>{sum(m[4] == DONE for m in MEASURES)} of {len(MEASURES)}</b><span>measures since 2021 done</span>"
-            "</div></div>")
+    # the brief's first action is the headline of the panel, on every tab; a district opens its own list
+    with st.container(key="act"):
+        st.html(f"<div class='act'><i></i><h2>First action: evacuate the {len(care)} hospitals and care homes that "
+                "sat in the 2021 water</h2></div>")
+        st.pills("District", ["All", *by_d.index], key="dfilt", label_visibility="collapsed", on_change=go_district,
+                 format_func=lambda d: f"All {len(care)}" if d == "All" else f"{d} {by_d[d]}")
+    st.html(f"<p class='ctx'><b>{about(obs['no_shelter'])}</b> with no shelter place within 1.5 km "
+            f"· <b>{sum(m[4] == DONE for m in MEASURES)} of {len(MEASURES)}</b> measures since 2021 done</p>")
     tab = st.segmented_control("View", TABS, key="tab", required=True, label_visibility="collapsed", width="stretch")
     panel = st.container(height=PANEL_H, border=False, key="panel")
 
@@ -156,18 +172,16 @@ layers, view, picks = list(WATER), None, {}
 
 # ================================================================================================ Evacuate
 if tab == "Evacuate":
-    opts = ["All", *by_d.index]
     with panel:
-        st.pills("District", opts, key="dfilt", label_visibility="collapsed", on_change=set_, args=("site", None),
-                 format_func=lambda d: f"All {len(care)}" if d == "All" else f"{d} {by_d[d]}")
         dist = S.dfilt or "All"
         sites = evac_order(care if dist == "All" else care[care.district == dist])
         site = sites[sites.name == S.site].iloc[0] if S.site in set(sites.name) else None
         if site is None:
+            st.html(f"<p class='cap'>Evacuate in this order{'' if dist == 'All' else ' · ' + dist + ' district'}</p>")
             k = f"sites-{dist}-{S.v}"
             st.dataframe(sites.assign(pct=sites.share_of_site_flooded * 100)[["order", "name", "town", "pct"]], key=k,
                          on_select=partial(on_table, k, sites, "site", "name"), selection_mode="single-row",
-                         hide_index=True, height=min(36 * len(sites) + 38, PANEL_H - 84), column_config={
+                         hide_index=True, height=min(36 * len(sites) + 38, PANEL_H - 72), column_config={
                              "order": st.column_config.NumberColumn("#", width=34),
                              "name": st.column_config.TextColumn("Site", width=178),
                              "town": st.column_config.TextColumn("Town", width=115),
@@ -212,7 +226,7 @@ elif tab == "Shelters":
             rnd = lambda c: tl[c].map(lambda n: round(n, -2) if n >= 1000 else round(n, -1) if n >= 100 else round(n))
             st.dataframe(tl.assign(people=rnd("people"), covered=rnd("covered"), no_shelter=rnd("no_shelter"))
                          [["short", "people", "covered", "no_shelter"]], key=k, on_select=partial(on_table, k, tl, "town", "short"), selection_mode="single-row", hide_index=True,
-                         height=PANEL_H - 34, column_config={
+                         height=PANEL_H - 38, column_config={
                              "short": st.column_config.TextColumn("Town", width=176),
                              "people": st.column_config.NumberColumn("In water", format="localized", width=76),
                              "covered": st.column_config.NumberColumn("Has place", format="localized", width=76),
