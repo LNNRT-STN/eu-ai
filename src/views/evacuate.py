@@ -17,6 +17,8 @@ from core import about, fmt
 
 head, towns, crit, shel, flood, *_ = anna.load()
 recv, bus = anna.load_moves()
+HOUSE = pd.read_csv(core.DATA / "housing_age.csv")          # notebooks/housing_age.py (GHS-OBAT construction period)
+B3D = pd.read_parquet(core.DATA / "buildings_3d.parquet")   # every OBAT building in the 2021 water, with height
 V = "worst"                       # the bus plan exists only for all satellite passes (EFAS 500-year for the Vesdre)
 T = (towns[(towns.variant == V) & (towns.people >= 10)].sort_values("people", ascending=False).reset_index(drop=True))
 CC = {"BE": "Belgium", "NL": "Netherlands", "DE": "Germany"}
@@ -291,6 +293,41 @@ st.space("medium")
 first, order, msg, prep = st.tabs(["Evacuate first", "Who gives the order", "Warning message", "Plan and drill"])
 
 with first:
+    # homes with no upper floor: OBAT height under ~4.5 m; 2.5 m is OBAT's fill-in value, so it counts as unknown
+    hb = B3D[(B3D.municipality == t.municipality) & (B3D.area == t.area)]
+    homes = hb[hb.use == 1]
+    one = homes[(homes.storeys == 1) & (homes.height_m != 2.5)]
+    unk = int((homes.height_m == 2.5).sum())
+    ha = HOUSE[(HOUSE.municipality == t.municipality) & (HOUSE.area == t.area)]
+    old = int(ha.res_pre1980.sum()) if len(ha) else 0
+    nonres = int(ha.nonres_in_flood.sum()) if len(ha) else 0
+    core.group([("<b>Single-storey homes</b>", "No upper floor to escape to if the water comes fast: knock on these "
+                 f"doors first. {fmt(unk)} more homes have no reliable height.", f"<b>{fmt(len(one))}</b>"),
+                ("<b>Homes in neighbourhoods built before 1980</b>", "Older riverside housing. Neighbourhood age (when the "
+                 "100 m area was first built up), not the age of each house.",
+                 f"<b>{fmt(old)}</b> of {fmt(len(homes))}"),
+                ("<b>Shops, workshops and other non-residential buildings</b>", "Small businesses: warn them too, and "
+                 "tell them where to move stock and vehicles.", f"<b>{fmt(nonres)}</b>")],
+               f"Buildings in the 2021 water in {t['name']}")
+    if len(homes):
+        hv = homes.assign(single=(homes.storeys == 1) & (homes.height_m != 2.5),
+                          tname=lambda d: d.single.map({True: "Single-storey home", False: "Home with an upper floor"}),
+                          tinfo=lambda d: [f"about {h:.0f} m high" if h != 2.5 else "height unknown" for h in d.height_m])
+        hv["c"] = [core.rgb(core.EVACUATE) if x else [142, 142, 147, 200] for x in hv.single]
+        hv["z"] = hv.height_m.clip(lower=3)
+        st.pydeck_chart(pdk.Deck(
+            layers=[pdk.Layer("GeoJsonLayer", flood[(t.area, V)], filled=True, get_fill_color=[0, 113, 227, 60],
+                              stroked=False),
+                    pdk.Layer("ColumnLayer", hv, get_position=["lon", "lat"], get_elevation="z", elevation_scale=6,
+                              radius=7, get_fill_color="c", pickable=True, extruded=True)],
+            initial_view_state=pdk.ViewState(longitude=homes.lon.median(), latitude=homes.lat.median(), zoom=14.2,
+                                             pitch=55, bearing=-20),
+            map_style=pdk.map_styles.CARTO_LIGHT, tooltip={"html": "<b>{tname}</b><br/>{tinfo}"},
+            views=[pdk.View(type="MapView", controller={"scrollZoom": False})]), height=420)
+        core.legend(core.swatch(core.EVACUATE, "Single-storey home", True)
+                    + core.swatch("#8e8e93", "Home with an upper floor (column height ∝ building height, ×6)", True)
+                    + core.swatch("rgba(0,113,227,.55)", "2021 water"))
+    st.space("small")
     if len(weak):
         rows = []
         for r in weak.itertuples():
@@ -350,6 +387,8 @@ width:100%}}td,th{{border-bottom:1px solid #ddd;padding:.3rem .4rem;text-align:l
 <h2>Who leaves</h2><p>About {about(t.people)} residents lived in the 2021 water. {about(walk)} can walk to a shelter
 within 1.5 km; {about(ride)} need transport (up to 10 km); {about(left)} have no place within 10 km.</p>
 <h2>Evacuate first</h2><ul>{first_rows}</ul>
+<p>In the 2021 water: {fmt(len(one))} single-storey homes (no upper floor to escape to; {fmt(unk)} with no reliable
+height), {fmt(old)} homes in neighbourhoods built before 1980, {fmt(nonres)} non-residential buildings.</p>
 <h2>Where they go</h2><table><tr><th>#</th><th>Dry shelter</th><th>km from centre</th><th>People sent</th>
 <th>Places in all</th><th>Other towns sent here</th></tr>{rows}</table>
 <h2>Who gives the order ({CC[cc]})</h2><table>{who}</table>

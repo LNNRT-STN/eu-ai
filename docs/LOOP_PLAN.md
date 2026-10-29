@@ -24,6 +24,7 @@ close the 2021 governance gaps (roles, warning → instruction, plans and drills
    (top 6 towns by residents with no shelter on foot, district/province to call, care sites; click opens the plan).
 3. Long term page (`src/views/long_term.py`) from docs/BUDGETS.md: gap → measure → money, partly-verified badges.
 4. Offer a bed (`src/views/host.py`): solidarity register, no personal data, local file; beds within 10 km on the plan.
+5. Housing age + 3D single-storey view in "Evacuate first" and the plan download.
 
 ## In progress (delegated, background agents; each writes only its own files)
 - Road sim: `outputs/data/evac_towns.csv`, `evac_edges.geojson` (`notebooks/evac_sim.py`): time to leave the water
@@ -32,9 +33,8 @@ close the 2021 governance gaps (roles, warning → instruction, plans and drills
   (short term: no train evacuation) + long-term repair list.
 
 ## Backlog (highest value first)
-- NEXT: wire housing data (landed): `housing_age.csv` (res_pre1980 = homes in neighbourhoods first built before 1980:
-  OBAT epoch is the 100 m cell's, not the building's) + `buildings_3d.parquet` (21,969 buildings, height, storeys) →
-  "Evacuate first" line + 3D view of single-storey homes in the water + plan download.
+- NEXT (owner request): Safe check-in + door-knock list. Residents report "evacuated, I'm at X"; fire brigade sees
+  buildings in the water with no check-in, single-storey first, by sector, exportable. No names; local file only.
 - Long term: add a rail/bridges row when the infra agent lands (repair status + source).
 - Wire each agent's output in as it lands; render; verify totals against app_towns.
 - "Better prepared than 2021?" one line on the page: brief Q2/Q4 asks it; only verified facts, else say "not verified".

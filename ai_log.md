@@ -106,6 +106,12 @@ re-runnable script in `notebooks/` (`pipeline.py`, `osm_extract.py`, `dq_report.
 - How we checked it: filled the form in the browser, read the stored row, saw the line appear for a town 10 km away, fixed plurals and a code-parsing bug (an all-digit code with a leading zero would not withdraw). The test offer was deleted.
 - Result: privacy by design: no name, address or phone stored; offers stay on the local machine (data/, gitignored); not counted as shelter places. A real roll-out is run by the municipality under the GDPR.
 
+## 19. Housing age and a 3D "no upper floor" view (GHS-OBAT)
+- Prompt/intent: flag older riverside housing and homes with no upper floor to escape to.
+- AI output (short): an agent read GHS-OBAT (BE, NL, DE) and wrote housing_age.csv (pre-1980, non-residential per town) and buildings_3d.parquet (21,969 buildings in the 2021 water, height, storeys); the page shows three counts per town and a 3D map (single-storey homes red).
+- How we checked it: building totals match app_towns (21,949 vs 21,864; median gap 1 per town). Construction period is the 100 m cell's first built-up epoch, not the building's: labelled "neighbourhood age". 1,438 homes have OBAT's 2.5 m fill-in height: counted as "no reliable height", not single-storey (Schleiden 1,351 + 168 = the agent's 1,519). Removed an unsupported claim ("often older residents") after review.
+- Result: water depth is not in the data, so "no upper floor" is a priority signal, not a drowning-risk estimate.
+
 ## Data-cleaning decisions (from *Python for Data Analysis* ch.7)
 - Duplicates: overlapping flood shapes dissolved; OSM objects merged per campus; a building in two study areas counted once.
 - Missing values: analysed and reported per area (book p.210), not silently filled.
