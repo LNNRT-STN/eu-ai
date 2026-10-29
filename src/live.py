@@ -213,6 +213,17 @@ def reset(t0="2021-07-12 06:00"):
         c.execute("DELETE FROM meta WHERE k LIKE 'done:%'")
 
 
+def seek(t):
+    """Jump the replay to t (held to START..END), still playing if it was. Forward, the next tick applies everything
+    passed on the way; back, the scenario is rebuilt from t (a replay never un-warns a town), and briefings already
+    drafted come back from the drafts cache."""
+    t, k = min(max(_ts(t), START), END), clock()
+    if k["mode"] != "replay" or t < k["t"]:
+        reset(t)
+    _set(t=t, playing=int(k["playing"] and k["mode"] == "replay" and t < END))
+    tick(t, "replay")
+
+
 def _advance(c):
     m, t, p, s, wall = _row(c)
     now = time.time()
@@ -510,8 +521,8 @@ def _facts(r, prev, s, when, t, mode):
     return {"town": _name(r.municipality), "status": s, "from": "normal" if prev == "none" else prev,
             # a replay steps on daily flows, so it gives the day only
             "time": f"{drill(when):%a %-d %b %Y} (daily river flow)" if mode == "replay" else _fmt_t(when),
-            "scenario": (f"drill: the July 2021 flood replayed as if it began on {DRILL_DAY0:%a %-d %b %Y}, on modelled "
-                         "river flows computed afterwards (not a forecast)"
+            "scenario": (f"replay of the 2021 forecast: the July 2021 flood shown as if it began on {DRILL_DAY0:%a %-d %b %Y}, on "
+                         "modelled river flows computed afterwards (not a live forecast)"
                          if mode == "replay" else "live forecast"),
             "river_point": r.gauge, "modelled_flow_m3s": int(round(q)), "modelled_two_year_flow_m3s": int(round(raw.q2)),
             "modelled_july_2021_peak_m3s": int(round(raw.q2021)),

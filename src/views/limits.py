@@ -84,7 +84,7 @@ with right:
          "GloFAS (~5 km) handles the Meuse well, small valleys poorly; it puts the 2021 Vesdre peak far below what was "
          "observed. The ten river points are all in the Meuse basin: no outlook for the Ahr or Erft yet. Official "
          "warnings: SPW, Rijkswaterstaat, German state flood centres."),
-        ("**The drill is a replay**",
+        ("**A replay of the 2021 forecast**",
          "The river flows are those of 12–17 July 2021, modelled afterwards (GloFAS), shown as if they started today. "
          "Only the dates move."),
     ])

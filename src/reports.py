@@ -24,8 +24,8 @@ Rules:
   that fits the recipient (a mayor: alert and evacuate residents, open shelters; a fire brigade: crews,
   door-knocking, closed roads).
 - Say that river flows come from a model (GloFAS) and are not a gauge reading when flows are mentioned.
-  In a replay the flows were computed afterwards: never call them a forecast, and never call the modelled
-  July 2021 peak the real peak. A replay is a drill: say so in line 1, and use the date given as it is.
+  In a replay the flows were computed afterwards: never call them a live forecast, and never call the modelled
+  July 2021 peak the real peak. Call a replay a replay of the 2021 forecast in line 1, and use the date given as it is.
 - If the flood extent is modelled, say so whenever you give its number of people.
 - End with this exact line: {FOOTER}"""
 

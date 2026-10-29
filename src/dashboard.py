@@ -4,6 +4,7 @@ notebooks/pipeline.py, dq_report.py and q4_ranking.py outputs. Run: streamlit ru
 
 On launch the visitor picks a role (resident, crisis manager, fire brigade, policy maker); each role sees only its
 pages. ?role=<key> in the URL skips the choice (demo links, test renders)."""
+import pandas as pd
 import streamlit as st
 
 import anna
@@ -77,7 +78,7 @@ def pick(k):
 
 def launch():
     st.title("Flood desk")
-    st.markdown(f"**Drill: {live.drill(live.START):%A %-d %B %Y}.** The July 2021 flood in Belgium, the Netherlands "
+    st.markdown(f"**Replay of the 2021 forecast, from {live.drill(live.START):%A %-d %B %Y}.** The July 2021 flood in Belgium, the Netherlands "
                 "and Germany, replayed as if it were arriving now.",
                 help="The river flows are those of 12-17 July 2021, modelled afterwards (GloFAS). Only the dates move. "
                      "Not an official warning: those come from SPW, Rijkswaterstaat and the German state flood centres.")
@@ -90,6 +91,57 @@ def launch():
             st.caption(who)
             st.button(f"Continue as {name.lower()}", key=f"go-{k}", on_click=pick, args=(k,),
                       type="primary" if k == "manager" else "secondary", width="stretch")
+
+
+# the replay's days, to jump to: its start, then each midnight (flows are daily, so status changes at midnight)
+DAYS = [live.START] + list(pd.date_range(live.START.normalize() + pd.Timedelta(days=1), live.END, freq="D"))
+
+
+def seek():
+    live.seek(st.session_state.sc_time)
+    st.session_state._seeked = True  # the fragment reruns the whole page, so the other views follow
+
+
+def now():
+    """Where the shared clock stands, and a slider to jump to any day of the replay; moves the clock while playing,
+    so every role sees the same moment."""
+    k = live.advance()
+    t = f"{live.drill(k['t']):%a %-d %b, %H:%M}" if k["mode"] == "replay" else f"{k['t']:%a %-d %b, %H:%M}"
+    st.caption(f":material/{'play_arrow' if k['playing'] else 'pause'}: **{t}**"
+               + (" · replay of the 2021 forecast" if k["mode"] == "replay" else " · live forecast"))
+    if k["mode"] == "replay":
+        st.session_state.sc_time = max(d for d in DAYS if d <= k["t"])
+        st.select_slider("Jump to", DAYS, key="sc_time", on_change=seek,
+                         format_func=lambda d: f"{live.drill(d):%a %-d %b}" + (" 06:00" if d == live.START else ""),
+                         help="Pick a day of the replay. Going back rebuilds that moment: alerts, briefings, "
+                              "closed roads and simulated check-ins as they stood then.")
+    if st.session_state.pop("_seeked", False):
+        st.rerun()
+
+
+def scenario():
+    """The scenario player, for every role: one clock shared by all sessions (src/live.py), so what the crisis
+    manager plays, the fire brigade and the residents see too. Widgets follow the clock, not the other way round:
+    another session may have changed it."""
+    c = live.clock()
+    st.session_state.sc_mode = c["mode"]
+    st.session_state.sc_speed = float(c["speed"]) if c["speed"] in (1, 3, 6, 12) else 3.0
+    st.caption("Scenario", help="Replay the July 2021 river flows as if they started today, to see how the tool "
+                                "works in practice. The clock is shared: every role sees the same moment.")
+    st.segmented_control("Mode", ["replay", "live"], key="sc_mode", label_visibility="collapsed",
+                         format_func={"replay": "Replay: 2021 forecast", "live": "Live forecast"}.get,
+                         on_change=lambda: st.session_state.sc_mode and live.set_mode(st.session_state.sc_mode))
+    b1, b2 = st.columns(2)
+    if c["playing"]:
+        b1.button("Pause", icon=":material/pause:", on_click=live.pause, width="stretch")
+    else:
+        b1.button("Play", icon=":material/play_arrow:", on_click=live.play, type="primary", width="stretch")
+    b2.button("Reset", icon=":material/replay:", on_click=live.reset, width="stretch",
+              help=f"Back to {live.drill(live.START):%a %d %b} 06:00 (the 12 July 2021 river flows); clears alerts, "
+                   "reports, closures and simulated check-ins")
+    st.select_slider("Speed", [1.0, 3.0, 6.0, 12.0], key="sc_speed", format_func=lambda x: f"{x:g} h per second",
+                     on_change=lambda: live.set_speed(st.session_state.sc_speed))
+    st.fragment(now, run_every=1.5 if c["playing"] else None)()
 
 
 if role is None:
@@ -119,6 +171,9 @@ with st.sidebar:
         st.selectbox("Town", list(lab), format_func=lab.get, key="town",
                      on_change=lambda: st.session_state.update(_town=st.session_state.town))
 
+    st.divider()
+    scenario()
+
 nav.run()
 
 # footer last, so each page's own sidebar controls sit right under the navigation
@@ -128,7 +183,7 @@ if role != "resident":
         gauges, *_, fetched, err = core.outlook()
         c1, c2 = st.columns([3, 1], vertical_alignment="center")
         c1.caption("Live river outlook" + (f" · {fetched:%H:%M}" if fetched is not None else " · unavailable"),
-                   help="Open-Meteo GloFAS, the real 30-day outlook for today (not the drill).")
+                   help="Open-Meteo GloFAS, the real 30-day outlook for today (not the replay).")
         if c2.button("", icon=":material/refresh:", type="tertiary", help="Refresh the live outlook"):
             core._outlook.clear()
             st.rerun()

@@ -39,7 +39,23 @@ def shelter_town():
     return {f["properties"]["name"]: f["properties"]["muni"] for f in reversed(g) if f["properties"].get("muni")}
 
 
-KIND = {"civic": "civic building", "school": "school", "sports hall": "sports hall"}
+@st.cache_data
+def addresses():
+    """'Street 12, Town' for every home in the water, for the address box's autocomplete."""
+    H = homes()
+    return sorted(H.street + " " + H.housenumber + ", " + H.town)
+
+
+EXAMPLES = {  # demo addresses for the address box, one per kind of answer
+    "Ahrstraße 28, Ahrbrück": "Ahr, in the 2021 water",
+    "Ahruferstraße 29, Bad Neuenahr-Ahrweiler": "Ahr, single storey",
+    "Avenue Albert Ier 3, Pepinster": "Vesdre, modelled",
+    "Quai Saint-Paul de Sinçay 126, Liège": "Liège",
+    "Aachener Straße 10, Schleiden": "Schleiden",
+    "An der Schwarzau 11, Erftstadt": "Erftstadt",
+    "Kirchstraße 3, Altenahr": "dry in 2021",
+}
+KIND = {"civic":"civic building", "school": "school", "sports hall": "sports hall"}
 LEAVE, LEFT, BED = ("Do I need to leave?", "I have left / I need help", "Offer a bed")
 
 
@@ -64,11 +80,32 @@ def method(modelled=False):
             "contributors.")
 
 
+def alert(muni, town):
+    """Has the alert come? The town's status at the scenario clock (sidebar), so a resident sees the replay too."""
+    k = live.clock()
+    S = live.towns_status().sort_values("level").drop_duplicates("municipality", keep="last")  # worst status
+    s = S.set_index("municipality").status.get(muni, "none")
+    when = (f"Replay of the 2021 forecast, {live.drill(k['t']):%a %-d %b, %H:%M}" if k["mode"] == "replay"
+            else f"Live forecast, {k['t']:%a %-d %b, %H:%M}")
+    if s == "evacuate":
+        st.error(f"**{when}: {town} is told to evacuate. Leave now.**", icon=":material/directions_run:")
+    elif s == "warn":
+        st.warning(f"**{when}: {town} is warned. Pack and get ready to leave.**", icon=":material/notifications_active:")
+    elif s == "watch":
+        st.info(f"**{when}: the river near {town} is rising.** No alert yet; stay tuned.", icon=":material/water:")
+    else:
+        st.caption(f"{when}: no alert for {town}." + (" No river point near this town in our data."
+                                                       if s == live.NO_POINT else ""))
+
+
 def lookup():
     """Address → verdict, then where to go. Sets st.session_state.res_home for the other tabs."""
     H = homes()
-    q = st.text_input("Your address", placeholder="e.g. Ahrstraße 28, Ahrbrück", key="res_q",
-                      help="Street and number, and the town if you like. Nothing you type here is stored.")
+    # one box that autocompletes: demo examples first, then every home in the water; any other address can be typed
+    q = st.selectbox("Your address", list(EXAMPLES) + [a for a in addresses() if a not in EXAMPLES], index=None,
+                     format_func=lambda a: f"{a}  ·  {EXAMPLES[a]}" if a in EXAMPLES else a,
+                     accept_new_options=True, key="res_q", placeholder="Start typing, or pick an example",
+                     help="Street and number, and the town if you like. Nothing you type here is stored.") or ""
 
     # People type whole addresses ("Ahrstraße 28, Ahrbrück", "5 rue de la Station"): split off the number and the
     # town, or the street would not match and the page would wrongly say the home was dry.
@@ -127,6 +164,7 @@ def lookup():
     st.error(f"**{street} {num}, {town} was in the 2021 water{' (modelled)' if modelled else ''}. Leave when the "
              "alert comes, before the water rises.**" + (" Your home has no upper floor to escape to: leave early."
                                                          if h.single else ""), icon=":material/warning:")
+    st.fragment(alert, run_every=3 if live.clock()["playing"] else None)(h.municipality, town)
     if go is not None:
         walk = go.km <= 1.5
         mins = go.km / (WALK_KMH if walk else BUS_KMH) * 60

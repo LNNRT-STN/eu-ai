@@ -106,9 +106,9 @@ def _map(p, sites, shelters, side, sel):
         show_care = st.toggle("Care sites in the water", value=True, key="gap_care")
         show_dry = st.toggle("Dry candidate sites", key="gap_dry")
         c = live.clock()
-        show_rivers = st.toggle("River points on the drill day", value=c["mode"] == "replay", key="gap_rivers",
+        show_rivers = st.toggle("River points on the replay day", value=c["mode"] == "replay", key="gap_rivers",
                                 disabled=c["mode"] != "replay",
-                                help="Each point's July 2021 flow on the day the drill clock stands on.")
+                                help="Each point's July 2021 flow on the day the replay clock stands on.")
     pick = None if sel is None else sel.municipality
     layers = [core.regions(p.assign(
         fill=[core.rgb(core.GAP[x][0], 150 if m == pick else 40 if pick else 85) for x, m in zip(p.gap, p.municipality)],
@@ -139,9 +139,9 @@ def _map(p, sites, shelters, side, sel):
                          columns=["gauge", "lat", "lon", "lvl", "pct"])
         layers.append(core.points(g.assign(fill=[core.rgb(forecast.LEVELS[l][1]) for l in g.lvl],
                                            tip=[f"{r.gauge}\n{forecast.LEVELS[r.lvl][0]} · {r.pct:.0%} of the July "
-                                                f"2021 peak · drill {live.drill(day):%a %d %b}"
+                                                f"2021 peak · replay {live.drill(day):%a %d %b}"
                                                 for r in g.itertuples()]), "fill", 8, 2))
-        river_key = "<b>River point, drill day</b>" + "".join(core.swatch(c, lab, True) for lab, c in forecast.LEVELS)
+        river_key = "<b>River point, replay day</b>" + "".join(core.swatch(c, lab, True) for lab, c in forecast.LEVELS)
     v = core.view(core.bbox(), None if sel is None else (sel.lon, sel.lat), 11)
     core.deck(layers, v, 480, on_select=_from_map, selection_mode="single-object", key="gap_map")
     core.legend("<b>Shelter gap</b> (circle: people in the water)"

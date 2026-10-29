@@ -30,7 +30,7 @@ def outlook():
                                                                 else "never") +
                       ". Ten river points, each rated against the same model's July 2021 peak. Refresh it from the "
                       "sidebar.")
-    st.caption("Real and current: today's forecast, not the drill. A heads-up from a model, not an official warning.")
+    st.caption("Real and current: today's forecast, not the replay. A heads-up from a model, not an official warning.")
     core.banner(color, head, detail, note=False)
     if gauges is None:
         return
@@ -114,7 +114,7 @@ def peaks():
                     .configure_view(stroke=None)
                     .configure_axis(domain=False, ticks=False, labelColor="#1d1d1f", labelFontSize=12), width="stretch")
     core.legend("".join(core.swatch(c, lab) for lab, c in forecast.LEVELS)
-                + ("<span><i style='border:2px solid #1d1d1f;background:none'></i>drill clock</span>" if day is not None
+                + ("<span><i style='border:2px solid #1d1d1f;background:none'></i>replay clock</span>" if day is not None
                    else ""))
 
 
@@ -123,11 +123,11 @@ def render():
     st.divider()
     flow = core.load_replay()
     lag = (flow["Meuse · Venlo"].idxmax() - flow["Vesdre · Chaudfontaine"].idxmax()).days
-    st.subheader(":orange[:material/timeline:] When each river peaks in the drill",
+    st.subheader(":orange[:material/timeline:] When each river peaks in the replay",
                  help="Daily river flow from the GloFAS model for 12–17 July 2021, as % of each point's own July 2021 "
-                      "peak, on the drill dates. Top to bottom follows the water: the Ardennes tributaries peak first. "
+                      "peak, on the replay dates. Top to bottom follows the water: the Ardennes tributaries peak first. "
                       "Covers the Meuse basin only, not the Ahr or Erft.")
-    st.caption(f"Drill, not a forecast: the July 2021 flows, dated from {live.drill(DAY0):%a %-d %b}. Dutch Limburg "
+    st.caption(f"Replay of the 2021 forecast: the July 2021 flows, dated from {live.drill(DAY0):%a %-d %b}. Dutch Limburg "
                f"peaks about {lag} day{'s' if lag != 1 else ''} after the Vesdre: that gap is the downstream lead time.")
     st.fragment(peaks, run_every=6 if live.clock()["playing"] else None)()
 
@@ -149,6 +149,6 @@ def render():
             "- **Live outlook:** Open-Meteo GloFAS 30-day ensemble at ten points of the Meuse basin. Status: the "
             "ensemble median against the same model's 2-year flood, half the July 2021 peak and the July 2021 peak. "
             "The wettest run is shown beside it.\n"
-            "- **Drill peaks:** GloFAS reanalysis, daily, computed after the event. Each cell is that day's flow as a "
-            "share of the point's own July 2021 peak. The black frame is the day the drill clock stands on.\n"
+            "- **Replay peaks:** GloFAS reanalysis, daily, computed after the event. Each cell is that day's flow as a "
+            "share of the point's own July 2021 peak. The black frame is the day the replay clock stands on.\n"
             f"- **Source:** {core.AS_OF['replay']}.")

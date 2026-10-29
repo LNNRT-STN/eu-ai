@@ -41,27 +41,8 @@ def water_by_town():
                     feats.append({"type": "Feature", "geometry": mapping(part), "properties": {"municipality": m}})
     return {"type": "FeatureCollection", "features": feats}
 
-# ------------------------------------------------------------------ scenario player (sidebar)
+# the scenario player is in every role's sidebar (dashboard.py)
 c = live.clock()
-with st.sidebar:
-    st.caption("Scenario")
-    mode = st.segmented_control("Mode", ["replay", "live"], default=c["mode"], key="cr_mode",
-                                format_func={"replay": "Drill: July 2021", "live": "Live forecast"}.get,
-                                label_visibility="collapsed") or c["mode"]
-    if mode != c["mode"]:
-        live.set_mode(mode)
-    b1, b2 = st.columns(2)
-    if c["playing"]:
-        b1.button("Pause", icon=":material/pause:", on_click=live.pause, width="stretch")
-    else:
-        b1.button("Play", icon=":material/play_arrow:", on_click=live.play, type="primary", width="stretch")
-    b2.button("Reset", icon=":material/replay:", on_click=live.reset, width="stretch",
-              help=f"Back to {live.drill(live.START):%a %d %b} 06:00 (the 12 July 2021 river flows); clears alerts, "
-                   "reports, closures and simulated check-ins")
-    sp = st.select_slider("Speed", [1.0, 3.0, 6.0, 12.0], value=float(c["speed"]) if c["speed"] in (1, 3, 6, 12) else 3.0,
-                          format_func=lambda x: f"{x:g} h per second")
-    if sp != c["speed"]:
-        live.set_speed(sp)
 
 
 # the absorbed pages draw with core's grouped-list classes; take those, not its page padding or sidebar rules
@@ -85,7 +66,7 @@ def coming(t):
     by = ahead.dt.normalize().value_counts().sort_index()
     days = " · ".join(f"{live.drill(d):%a %-d %b}: {n}" for d, n in by.items())
     st.warning(f"**A flood like July 2021 is coming. {len(ahead)} more towns reach evacuate, the first on "
-               f"{live.drill(first):%A %-d %B}.** Towns per day: {days}. A drill on the 2021 river flows, not an "
+               f"{live.drill(first):%A %-d %B}.** Towns per day: {days}. A replay of the 2021 forecast, not an "
                "official warning.", icon=":material/flood:")
 
 
@@ -96,7 +77,7 @@ def board():
     s = live.towns_status(t)
     m = live.summary(t)
     if c["mode"] == "replay":
-        st.subheader(f"{live.drill(t):%a %d %b %Y, %H:%M} · drill: the July 2021 flood, arriving now")
+        st.subheader(f"{live.drill(t):%a %d %b %Y, %H:%M} · replay of the 2021 forecast, arriving now")
         coming(t)
     else:
         st.subheader(f"{t:%a %d %b %Y, %H:%M} · live forecast")
@@ -111,7 +92,7 @@ def board():
              delta_color="off", delta_arrow="off",
              help="Residents inside the 2021 satellite flood of the towns at 'evacuate' (a floor). Below it, kept "
                   "apart: residents in the modelled Vesdre zone (EFAS 500-year), which the satellite did not map")
-    hh = "Check-ins per home" + (", simulated in the drill." if sim else ".")
+    hh = "Check-ins per home" + (", simulated in the replay." if sim else ".")
     k.metric("Homes safe", fmt(m["safe"]), border=True, width=140, help=hh)
     k.metric("Homes need help", fmt(m["needs_help"]), border=True, width=170, help=hh)
     k.metric("Roads closed", m["roads_closed"], border=True, width=130)
@@ -196,7 +177,7 @@ def then_2021():
            for a, *_ in Y2021}
     # a four-column table cannot fit 390 px: it keeps its width and scrolls sideways inside its own box
     st.html("<style>.st-key-y2021{overflow-x:auto}.st-key-y2021 table{min-width:640px}</style>")
-    st.container(key="y2021").markdown("| River | EFAS warned | 2021 evacuation order | Tool: river at evacuate level (drill day) |\n"
+    st.container(key="y2021").markdown("| River | EFAS warned | 2021 evacuation order | Tool: river at evacuate level (replay day) |\n"
                 "|---|---|---|---|\n" +
                 "\n".join(f"| {name} | {efas} | {order} | " + (f"{day[a]:%d Jul} ({live.drill(day[a]):%a %d %b})"
                                                               if day[a] is not None else "not reached") + " |"
@@ -216,12 +197,12 @@ with t1:
             "- **Alert level:** GloFAS river flow on each town's river against its own 2-year flood and July 2021 "
             "peak (impact forecast, src/build_ml2.py). Status uses the highest flow reached so far: levels never drop "
             "during a replay.\n"
-            "- **Drill:** the replay steps on daily modelled flows (GloFAS reanalysis, computed afterwards), so it "
-            f"gives the day, not the hour. Shown as a drill from {live.drill(live.START):%a %d %b %Y}: the dates are "
+            "- **Replay of the 2021 forecast:** it steps on daily modelled flows (GloFAS reanalysis, computed afterwards), so it "
+            f"gives the day, not the hour. Shown as if it began on {live.drill(live.START):%a %d %b %Y}: the dates are "
             "moved, the flows are those of 12-17 July 2021. A model replay, not official warnings.\n"
             "- **People to move:** residents inside the 2021 satellite flood of the towns at evacuate, a floor. The "
             "Vesdre valley has no satellite map: its residents come from the EFAS 500-year model and are shown apart.\n"
-            "- **Homes safe / need help:** check-ins per home; in the drill they are simulated.\n"
+            "- **Homes safe / need help:** check-ins per home; in the replay they are simulated.\n"
             "- **Briefings:** queued at each rise for the mayor and the district fire brigade; Claude writes the words, "
             "every figure comes from the tool. Nothing is sent.\n"
             "- **July 2021 comparison:** the first day whose mean river flow puts a town of that river at evacuate. "

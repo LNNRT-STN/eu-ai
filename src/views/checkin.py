@@ -53,7 +53,7 @@ def crews(muni):
     here = doors()[lambda d: d.municipality == muni]
     c = live.clock()
     if c["mode"] == "replay":
-        st.caption(f":orange[:material/history:] Drill: {live.drill(c['t']):%a %-d %b, %H:%M}, the July 2021 flood "
+        st.caption(f":orange[:material/history:] Replay of the 2021 forecast: {live.drill(c['t']):%a %-d %b, %H:%M}, the July 2021 flood "
                    "replayed. Not a forecast.")
     ci = live.checkins(muni)
     last = (ci.sort_values("when").groupby("door").last() if len(ci)
@@ -66,7 +66,7 @@ def crews(muni):
         a, b = st.columns([3, 1], vertical_alignment="center")
         a.warning("Includes simulated check-ins from the July 2021 replay, not real ones.", icon=":material/science:")
         b.button("Clear simulated", icon=":material/restart_alt:", key="ci_clear", on_click=live.clear_drill,
-                 args=(muni,), help="Remove the simulated and drill check-ins for this town. While the replay plays, "
+                 args=(muni,), help="Remove the simulated and replay check-ins for this town. While the replay plays, "
                                     "new simulated ones keep arriving.")
     n = L.status.value_counts()
     single_open = int((L.single & (L.status == "no news")).sum())
