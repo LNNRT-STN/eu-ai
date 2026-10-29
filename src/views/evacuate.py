@@ -13,6 +13,7 @@ import streamlit as st
 
 import anna
 import core
+import map3d
 import forecast
 from core import about, fmt
 
@@ -112,17 +113,9 @@ def pick_call():
         st.session_state.town = st.session_state._town = calls.municipality.iloc[rows[0]]
 
 
-st.subheader("First action: call these towns, in this order")
-st.dataframe(calls[["short", "call", "no_shelter", "care"]].assign(no_shelter=calls.no_shelter.map(about)),
-             hide_index=True, key="ev_calls", on_select=pick_call, selection_mode="single-row",
-             column_config={"short": st.column_config.TextColumn("Town (and its mayor)"),
-                            "call": st.column_config.TextColumn("Also call"),
-                            "no_shelter": st.column_config.TextColumn("No shelter on foot",
-                                                                      help="Residents in the 2021 water with no free "
-                                                                           "shelter place within 1.5 km"),
-                            "care": st.column_config.NumberColumn("Care sites to evacuate", format="%d")})
-st.caption("Ordered by residents with no shelter place on foot: they need transport, so these calls take longest to "
-           "act on. \\* modelled (Vesdre). Click a town, or pick one in the sidebar, to open its plan below.")
+top = calls.iloc[0]
+st.markdown(f"**First action:** call {top.short.rstrip(' *')} and {top.call} first: about {about(top.no_shelter)} "
+            "residents there have no shelter on foot. Full call order below.")
 st.divider()
 pick = T[T.municipality == st.session_state.get("town")]
 t = (pick if len(pick) else T).iloc[0]
@@ -191,6 +184,7 @@ def river_line():
 river_line()
 urgent = left >= 5 or len(weak) or (len(ev) and ev.reroute_share.iloc[0] >= .5)
 (st.error if urgent else st.info)(f"**{verdict}.** {sub}", icon=":material/warning:" if urgent else ":material/info:")
+map3d.render(t, height=460, attribution=False)
 
 m1, m2, m3 = st.columns(3)
 m1.metric("Walk to a shelter", about(walk), help="Shelter within 1.5 km of home", border=True)
@@ -264,6 +258,8 @@ with rm:
                                                                  help="Number of other towns sent here too: agree who uses it")})
     else:
         st.info("No dry candidate shelter within 10 km in the data. Ask the neighbouring municipalities.")
+st.caption("3D map: MapLibre GL JS, AWS Terrain Tiles, Sentinel-2 cloudless 2021 by EOX (CC BY-NC-SA 4.0). "
+           "Homes are OBAT points drawn as blocks; red = single-storey.")
 st.caption("One plan that fits the most people in (max-flow, 10 km straight line). Shelters are OpenStreetMap "
            "schools, sports halls and civic buildings, dry in 2021 and in the 100-year model: candidates, not official "
            "shelters. Places: floor area × 50 % usable ÷ 4 m² per person.")
@@ -290,6 +286,18 @@ def spare_beds():
 
 
 spare_beds()
+st.divider()
+st.subheader("First action: call these towns, in this order")
+st.dataframe(calls[["short", "call", "no_shelter", "care"]].assign(no_shelter=calls.no_shelter.map(about)),
+             hide_index=True, key="ev_calls", on_select=pick_call, selection_mode="single-row",
+             column_config={"short": st.column_config.TextColumn("Town (and its mayor)"),
+                            "call": st.column_config.TextColumn("Also call"),
+                            "no_shelter": st.column_config.TextColumn("No shelter on foot",
+                                                                      help="Residents in the 2021 water with no free "
+                                                                           "shelter place within 1.5 km"),
+                            "care": st.column_config.NumberColumn("Care sites to evacuate", format="%d")})
+st.caption("Ordered by residents with no shelter place on foot: they need transport, so these calls take longest to "
+           "act on. \\* modelled (Vesdre). Click a town, or pick one in the sidebar, to open its plan above.")
 
 # ------------------------------------------------------------------ the steps that broke in 2021, one tab each
 

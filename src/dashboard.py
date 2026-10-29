@@ -35,7 +35,6 @@ with st.sidebar:
         lab = dict(zip(tw.municipality, tw.label + " · " + tw.people.map(core.about) + " in the 2021 water"))
         st.selectbox("Town", list(lab), format_func=lab.get, key="town",
                      on_change=lambda: st.session_state.update(_town=st.session_state.town))
-        st.divider()
 
 nav.run()
 

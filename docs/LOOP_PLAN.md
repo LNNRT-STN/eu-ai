@@ -30,13 +30,11 @@ close the 2021 governance gaps (roles, warning → instruction, plans and drills
 8. Safe check-in + door-knock list (addresses from OSM), drill mode, alert-feed placeholder.
 9. Sidebar Town picker; main pages native Streamlit, no custom CSS (old pages keep core.style()).
 10. 3D view (MapLibre, terrain + satellite, water draped, layer toggles, July 2021 slider); sidebar footer after page controls.
+11. 3D hero on the Evacuation plan (src/map3d.py shared); call list moved below; legend folds on phones.
 
 ## In progress (delegated, background agents; each writes only its own files)
 
 ## Backlog (highest value first)
-- Bring the FireTrace feel to the home page: a compact 3D preview of the chosen town at the top of the Evacuation plan
-  (homeowner urgency in the first viewport), linking to the full 3D view.
-- Mobile pass of the 3D view (390 px).
 (none)
 - Wire each agent's output in as it lands; render; verify totals against app_towns.
 - "Better prepared than 2021?" one line on the page: brief Q2/Q4 asks it; only verified facts, else say "not verified".

@@ -140,6 +140,12 @@ re-runnable script in `notebooks/` (`pipeline.py`, `osm_extract.py`, `dq_report.
 - How we checked it: FireTrace has no public repository and no licence, so it was used as a design reference only (no code, not its Mapbox token). Renders checked for Bad Neuenahr-Ahrweiler, Trooz (modelled, dashed edge) and Schleiden (town carried over from the sidebar). Single-storey count matches the Evacuation plan (264 Bad Neuenahr, 1,351 Schleiden). Relabelled "Care sites to evacuate" (18 in Bad Neuenahr) to "Care sites and schools": 11 of the 18 are schools, which close rather than evacuate. Found by the agent: MapLibre workers fail in Streamlit's null-origin iframe; loading from a blob: URL fixes it.
 - Result: water opacity on the slider is a visual cue, not a flood simulation; homes are OBAT points drawn as blocks, not outlines; needs internet for tiles.
 
+## 25. 3D map as the hero of the Evacuation plan (owner choice)
+- Prompt/intent: make the 3D view the prime example; owner chose it as the hero of the home page.
+- AI output (short): map code moved to `src/map3d.py` (one `render()` for the home hero and the 3D page); home order: title, one-line first action, town, verdict, 3D valley, three numbers, shelter map, then the full call list; legend folds on phones.
+- How we checked it: renders at 1440 and 390 px, no exception. A first edit replaced the wrong `spare_beds()` (inside the def) and broke the file: reverted from git and redone with exact anchors. The legend change needed a server restart to show (stale imported module).
+- Result: decision first (product principle 1), then the 3D valley in the first screen.
+
 ## Data-cleaning decisions (from *Python for Data Analysis* ch.7)
 - Duplicates: overlapping flood shapes dissolved; OSM objects merged per campus; a building in two study areas counted once.
 - Missing values: analysed and reported per area (book p.210), not silently filled.
