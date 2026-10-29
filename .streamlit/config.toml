@@ -20,6 +20,7 @@ orangeColor = "#c93400"
 greenColor = "#248a3d"
 blueColor = "#0071e3"
 grayColor = "#6e6e73"
+violetColor = "#7b3fd1"  # care sites and schools in the water, on every map
 
 [theme.sidebar]
 backgroundColor = "#fbfbfd"

@@ -13,7 +13,8 @@ obs, mod = head["worst"]["observed"], head["worst"]["modelled_vesdre"]
 T = towns[towns.variant == "worst"]
 gap_towns = int((T.no_shelter >= 50).sum())
 care = head["worst"]["sites"]["vulnerable"]
-schools = head["worst"]["sites"]["schools"]
+sc = crit[(crit.type == "school") & crit.in_worst_flood.astype(bool) & crit.share_of_site_flooded.ge(.05)]
+sch_obs, sch_mod = int((~sc.area.isin(anna.MODELLED)).sum()), int(sc.area.isin(anna.MODELLED).sum())
 inf = pd.read_csv(core.DATA / "infra_in_flood.csv")   # notebooks/infra.py: today's network inside the 2021 water
 rail_obs = inf[(inf.kind == "rail") & ~inf.area.isin(anna.MODELLED)].km_in_flood.sum()
 rail_mod = inf[(inf.kind == "rail") & inf.area.isin(anna.MODELLED)].km_in_flood.sum()
@@ -58,7 +59,7 @@ ROWS = [
      f"({src(KEEP, 'keep.eu')}); next call 21 Sep–16 Dec 2026 ({src(CALL, 'call notice', False)}). EU civil "
      f"protection prevention call: €10.6 m in 2026, next round early 2027 ({src(UCPM, 'UCPM', False)})."),
     ("Hospitals and care homes in the water",
-     f"{care} sites, at least 5 % of the site in the 2021 water; {schools} schools as well.",
+     f"{care} sites, at least 5 % of the site in the 2021 water; {sch_obs} schools as well (+{sch_mod} modelled in the Vesdre).",
      "A move-out plan per site (beds, transport, receiving site), then flood-proofing or relocation.",
      "No published unit cost for flood-proofing a care home. For scale only: restoring the Augustinum care home in "
      f"Bad Neuenahr costs about €40 m (restoration, not flood-proofing; {src(AUG, 'Augustinum', False)})."),

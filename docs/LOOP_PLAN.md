@@ -31,13 +31,13 @@ close the 2021 governance gaps (roles, warning → instruction, plans and drills
 9. Sidebar Town picker; main pages native Streamlit, no custom CSS (old pages keep core.style()).
 10. 3D view (MapLibre, terrain + satellite, water draped, layer toggles, July 2021 slider); sidebar footer after page controls.
 11. 3D hero on the Evacuation plan (src/map3d.py shared); call list moved below; legend folds on phones.
+12. Independent review: 4 P0 + 4 P1 fixed (schools obs/mod, two plans labelled, centre km, doors vs homes, one first action, outlook fallback, better-prepared answer, one care colour).
 
 ## In progress (delegated, background agents; each writes only its own files)
 
 ## Backlog (highest value first)
 (none)
 - Wire each agent's output in as it lands; render; verify totals against app_towns.
-- "Better prepared than 2021?" one line on the page: brief Q2/Q4 asks it; only verified facts, else say "not verified".
 - Map: avoid label overlap of numbered shelters (town centre now marked).
 - Impeccable detector: clean on evacuate.py (re-run after big changes).
 - Shelters shared by several towns: one line naming the shelters that need an agreement between municipalities.

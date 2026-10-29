@@ -211,12 +211,23 @@ def _outlook():
     return *forecast.rivers(), forecast.rain(), pd.Timestamp.now(tz="Europe/Brussels")
 
 
+LAST = OUT / "outlook_last.pkl"  # last good outlook (local, gitignored): shown with its time when the API is down
+
+
 def outlook():
-    """(gauges, series, rain, fetched_at, error); gauges is None when offline or the API is down."""
+    """(gauges, series, rain, fetched_at, error); gauges is None when offline and no earlier outlook is saved."""
     try:
-        return (*_outlook(), None)
+        got = _outlook()
+        try:
+            pd.to_pickle(got, LAST)
+        except OSError:
+            pass
+        return (*got, None)
     except Exception as e:
-        return None, None, None, None, str(e)
+        try:
+            return (*pd.read_pickle(LAST), f"live outlook unavailable ({e}); showing the last one")
+        except Exception:
+            return None, None, None, None, str(e)
 
 
 def status(gauges, rain, err):

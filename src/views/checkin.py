@@ -152,7 +152,9 @@ with crew:
                            file_name=f"door_knock_{anna.town(muni).replace(' ', '_')}.csv", mime="text/csv",
                            icon=":material/download:")
     no_addr = int((~here.has_address).sum())
-    st.caption(f"{fmt(len(here))} homes in the 2021 water here; {fmt(no_addr)} have no OpenStreetMap address "
-            "and are listed by map point (Venlo area: most homes). 'Reached by alert': BE-Alert SMS delivery reports or "
+    st.caption(f"{fmt(len(here))} doors to check: {fmt(int(here.buildings.sum()))} homes in the 2021 water, grouped by "
+               f"address (several buildings can share one); {fmt(no_addr)} have no OpenStreetMap address and are "
+               "listed by map point" + (" (most Venlo-area homes)" if here.municipality.str.contains("(NL)", regex=False).any()
+                                        else "") + ". 'Reached by alert': BE-Alert SMS delivery reports or "
             "call results would plug in here; cell broadcast cannot confirm delivery. Order: help requests, then homes "
             "with no news, single-storey first.")

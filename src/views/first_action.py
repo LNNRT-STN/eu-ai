@@ -104,7 +104,7 @@ def fit(df):
 
 
 # =============================================================================== 1 · DO NOW
-st.html(f"<div class='act'><i></i><div><h1>Do now: evacuate the {len(care)} hospitals and care homes in the flood zone"
+st.html(f"<div class='act'><i></i><div><h1>Across all towns: move the {len(care)} hospitals and care homes in the flood zone first"
         "</h1><p>Pick a district: its sites in evacuation order, and the nearest dry hospitals and care homes."
         "</p></div></div>")
 st.space("small")
@@ -193,7 +193,8 @@ far_more = obs["bus_covered"] - obs["sheltered"]
 st.html(f"<div class='act next'><i></i><div><h1>Next: {about(obs['no_shelter'])} people would have no shelter place "
         "within walking distance</h1>"
         f"<p>{about(obs['sheltered'])} of the {about(obs['people'])} residents in the 2021 water have one within 1.5 km. "
-        f"{len(schools)} schools sat in the water themselves. Candidate shelters 2–10 km away have empty places for "
+        f"{int((~schools.area.isin(anna.MODELLED)).sum())} schools sat in the water themselves "
+        f"(+{int(schools.area.isin(anna.MODELLED).sum())} modelled). Candidate shelters 1.5–10 km away have empty places for "
         f"{about(far_more)} more.</p></div></div>")
 st.space("small")
 
@@ -294,7 +295,10 @@ st.space("medium")
 core.group([
     ("<b>Warning time</b>", f"In the July 2021 replay, Maastricht to Venlo peaked {lead} day after the Vesdre and Liège.",
      f"{lead} day"),
-    ("<b>Better prepared than 2021?</b>", "What changed since 2021 is still being verified.", "Not verified yet"),
+    ("<b>Better prepared than 2021?</b>", "Partly. Warning: Germany's cell broadcast has run since Feb 2023 and a "
+     "€88 m siren programme followed. Rail: the Ahr valley line reopened in Dec 2025. Still open: shelter places on "
+     "foot (see above), the Ahr's retention basins (unfunded). Partly verified desk research: docs/BUDGETS.md, Long "
+     "term page.", "Partly"),
 ], "Context")
 with st.expander("Why these numbers"):
     st.markdown(

@@ -114,8 +114,9 @@ def pick_call():
 
 
 top = calls.iloc[0]
-st.markdown(f"**First action:** call {top.short.rstrip(' *')} and {top.call} first: about {about(top.no_shelter)} "
-            "residents there have no shelter on foot. Full call order below.")
+st.markdown(f"**First action:** call {top.short.rstrip(' *')} and {top.call}: book buses for about "
+            f"{about(top.no_shelter)} residents who cannot walk to a shelter"
+            + (f", and start moving its {top.care} hospitals and care homes" if top.care else "") + ". Full call order below.")
 st.divider()
 pick = T[T.municipality == st.session_state.get("town")]
 t = (pick if len(pick) else T).iloc[0]
@@ -187,8 +188,11 @@ urgent = left >= 5 or len(weak) or (len(ev) and ev.reroute_share.iloc[0] >= .5)
 map3d.render(t, height=460, attribution=False)
 
 m1, m2, m3 = st.columns(3)
-m1.metric("Walk to a shelter", about(walk), help="Shelter within 1.5 km of home", border=True)
-m2.metric("Need a bus or car", about(ride), help="Their shelter is 1.5–10 km from home", border=True)
+m1.metric("Can walk to a shelter", about(walk), border=True,
+          help="Walking check: a free shelter place within 1.5 km of home (best possible share-out).")
+m2.metric("Need a bus or car", about(ride), border=True,
+          help="10 km plan: a free place 1.5–10 km from home. The table below is this 10 km plan, so its split "
+               "between near and far shelters differs from the walking check.")
 m3.metric("No place within 10 km", about(left), help="Ask the next municipality" if left >= 5 else "Everyone fits",
           border=True)
 st.caption(note)
@@ -207,7 +211,7 @@ with lm:
     if len(care):
         cs = care.assign(tname=care.name, tinfo=[f"{k} in the 2021 water · {s:.0%} of the site"
                                                  for k, s in zip(care.type, care.share_of_site_flooded)])
-        layers.append(core.points(cs, core.rgb(core.EVACUATE), 6))
+        layers.append(core.points(cs, core.rgb("#7b3fd1"), 6))
     if len(plan):
         ps = plan.assign(lon=plan.s_lon, lat=plan.s_lat, tname=[f"{n}. {s}" for n, s in zip(plan.n, plan.shelter)],
                          tinfo=[f"{about(p)} people from {t['name']} · {fmt(c)} places in all · {k} km from the centre"
@@ -237,7 +241,7 @@ with lm:
                              initial_view_state=pdk.ViewState(longitude=pts.lon.mean(), latitude=pts.lat.mean(), zoom=z),
                              views=[pdk.View(type="MapView", controller={"scrollZoom": False})]), height=MAP_H)
     st.caption(":green[●] Dry shelter, size = people sent there (the ten largest numbered as in the list)  \n"
-               + (":red[●] Hospital, care home or school in the 2021 water · " if len(care) else "")
+               + (":violet[●] Hospital, care home or school in the 2021 water · " if len(care) else "")
                + f":blue[■] 2021 water{' (modelled)' if modelled else ''} · "
                ":material/radio_button_unchecked: Town centre · :orange[━] Busiest evacuation roads · "
                ":material/remove: Railway in the 2021 water")
@@ -248,8 +252,10 @@ with rm:
                      column_config={
                          "n": st.column_config.NumberColumn("#", width=36),
                          "shelter": st.column_config.TextColumn("Dry shelter", width=175),
-                         "km": st.column_config.NumberColumn("km", format="%.1f", width=44,
-                                                             help="Straight line from the town centre"),
+                         "km": st.column_config.NumberColumn("Centre km", format="%.1f", width=70,
+                                                             help="Straight line from the town centre. The 10 km "
+                                                                  "limit is from each home, so some shelters are "
+                                                                  "further from the centre."),
                          "people": st.column_config.NumberColumn("Send", format="%d", width=54,
                                                                  help="People from this town sent here"),
                          "places": st.column_config.NumberColumn("Places", format="%d", width=54,

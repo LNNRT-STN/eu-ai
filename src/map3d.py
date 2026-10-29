@@ -178,8 +178,8 @@ map.once("style.load", () => {
   };
   D.shelters.forEach((s, i) => pin(s.x, s.y, "#248a3d", s.n, s.n + ": about " + s.p + " people in the bus plan", i < 4));
   if (D.shelters.length) key.push(["#248a3d", "Dry shelter (top 4 named)"]);
-  D.care.forEach((c, i) => pin(c.x, c.y, "#7a2c10", c.n, c.n + " (" + c.k + "), " + Math.round(c.s * 100) + "% of the site in the 2021 water", i < 3));
-  if (D.care.length) key.push(["#7a2c10", "Care site in the water (top 3 named)"]);
+  D.care.forEach((c, i) => pin(c.x, c.y, "#7b3fd1", c.n, c.n + " (" + c.k + "), " + Math.round(c.s * 100) + "% of the site in the 2021 water", i < 3));
+  if (D.care.length) key.push(["#7b3fd1", "Care site or school in the water (top 3 named)"]);
   document.getElementById("k").innerHTML = key.map(([c, l]) => '<div><s style="background:' + c + '"></s>' + l + "</div>").join("")
     || "<div>No layers on</div>";
 });
