@@ -231,9 +231,31 @@ def points(df, color, radius=6, line=2):
                      radius_units="'pixels'", pickable=True)
 
 
+def _plain(t):
+    """pydeck shows HTML inside data values as literal text ('<b>Liège</b>'): turn tips into plain lines."""
+    import re
+    return re.sub(r"<[^>]+>", "", re.sub(r"<br\s*/?>", "\n", t)) if isinstance(t, str) else t
+
+
+def _plain_tips(layer):
+    d = layer.data
+    if isinstance(d, list):
+        for o in d:
+            if isinstance(o, dict) and "tip" in o:
+                o["tip"] = _plain(o["tip"])
+    elif isinstance(d, dict):
+        for f in d.get("features", []):
+            if "tip" in f.get("properties", {}):
+                f["properties"]["tip"] = _plain(f["properties"]["tip"])
+    elif isinstance(d, pd.DataFrame) and "tip" in d:
+        layer.data = d.assign(tip=d.tip.map(_plain))
+
+
 def deck(layers, v, height=600, **kw):
-    tip = {"html": "{tip}", "style": {"backgroundColor": "#1d1d1f", "color": "#fff", "fontSize": "13px",
-                                       "padding": "6px 9px", "borderRadius": "8px"}}
+    for layer in layers:
+        _plain_tips(layer)
+    tip = {"text": "{tip}", "style": {"backgroundColor": "#1d1d1f", "color": "#fff", "fontSize": "13px",
+                                       "padding": "6px 9px", "borderRadius": "8px", "whiteSpace": "pre-line"}}
     st.pydeck_chart(pdk.Deck(layers=layers, initial_view_state=v, map_style=pdk.map_styles.CARTO_LIGHT, tooltip=tip),
                     height=height, **kw)
 

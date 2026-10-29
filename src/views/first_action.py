@@ -14,6 +14,7 @@ T = towns[towns.variant == V].assign(no_shelter=lambda d: d.no_reach + d.full)
 C = crit[crit.share_of_site_flooded.ge(.05) & crit.in_worst_flood.astype(bool)]
 care = C[C.type.isin(["hospital", "care home"])]
 DISTRICT = {"ahr": "Ahrweiler", "erftstadt": "Rhein-Erft", "schleiden": "Euskirchen"}
+FONT = "Arial"                                   # map labels: one plain sans every machine has
 by_d = care.groupby(care.area.map(DISTRICT)).size().sort_values(ascending=False)
 _, flow = core.load_brief()
 lead = (flow.idxmax().max() - flow.idxmax().min()).days
@@ -37,6 +38,8 @@ st.html("""<style>
 .steps div{background:#fff;border-radius:16px;padding:1rem 1.2rem}
 .steps b{display:block;font-size:1.05rem;color:#1d1d1f}
 .steps span{display:block;margin-top:.25rem;color:#6e6e73;font-size:.9rem}
+.lst .r{grid-template-columns:1fr auto}
+.lst .n{white-space:normal}
 .h2{font-size:1.15rem;font-weight:650;color:#1d1d1f;margin:0 0 .5rem .2rem}
 @media (max-width:900px){.big,.steps{grid-template-columns:1fr}.act h1{font-size:1.5rem}}
 </style>""")
@@ -54,26 +57,81 @@ st.space("small")
 
 # 3. map + where
 top = T.nlargest(5, "no_shelter").reset_index(drop=True)
+top["short"] = top.label.str.replace(" (modelled)", " *")
+top["why"] = ["full" if f >= n else "far" for f, n in zip(top.full, top.no_reach)]
 left, right = st.columns([3, 2], gap="small")
 with left:
-    layers = [pdk.Layer("GeoJsonLayer", flood[(a, V)], filled=True, stroked=False,
-                        get_fill_color=[0, 113, 227, 40 if a in anna.MODELLED else 90]) for a in anna.AREA]
-    layers.append(pdk.Layer("ScatterplotLayer", top.assign(
-        r=lambda d: d.no_shelter ** .5 * .32 + 5,
-        tip=lambda d: [f"<b>{x.label}</b><br>{fmt(x.no_shelter)} with no shelter place" for x in d.itertuples()]),
-        get_position=["lon", "lat"], get_radius="r", radius_units="'pixels'", get_fill_color=core.rgb(anna.TOO_FAR, 170),
-        get_line_color=[255, 255, 255], line_width_min_pixels=1.5, stroked=True, pickable=True))
-    layers.append(core.points(care.assign(tip=[f"<b>{n}</b><br>{t}" for n, t in zip(care.name, care.type)]),
-                              core.rgb(core.EVACUATE), 6))
+    pick = st.pills("Town", ["All", *top.short], default="All", label_visibility="collapsed")
+    sel = None if pick in (None, "All") else top[top.short == pick].iloc[0]
+    color = lambda w, a=200: core.rgb(anna.FULL if w == "full" else anna.TOO_FAR, a)
+    tipstyle = {"backgroundColor": "#1d1d1f", "color": "#fff", "fontSize": "13px", "borderRadius": "8px"}
+    layers = [pdk.Layer("GeoJsonLayer", flood[(a, V)], filled=True, stroked=True, line_width_min_pixels=1,
+                        get_fill_color=[0, 113, 227, 70 if a in anna.MODELLED else 140], get_line_color=[0, 90, 200, 200])
+              for a in anna.AREA]
+    if sel is None:
+        # overview: one labelled circle per town, coloured by the reason (same colours as the bars)
+        pts = top.assign(r=lambda d: d.no_shelter ** .5 * .32 + 6, fill=[color(w) for w in top.why],
+                         txt=[f"{s}  {about(n)}" for s, n in zip(top.short, top.no_shelter)],
+                         tname=top.label, tinfo=[f"{fmt(n)} people with no shelter place" for n in top.no_shelter])
+        # label under its circle; when a neighbour within 15 km sits to the east, this one goes above, so they never touch
+        west = [((core.km(x.lon, x.lat, top.lon, top.lat) < 15) & (top.lon > x.lon)).any() for x in pts.itertuples()]
+        pts["anchor"] = "middle"
+        pts["off"] = [[0, -(r + 12)] if w else [0, r + 12] for r, w in zip(pts.r, west)]
+        layers += [pdk.Layer("ScatterplotLayer", pts, get_position=["lon", "lat"], get_radius="r", radius_units="'pixels'",
+                             get_fill_color="fill", get_line_color=[255, 255, 255], line_width_min_pixels=2,
+                             stroked=True, pickable=True),
+                   core.points(care.assign(tname=care.name, tinfo=[f"{t} in the 2021 water" for t in
+                                                care.type]), core.rgb(core.EVACUATE), 5),
+                   pdk.Layer("TextLayer", pts, get_position=["lon", "lat"], get_text="txt", get_size=13,
+                             get_color=[29, 29, 31], get_pixel_offset="off", get_text_anchor="anchor",
+                             get_alignment_baseline="'center'", background=True,
+                             get_background_color=[255, 255, 255, 235], background_padding=[5, 3])]
+        view = pdk.ViewState(longitude=6.35, latitude=50.62, zoom=7.7)
+    else:
+        # one town: its flooded area, the dry shelters around it (size = places) and its flooded care sites, named
+        near = shel[shel.area == sel.area].assign(km=lambda d: core.km(sel.lon, sel.lat, d.lon, d.lat))
+        near = near[near.km <= 6].assign(r=lambda d: (d.capacity_central ** .5) * .5 + 3,
+                                         tname=lambda d: [n if isinstance(n, str) else c for n, c in zip(d.name, d.cat)],
+                                         tinfo=lambda d: [f"≈ {about(p)} places" for p in d.capacity_central])
+        here = care[(care.area == sel.area)].assign(tname=lambda d: d.name, tinfo=lambda d: [f"{t}, {s:.0%} of the site under water"
+                                                                  for t, s in zip(d.type, d.share_of_site_flooded)])
+        layers += [pdk.Layer("ScatterplotLayer", near, get_position=["lon", "lat"], get_radius="r", radius_units="'pixels'",
+                             get_fill_color=core.rgb(core.SHELTER, 210), get_line_color=[255, 255, 255],
+                             line_width_min_pixels=1, stroked=True, pickable=True),
+                   core.points(here, core.rgb(core.EVACUATE), 7)]
+        # centre on the flooded sites when the town has some (the municipality's middle can sit outside the valley)
+        mine = here[here.town == sel["name"]]
+        view = pdk.ViewState(longitude=mine.lon.mean() if len(mine) else sel.lon,
+                             latitude=mine.lat.mean() if len(mine) else sel.lat, zoom=12.6)
     # scroll wheel must move the page, not zoom the map (the +/- buttons still zoom)
-    st.pydeck_chart(pdk.Deck(layers=layers, initial_view_state=pdk.ViewState(longitude=6.35, latitude=50.62, zoom=7.7),
+    st.pydeck_chart(pdk.Deck(layers=layers, initial_view_state=view, map_style=pdk.map_styles.CARTO_LIGHT,
                              views=[pdk.View(type="MapView", controller={"scrollZoom": False})],
-                             map_style=pdk.map_styles.CARTO_LIGHT,
-                             tooltip={"html": "{tip}", "style": {"backgroundColor": "#1d1d1f", "color": "#fff",
-                                                                 "fontSize": "13px", "borderRadius": "8px"}}), height=420)
-    core.legend(core.swatch(anna.TOO_FAR, "No shelter place", True) + core.swatch(core.EVACUATE, "Hospital / care home", True)
-                + core.swatch("rgba(0,113,227,.35)", "2021 water"))
+                             tooltip={"html": "<b>{tname}</b><br/>{tinfo}", "style": tipstyle}), height=440)
+    if sel is None:
+        core.legend(core.swatch(anna.FULL, "Shelters full", True) + core.swatch(anna.TOO_FAR, "Too far to walk", True)
+                    + core.swatch(core.EVACUATE, "Hospital / care home", True) + core.swatch("rgba(0,113,227,.55)", "2021 water"))
+    else:
+        core.legend(f"<b>{sel.label}</b> · {fmt(sel.no_shelter)} with no shelter place"
+                    + core.swatch(core.SHELTER, "Dry shelter (size = places)", True)
+                    + core.swatch(core.EVACUATE, "Hospital / care home in the water", True)
+                    + core.swatch("rgba(0,113,227,.55)", "2021 water"))
 with right:
+  if sel is not None:
+    # one town: number, reason, its flooded care sites, its biggest dry shelters. Short lines only.
+    why = "shelters nearby are full" if sel.why == "full" else "no shelter within 1.5 km on foot"
+    sites = care[(care.town == sel["name"]) & (care.area == sel.area)]
+    big = shel[(shel.area == sel.area) & (core.km(sel.lon, sel.lat, shel.lon, shel.lat) <= 6)].nlargest(3, "capacity_central")
+    li = lambda rows: "".join(f"<div class='r'><div class='n'>{a}<span class='t'>{b}</span></div>"
+                              f"<div class='v'>{c}</div></div>" for a, b, c in rows)
+    st.html(f"<div class='h2'>{sel.label}</div><div class='big' style='grid-template-columns:1fr'><div>"
+            f"<b>{about(sel.no_shelter)}</b><span>with no shelter place: {why}</span></div></div>"
+            + (f"<div class='h2' style='margin-top:.8rem'>Evacuate first · % of site under water</div><div class='bars lst'>"
+               + li((n, t, f"{s:.0%}") for n, t, s in zip(sites.name, sites.type, sites.share_of_site_flooded))
+               + "</div>" if len(sites) else "")
+            + "<div class='h2' style='margin-top:.8rem'>Biggest dry shelters · places</div><div class='bars lst'>"
+            + li((n if isinstance(n, str) else c, c, f"{about(p)}") for n, c, p in
+                 zip(big.name, big.cat, big.capacity_central)) + "</div><p class='asof'>Places are estimates; confirm with the commune.</p>")
+  else:
     mx = top.no_shelter.max()
     rows = "".join(f"<div class='r'><div class='n'>{r.label.replace(' (modelled)', ' *')}"
                    f"<span class='t'>{'shelters full' if r.full >= r.no_reach else 'too far to walk'}</span></div>"
