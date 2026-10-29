@@ -96,7 +96,9 @@ def ring(lon, lat):
 
 
 def dots(df, lid, color, r=7, **kw):
-    return pdk.Layer("ScatterplotLayer", df, id=lid, get_position=["lon", "lat"], get_radius=kw.pop("get_radius", r),
+    # the id changes after every pick: the stable map keeps its last selection, and Streamlit greys out every
+    # object outside it; a selection on an id that no longer exists does nothing
+    return pdk.Layer("ScatterplotLayer", df, id=f"{lid}-{S.v}", get_position=["lon", "lat"], get_radius=kw.pop("get_radius", r),
                      radius_units="'pixels'", get_fill_color=color, get_line_color=[255, 255, 255],
                      line_width_min_pixels=2, stroked=True, pickable=True, auto_highlight=True, **kw)
 
@@ -128,9 +130,11 @@ def on_map(key, layer_to_state):
         objs = S[key]["selection"]["objects"]
     except Exception:
         return
-    for lid, (target, col) in layer_to_state.items():
-        if objs.get(lid):
-            S[target] = objs[lid][0][col]
+    for lid, picked in objs.items():
+        base = lid.rsplit("-", 1)[0]
+        if picked and base in layer_to_state:
+            target, col = layer_to_state[base]
+            S[target] = picked[0][col]
             bump()
             return
 
@@ -314,7 +318,14 @@ else:
     key_html = "".join(core.swatch(STATUS[s], s, True) for s in STATUS) + "<span>one dot per commune named</span>"
 
 with right:
-    mk = f"map-{tab}-{S.v}"
+    # one map per tab that stays mounted: a new view then glides there instead of redrawing. Streamlit's map does
+    # not register deck.gl's FlyToInterpolator, so the controller's default (linear pan + zoom) animates it.
+    # Streamlit only forwards view keys that changed since the last run, so the duration alternates by 1 ms to be
+    # sent with every new view (otherwise the map jumps).
+    mk = f"map-{tab}"
+    S.tick = S.get("tick", 0) + 1
+    view = pdk.ViewState(longitude=view.longitude, latitude=view.latitude, zoom=view.zoom,
+                         transition_duration=1200 + S.tick % 2)
     st.pydeck_chart(pdk.Deck(layers=layers, initial_view_state=view, map_style=pdk.map_styles.CARTO_LIGHT,
                              views=[pdk.View(type="MapView", controller={"scrollZoom": False})], tooltip=TIP),
                     height=MAP_H, key=mk, on_select=partial(on_map, mk, picks), selection_mode="single-object")
