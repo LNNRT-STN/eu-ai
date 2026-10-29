@@ -1,5 +1,6 @@
 """Home page for Anna: one decision, three numbers, one map, three next steps. Few words; detail behind 'Why'.
 Numbers come from outputs/data/ (notebooks/pipeline.py, q4_ranking.py) and src/out/meuse/replay_2021.json."""
+import pandas as pd
 import pydeck as pdk
 import streamlit as st
 
@@ -40,6 +41,9 @@ st.html("""<style>
 .steps span{display:block;margin-top:.25rem;color:#6e6e73;font-size:.9rem}
 .lst .r{grid-template-columns:1fr auto}
 .lst .n{white-space:normal}
+.bars .cap{font-size:.8rem;font-weight:600;color:#6e6e73;margin:0 0 .3rem}
+.one b{display:block;font-size:2.4rem;font-weight:700;letter-spacing:-.03em;line-height:1.05;color:#1d1d1f}
+.one span{display:block;margin-top:.3rem;color:#6e6e73;font-size:.95rem}
 .h2{font-size:1.15rem;font-weight:650;color:#1d1d1f;margin:0 0 .5rem .2rem}
 @media (max-width:900px){.big,.steps{grid-template-columns:1fr}.act h1{font-size:1.5rem}}
 </style>""")
@@ -55,14 +59,46 @@ st.html(f"<div class='big'><div><b>{about(obs['no_shelter'])}</b><span>people wi
         f"<div><b>{lead} day</b><span>warning from upstream to Venlo</span></div></div>")
 st.space("small")
 
-# 3. map + where
+# 3. map + where. Town buttons span the full width so the map and the side panel start on the same line.
+MAP_H = 500
 top = T.nlargest(5, "no_shelter").reset_index(drop=True)
 top["short"] = top.label.str.replace(" (modelled)", " *")
 top["why"] = ["full" if f >= n else "far" for f, n in zip(top.full, top.no_reach)]
+pick = st.pills("Town", ["All", *top.short], default="All", label_visibility="collapsed")
+sel = None if pick in (None, "All") else top[top.short == pick].iloc[0]
+
+focus = None                                   # the site or shelter clicked in a list, shown on the map
+if sel is not None:
+    sites = care[(care.town == sel["name"]) & (care.area == sel.area)].reset_index(drop=True)
+    near = shel[shel.area == sel.area].assign(km=lambda d: core.km(sel.lon, sel.lat, d.lon, d.lat))
+    near = near[near.km <= 6].sort_values("capacity_central", ascending=False).reset_index(drop=True)
+    near["label"] = [n if isinstance(n, str) else f"Unnamed {c}" for n, c in zip(near.name, near.cat)]
+    # one selection at a time: clicking in one list resets the other (its key gets a new version)
+    ver = st.session_state.setdefault("ver", {"evac": 0, "shel": 0})
+    kE, kS = f"evac-{pick}-{ver['evac']}", f"shel-{pick}-{ver['shel']}"
+
+    def rows(key):
+        try:
+            return list(st.session_state[key]["selection"]["rows"])
+        except Exception:
+            return []
+
+    def clicked(key, kind):
+        r = rows(key)
+        st.session_state["focus"] = (pick, kind, r[0]) if r else None
+        if r:
+            other = "shel" if kind == "evac" else "evac"
+            st.session_state["ver"][other] += 1
+
+    f = st.session_state.get("focus")
+    if f and f[0] == pick:
+        src = sites if f[1] == "evac" else near
+        if f[2] < len(src):
+            focus = src.iloc[f[2]].copy()
+            focus["kind"] = f[1]
+
 left, right = st.columns([3, 2], gap="small")
 with left:
-    pick = st.pills("Town", ["All", *top.short], default="All", label_visibility="collapsed")
-    sel = None if pick in (None, "All") else top[top.short == pick].iloc[0]
     color = lambda w, a=200: core.rgb(anna.FULL if w == "full" else anna.TOO_FAR, a)
     tipstyle = {"backgroundColor": "#1d1d1f", "color": "#fff", "fontSize": "13px", "borderRadius": "8px"}
     layers = [pdk.Layer("GeoJsonLayer", flood[(a, V)], filled=True, stroked=True, line_width_min_pixels=1,
@@ -75,71 +111,77 @@ with left:
                          tname=top.label, tinfo=[f"{fmt(n)} people with no shelter place" for n in top.no_shelter])
         # label under its circle; when a neighbour within 15 km sits to the east, this one goes above, so they never touch
         west = [((core.km(x.lon, x.lat, top.lon, top.lat) < 15) & (top.lon > x.lon)).any() for x in pts.itertuples()]
-        pts["anchor"] = "middle"
         pts["off"] = [[0, -(r + 12)] if w else [0, r + 12] for r, w in zip(pts.r, west)]
         layers += [pdk.Layer("ScatterplotLayer", pts, get_position=["lon", "lat"], get_radius="r", radius_units="'pixels'",
                              get_fill_color="fill", get_line_color=[255, 255, 255], line_width_min_pixels=2,
                              stroked=True, pickable=True),
-                   core.points(care.assign(tname=care.name, tinfo=[f"{t} in the 2021 water" for t in
-                                                care.type]), core.rgb(core.EVACUATE), 5),
+                   core.points(care.assign(tname=care.name, tinfo=[f"{t} in the 2021 water" for t in care.type]),
+                               core.rgb(core.EVACUATE), 5),
                    pdk.Layer("TextLayer", pts, get_position=["lon", "lat"], get_text="txt", get_size=13,
-                             get_color=[29, 29, 31], get_pixel_offset="off", get_text_anchor="anchor",
-                             get_alignment_baseline="'center'", background=True,
-                             get_background_color=[255, 255, 255, 235], background_padding=[5, 3])]
+                             get_color=[29, 29, 31], get_pixel_offset="off", get_alignment_baseline="'center'",
+                             background=True, get_background_color=[255, 255, 255, 235], background_padding=[5, 3])]
         view = pdk.ViewState(longitude=6.35, latitude=50.62, zoom=7.7)
     else:
-        # one town: its flooded area, the dry shelters around it (size = places) and its flooded care sites, named
-        near = shel[shel.area == sel.area].assign(km=lambda d: core.km(sel.lon, sel.lat, d.lon, d.lat))
-        near = near[near.km <= 6].assign(r=lambda d: (d.capacity_central ** .5) * .5 + 3,
-                                         tname=lambda d: [n if isinstance(n, str) else c for n, c in zip(d.name, d.cat)],
-                                         tinfo=lambda d: [f"≈ {about(p)} places" for p in d.capacity_central])
-        here = care[(care.area == sel.area)].assign(tname=lambda d: d.name, tinfo=lambda d: [f"{t}, {s:.0%} of the site under water"
-                                                                  for t, s in zip(d.type, d.share_of_site_flooded)])
-        layers += [pdk.Layer("ScatterplotLayer", near, get_position=["lon", "lat"], get_radius="r", radius_units="'pixels'",
-                             get_fill_color=core.rgb(core.SHELTER, 210), get_line_color=[255, 255, 255],
-                             line_width_min_pixels=1, stroked=True, pickable=True),
-                   core.points(here, core.rgb(core.EVACUATE), 7)]
-        # centre on the flooded sites when the town has some (the municipality's middle can sit outside the valley)
-        mine = here[here.town == sel["name"]]
-        view = pdk.ViewState(longitude=mine.lon.mean() if len(mine) else sel.lon,
-                             latitude=mine.lat.mean() if len(mine) else sel.lat, zoom=12.6)
+        # one town: dry shelters (green, size = places) and flooded care sites (red); a clicked name gets a ring + label
+        shown = near.assign(r=lambda d: (d.capacity_central ** .5) * .5 + 3, tname=near.label,
+                            tinfo=[f"{c} · ≈ {about(p)} places" for c, p in zip(near.cat, near.capacity_central)])
+        mine = sites.assign(tname=sites.name, tinfo=[f"{t} · {s:.0%} of the site under water"
+                                                    for t, s in zip(sites.type, sites.share_of_site_flooded)])
+        layers += [pdk.Layer("ScatterplotLayer", shown, get_position=["lon", "lat"], get_radius="r",
+                             radius_units="'pixels'", get_fill_color=core.rgb(core.SHELTER, 210),
+                             get_line_color=[255, 255, 255], line_width_min_pixels=1, stroked=True, pickable=True),
+                   core.points(mine, core.rgb(core.EVACUATE), 7)]
+        if focus is not None:
+            f1 = pd.DataFrame([{"lon": focus.lon, "lat": focus.lat,
+                                "txt": focus["name"] if focus.kind == "evac" else focus.label}])
+            layers += [pdk.Layer("ScatterplotLayer", f1, get_position=["lon", "lat"], get_radius=16, radius_units="'pixels'",
+                                 filled=False, stroked=True, get_line_color=[29, 29, 31], line_width_min_pixels=3)]
+            view = pdk.ViewState(longitude=focus.lon, latitude=focus.lat, zoom=15)
+        else:
+            c = sites if len(sites) else near.head(5)
+            view = pdk.ViewState(longitude=c.lon.mean() if len(c) else sel.lon,
+                                 latitude=c.lat.mean() if len(c) else sel.lat, zoom=12.6)
     # scroll wheel must move the page, not zoom the map (the +/- buttons still zoom)
     st.pydeck_chart(pdk.Deck(layers=layers, initial_view_state=view, map_style=pdk.map_styles.CARTO_LIGHT,
                              views=[pdk.View(type="MapView", controller={"scrollZoom": False})],
-                             tooltip={"html": "<b>{tname}</b><br/>{tinfo}", "style": tipstyle}), height=440)
+                             tooltip={"html": "<b>{tname}</b><br/>{tinfo}", "style": tipstyle}), height=MAP_H)
     if sel is None:
         core.legend(core.swatch(anna.FULL, "Shelters full", True) + core.swatch(anna.TOO_FAR, "Too far to walk", True)
                     + core.swatch(core.EVACUATE, "Hospital / care home", True) + core.swatch("rgba(0,113,227,.55)", "2021 water"))
     else:
-        core.legend(f"<b>{sel.label}</b> · {fmt(sel.no_shelter)} with no shelter place"
-                    + core.swatch(core.SHELTER, "Dry shelter (size = places)", True)
-                    + core.swatch(core.EVACUATE, "Hospital / care home in the water", True)
+        found = "" if focus is None else (f"<b>◯ {focus['name'] if focus.kind == 'evac' else focus.label}</b> · "
+                 + (f"{focus.share_of_site_flooded:.0%} of the site under water" if focus.kind == "evac"
+                    else f"≈ {about(focus.capacity_central)} places") + "<br>")
+        core.legend(found + core.swatch(core.EVACUATE, "Evacuate first", True) + core.swatch(core.SHELTER, "Dry shelter (size = places)", True)
                     + core.swatch("rgba(0,113,227,.55)", "2021 water"))
+
 with right:
-  if sel is not None:
-    # one town: number, reason, its flooded care sites, its biggest dry shelters. Short lines only.
-    why = "shelters nearby are full" if sel.why == "full" else "no shelter within 1.5 km on foot"
-    sites = care[(care.town == sel["name"]) & (care.area == sel.area)]
-    big = shel[(shel.area == sel.area) & (core.km(sel.lon, sel.lat, shel.lon, shel.lat) <= 6)].nlargest(3, "capacity_central")
-    li = lambda rows: "".join(f"<div class='r'><div class='n'>{a}<span class='t'>{b}</span></div>"
-                              f"<div class='v'>{c}</div></div>" for a, b, c in rows)
-    st.html(f"<div class='h2'>{sel.label}</div><div class='big' style='grid-template-columns:1fr'><div>"
-            f"<b>{about(sel.no_shelter)}</b><span>with no shelter place: {why}</span></div></div>"
-            + (f"<div class='h2' style='margin-top:.8rem'>Evacuate first · % of site under water</div><div class='bars lst'>"
-               + li((n, t, f"{s:.0%}") for n, t, s in zip(sites.name, sites.type, sites.share_of_site_flooded))
-               + "</div>" if len(sites) else "")
-            + "<div class='h2' style='margin-top:.8rem'>Biggest dry shelters · places</div><div class='bars lst'>"
-            + li((n if isinstance(n, str) else c, c, f"{about(p)}") for n, c, p in
-                 zip(big.name, big.cat, big.capacity_central)) + "</div><p class='asof'>Places are estimates; confirm with the commune.</p>")
-  else:
-    mx = top.no_shelter.max()
-    rows = "".join(f"<div class='r'><div class='n'>{r.label.replace(' (modelled)', ' *')}"
-                   f"<span class='t'>{'shelters full' if r.full >= r.no_reach else 'too far to walk'}</span></div>"
-                   f"<div class='b' style='width:{max(4, 100 * r.no_shelter / mx):.0f}%;background:"
-                   f"{anna.FULL if r.full >= r.no_reach else anna.TOO_FAR}'></div><div class='v'>{about(r.no_shelter)}</div></div>"
-                   for r in top.itertuples())
-    st.html(f"<div class='h2'>Where</div><div class='bars'>{rows}</div>"
-            "<p class='asof'>* modelled: the satellite missed the Vesdre valley</p>")
+    if sel is None:
+        mx = top.no_shelter.max()
+        bars = "".join(f"<div class='r'><div class='n'>{r.short}<span class='t'>"
+                       f"{'shelters full' if r.why == 'full' else 'too far to walk'}</span></div>"
+                       f"<div class='b' style='width:{max(4, 100 * r.no_shelter / mx):.0f}%;background:"
+                       f"{anna.FULL if r.why == 'full' else anna.TOO_FAR}'></div><div class='v'>{about(r.no_shelter)}</div></div>"
+                       for r in top.itertuples())
+        st.html(f"<div class='bars'><div class='cap'>People with no shelter place</div>{bars}</div>"
+                "<p class='asof'>* modelled: the satellite missed the Vesdre valley</p>")
+    else:
+        why = "shelters nearby are full" if sel.why == "full" else "no shelter within 1.5 km on foot"
+        st.html(f"<div class='bars'><div class='cap'>{sel.label}</div><div class='one'><b>{about(sel.no_shelter)}</b>"
+                f"<span>with no shelter place: {why}</span></div></div>")
+        h_e = 36 * min(len(sites), 4) + 38 if len(sites) else 0
+        if len(sites):
+            st.dataframe(sites.assign(pct=sites.share_of_site_flooded * 100)[["name", "pct"]], key=kE,
+                         on_select=lambda: clicked(kE, "evac"), selection_mode="single-row", hide_index=True,
+                         height=h_e, column_config={
+                             "name": st.column_config.TextColumn("Evacuate first", width="medium"),
+                             "pct": st.column_config.NumberColumn("Under water", format="%d%%", width="small")})
+        st.dataframe(near[["label", "capacity_central"]], key=kS, on_select=lambda: clicked(kS, "shel"),
+                     selection_mode="single-row", hide_index=True, height=max(150, MAP_H - 130 - h_e),
+                     column_config={"label": st.column_config.TextColumn("Dry shelters nearby", width="medium"),
+                                    "capacity_central": st.column_config.NumberColumn("Places", format="localized",
+                                                                                      width="small")})
+        st.html("<p class='asof'>Click a name to find it on the map. Places are estimates.</p>")
 st.space("small")
 
 # 4. next steps
