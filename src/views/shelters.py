@@ -53,14 +53,14 @@ with right:
 sel = sh.iloc[pick.selection.rows[0]] if pick.selection.rows else None
 with left:
     layers = core.water("worst") + [core.points(
-        sh.assign(tip=[f"<b>{n}</b><br>{t} · {m}<br>≈ {c:,.0f} places" for n, t, m, c in
+        sh.assign(tip=[f"{n}\n{t} · {m}\n≈ {c:,.0f} places" for n, t, m, c in
                        zip(sh.name, sh.type, sh.muni, sh.capacity_central)],
                   fill=[core.rgb(core.KIND[k]) for k in sh.type]), "fill", 4, 1)]
     if focus:
         layers.append(core.points(z.to_frame().T[["lon", "lat"]].astype(float).assign(
-            tip=f"<b>{z.municipality}</b><br>centre of the municipality"), core.rgb(core.EVACUATE), 8))
+            tip=f"{z.municipality}\ncentre of the municipality"), core.rgb(core.EVACUATE), 8))
     if sel is not None:
-        layers.append(core.points(sel.to_frame().T[["lon", "lat"]].astype(float).assign(tip=f"<b>{sel['name']}</b>"),
+        layers.append(core.points(sel.to_frame().T[["lon", "lat"]].astype(float).assign(tip=f"{sel['name']}"),
                                   core.rgb("#0071e3"), 9, 3))
     v = (sel.lon, sel.lat) if sel is not None else focus
     core.deck(layers, core.view(core.bbox(), v, 13 if sel is not None else 12), 460)

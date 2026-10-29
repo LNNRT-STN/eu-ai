@@ -102,25 +102,25 @@ with left:
                       if side == "All" or SIDE[k.split(" · ")[1]] == side], columns=["gauge", "lat", "lon", "lvl", "pct"])
     layers = core.water("worst") if show_water else []
     if show_dry:
-        layers.append(core.points(dry.assign(tip=[f"<b>{n}</b><br>{t} · {m}<br>≈ {c:,.0f} places" for n, t, m, c in
+        layers.append(core.points(dry.assign(tip=[f"{n}\n{t} · {m}\n≈ {c:,.0f} places" for n, t, m, c in
                                                   zip(dry.name, dry.type, dry.muni, dry.capacity_central)]),
                                   core.rgb(core.SHELTER), 3, 1))
     layers.append(core.towns(p.assign(
         fill=[core.rgb(core.GAP[x][0], 215 if sel is None or r == sel["rank"] else 90) for x, r in zip(p.gap, p["rank"])],
-        tip=[f"<b>{m}</b> · {x}<br>≈ {about(n)} people in the water" + (" (modelled)" if mo else "")
-             + f"<br>≈ {about(ns)} without a shelter place" for m, x, n, ns, mo in
+        tip=[f"{m} · {x}\n≈ {about(n)} people in the water" + (" (modelled)" if mo else "")
+             + f"\n≈ {about(ns)} without a shelter place" for m, x, n, ns, mo in
              zip(p.municipality, p.gap, p.people, p.no_shelter, p.modelled)]), "people", "fill", 18))
     if sel is not None:
         layers.append(pdk.Layer("ScatterplotLayer", sel.to_frame().T[["lon", "lat"]].astype(float),
                                 get_position=["lon", "lat"], filled=False, stroked=True, get_line_color=[29, 29, 31],
                                 line_width_min_pixels=3, get_radius=22, radius_units="'pixels'"))
     if show_care:
-        layers.append(core.points(ev.assign(tip=[f"<b>{n}</b><br>{t} · {m}<br>{s:.0%} of the site in the water"
+        layers.append(core.points(ev.assign(tip=[f"{n}\n{t} · {m}\n{s:.0%} of the site in the water"
                                                  for n, t, m, s in zip(ev.name, ev.type, ev.municipality,
                                                                        ev.share_of_site_flooded)]),
                                   core.rgb(core.EVACUATE), 5))
     layers.append(core.points(g.assign(fill=[core.rgb(forecast.LEVELS[l][1]) for l in g.lvl],
-                                       tip=[f"<b>{r.gauge}</b><br>{forecast.LEVELS[r.lvl][0]} · {r.pct:.0%} of the "
+                                       tip=[f"{r.gauge}\n{forecast.LEVELS[r.lvl][0]} · {r.pct:.0%} of the "
                                             f"July 2021 peak" for r in g.itertuples()]), "fill", 8, 2))
     v = core.view(core.bbox(), None if sel is None else (sel.lon, sel.lat), 11)
     core.deck(layers, v, 540, on_select=from_map, selection_mode="single-object", key="map")

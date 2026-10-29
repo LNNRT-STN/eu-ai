@@ -95,6 +95,8 @@ CSS = """<style>
 [data-testid=stExpander] details{background:var(--group);border-radius:12px;border-color:transparent}
 [data-testid=stTabs] [data-baseweb=tab-list]{gap:1.25rem}
 [data-testid=stDeckGlJsonChart]{border-radius:12px;overflow:hidden}
+/* Streamlit escapes tooltip values, so tips are plain text: line breaks via pre-line, first line is the title */
+.deck-tooltip::first-line{font-weight:600}
 .facts{display:grid;grid-template-columns:repeat(4,1fr);background:var(--group);border-radius:12px}
 .facts>div{padding:.95rem 1.1rem;position:relative}
 .facts>div+div::before{content:"";position:absolute;left:0;top:1rem;bottom:1rem;border-left:1px solid var(--sep)}
@@ -269,7 +271,8 @@ def towns(df, size, color, scale=14):
 
 def deck(layers, v, height=600, **kw):
     tip = {"html": "{tip}", "style": {"backgroundColor": "#1d1d1f", "color": "#fff", "fontSize": "13px",
-                                       "padding": "6px 9px", "borderRadius": "8px"}}
+                                       "padding": "6px 9px", "borderRadius": "8px",
+                                       "whiteSpace": "pre-line"}}
     st.pydeck_chart(pdk.Deck(layers=layers, initial_view_state=v, map_style=pdk.map_styles.CARTO_LIGHT, tooltip=tip),
                     height=height, **kw)
 

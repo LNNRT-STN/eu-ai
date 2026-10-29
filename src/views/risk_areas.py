@@ -68,17 +68,17 @@ if sel is not None:
 
 layers = core.water(variant) + [core.towns(com.assign(
     fill=[core.rgb(core.MISSED if m else core.PEOPLE, 210) for m in com.modelled],
-    tip=[f"<b>{m}</b><br>≈ {about(p)} people in the water" + (" (modelled)" if mo else "")
-         + f"<br>{b:,} buildings" for m, p, b, mo in zip(com.municipality, com.people, com.buildings, com.modelled)]),
+    tip=[f"{m}\n≈ {about(p)} people in the water" + (" (modelled)" if mo else "")
+         + f"\n{b:,} buildings" for m, p, b, mo in zip(com.municipality, com.people, com.buildings, com.modelled)]),
     "people", "fill", 20)]
 if show_care:
-    layers.append(core.points(ev.assign(tip=[f"<b>{n}</b><br>{t} · {m}<br>{s:.0%} of the site in the water" for n, t, m, s in
+    layers.append(core.points(ev.assign(tip=[f"{n}\n{t} · {m}\n{s:.0%} of the site in the water" for n, t, m, s in
                                              zip(ev.name, ev.type, ev.municipality, ev.share_of_site_flooded)]),
                               core.rgb(core.EVACUATE), 5))
 if show_gauges:
     import forecast
     layers.append(core.points(gauges.assign(fill=[core.rgb(forecast.LEVELS[l][1]) for l in gauges.level],
-                                            tip=[f"<b>{r.gauge}</b><br>forecast peak {r.peak:,.0f} m³/s ({r.pct_2021:.0%} of 2021)"
+                                            tip=[f"{r.gauge}\nforecast peak {r.peak:,.0f} m³/s ({r.pct_2021:.0%} of 2021)"
                                                  for r in gauges.itertuples()]), "fill", 7))
 with left:
     focus = (sel.lon, sel.lat) if sel is not None else (com.lon.mean(), com.lat.mean()) if area is not None else None

@@ -58,9 +58,9 @@ with right:
     m = munis[(munis.variant == variant) & (munis.no_shelter >= 1)].sort_values("no_shelter", ascending=False)
     layers = core.water(variant) + [
         core.points(shelters.assign(fill=[core.rgb(core.KIND[k], 200) for k in shelters.type],
-                                    tip=[f"<b>{n}</b><br>{t} · ≈ {c:,.0f} places" for n, t, c in
+                                    tip=[f"{n}\n{t} · ≈ {c:,.0f} places" for n, t, c in
                                          zip(shelters.name, shelters.type, shelters.capacity_central)]), "fill", 3, 0),
-        core.towns(m.assign(tip=[f"<b>{x}</b><br>≈ {about(n)} without a place: {about(r)} too far, {about(f)} full"
+        core.towns(m.assign(tip=[f"{x}\n≈ {about(n)} without a place: {about(r)} too far, {about(f)} full"
                                  for x, n, r, f in zip(m.municipality, m.no_shelter, m.no_reach, m.full)]),
                    "no_shelter", core.rgb(core.EVACUATE, 220), 18)]
     core.deck(layers, core.view(core.bbox(variant)), 400)
@@ -73,7 +73,7 @@ if m.empty:
     st.success("Every resident has a shelter place within walking reach.", icon=":material/check_circle:")
 else:
     core.group([(f"<b>{x}</b>" + (" · modelled" if mo else ""), f"{about(r)} have no shelter within 1.5 km · "
-                 f"{about(f)} find the shelters in reach full", f"<b>{about(n)}</b> of {about(p)}")
+                 f"{about(f)} find the shelters in reach full", f"{about(n)} of {about(p)}")
                 for x, n, r, f, p, mo in m.head(8)[["municipality", "no_shelter", "no_reach", "full", "people",
                                                      "modelled"]].itertuples(index=False)],
                foot="Central assumptions, per municipality. Fixes: buses to sites further away, pre-agree extra sites "
