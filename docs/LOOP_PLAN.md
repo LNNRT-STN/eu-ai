@@ -22,6 +22,7 @@ close the 2021 governance gaps (roles, warning → instruction, plans and drills
    gives the order, message, plan and drill), HTML download. Roles + translations fact-checked by an agent. `e19040f`
 2. River outlook line per town (nearest GloFAS point ≤ 15 km, else "follow official centre"); first-action call list
    (top 6 towns by residents with no shelter on foot, district/province to call, care sites; click opens the plan).
+3. Long term page (`src/views/long_term.py`) from docs/BUDGETS.md: gap → measure → money, partly-verified badges.
 
 ## In progress (delegated, background agents; each writes only its own files)
 - Housing: `outputs/data/housing_age.csv` + `buildings_3d_*.parquet` (`notebooks/housing_age.py`). → "Evacuate first",
@@ -30,11 +31,9 @@ close the 2021 governance gaps (roles, warning → instruction, plans and drills
   (4 and 3 km/h), time to shelter, busiest roads and bridges, routes through water. → map layer + numbers per town.
 - Rail and bridges: `outputs/data/infra_in_flood.csv`, `infra_rail.geojson`, `docs/INFRA_2021.md`. → map layer
   (short term: no train evacuation) + long-term repair list.
-- Budgets: `docs/BUDGETS.md` (cited). → long-term page.
 
 ## Backlog (highest value first)
-- Page structure once data lands: Evacuation plan = short term (now / today); new page "Long term" = gaps → measures →
-  funding (cited), per town and per area. Keep the home page one minute to read.
+- Long term: add a rail/bridges row when the infra agent lands (repair status + source).
 - Wire each agent's output in as it lands; render; verify totals against app_towns.
 - "Better prepared than 2021?" one line on the page: brief Q2/Q4 asks it; only verified facts, else say "not verified".
 - Map: avoid label overlap of numbered shelters (town centre now marked).

@@ -94,6 +94,12 @@ re-runnable script in `notebooks/` (`pipeline.py`, `osm_extract.py`, `dq_report.
 - How we checked it: rendered and clicked (Schleiden: 1,200 walk + 2,300 transport = 3,500 residents, matching app_towns). The outlook was rate-limited by Open-Meteo during the test; the page now says "unavailable right now" instead of "offline". District/province per area is a team summary to verify.
 - Result: the first action is the first thing on the home page.
 
+## 17. Long term page: gaps, measures and real budgets
+- Prompt/intent: link the short-term plan to long-term fixes, grounded in money that exists.
+- AI output (short): desk research by an AI agent (docs/BUDGETS.md, a URL per row, verified yes/partly) and a page `src/views/long_term.py`: five gaps from our data (shelter reach, care sites, warning chain, homes in the water, too much water too fast) → measure → funding line; committed money since 2021.
+- How we checked it: gap numbers read from q4_headline.json and app_towns.csv (19,000 observed / 6,500 modelled without a shelter on foot; 15 care sites; 44 schools; 13,100 / 8,800 buildings); amounts copied as published and never summed; "partly verified" shown on the page wherever the source is secondary. Headline reworded after the render showed it contradicted the payout figure ("money is flowing" vs a fifth paid out).
+- Result: not found and said so: unit costs for flood-proofing a care home or shelter equipment; rescEU and ERDF regional amounts; an OVV report on Limburg 2021.
+
 ## Data-cleaning decisions (from *Python for Data Analysis* ch.7)
 - Duplicates: overlapping flood shapes dissolved; OSM objects merged per campus; a building in two study areas counted once.
 - Missing values: analysed and reported per area (book p.210), not silently filled.

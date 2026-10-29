@@ -1,0 +1,111 @@
+"""Long term: the gaps the 2021 data shows, the measure that closes each one, and the money that exists for it.
+Gaps come from outputs/data/ (q4_headline.json, app_towns.csv). Every amount comes from docs/BUDGETS.md (desk research,
+external sources, URL per row): copied as published, never summed across rows, 'partly' where the source is secondary."""
+import streamlit as st
+
+import anna
+import core
+from core import about
+
+head, towns, crit, *_ = anna.load()
+obs, mod = head["worst"]["observed"], head["worst"]["modelled_vesdre"]
+T = towns[towns.variant == "worst"]
+gap_towns = int((T.no_shelter >= 50).sum())
+care = head["worst"]["sites"]["vulnerable"]
+schools = head["worst"]["sites"]["schools"]
+b_obs, b_mod = T[~T.area.isin(anna.MODELLED)].buildings.sum(), T[T.area.isin(anna.MODELLED)].buildings.sum()
+
+EC = "https://ec.europa.eu/regional_policy/whats-new/newsroom/15-12-2022-eu-cohesion-policy-eur718-5-million-to-support-seven-member-states-following-devastating-natural-disasters-of-2021_en"
+ZDF = "https://www.zdfheute.de/politik/deutschland/ahrtal-flutkatastrophe-hochwasser-wiederaufbau-hilfe-finanzministerium-100.html"
+NRW = "https://www.land.nrw/pressemitteilung/2021-bis-2026-fuenf-jahre-nach-der-starkregen-und-hochwasserkatastrophe-viel"
+WAL = "https://wallonie.be/fr/actualites/5-ans-apres-les-inondations-de-2021-ou-en-est"
+UVCW = "https://uvcw.be/environnement/actus/art-10243"
+AHR = "https://www.wochenblatt-reporter.de/c-lokales/absage-fuers-ahrtal-becken-nicht-aus-aufbauhilfefonds_a879494"
+KEEP = "https://keep.eu/programmes/311"
+CALL = "https://www.hezelburcht.com/en/news/8th-interreg-meuse-rhine-call-for-cross-border-cooperation-opens-in-september-2026/"
+UCPM = "https://civil-protection-knowledge-network.europa.eu/2026-kapp-calls-proposals-open"
+SIREN = "https://www.bundestag.de/presse/hib/kurzmeldungen-1195188"
+BREMEN = "https://www.rathaus.bremen.de/sixcms/media.php/13/20250624_top%2011_Warninfrastruktur_Bund_Laender_Vereinbarung.pdf"
+WRL = "https://zoek.officielebekendmakingen.nl/stcrt-2022-19467.pdf"
+AUG = "https://augustinum.de/fileadmin/Presse/Presseinfos/Augustinum-260128-BadNeuenahr-Renovierung.pdf"
+WALREP = "https://www.wallonie.be/sites/default/files/2022-11/Inondations%20rapport%20de%20la%20commission%20parlementaire.pdf"
+
+src = lambda url, label, ok=True: (f"<a href='{url}' target='_blank'>{label}</a>"
+                                   + ("" if ok else " <span class='lt-partly'>partly verified</span>"))
+
+st.html("""<style>
+.lt-partly{display:inline-block;font-size:.72rem;font-weight:600;color:#8a5a00;background:#fff4d6;border-radius:6px;
+  padding:0 .35rem;margin-left:.2rem;vertical-align:.08em}
+.lt{background:#fff;border-radius:14px;overflow:hidden}
+.lt .r{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.2fr) minmax(0,1.3fr);gap:1.2rem;padding:.9rem 1.1rem;
+  position:relative}
+.lt .r+.r::before{content:"";position:absolute;top:0;left:1.1rem;right:0;border-top:1px solid #e3e3e8}
+.lt .h{padding:.6rem 1.1rem;font-size:.78rem;font-weight:600;color:#6e6e73}
+.lt b{display:block;font-weight:600;color:#1d1d1f;font-size:.98rem;line-height:1.35}
+.lt span{display:block;color:#6e6e73;font-size:.88rem;line-height:1.45;margin-top:.15rem}
+.lt a{color:#0066cc}
+.lt span.lt-partly{display:inline-block;margin-top:0;color:#8a5a00}
+@media (max-width:900px){.lt .r{grid-template-columns:1fr;gap:.4rem}.lt .h{display:none}}
+</style>""")
+
+core.header("Long term", "What to fix before the next flood, and the money that already exists for it.")
+st.space("small")
+core.banner("#0071e3", "Rebuilding money exists; prevention and preparedness are where the gaps are",
+            f"In the data: {about(obs['no_shelter'])} residents in the 2021 water have no shelter place on foot "
+            f"(plus {about(mod['no_shelter'])} modelled in the Vesdre), across {gap_towns} towns; {care} hospitals and "
+            f"care homes sat in the water. Five years on, about a fifth of Germany's rebuilding fund is paid out, and "
+            f"the Ahr's three priority retention basins (about €300 m) have no funding.",
+            note=False)
+st.space("small")
+
+ROWS = [
+    ("Shelter places out of walking reach",
+     f"{about(obs['no_shelter'])} residents observed, {about(mod['no_shelter'])} modelled (Vesdre). Most have a place "
+     "within 10 km by bus.",
+     "Sign shelter and bus agreements between neighbouring municipalities, across the border where the nearest "
+     "shelter is.",
+     f"Interreg Meuse-Rhine 2021-27: €176.0 m programme, objective “climate adaptation, disaster risk prevention” "
+     f"({src(KEEP, 'keep.eu')}); next call 21 Sep–16 Dec 2026 ({src(CALL, 'call notice', False)}). EU civil "
+     f"protection prevention call: €10.6 m in 2026, next round early 2027 ({src(UCPM, 'UCPM', False)})."),
+    ("Hospitals and care homes in the water",
+     f"{care} sites, at least 5 % of the site in the 2021 water; {schools} schools as well.",
+     "A move-out plan per site (beds, transport, receiving site), then flood-proofing or relocation.",
+     "No published unit cost for flood-proofing a care home. For scale only: restoring the Augustinum care home in "
+     f"Bad Neuenahr costs about €40 m (restoration, not flood-proofing; {src(AUG, 'Augustinum', False)})."),
+    ("Warnings that did not become instructions",
+     "Wallonia's inquiry found the warning chain from the met office to citizens failed "
+     f"({src(WALREP, 'parliament report, 2022', False)}).",
+     "Sirens and cell broadcast in every flood zone; the message templates on the Evacuation plan, drilled once a year.",
+     f"German siren programme: €88 m for about 5,000 sirens ({src(SIREN, 'Bundestag', False)}); about €10,850 per "
+     f"siren in Bremen ({src(BREMEN, 'Bremen Senate', False)})."),
+    ("Homes that will flood again",
+     f"{about(b_obs)} buildings in the observed 2021 water, {about(b_mod)} in the modelled Vesdre zone.",
+     "Buy out and demolish the most exposed homes; no rebuilding in the flow path.",
+     f"Wallonia: €25 m for 9 communes (Verviers, Pepinster, Trooz, Chaudfontaine…) until July 2028 "
+     f"({src(WAL, 'wallonie.be')})."),
+    ("Too much water, too fast",
+     "Stalled rain over steep, sealed valleys; models underestimated it.",
+     "Retention basins upstream, and space for the river.",
+     f"Ahr: 3 priority basins about €300 m, unfunded; not eligible under Germany's rebuilding fund "
+     f"({src(AHR, 'Wochenblatt', False)}). Wallonia: €13 m for retention basins in 2026 ({src(WAL, 'wallonie.be')}). "
+     f"Limburg (NL): €600 m regional water-system agreement, 2022 ({src(WRL, 'Staatscourant', False)})."),
+]
+st.html("<div class='lt'><div class='r h'><div>Gap</div><div>Measure</div><div>Money that exists</div></div>"
+        + "".join(f"<div class='r'><div><b>{g}</b><span>{e}</span></div><div><span style='color:#1d1d1f;margin:0'>{m}"
+                  f"</span></div><div><span style='margin:0'>{f}</span></div></div>" for g, e, m, f in ROWS)
+        + "</div>")
+st.space("medium")
+
+core.group([
+    ("<b>EU Solidarity Fund</b>", f"Germany €612.6 m, Belgium €87.7 m, Netherlands €4.7 m, agreed Dec 2022 · "
+     f"{src(EC, 'European Commission')}", "Repair"),
+    ("<b>Germany: rebuilding fund (Aufbauhilfe 2021)</b>", f"Up to €30 bn; about €6.2 bn paid out by July 2026 "
+     f"(NRW €2.6 bn, RLP €2.5 bn) · {src(ZDF, 'ZDF, citing the finance ministry')}", "Repair"),
+    ("<b>North Rhine-Westphalia</b>", f"About €4.7 bn approved of about €12.3 bn available · {src(NRW, 'Land NRW')}",
+     "Repair"),
+    ("<b>Wallonia</b>", f"€2.8 bn direct cost to the regional budget; losses over €5 bn · {src(UVCW, 'UVCW')}",
+     "Repair"),
+], "Money already committed since 2021")
+st.html("<p class='asof'>External sources, not challenge data: desk research of 29 Oct 2026, every row in "
+        "docs/BUDGETS.md with its URL. Amounts are copied as published and never added up across rows (different "
+        "scopes and dates). “Partly verified” means a secondary source or a search snippet: re-check before citing.</p>")
