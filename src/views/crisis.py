@@ -69,14 +69,14 @@ def board():
     st.title("Crisis room")
     st.subheader(f"{t:%a %d %b %Y, %H:%M}" + (" · replay of July 2021" if c["mode"] == "replay" else " · live forecast"))
 
-    k = st.columns(6)
-    k[0].metric("Towns to evacuate", m["evacuate"], border=True)
-    k[1].metric("Towns warned", m["warn"], border=True)
-    k[2].metric("People to move", about(m["people_evacuate"]), border=True,
-                help="Residents in the 2021 water of the towns at 'evacuate', scaled by the impact forecast")
-    k[3].metric("Reported safe", fmt(m["safe"]), border=True, help="Check-ins; in the replay they are simulated")
-    k[4].metric("Need help", fmt(m["needs_help"]), border=True)
-    k[5].metric("Roads closed", m["roads_closed"], border=True)
+    k = st.container(horizontal=True, gap="small")  # wraps on phones instead of stacking six rows
+    k.metric("Towns to evacuate", m["evacuate"], border=True, width=150)
+    k.metric("Towns warned", m["warn"], border=True, width=150)
+    k.metric("People to move", about(m["people_evacuate"]), border=True, width=150,
+             help="Residents in the 2021 water of the towns at 'evacuate', scaled by the impact forecast")
+    k.metric("Reported safe", fmt(m["safe"]), border=True, width=150, help="Check-ins; in the replay they are simulated")
+    k.metric("Need help", fmt(m["needs_help"]), border=True, width=150)
+    k.metric("Roads closed", m["roads_closed"], border=True, width=150)
 
     left, right = st.columns([3, 2], gap="medium")
     with left:
