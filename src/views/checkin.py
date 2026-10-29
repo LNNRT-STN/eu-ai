@@ -2,7 +2,8 @@
 leaving") by street and house number; fire crews see every home in the water with no news, those who asked for help
 first, then single-storey homes. Addresses: OpenStreetMap matched to GHS-OBAT buildings (notebooks/addresses.py, ODbL).
 No names or phone numbers are stored: only the address, where people are and how many. Check-ins stay on this machine
-(data/checkins.csv, gitignored). A drill fills simulated check-ins, tagged DRILL, removable in one click."""
+(src/live.py, data/live.db, gitignored). The July 2021 replay adds simulated check-ins, labelled, removable in one click."""
+import json
 from datetime import datetime
 
 import numpy as np
@@ -12,9 +13,9 @@ import streamlit as st
 
 import anna
 import core
+import live
 from core import fmt
 
-FILE = core.DATA.parents[1] / "data" / "checkins.csv"
 COLS = ["when", "municipality", "door", "status", "where", "people", "drill"]
 WHERE = ["A shelter", "Family or friends", "A spare bed offered by a resident", "Elsewhere, outside the flood zone"]
 
@@ -35,16 +36,7 @@ def doors():
                  buildings=("bid", "size"), single=("single", "any"), has_address=("label", lambda x: x.iloc[0] != "")))
 
 
-def checkins():
-    try:
-        return pd.read_csv(FILE)
-    except (FileNotFoundError, pd.errors.EmptyDataError):
-        return pd.DataFrame(columns=COLS)
-
-
-def save(df):
-    FILE.parent.mkdir(exist_ok=True)
-    df.to_csv(FILE, index=False)
+EDGES = json.loads((core.DATA / "evac_edges.geojson").read_text())
 
 
 D = doors()
@@ -82,7 +74,7 @@ with me:
             door = f"{street} {number}"
             row = dict(when=datetime.now().isoformat(timespec="minutes"), municipality=muni, door=door,
                        status="needs help" if help_ else "safe", where=where or "", people=int(people), drill=False)
-            save(pd.concat([checkins(), pd.DataFrame([row])]))
+            live.add_checkin(**{k: row[k] for k in ("municipality", "door", "status", "where", "people", "drill")})
             if help_:
                 st.error(f"Help request sent for {door}: it is now first on the crews' list. If water is rising, go "
                          "upstairs and call 112.")
@@ -92,35 +84,20 @@ with me:
                "BE-Alert or NL-Alert SMS, or by phone through the municipal help line.")
 
 # ------------------------------------------------------------------ crews
-with crew:
-    ci = checkins()
-    last = (ci[ci.municipality == muni].sort_values("when").groupby("door").last()
-            if len(ci) else pd.DataFrame(columns=COLS).set_index("door"))
-    L = here.merge(last[["status", "where", "people", "drill"]], left_on="door", right_index=True, how="left")
+
+
+def crews():
+    ci = live.checkins(muni)
+    last = (ci.sort_values("when").groupby("door").last() if len(ci)
+            else pd.DataFrame(columns=COLS + ["sim"]).set_index("door"))
+    L = here.merge(last[["status", "where", "people", "drill", "sim"]], left_on="door", right_index=True, how="left")
     L["status"] = L.status.fillna("no news")
     L["alert"] = "no feed yet"
     order = {"needs help": 0, "no news": 1, "safe": 2}
     L = L.assign(o=L.status.map(order), s=~L.single).sort_values(["o", "s", "street", "door"]).reset_index(drop=True)
-    is_drill = bool(len(last) and last.drill.fillna(False).astype(bool).any())
-
-    b1, b2, _ = st.columns([1, 1, 3])
-    if b1.button("Run a drill", icon=":material/play_arrow:", help="Simulate check-ins: about 60 % left, 3 % need help"):
-        rng = np.random.default_rng()
-        r = rng.random(len(here))
-        sim = here[r < .63].reset_index(drop=True)
-        status = np.where(r[r < .63] < .03, "needs help", "safe")
-        rows = pd.DataFrame(dict(when=datetime.now().isoformat(timespec="minutes"), municipality=muni,
-                                 door=sim.door.values, status=status, where=np.where(status == "safe", "DRILL", ""),
-                                 people=1, drill=True))
-        save(pd.concat([checkins(), rows]))
-        st.rerun()
-    if b2.button("Reset drill", icon=":material/restart_alt:", disabled=not is_drill):
-        c = checkins()
-        save(c[~c.drill.astype(bool)])
-        st.rerun()
-    if is_drill:
-        st.warning("DRILL: the check-ins below are simulated, not real.", icon=":material/science:")
-
+    simulated = bool(len(ci) and (ci.drill.astype(bool) | ci.sim.astype(bool)).any())
+    if simulated:
+        st.warning("Includes simulated check-ins from the July 2021 replay, not real ones.", icon=":material/science:")
     n = L.status.value_counts()
     single_open = int((L.single & (L.status == "no news")).sum())
     c = st.columns(3)
@@ -151,6 +128,31 @@ with crew:
         st.download_button("Download the list for crews", todo[["door", "status", "single", "lat", "lon"]].to_csv(index=False),
                            file_name=f"door_knock_{anna.town(muni).replace(' ', '_')}.csv", mime="text/csv",
                            icon=":material/download:")
+    # road closures: crews close and reopen; the crisis room map shows them
+    st.markdown("**Roads closed**")
+    cl = live.closures()
+    cl = cl[cl.municipality == muni]
+    for r in cl.itertuples():
+        a, b = st.columns([5, 1])
+        a.markdown(f"**{r.name or r.osm_id}** · {'auto, in the 2021 water' if r.auto else 'by ' + r.by}"
+                   f"{' · ' + r.note if r.note else ''}")
+        b.button("Reopen", key=f"reopen{r.id}", on_click=live.reopen, args=(r.id,))
+    if cl.empty:
+        st.caption("No road closed in this town.")
+    roads = [f["properties"]["name"] for f in EDGES["features"] if f["properties"]["municipality"] == muni
+             and f["properties"]["name"]]
+    with st.form(f"close_{muni}", border=False):
+        a, b, c3 = st.columns([3, 2, 1], vertical_alignment="bottom")
+        road = a.selectbox("Road", list(dict.fromkeys(roads)), index=None, accept_new_options=True,
+                           placeholder="Busiest evacuation roads first, or type a name")
+        note = b.text_input("Why", placeholder="e.g. bridge under water")
+        if c3.form_submit_button("Close road", icon=":material/block:") and road:
+            f = next((f for f in EDGES["features"] if f["properties"]["name"] == road), None)
+            xy = f["geometry"]["coordinates"][0] if f else [None, None]
+            if isinstance(xy[0], list):
+                xy = xy[0]
+            live.close_road(road, muni, by="fire crew", note=note, lon=xy[0], lat=xy[1])
+            st.rerun()
     no_addr = int((~here.has_address).sum())
     st.caption(f"{fmt(len(here))} doors to check: {fmt(int(here.buildings.sum()))} homes in the 2021 water, grouped by "
                f"address (several buildings can share one); {fmt(no_addr)} have no OpenStreetMap address and are "
@@ -158,3 +160,9 @@ with crew:
                                         else "") + ". 'Reached by alert': BE-Alert SMS delivery reports or "
             "call results would plug in here; cell broadcast cannot confirm delivery. Order: help requests, then homes "
             "with no news, single-storey first.")
+
+
+with crew:
+    if st.button("Clear simulated check-ins", icon=":material/restart_alt:"):
+        live.clear_drill(muni)
+    st.fragment(crews, run_every=3 if live.clock()["playing"] else None)()
