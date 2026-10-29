@@ -30,7 +30,7 @@ limits = [
      "water is not the same as damaged. No age data."),
     ("Shelters are candidates", "OSM schools, sports halls and civic buildings with at least 200 m² of floor, dry in "
      "2021 and outside the EFAS 100-year zone. Capacity is floor area × usable share ÷ m² per person, not an official "
-     "figure."),
+     "figure. Sites above 20,000 m² (merged campuses, race circuits) count as 20,000 m²."),
     ("Walking reach is a straight line", "1.5 km (1 and 2.5 km in the low and high cases). It understates walks in steep "
      "valleys and ignores flooded roads and bridges."),
     ("Care sites", "OSM hospitals, care homes and schools; only sites with at least 5 % of their area in the water count."),

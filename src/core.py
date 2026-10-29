@@ -42,6 +42,7 @@ chip = lambda lab, h: f"<span class='pill' style='background:{h};color:{ink(h)}'
 WATER = "rgba(0,113,227,.35)"  # observed 2021 water as drawn on the maps
 MODEL = "rgba(143,140,132,.4)"  # modelled water (Vesdre, missed by the satellite) in the MISSED grey
 fmt = lambda n: f"{n:,.0f}"
+MAX_FLOOR = 20_000  # m²: above this OSM merged a whole campus or tagged a race circuit; counted as this much
 about = lambda n: fmt(round(n, -2) if n >= 1000 else round(n, -1) if n >= 100 else n)  # residents are an order of magnitude
 
 CSS = """<style>
@@ -164,6 +165,10 @@ def load():
     rank["gap"] = rank.why.map(WHY)
     sites = sites[sites.share_of_site_flooded >= .05]  # below 5 % the site only touches the water's edge
     sh = gpd.read_file(DATA / "shelters.geojson")
+    sh = sh[~sh.geometry.duplicated()]  # a site in two overlapping study areas comes twice
+    sh["capped"] = sh.gfa > MAX_FLOOR
+    sh["gfa"] = sh.gfa.clip(upper=MAX_FLOOR)
+    sh["capacity_central"] = (sh.gfa * .5 / 4).round()  # floor × 50 % usable ÷ 4 m² per person, as in the README
     pt = sh.geometry.to_crs(3035).centroid.to_crs(4326)  # a few campuses are polygons
     sh = pd.DataFrame(sh.drop(columns="geometry")).assign(
         lon=pt.x.round(5), lat=pt.y.round(5), type=sh.cat.map(CAT), name=sh["name"].fillna("(no name in OSM)"),

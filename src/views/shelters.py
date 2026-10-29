@@ -68,7 +68,7 @@ with left:
                 + (core.swatch(core.EVACUATE, "Municipality centre", True) if focus else "")
                 + core.swatch(core.WATER, "2021 water") + core.swatch(core.MODEL, "Vesdre, modelled water"))
     if sel is not None:
-        core.group([("Type", sel.type), ("Municipality", sel.muni or "–"), ("Floor", f"{fmt(sel.gfa)} m²"),
+        core.group([("Type", sel.type), ("Municipality", sel.muni or "–"), ("Floor", f"{fmt(sel.gfa)} m²" + (" (capped)" if sel.capped else "")),
                     ("Places", f"≈ {fmt(sel.capacity_central)}"),
                     ("Map", f"<a href='https://www.openstreetmap.org/#map=18/{sel.lat}/{sel.lon}' target='_blank'>"
                             "Open in OpenStreetMap</a>")], sel["name"])
