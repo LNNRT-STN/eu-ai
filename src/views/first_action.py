@@ -1,6 +1,6 @@
 """Home page for Anna, in order of importance:
   1 Do now   evacuate the hospitals and care homes in the 2021 water: per district, in order, and where to take them
-  2 Next     people with no shelter place within walking distance, and the empty places 2-10 km away
+  2 Next     (brief Q3) who has a candidate shelter within walking distance, who does not; schools in the water
   3 Context  warning time, 'better prepared?', how the numbers were made
 Numbers come from outputs/data/ (notebooks/pipeline.py, q4_ranking.py, receiving.py) and src/out/meuse/replay_2021.json."""
 import pandas as pd
@@ -182,112 +182,109 @@ with right:
             "residents are not in any dataset: confirm with each operator.</p>")
 st.space("medium")
 
-# =============================================================================== 2 · NEXT
-bus_more = obs["bus_covered"] - obs["sheltered"]
-st.html(f"<div class='act next'><i></i><div><h1>Next: shelters within walking distance are full, but there are "
-        "empty places 2–10 km away</h1>"
-        f"<p>{about(obs['no_shelter'])} people would have no shelter place within 1.5 km on foot. "
-        f"<b>Shelters 2–10 km away have empty places for {about(bus_more)} of them</b>; "
-        f"{about(obs['bus_no_shelter'])} would have no place within 10 km. Pick a town to see where the empty places "
-        "are.</p></div></div>")
+# =============================================================================== 2 · NEXT (brief, Q3)
+# The brief's Q3: candidate shelters (schools, sports halls, civic buildings) that stayed dry and are big enough,
+# rough capacity; how many exposed residents have one within reach and how many don't; flag schools in the water.
+schools = C[C.type == "school"]
+far_more = obs["bus_covered"] - obs["sheltered"]
+st.html(f"<div class='act next'><i></i><div><h1>Next: {about(obs['no_shelter'])} people would have no shelter place "
+        "within walking distance</h1>"
+        f"<p>{about(obs['sheltered'])} of the {about(obs['people'])} residents in the 2021 water have one within 1.5 km. "
+        f"{len(schools)} schools sat in the water themselves. Candidate shelters 2–10 km away have empty places for "
+        f"{about(far_more)} more.</p></div></div>")
 st.space("small")
 
 top = T.nlargest(5, "no_shelter").reset_index(drop=True)
 top["short"] = top.label.str.replace(" (modelled)", " *")
-top["by_bus"] = (top.bus_covered.fillna(top.covered) - top.covered).clip(lower=0)
-top["left"] = (top.people - top.bus_covered.fillna(top.covered)).clip(lower=0)
 st.session_state.setdefault("town", "All")
 pick = st.pills("Town", ["All", *top.short], label_visibility="collapsed", key="town")
 sel = None if pick in (None, "All") else top[top.short == pick].iloc[0]
-plan = (bus[(bus.town == sel["name"]) & (bus.area == sel.area)].sort_values("people", ascending=False)
-        .reset_index(drop=True) if sel is not None else bus.iloc[0:0])
+cands = (shel[(shel.town == sel["name"]) & (shel.area == sel.area)].sort_values("capacity_central", ascending=False)
+         .reset_index(drop=True) if sel is not None else shel.iloc[0:0])
+cands["label"] = [n if isinstance(n, str) else f"Unnamed {c}" for n, c in zip(cands.name, cands.cat)]
+town_schools = schools[(schools.town == sel["name"]) & (schools.area == sel.area)] if sel is not None else schools
 all2 = st.session_state.get(f"all2-{pick}", False)
-k2 = f"bus-{pick}-{all2}"
+k2 = f"cand-{pick}-{all2}"
 i2 = picked_row(k2)
-stop = plan.iloc[i2] if i2 is not None and i2 < len(plan) else None
+stop = cands.iloc[i2] if i2 is not None and i2 < len(cands) else None
 
 left, right = st.columns([3, 2], gap="small")
 with left:
+    sch = town_schools.assign(tname=town_schools.name, tinfo=[f"school in the 2021 water · {s:.0%} of the site"
+                                                             for s in town_schools.share_of_site_flooded])
+    school_layer = pdk.Layer("ScatterplotLayer", sch, get_position=["lon", "lat"], get_radius=6, radius_units="'pixels'",
+                             filled=False, stroked=True, get_line_color=core.rgb(core.EVACUATE), line_width_min_pixels=2,
+                             pickable=True)
     layers = list(WATER)
     if sel is None:
         circ = top.assign(r=lambda d: d.no_shelter ** .5 * .32 + 6, tname=top.label,
-                          tinfo=[f"{fmt(n)} with no shelter place on foot · {fmt(b)} could find one 2–10 km away"
-                                 for n, b in zip(top.no_shelter, top.by_bus)],
+                          tinfo=[f"{fmt(n)} of {fmt(p)} residents with no shelter place within 1.5 km"
+                                 for n, p in zip(top.no_shelter, top.people)],
                           txt=[f"{s}  {about(n)}" for s, n in zip(top.short, top.no_shelter)])
         west = [((core.km(x.lon, x.lat, top.lon, top.lat) < 15) & (top.lon > x.lon)).any() for x in circ.itertuples()]
         circ["off"] = [[0, -(r + 12)] if w else [0, r + 12] for r, w in zip(circ.r, west)]
         layers += [pdk.Layer("ScatterplotLayer", circ, get_position=["lon", "lat"], get_radius="r", radius_units="'pixels'",
                              get_fill_color=core.rgb(core.EVACUATE, 190), get_line_color=[255, 255, 255],
                              line_width_min_pixels=2, stroked=True, pickable=True),
+                   school_layer,
                    pdk.Layer("TextLayer", circ, get_position=["lon", "lat"], get_text="txt", get_size=13,
                              get_color=[29, 29, 31], get_pixel_offset="off", get_alignment_baseline="'center'",
                              background=True, get_background_color=[255, 255, 255, 235], background_padding=[5, 3])]
         view = pdk.ViewState(longitude=6.35, latitude=50.62, zoom=7.7)
     else:
-        legs = plan.rename(columns={"s_lon": "lon", "s_lat": "lat"}).assign(
-            tlon=sel.lon, tlat=sel.lat, tname=plan.shelter,
-            tinfo=[f"{c} · room for {about(p)} people from {sel['name']} · ≈ {about(pl)} places in all"
-                   for c, p, pl in zip(plan.cat, plan.people, plan.places)],
-            r=lambda d: d.people ** .5 * .6 + 4)
-        town_pt = pd.DataFrame([{"lon": sel.lon, "lat": sel.lat, "tname": sel.label,
-                                 "tinfo": f"{fmt(sel.no_shelter)} with no shelter place on foot"}])
-        # faint grey lines to the 10 biggest destinations; the picked one is drawn bold green below (one at a time)
-        layers += [pdk.Layer("LineLayer", legs.head(10), get_source_position=["tlon", "tlat"],
-                             get_target_position=["lon", "lat"], get_color=[142, 142, 147, 90], get_width=1.5,
-                             width_units="'pixels'"),
-                   pdk.Layer("ScatterplotLayer", legs, get_position=["lon", "lat"], get_radius="r", radius_units="'pixels'",
+        cs = cands.assign(tname=cands.label, tinfo=[f"candidate {c} · rough capacity ≈ {about(p)} places"
+                                                    for c, p in zip(cands.cat, cands.capacity_central)],
+                          r=lambda d: d.capacity_central ** .5 * .45 + 3)
+        layers += [pdk.Layer("ScatterplotLayer", cs, get_position=["lon", "lat"], get_radius="r", radius_units="'pixels'",
                              get_fill_color=GREEN, get_line_color=[255, 255, 255], line_width_min_pixels=1.5,
                              stroked=True, pickable=True),
-                   pdk.Layer("ScatterplotLayer", town_pt, get_position=["lon", "lat"], get_radius=11,
-                             radius_units="'pixels'", get_fill_color=core.rgb(core.EVACUATE), get_line_color=[255, 255, 255],
-                             line_width_min_pixels=2, stroked=True, pickable=True)]
+                   school_layer]
         if stop is not None:
-            one = pd.DataFrame([{"tlon": sel.lon, "tlat": sel.lat, "lon": stop.s_lon, "lat": stop.s_lat}])
-            layers += [pdk.Layer("LineLayer", one, get_source_position=["tlon", "tlat"], get_target_position=["lon", "lat"],
-                                 get_color=[36, 138, 61, 230], get_width=4, width_units="'pixels'"),
-                       ring(stop.s_lon, stop.s_lat)]
-            view = fit(pd.DataFrame([{"lon": sel.lon, "lat": sel.lat}, {"lon": stop.s_lon, "lat": stop.s_lat}]))  # town and shelter both in view
+            layers.append(ring(stop.lon, stop.lat))
+            view = pdk.ViewState(longitude=stop.lon, latitude=stop.lat, zoom=15)
         else:
-            view = fit(pd.concat([legs[["lon", "lat"]], town_pt[["lon", "lat"]]]))
+            pts2 = pd.concat([cands[["lon", "lat"]], town_schools[["lon", "lat"]]])
+            view = fit(pts2) if len(pts2) else pdk.ViewState(longitude=sel.lon, latitude=sel.lat, zoom=12.5)
     deck(layers, view)
     if sel is None:
-        core.legend(core.swatch(core.EVACUATE, "People with no shelter place on foot (circle size)", True)
+        core.legend(core.swatch(core.EVACUATE, "People with no shelter place within 1.5 km (circle size)", True)
+                    + "<span><i style='border:2px solid #d70015;border-radius:50%;background:none'></i>School in the 2021 water</span>"
                     + core.swatch("rgba(0,113,227,.55)", "2021 water"))
     else:
-        core.legend(("" if stop is None else f"<b>◯ {stop.shelter}</b> · {stop['cat']} · {about(stop.people)} people "
-                     f"from {sel['name']} · ≈ {about(stop.places)} places<br>")
-                    + core.swatch(core.EVACUATE, sel.label, True)
-                    + core.swatch(core.SHELTER, "Shelter with empty places within 10 km (size = people)", True)
+        core.legend(("" if stop is None else f"<b>◯ {stop.label}</b> · candidate {stop['cat']} · rough capacity "
+                     f"≈ {about(stop.capacity_central)} places<br>")
+                    + core.swatch(core.SHELTER, "Candidate shelter, dry (size = rough capacity)", True)
+                    + "<span><i style='border:2px solid #d70015;border-radius:50%;background:none'></i>School in the 2021 water</span>"
                     + core.swatch("rgba(0,113,227,.55)", "2021 water"))
 with right:
     if sel is None:
         mx = top.people.max()
-        bars = "".join(f"<div class='r'><div class='n'>{r.short}<span class='t'>{about(r.left)} no place within 10 km"
-                       f"</span></div><div style='display:flex;height:.7rem;border-radius:4px;overflow:hidden;"
-                       f"background:#f2f2f7'><i style='width:{100 * r.covered / mx:.0f}%;background:#c7c7cc'></i>"
-                       f"<i style='width:{100 * r.by_bus / mx:.0f}%;background:{core.SHELTER}'></i>"
-                       f"<i style='width:{100 * r.left / mx:.0f}%;background:{core.EVACUATE}'></i></div>"
+        bars = "".join(f"<div class='r'><div class='n'>{r.short}<span class='t'>{about(r.covered)} of {about(r.people)} "
+                       f"have one</span></div><div style='display:flex;height:.7rem;border-radius:4px;overflow:hidden;"
+                       f"background:#f2f2f7'><i style='width:{100 * r.covered / mx:.0f}%;background:{core.SHELTER}'></i>"
+                       f"<i style='width:{100 * r.no_shelter / mx:.0f}%;background:{core.EVACUATE}'></i></div>"
                        f"<div class='v'>{about(r.no_shelter)}</div></div>" for r in top.itertuples())
-        st.html(f"<div class='bars'><div class='cap'>People with no shelter place on foot</div>{bars}</div>")
-        core.legend(core.swatch("#c7c7cc", "Place within 1.5 km") + core.swatch(core.SHELTER, "Empty place 2–10 km away")
-                    + core.swatch(core.EVACUATE, "No place within 10 km"))
+        st.html(f"<div class='bars'><div class='cap'>Residents in the 2021 water: shelter place within 1.5 km?</div>"
+                f"{bars}</div>")
+        core.legend(core.swatch(core.SHELTER, "Has a place") + core.swatch(core.EVACUATE, "No place (number)"))
         st.html("<p class='asof'>* modelled: the satellite missed the Vesdre valley</p>")
     else:
-        st.html(f"<div class='bars'><div class='cap'>{sel.label}</div><div class='one'><b>{about(sel.no_shelter)}</b>"
-                "<span>with no shelter place on foot</span></div><div class='trio'>"
-                f"<div><b>{about(sel.covered)}</b><span>place within 1.5 km</span></div>"
-                f"<div><b style='color:{core.SHELTER}'>{about(sel.by_bus)}</b><span>empty place 2–10 km away</span></div>"
-                f"<div><b style='color:{core.EVACUATE}'>{about(sel.left)}</b><span>no place within 10 km</span></div>"
-                "</div></div>")
-        shown2 = plan if all2 else plan.head(3)
-        st.dataframe(shown2.assign(p=shown2.people.round())[["shelter", "p"]], key=k2, on_select="rerun",
-                     selection_mode="single-row", hide_index=True, height=36 * len(shown2) + 40,
-                     column_config={"shelter": st.column_config.TextColumn("Shelter with empty places", width="medium"),
-                                    "p": st.column_config.NumberColumn("People", format="localized", width="small")})
-        if len(plan) > 3:
-            st.toggle(f"Show all {len(plan)} shelters", key=f"all2-{pick}")
-        st.html("<p class='asof'>Click a shelter to find it. Up to 10 km in a straight line, 4 m² per person, half the "
-                "floor usable. Places are estimates.</p>")
+        st.html(f"<div class='bars'><div class='cap'>{sel.label} · residents in the 2021 water</div><div class='trio'>"
+                f"<div><b style='color:{core.SHELTER}'>{about(sel.covered)}</b><span>have a shelter place within 1.5 km"
+                f"</span></div><div><b style='color:{core.EVACUATE}'>{about(sel.no_shelter)}</b><span>have none</span></div>"
+                f"<div><b>{len(town_schools)}</b><span>schools in the water</span></div></div></div>")
+        shown2 = cands if all2 else cands.head(3)
+        st.dataframe(shown2[["label", "cat", "capacity_central"]], key=k2, on_select="rerun", selection_mode="single-row",
+                     hide_index=True, height=36 * len(shown2) + 40,
+                     column_config={"label": st.column_config.TextColumn("Candidate shelter in the town", width="medium"),
+                                    "cat": st.column_config.TextColumn("Type", width="small"),
+                                    "capacity_central": st.column_config.NumberColumn("Rough capacity", format="localized",
+                                                                                      width="small")})
+        if len(cands) > 3:
+            st.toggle(f"Show all {len(cands)} candidates", key=f"all2-{pick}")
+        st.html("<p class='asof'>Candidates, not official shelters: schools, sports halls and civic buildings from "
+                "OpenStreetMap, dry in 2021 and in the 100-year model, at least 200 m². Rough capacity: floor area × "
+                "50 % usable ÷ 4 m² per person. Click one to find it.</p>")
 st.space("medium")
 
 # =============================================================================== 3 · CONTEXT
@@ -302,8 +299,8 @@ with st.expander("Why these numbers"):
         f"{about(obs['full'])} of them have a shelter within 1.5 km, but it is full (4 m² per person, half the floor "
         f"usable). Range {about(obs['no_shelter_range'][0])} to {about(obs['no_shelter_range'][1])} with stricter or "
         "looser assumptions.\n"
-        f"- **Within 10 km:** the same shelters, up to 10 km away in a straight line, have empty places for "
-        f"{about(bus_more)} of them.\n"
+        f"- **Within 10 km:** the same candidate shelters, up to 10 km away in a straight line, have empty places for "
+        f"{about(obs['bus_covered'] - obs['sheltered'])} of them.\n"
         f"- **Vesdre (modelled):** {about(mod['no_shelter'])} more people with no place on foot; the satellite map has "
         "no flood there.\n"
         "- **Hospitals and care homes:** at least 5 % of the site under water in July 2021. Receiving sites: the nearest "
