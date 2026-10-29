@@ -6,6 +6,7 @@ import core
 
 core.style()  # the older analyst pages keep their custom look; the main pages use the theme only
 import forecast
+import live
 from core import about, fmt
 
 d = core.load()
@@ -26,7 +27,8 @@ c1, c2 = st.columns([2, 3], vertical_alignment="bottom")
 side = c1.segmented_control("Country", ["All", "BE", "NL", "DE"], default="All", required=True,
                             format_func={"All": "All", **core.COUNTRY}.get)
 step = c2.segmented_control("Forecast time", list(STEPS), default=0, required=True, format_func=STEPS.get,
-                            help="Daily river flow from the GloFAS model for 12–16 July 2021, played back as a forecast.")
+                            help="Daily river flow from the GloFAS model for 12–16 July 2021, played back as a drill from "
+                            f"{live.drill(DAY0):%a %d %b}.")
 day = DAY0 + pd.Timedelta(days=step)
 
 # river status per point and day: 0 normal · 1 above 2-year flood · 2 above half of July 2021 · 3 at July 2021
@@ -49,7 +51,7 @@ if soon:
     detail += " " + " ".join(f"Peak in {h} h: {place(gs)}." for h, gs in by.items())
 color = forecast.LEVELS[3 if soon and not high else int(now.max())][1] if now.max() or soon else core.SHELTER
 st.html(f"<div class='banner' style='--c:{color}'><i class='dot'></i><div>"
-        f"<h2>{head}</h2><p>{detail.strip()}</p><small>Replay day {day:%a %d %b %Y} · training scenario, not a warning · "
+        f"<h2>{head}</h2><p>{detail.strip()}</p><small>Drill day {live.drill(day):%a %d %b %Y} (the flows of {day:%d %b %Y}) · training scenario, not a warning · "
         "River points cover the Meuse basin only, not the Ahr or Erft · Live outlook today: "
         + ("unavailable" if gauges is None else core.status(gauges, rain, err)[1].lower()) + "</small></div></div>")
 st.space("small")
@@ -221,7 +223,7 @@ heat = pd.DataFrame([(t, g, flow.loc[t, g] / ref[g][1], *forecast.LEVELS[lvl.loc
                      for g in order], columns=["day", "gauge", "pct", "status", "fill"])
 heat["ink"] = heat.fill.map(core.ink)
 heat = heat[(heat.day >= DAY0) & (heat.day <= DAY0 + pd.Timedelta(days=5))]
-heat["d"] = heat.day.dt.strftime("%a %d")  # plain labels: a year-less time unit would print 2012 weekdays
+heat["d"] = heat.day.map(live.drill).dt.strftime("%a %d")  # plain labels: a year-less time unit would print 2012 weekdays
 x = alt.X("d:O", sort=list(heat.d.unique()), title=None, axis=alt.Axis(labelAngle=0, orient="top"))
 y = alt.Y("gauge:N", sort=order, title=None, axis=alt.Axis(labelLimit=220))
 base = alt.Chart(heat).encode(x=x, y=y)
@@ -229,11 +231,11 @@ st.altair_chart(alt.layer(
     base.mark_rect(stroke="#fff", strokeWidth=2, cornerRadius=4).encode(
         color=alt.Color("status:N", scale=alt.Scale(domain=[l for l, _ in forecast.LEVELS],
                                                     range=[c for _, c in forecast.LEVELS]), legend=None),
-        tooltip=[alt.Tooltip("gauge:N", title="River"), alt.Tooltip("day:T", format="%a %d %b"),
+        tooltip=[alt.Tooltip("gauge:N", title="River"), alt.Tooltip("day:T", format="%d %b %Y", title="July 2021 flow of"),
                  alt.Tooltip("status:N"), alt.Tooltip("pct:Q", format=".0%", title="Of July 2021 peak")]),
     base.mark_text(fontSize=11).encode(text=alt.Text("pct:Q", format=".0%"),
                                        color=alt.Color("ink:N", scale=None)),
-    alt.Chart(pd.DataFrame({"d": [f"{day:%a %d}"]})).mark_rect(fill=None, stroke="#1d1d1f", strokeWidth=2).encode(
+    alt.Chart(pd.DataFrame({"d": [f"{live.drill(day):%a %d}"]})).mark_rect(fill=None, stroke="#1d1d1f", strokeWidth=2).encode(
         x=alt.X("d:O", sort=list(heat.d.unique()))),
 ).properties(height=330, background="#ffffff", padding={"left": 12, "right": 12, "top": 8, "bottom": 8}).configure_view(stroke=None)
  .configure_axis(domain=False, ticks=False, labelColor="#1d1d1f", labelFontSize=12), width="stretch")

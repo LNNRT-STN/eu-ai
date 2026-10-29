@@ -43,7 +43,7 @@ c = live.clock()
 with st.sidebar:
     st.caption("Scenario")
     mode = st.segmented_control("Mode", ["replay", "live"], default=c["mode"], key="cr_mode",
-                                format_func={"replay": "Replay July 2021", "live": "Live forecast"}.get,
+                                format_func={"replay": "Drill: July 2021", "live": "Live forecast"}.get,
                                 label_visibility="collapsed") or c["mode"]
     if mode != c["mode"]:
         live.set_mode(mode)
@@ -53,11 +53,27 @@ with st.sidebar:
     else:
         b1.button("Play", icon=":material/play_arrow:", on_click=live.play, type="primary", width="stretch")
     b2.button("Reset", icon=":material/replay:", on_click=live.reset, width="stretch",
-              help="Back to 12 July 06:00; clears alerts, reports, closures and simulated check-ins")
+              help=f"Back to {live.drill(live.START):%a %d %b} 06:00 (the 12 July 2021 river flows); clears alerts, "
+                   "reports, closures and simulated check-ins")
     sp = st.select_slider("Speed", [1.0, 3.0, 6.0, 12.0], value=float(c["speed"]) if c["speed"] in (1, 3, 6, 12) else 3.0,
                           format_func=lambda x: f"{x:g} h per second")
     if sp != c["speed"]:
         live.set_speed(sp)
+
+
+def coming(t):
+    """What the 2021 flows still hold after t: the towns not yet at evacuate that will get there, and on which day."""
+    tm = live._replay()["times"]
+    ahead = tm.t_evacuate[tm.t_evacuate > t].dropna()
+    if ahead.empty:
+        st.caption("No further town reaches evacuate in the July 2021 flows.")
+        return
+    first = ahead.min()
+    by = ahead.dt.normalize().value_counts().sort_index()
+    days = " · ".join(f"{live.drill(d):%a %-d %b}: {n}" for d, n in by.items())
+    st.warning(f"**A flood like July 2021 is coming. {len(ahead)} more towns reach evacuate, the first on "
+               f"{live.drill(first):%A %-d %B}.** Towns per day: {days}. Drill on the July 2021 river flows "
+               "(GloFAS, computed afterwards), shown from today; not an official warning.", icon=":material/flood:")
 
 
 def board():
@@ -67,7 +83,11 @@ def board():
     s = live.towns_status(t)
     m = live.summary(t)
     st.title("Crisis room")
-    st.subheader(f"{t:%a %d %b %Y, %H:%M}" + (" · replay of July 2021" if c["mode"] == "replay" else " · live forecast"))
+    if c["mode"] == "replay":
+        st.subheader(f"{live.drill(t):%a %d %b %Y, %H:%M} · drill: the July 2021 flood, arriving now")
+        coming(t)
+    else:
+        st.subheader(f"{t:%a %d %b %Y, %H:%M} · live forecast")
 
     k = st.container(horizontal=True, gap="small")  # wraps on phones instead of stacking six rows
     k.metric("Towns to evacuate", m["evacuate"], border=True, width=145)
@@ -114,21 +134,23 @@ def board():
         if ev.empty:
             st.caption("Nothing yet. Press Play in the sidebar.")
         for r in ev.itertuples():
-            when = f"{pd.Timestamp(r.t):%d %b}" if c["mode"] == "replay" else f"{pd.Timestamp(r.t):%d %b %H:%M}"
+            when = f"{live.drill(r.t):%a %d %b}" if c["mode"] == "replay" else f"{pd.Timestamp(r.t):%d %b %H:%M}"
             st.markdown(f"`{when}` **{anna.town(r.municipality)}** → {WORD.get(r.to, r.to)}")
         ob = live.outbox().tail(4).iloc[::-1]
         st.markdown("**Briefing drafts** (outbox, not sent)")
         if ob.empty:
             st.caption("Briefings for mayors and fire brigades appear here when a town's alert rises.")
         for r in ob.itertuples():
-            with st.expander(f"{pd.Timestamp(r.t):%d %b{'' if c['mode'] == 'replay' else ' %H:%M'}} · {r.recipient}"):
+            when = f"{live.drill(r.t):%a %d %b}" if c["mode"] == "replay" else f"{pd.Timestamp(r.t):%d %b %H:%M}"
+            with st.expander(f"{when} · {r.recipient}"):
                 st.write(live.report(r.id))
                 st.caption("Drafted by Claude from the tool's numbers; check before sending." if r.source != "template"
                            else "Template (no AI available).")
     st.caption("Alert level: GloFAS river flow on each town's river against its own 2-year flood and July 2021 peak "
                "(impact forecast, src/build_ml2.py). Levels never drop during a replay. The replay steps on daily modelled "
-               "flows (GloFAS reanalysis, computed afterwards), so it gives the day, not the hour. A model replay, not "
-               "official warnings.")
+               "flows (GloFAS reanalysis, computed afterwards), so it gives the day, not the hour. Shown as a drill from "
+               f"{live.drill(live.START):%a %d %b %Y}: the dates are moved, the flows are those of 12-17 July 2021. "
+               "A model replay, not official warnings.")
 
 
 st.fragment(board, run_every=1.5 if c["playing"] else None)()
@@ -152,8 +174,10 @@ if c["mode"] == "replay":
     noon = [i for i, t in enumerate(rp["index"]) if t.hour == 12]
     day = {a: next((rp["index"][i] for i in noon if (rp["status"][i][area == a] == "evacuate").any()), None)
            for a, *_ in Y2021}
-    st.markdown("| River | EFAS warned | 2021 evacuation order | Tool: river at evacuate level |\n|---|---|---|---|\n" +
-                "\n".join(f"| {name} | {efas} | {order} | {f'{day[a]:%d Jul}' if day[a] is not None else 'not reached'} |"
+    st.markdown("| River | EFAS warned | 2021 evacuation order | Tool: river at evacuate level (drill day) |\n"
+                "|---|---|---|---|\n" +
+                "\n".join(f"| {name} | {efas} | {order} | " + (f"{day[a]:%d Jul} ({live.drill(day[a]):%a %d %b})"
+                                                              if day[a] is not None else "not reached") + " |"
                            for a, name, efas, order in Y2021))
     st.caption("Tool column: the first day whose mean river flow (GloFAS reanalysis, known only afterwards) puts a town "
                "of that river at evacuate. It gives the day, not the hour, and it is not the forecast available at "

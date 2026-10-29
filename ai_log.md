@@ -205,6 +205,12 @@ re-runnable script in `notebooks/` (`pipeline.py`, `osm_extract.py`, `dq_report.
 - How we checked it: 10 engine tests (3 updated for the new behaviour); Crisis room, 2021 and today and the resident page re-rendered with no errors; template briefing read for Verviers.
 - Result: open items are a source for the care-home deaths line ([VERIFY] in the brief) and a cross-border view in "Who gives the order". The shared server must be restarted and Reset before the pitch.
 
+## 35. Drill framing: the July 2021 flood "arriving now" (Fri 30 Oct)
+- Prompt/intent: the owner asked that the dashboard show today as Friday 30 October, with the 2021 data, so the jury sees a disaster coming rather than a history lesson.
+- AI output (short): `live.drill()` moves the replay dates by a fixed shift (12 Jul 2021 -> Fri 30 Oct 2026). The clock, the data and the engine stay in July 2021; only dates on screen and in briefings move. The Crisis room adds a "coming" box counting the towns that will still reach evacuate, by drill day, from the replay's own first-evacuate times. The Briefing page and the 2021 comparison table show the drill day next to the July 2021 date.
+- How we checked it: 10 engine tests; a scratch-DB server rendered at 1440 and 390 px at the start (Fri 30 Oct 06:00: 0 towns, "60 more towns reach evacuate, the first on Saturday 31 October", 9 + 49 + 2 = 60) and at 13 Jul 12:00 (Sat 31 Oct: 9 at evacuate, 51 to come). No page errors.
+- Result: every drill screen says it is a drill on the July 2021 flows, computed afterwards, and not an official warning. The flows remain hindsight; the box never calls them a forecast.
+
 ## Data-cleaning decisions (from *Python for Data Analysis* ch.7)
 - Duplicates: overlapping flood shapes dissolved; OSM objects merged per campus; a building in two study areas counted once.
 - Missing values: analysed and reported per area (book p.210), not silently filled.

@@ -41,6 +41,9 @@ Engine: `src/live.py` (SQLite: clock, town status, events, check-ins, closures, 
 - An independent reviewer agent (fresh context) before the pitch caught 4 misleading numbers: repeat this.
 
 ## Open work (priority order)
+Drill framing (29 Oct, late, ai_log 35): the replay is shown as if it starts on **Fri 30 Oct 2026** (`live.DRILL_DAY0`,
+`live.drill()`); the data stays July 2021. Change `DRILL_DAY0` to move the drill. The Crisis room shows a "flood is
+coming" box from the replay's first-evacuate times.
 Done in the session of 29 Oct, evening (commits e467c0e..bb57e32, ai_log entries 30-33):
 - 2021 timeline: `docs/TIMELINE_2021.md` (sourced; Ahr and Vesdre times re-checked in the primary documents); a
   "July 2021: when the orders came" table under the Crisis room map (replay mode), with the tool column taken **by day of

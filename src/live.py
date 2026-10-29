@@ -5,7 +5,8 @@ at once. Pages call advance() on every refresh; it moves the shared clock and, f
 raises town status, records events, auto-closes flooded evacuation roads, adds simulated (drill) check-ins and queues
 briefings for mayors and fire brigades. Briefings are drafted in a background thread (reports.py) and stored here.
 
-Replay assumptions (say them in the UI): GloFAS daily flows are placed at noon and interpolated hourly; a town's
+Replay assumptions (say them in the UI): each GloFAS daily flow holds for its whole day (no interpolated hours); the
+replay is shown as a drill that starts on DRILL_DAY0 (dates moved, data unchanged); a town's
 level holds its highest value reached so far in the replay (water that has risen is not un-warned when it falls).
 """
 import hashlib
@@ -27,6 +28,10 @@ DATA = ROOT / "outputs" / "data"
 REFS = Path(__file__).resolve().parent / "out" / "meuse" / "gauge_refs.json"
 
 START, END = pd.Timestamp("2021-07-12 06:00"), pd.Timestamp("2021-07-18 00:00")
+# Drill: the replay is shown as if it began on the pitch day, so the July 2021 flood is "coming" now. The clock and the
+# data stay in July 2021; only the dates on screen and in briefings move (12 Jul 2021 -> Fri 30 Oct 2026).
+DRILL_DAY0 = pd.Timestamp("2026-10-30")
+SHIFT = DRILL_DAY0 - START.normalize()
 STATUS = ["none", "watch", "warn", "evacuate"]  # none: river at or below its 2-year flow
 ALERT = ("warn", "evacuate")
 MODELLED_AREAS = {"vesdre"}  # as anna.MODELLED: no satellite map, EFAS 500-year model  # the steps that make an event and briefings
@@ -51,6 +56,11 @@ CALL_TOWN = {"Weilerswist (DE)": "Kreis Euskirchen", "Blankenheim (DE)": "Kreis 
              "Durbuy (BE)": "Province of Luxembourg (governor)", "Hotton (BE)": "Province of Luxembourg (governor)",
              "La Roche-en-Ardenne (BE)": "Province of Luxembourg (governor)",
              "Rendeux (BE)": "Province of Luxembourg (governor)"}
+
+
+def drill(t):
+    """A replay time as the drill shows it (same hour, dates moved to start on DRILL_DAY0)."""
+    return pd.Timestamp(t) + SHIFT
 
 
 def district(area, municipality):
@@ -498,8 +508,9 @@ def _facts(r, prev, s, when, t, mode):
     modelled = r.area in anna.MODELLED
     return {"town": _name(r.municipality), "status": s, "from": "normal" if prev == "none" else prev,
             # a replay steps on daily flows, so it gives the day only
-            "time": f"{pd.Timestamp(when):%-d %b %Y} (daily river flow)" if mode == "replay" else _fmt_t(when),
-            "scenario": ("replay of July 2021 on modelled river flows computed afterwards (not a forecast)"
+            "time": f"{drill(when):%a %-d %b %Y} (daily river flow)" if mode == "replay" else _fmt_t(when),
+            "scenario": (f"drill: the July 2021 flood replayed as if it began on {DRILL_DAY0:%a %-d %b %Y}, on modelled "
+                         "river flows computed afterwards (not a forecast)"
                          if mode == "replay" else "live forecast"),
             "river_point": r.gauge, "modelled_flow_m3s": int(round(q)), "modelled_two_year_flow_m3s": int(round(raw.q2)),
             "modelled_july_2021_peak_m3s": int(round(raw.q2021)),
