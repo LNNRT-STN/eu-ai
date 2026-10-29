@@ -11,7 +11,8 @@ core.style()
 
 nav = st.navigation({
     "": [st.Page("views/evacuate.py", title="Evacuation plan", icon=":material/directions_run:", default=True),
-         st.Page("views/long_term.py", title="Long term", icon=":material/construction:")],
+         st.Page("views/long_term.py", title="Long term", icon=":material/construction:"),
+         st.Page("views/host.py", title="Offer a bed", icon=":material/volunteer_activism:")],
     "More": [st.Page("views/first_action.py", title="All towns and care sites", icon=":material/flag:"),
                      st.Page("views/briefing.py", title="Briefing", icon=":material/space_dashboard:"),
                      st.Page("views/rivers.py", title="Rivers", icon=":material/water:"),

@@ -100,6 +100,12 @@ re-runnable script in `notebooks/` (`pipeline.py`, `osm_extract.py`, `dq_report.
 - How we checked it: gap numbers read from q4_headline.json and app_towns.csv (19,000 observed / 6,500 modelled without a shelter on foot; 15 care sites; 44 schools; 13,100 / 8,800 buildings); amounts copied as published and never summed; "partly verified" shown on the page wherever the source is secondary. Headline reworded after the render showed it contradicted the payout figure ("money is flowing" vs a fifth paid out).
 - Result: not found and said so: unit costs for flood-proofing a care home or shelter equipment; rescEU and ERDF regional amounts; an OVV report on Limburg 2021.
 
+## 18. Offer a bed: a solidarity register (owner request)
+- Prompt/intent: let residents outside the flood zone offer a room or spare bed to people who must leave, as a solidarity movement.
+- AI output (short): page `src/views/host.py` (town, beds, who the host can take, "my home stayed dry" check, reference code, withdraw) and one line on the Evacuation plan with beds offered within 10 km.
+- How we checked it: filled the form in the browser, read the stored row, saw the line appear for a town 10 km away, fixed plurals and a code-parsing bug (an all-digit code with a leading zero would not withdraw). The test offer was deleted.
+- Result: privacy by design: no name, address or phone stored; offers stay on the local machine (data/, gitignored); not counted as shelter places. A real roll-out is run by the municipality under the GDPR.
+
 ## Data-cleaning decisions (from *Python for Data Analysis* ch.7)
 - Duplicates: overlapping flood shapes dissolved; OSM objects merged per campus; a building in two study areas counted once.
 - Missing values: analysed and reported per area (book p.210), not silently filled.

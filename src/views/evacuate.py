@@ -261,6 +261,30 @@ with rm:
 st.html("<p class='asof'>One plan that fits the most people in (max-flow, 10 km straight line). Shelters are "
         "OpenStreetMap schools, sports halls and civic buildings, dry in 2021 and in the 100-year model: candidates, not "
         "official shelters. Places: floor area × 50 % usable ÷ 4 m² per person.</p>")
+
+
+def spare_beds():
+    """Beds residents offered (Offer a bed page) in this town or a town whose centre is within 10 km."""
+    try:
+        o = pd.read_csv(core.DATA.parents[1] / "data" / "host_offers.csv")
+    except (FileNotFoundError, pd.errors.EmptyDataError):
+        return
+    ctr = towns.drop_duplicates("municipality").set_index("municipality")[["lon", "lat"]]
+    o = o[o.outside_2021.astype(bool) & o.municipality.isin(ctr.index)]
+    if o.empty:
+        return
+    d = core.km(t.lon, t.lat, ctr.loc[o.municipality, "lon"].values, ctr.loc[o.municipality, "lat"].values)
+    near_o = o[d <= 10]
+    if len(near_o):
+        n, h, old = int(near_o.beds.sum()), len(near_o), int(near_o.loc[near_o.older.astype(bool), "beds"].sum())
+        st.html(f"<p class='ev-river'><i style='background:{core.SHELTER}'></i><span><b>{n} spare "
+                f"bed{'s' if n != 1 else ''} offered by residents</b> within 10 km ({h} home{'s' if h != 1 else ''}; "
+                f"{old} suit{'s' if old == 1 else ''} an older or less mobile person). Not "
+                "checked yet, and not counted in the shelter places: use them first for people who cannot stay in a "
+                "hall.</span></p>")
+
+
+spare_beds()
 st.space("medium")
 
 # ------------------------------------------------------------------ the four steps that broke in 2021
