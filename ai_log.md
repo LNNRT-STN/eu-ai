@@ -112,6 +112,12 @@ re-runnable script in `notebooks/` (`pipeline.py`, `osm_extract.py`, `dq_report.
 - How we checked it: building totals match app_towns (21,949 vs 21,864; median gap 1 per town). Construction period is the 100 m cell's first built-up epoch, not the building's: labelled "neighbourhood age". 1,438 homes have OBAT's 2.5 m fill-in height: counted as "no reliable height", not single-storey (Schleiden 1,351 + 168 = the agent's 1,519). Removed an unsupported claim ("often older residents") after review.
 - Result: water depth is not in the data, so "no upper floor" is a priority signal, not a drowning-risk estimate.
 
+## 20. Road evacuation simulation and rail in the flood
+- Prompt/intent: simulate people moving when an evacuation happens (owner chose routes + road load, not time-stepped traffic; simulation, not ML).
+- AI output (short): two agents. `notebooks/evac_sim.py`: 14 towns with at least 300 residents in the water, today's OSM roads (Geofabrik extracts; Overpass was unreachable), residents spread evenly over the streets in the water, walk 4 km/h (3 km/h for older people), bus 30 km/h without boarding. `notebooks/infra.py`: rail, stations and bridges inside the 2021 water + desk research (docs/INFRA_2021.md).
+- How we checked it: road vs straight-line distance median 1.2-1.4 in every town; people totals equal app_towns exactly; rail result compared with Deutsche Bahn's rebuild of the Ahr line (19 rail bridges in our layer, 22 rebuilt by DB). In the render an unnamed road showed as "tertiary" (OSM class) and was relabelled "an unnamed tertiary road"; plurals fixed.
+- Result: the striking finding: in narrow valleys most routes go back through the 2021 water (Dernau 100 %, Trooz 95 %, Bad Neuenahr-Ahrweiler 37 %): evacuate before the river rises. Times are minimums. We do not show the simulation's walk/bus split, because it uses the 10 km plan and would contradict the walking plan's counts.
+
 ## Data-cleaning decisions (from *Python for Data Analysis* ch.7)
 - Duplicates: overlapping flood shapes dissolved; OSM objects merged per campus; a building in two study areas counted once.
 - Missing values: analysed and reported per area (book p.210), not silently filled.

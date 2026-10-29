@@ -1,0 +1,322 @@
+area,source,municipality,kind,subkind,name,km_in_flood,count,bridge
+ahr,observed EMS all passes,Ahrbrück (DE),bridge_rail,rail,3000; Ahrtalbahn,,1.0,True
+ahr,observed EMS all passes,Altenahr (DE),bridge_rail,rail,3000; Ahrtalbahn,,1.0,True
+ahr,observed EMS all passes,Altenahr (DE),bridge_rail,rail,3000; Ahrtalbahn,,1.0,True
+ahr,observed EMS all passes,Altenahr (DE),bridge_rail,rail,3000; Ahrtalbahn,,1.0,True
+ahr,observed EMS all passes,Altenahr (DE),bridge_rail,rail,3000; Ahrtalbahn,,1.0,True
+ahr,observed EMS all passes,Altenahr (DE),bridge_rail,rail,3000; Ahrtalbahn,,1.0,True
+ahr,observed EMS all passes,"Bad Neuenahr-Ahrweiler, Stadt (DE)",bridge_rail,rail,3000; Ahrtalbahn,,1.0,True
+ahr,observed EMS all passes,"Bad Neuenahr-Ahrweiler, Stadt (DE)",bridge_rail,rail,3000; Ahrtalbahn,,1.0,True
+ahr,observed EMS all passes,"Bad Neuenahr-Ahrweiler, Stadt (DE)",bridge_rail,rail,3000; Ahrtalbahn,,1.0,True
+ahr,observed EMS all passes,"Bad Neuenahr-Ahrweiler, Stadt (DE)",bridge_rail,rail,3000; Ahrtalbahn,,1.0,True
+ahr,observed EMS all passes,"Bad Neuenahr-Ahrweiler, Stadt (DE)",bridge_rail,rail,3000; Ahrtalbahn,,1.0,True
+ahr,observed EMS all passes,"Bad Neuenahr-Ahrweiler, Stadt (DE)",bridge_rail,rail,3000; Ahrtalbahn,,1.0,True
+ahr,observed EMS all passes,Dernau (DE),bridge_rail,rail,3000; Ahrtalbahn,,1.0,True
+ahr,observed EMS all passes,Dernau (DE),bridge_rail,rail,3000; Ahrtalbahn,,1.0,True
+ahr,observed EMS all passes,Dernau (DE),bridge_rail,rail,3000; Ahrtalbahn,,1.0,True
+ahr,observed EMS all passes,Mayschoß (DE),bridge_rail,rail,3000; Ahrtalbahn,,1.0,True
+ahr,observed EMS all passes,Rech (DE),bridge_rail,rail,3000; Ahrtalbahn,,1.0,True
+ahr,observed EMS all passes,"Sinzig, Stadt (DE)",bridge_rail,rail,2630; Linke Rheinstrecke,,1.0,True
+ahr,observed EMS all passes,"Sinzig, Stadt (DE)",bridge_rail,rail,2630; Linke Rheinstrecke,,1.0,True
+ahr,observed EMS all passes,Altenahr (DE),bridge_road,road_primary,B 257,,1.0,True
+ahr,observed EMS all passes,Altenahr (DE),bridge_road,road_primary,B 267,,1.0,True
+ahr,observed EMS all passes,Altenahr (DE),bridge_road,road_secondary,L 76,,1.0,True
+ahr,observed EMS all passes,"Bad Neuenahr-Ahrweiler, Stadt (DE)",bridge_road,road_motorway; road_trunk,A 61; B 266,,1.0,True
+ahr,observed EMS all passes,"Bad Neuenahr-Ahrweiler, Stadt (DE)",bridge_road,road_trunk,B 266,,1.0,True
+ahr,observed EMS all passes,"Bad Neuenahr-Ahrweiler, Stadt (DE)",bridge_road,road_primary,B 266,,1.0,True
+ahr,observed EMS all passes,"Bad Neuenahr-Ahrweiler, Stadt (DE)",bridge_road,road_trunk,B 266,,1.0,True
+ahr,observed EMS all passes,"Bad Neuenahr-Ahrweiler, Stadt (DE)",bridge_road,road_primary,B 266,,1.0,True
+ahr,observed EMS all passes,"Bad Neuenahr-Ahrweiler, Stadt (DE)",bridge_road,road_primary,B 267,,1.0,True
+ahr,observed EMS all passes,"Bad Neuenahr-Ahrweiler, Stadt (DE)",bridge_road,road_secondary,L 83,,1.0,True
+ahr,observed EMS all passes,"Bad Neuenahr-Ahrweiler, Stadt (DE)",bridge_road,road_secondary,Ramersbacher Straße,,1.0,True
+ahr,observed EMS all passes,Schuld (DE),bridge_road,road_secondary,L 73,,1.0,True
+ahr,observed EMS all passes,Schuld (DE),bridge_road,road_secondary,L 73,,1.0,True
+ahr,observed EMS all passes,Schuld (DE),bridge_road,road_secondary,L 73,,1.0,True
+ahr,observed EMS all passes,Schuld (DE),bridge_road,road_secondary,L 73,,1.0,True
+ahr,observed EMS all passes,Schuld (DE),bridge_road,road_secondary,L 73; unnamed,,1.0,True
+ahr,observed EMS all passes,"Sinzig, Stadt (DE)",bridge_road,road_trunk,B 9,,1.0,True
+ahr,observed EMS all passes,"Sinzig, Stadt (DE)",bridge_road,road_trunk,B 9,,1.0,True
+ahr,observed EMS all passes,"Sinzig, Stadt (DE)",bridge_road,road_secondary,L 82,,1.0,True
+ahr,observed EMS all passes,Ahrbrück (DE),rail,rail,3000; Ahrtalbahn,0.88,,False
+ahr,observed EMS all passes,Altenahr (DE),rail,rail,3000; Ahrtalbahn,1.27,,False
+ahr,observed EMS all passes,Altenahr (DE),rail,rail,3000; Ahrtalbahn (service=siding),0.24,,False
+ahr,observed EMS all passes,"Bad Neuenahr-Ahrweiler, Stadt (DE)",rail,rail,3000; Ahrtalbahn,7.08,,False
+ahr,observed EMS all passes,Dernau (DE),rail,rail,3000; Ahrtalbahn,3.47,,False
+ahr,observed EMS all passes,Mayschoß (DE),rail,rail,3000; Ahrtalbahn,0.55,,False
+ahr,observed EMS all passes,Rech (DE),rail,rail,3000; Ahrtalbahn,0.19,,False
+ahr,observed EMS all passes,"Sinzig, Stadt (DE)",rail,rail,2630; Linke Rheinstrecke,0.63,,False
+ahr,observed EMS all passes,Ahrbrück (DE),road_main,road_primary,B 257,2.19,,False
+ahr,observed EMS all passes,Altenahr (DE),road_main,road_primary,B 257,0.22,,False
+ahr,observed EMS all passes,Altenahr (DE),road_main,road_primary,B 267,2.6,,False
+ahr,observed EMS all passes,Altenahr (DE),road_main,road_secondary,L 76,0.31,,False
+ahr,observed EMS all passes,"Bad Neuenahr-Ahrweiler, Stadt (DE)",road_main,road_motorway,A 61,0.55,,False
+ahr,observed EMS all passes,"Bad Neuenahr-Ahrweiler, Stadt (DE)",road_main,road_primary,B 266,0.74,,False
+ahr,observed EMS all passes,"Bad Neuenahr-Ahrweiler, Stadt (DE)",road_main,road_trunk,B 266,2.83,,False
+ahr,observed EMS all passes,"Bad Neuenahr-Ahrweiler, Stadt (DE)",road_main,road_primary,B 267,2.47,,False
+ahr,observed EMS all passes,"Bad Neuenahr-Ahrweiler, Stadt (DE)",road_main,road_secondary,L 80,0.79,,False
+ahr,observed EMS all passes,"Bad Neuenahr-Ahrweiler, Stadt (DE)",road_main,road_secondary,L 83,0.77,,False
+ahr,observed EMS all passes,"Bad Neuenahr-Ahrweiler, Stadt (DE)",road_main,road_secondary,L 84,1.66,,False
+ahr,observed EMS all passes,"Bad Neuenahr-Ahrweiler, Stadt (DE)",road_main,road_secondary,Ramersbacher Straße,0.11,,False
+ahr,observed EMS all passes,"Bad Neuenahr-Ahrweiler, Stadt (DE)",road_main,road_primary,unnamed,0.29,,False
+ahr,observed EMS all passes,"Bad Neuenahr-Ahrweiler, Stadt (DE)",road_main,road_secondary,unnamed,0.08,,False
+ahr,observed EMS all passes,"Bad Neuenahr-Ahrweiler, Stadt (DE)",road_main,road_trunk,unnamed,0.85,,False
+ahr,observed EMS all passes,Dernau (DE),road_main,road_primary,B 267,2.55,,False
+ahr,observed EMS all passes,Fuchshofen (DE),road_main,road_secondary,L 73,0.17,,False
+ahr,observed EMS all passes,Hönningen (DE),road_main,road_primary,B 257,1.14,,False
+ahr,observed EMS all passes,Mayschoß (DE),road_main,road_primary,B 267,1.93,,False
+ahr,observed EMS all passes,Müsch (DE),road_main,road_primary,B 258,0.01,,False
+ahr,observed EMS all passes,Müsch (DE),road_main,road_secondary,L 73,0.05,,False
+ahr,observed EMS all passes,Rech (DE),road_main,road_primary,B 267,0.7,,False
+ahr,observed EMS all passes,Schuld (DE),road_main,road_secondary,L 73,1.3,,False
+ahr,observed EMS all passes,Schuld (DE),road_main,road_primary,L 75,0.21,,False
+ahr,observed EMS all passes,Schuld (DE),road_main,road_secondary,unnamed,0.1,,False
+ahr,observed EMS all passes,"Sinzig, Stadt (DE)",road_main,road_trunk,B 9,1.55,,False
+ahr,observed EMS all passes,"Sinzig, Stadt (DE)",road_main,road_secondary,L 82,0.9,,False
+ahr,observed EMS all passes,"Sinzig, Stadt (DE)",road_main,road_secondary,Lindenstraße,0.12,,False
+ahr,observed EMS all passes,"Sinzig, Stadt (DE)",road_main,road_secondary,unnamed,0.05,,False
+ahr,observed EMS all passes,"Sinzig, Stadt (DE)",road_main,road_trunk,unnamed,0.18,,False
+ahr,observed EMS all passes,Wershofen (DE),road_main,road_secondary,L 73,0.53,,False
+ahr,observed EMS all passes,Ahrbrück (DE),station,rail_halt,Ahrbrück,,1.0,False
+ahr,observed EMS all passes,Altenahr (DE),station,rail_halt,Altenahr,,1.0,False
+ahr,observed EMS all passes,"Bad Neuenahr-Ahrweiler, Stadt (DE)",station,rail_station,Heimersheim/Lohrsdorf,,1.0,False
+ahr,observed EMS all passes,"Bad Neuenahr-Ahrweiler, Stadt (DE)",station,rail_station,Walporzheim,,1.0,False
+ahr,observed EMS all passes,Dernau (DE),station,rail_station,Dernau,,1.0,False
+ahr,observed EMS all passes,Mayschoß (DE),station,rail_halt,Mayschoß,,1.0,False
+erftstadt,observed EMS all passes,"Erftstadt, Stadt (DE)",bridge_road,road_motorway,A 1,,1.0,True
+erftstadt,observed EMS all passes,"Erftstadt, Stadt (DE)",bridge_road,road_motorway,A 553,,1.0,True
+erftstadt,observed EMS all passes,"Erftstadt, Stadt (DE)",bridge_road,road_motorway,A 61,,1.0,True
+erftstadt,observed EMS all passes,"Erftstadt, Stadt (DE)",bridge_road,road_secondary,L 163,,1.0,True
+erftstadt,observed EMS all passes,"Erftstadt, Stadt (DE)",bridge_road,road_secondary,L 163,,1.0,True
+erftstadt,observed EMS all passes,"Erftstadt, Stadt (DE)",bridge_road,road_secondary,L 495,,1.0,True
+erftstadt,observed EMS all passes,"Erftstadt, Stadt (DE)",road_main,road_motorway,A 1,5.24,,False
+erftstadt,observed EMS all passes,"Erftstadt, Stadt (DE)",road_main,road_motorway,A 1;A 61,0.87,,False
+erftstadt,observed EMS all passes,"Erftstadt, Stadt (DE)",road_main,road_motorway,A 553,0.5,,False
+erftstadt,observed EMS all passes,"Erftstadt, Stadt (DE)",road_main,road_motorway,A 61,3.36,,False
+erftstadt,observed EMS all passes,"Erftstadt, Stadt (DE)",road_main,road_primary,B 265,3.22,,False
+erftstadt,observed EMS all passes,"Erftstadt, Stadt (DE)",road_main,road_secondary,L 163,1.34,,False
+erftstadt,observed EMS all passes,"Erftstadt, Stadt (DE)",road_main,road_secondary,L 495,0.49,,False
+erftstadt,observed EMS all passes,"Erftstadt, Stadt (DE)",road_main,road_motorway,unnamed,0.71,,False
+erftstadt,observed EMS all passes,"Erftstadt, Stadt (DE)",road_main,road_primary,unnamed,1.48,,False
+erftstadt,observed EMS all passes,"Erftstadt, Stadt (DE)",road_main,road_secondary,unnamed,0.02,,False
+erftstadt,observed EMS all passes,"Kerpen, Kolpingstadt (DE)",road_main,road_secondary,L 495,0.69,,False
+erftstadt,observed EMS all passes,Weilerswist (DE),road_main,road_secondary,L 163,0.05,,False
+eschweiler,observed EMS all passes,"Eschweiler, Stadt (DE)",rail,rail,2571,0.11,,False
+eschweiler,observed EMS all passes,Inden (DE),road_main,road_secondary,L 241,0.18,,False
+eschweiler,observed EMS all passes,"Stolberg (Rhld.), Kupferstadt (DE)",road_main,road_primary,L 238,0.18,,False
+euskirchen,observed EMS all passes,"Bad Münstereifel, Stadt (DE)",bridge_rail,rail,2634; Erfttalbahn; 475 KBS 475 Erfttalbahn,,1.0,True
+euskirchen,observed EMS all passes,"Bad Münstereifel, Stadt (DE)",bridge_rail,rail,2634; Erfttalbahn; 475 KBS 475 Erfttalbahn,,1.0,True
+euskirchen,observed EMS all passes,"Bad Münstereifel, Stadt (DE)",bridge_road,road_primary,L 194,,1.0,True
+euskirchen,observed EMS all passes,"Bad Münstereifel, Stadt (DE)",bridge_road,road_secondary,L 234,,1.0,True
+euskirchen,observed EMS all passes,"Euskirchen, Stadt (DE)",bridge_road,road_primary,B 56; B 266; B 56;B 266,,1.0,True
+euskirchen,observed EMS all passes,"Bad Münstereifel, Stadt (DE)",rail,rail,2634; Erfttalbahn; 475 KBS 475 Erfttalbahn,0.34,,False
+euskirchen,observed EMS all passes,"Euskirchen, Stadt (DE)",rail,rail,2585; Bördebahn,0.03,,False
+euskirchen,observed EMS all passes,"Euskirchen, Stadt (DE)",rail,rail,unnamed rail (service=spur),0.63,,False
+euskirchen,observed EMS all passes,"Bad Münstereifel, Stadt (DE)",road_main,road_secondary,L 11,0.23,,False
+euskirchen,observed EMS all passes,"Bad Münstereifel, Stadt (DE)",road_main,road_primary,L 194,0.36,,False
+euskirchen,observed EMS all passes,"Bad Münstereifel, Stadt (DE)",road_main,road_secondary,L 234,0.26,,False
+euskirchen,observed EMS all passes,"Euskirchen, Stadt (DE)",road_main,road_primary,B 56; B 266,0.32,,False
+euskirchen,observed EMS all passes,"Euskirchen, Stadt (DE)",road_main,road_primary,B 56;B 266,0.09,,False
+euskirchen,observed EMS all passes,"Euskirchen, Stadt (DE)",road_main,road_primary,L 194,0.24,,False
+euskirchen,observed EMS all passes,"Bad Münstereifel, Stadt (DE)",station,rail_halt,Bad Münstereifel-Arloff,,1.0,False
+liege,observed EMS all passes,(outside outlines),bridge_road,road_primary,N2,,1.0,True
+liege,observed EMS all passes,Riemst (BE),bridge_road,road_primary,N79,,1.0,True
+liege,observed EMS all passes,(outside outlines),rail,rail,433 (service=yard),0.14,,False
+liege,observed EMS all passes,Luik (BE),rail,rail,L43,0.09,,False
+liege,observed EMS all passes,Wezet (BE),rail,rail,L40,0.24,,False
+liege,observed EMS all passes,(outside outlines),road_main,road_motorway,E25,0.01,,False
+liege,observed EMS all passes,(outside outlines),road_main,road_primary,N2,0.05,,False
+liege,observed EMS all passes,(outside outlines),road_main,road_primary,N296,0.02,,False
+liege,observed EMS all passes,(outside outlines),road_main,road_secondary,N653b,0.1,,False
+liege,observed EMS all passes,Kelmis (BE),road_main,road_primary,N3,0.01,,False
+liege,observed EMS all passes,Riemst (BE),road_main,road_primary,N79,0.09,,False
+liege,observed EMS all passes,Wezet (BE),road_main,road_motorway,E25,1.93,,False
+liege,observed EMS all passes,Wezet (BE),road_main,road_secondary,N653b,0.17,,False
+rochefort,observed EMS all passes,Hamoir (BE),rail,rail,L43,0.22,,False
+rochefort,observed EMS all passes,(outside outlines),road_main,road_motorway,E411,0.79,,False
+rochefort,observed EMS all passes,(outside outlines),road_main,road_trunk,N4,0.22,,False
+rochefort,observed EMS all passes,(outside outlines),road_main,road_secondary,N623,0.04,,False
+rochefort,observed EMS all passes,(outside outlines),road_main,road_trunk,N63,0.01,,False
+rochefort,observed EMS all passes,(outside outlines),road_main,road_secondary,N638,0.05,,False
+rochefort,observed EMS all passes,(outside outlines),road_main,road_secondary,N846,0.1,,False
+rochefort,observed EMS all passes,(outside outlines),road_main,road_secondary,N860,0.16,,False
+rochefort,observed EMS all passes,(outside outlines),road_main,road_secondary,N889,0.03,,False
+rochefort,observed EMS all passes,(outside outlines),road_main,road_secondary,N929,0.05,,False
+rochefort,observed EMS all passes,(outside outlines),road_main,road_motorway,unnamed,0.22,,False
+rochefort,observed EMS all passes,Durbuy (BE),road_main,road_secondary,N638,0.02,,False
+rochefort,observed EMS all passes,Durbuy (BE),road_main,road_secondary,N831,0.13,,False
+rochefort,observed EMS all passes,Hotton (BE),road_main,road_secondary,N833,0.01,,False
+rochefort,observed EMS all passes,Hotton (BE),road_main,road_secondary,N898,0.17,,False
+rochefort,observed EMS all passes,La Roche-en-Ardenne (BE),road_main,road_secondary,N833,0.49,,False
+rochefort,observed EMS all passes,La Roche-en-Ardenne (BE),road_main,road_primary,N89,0.19,,False
+rochefort,observed EMS all passes,Rendeux (BE),road_main,road_secondary,N833,0.66,,False
+rochefort,observed EMS all passes,Rochefort (BE),road_main,road_motorway,E411,0.11,,False
+rochefort,observed EMS all passes,Rochefort (BE),road_main,road_secondary,N911,0.11,,False
+rochefort,observed EMS all passes,Rochefort (BE),road_main,road_secondary,N911a,0.01,,False
+rochefort,observed EMS all passes,Rochefort (BE),road_main,road_secondary,N955,0.01,,False
+schleiden,observed EMS all passes,Kall (DE),bridge_rail,rail,2631; Eifelstrecke,,1.0,True
+schleiden,observed EMS all passes,Kall (DE),bridge_road,road_secondary,L 105,,1.0,True
+schleiden,observed EMS all passes,Kall (DE),bridge_road,road_secondary,L 105,,1.0,True
+schleiden,observed EMS all passes,"Schleiden, Stadt (DE)",bridge_road,road_primary,B 258,,1.0,True
+schleiden,observed EMS all passes,"Schleiden, Stadt (DE)",bridge_road,road_primary,B 265,,1.0,True
+schleiden,observed EMS all passes,"Schleiden, Stadt (DE)",bridge_road,road_primary,B 265,,1.0,True
+schleiden,observed EMS all passes,"Schleiden, Stadt (DE)",bridge_road,road_primary,B 266,,1.0,True
+schleiden,observed EMS all passes,"Schleiden, Stadt (DE)",bridge_road,road_primary,B 266; unnamed,,1.0,True
+schleiden,observed EMS all passes,Kall (DE),rail,rail,2631; Eifelstrecke,1.91,,False
+schleiden,observed EMS all passes,Kall (DE),rail,rail,2631; Eifelstrecke (service=yard),0.57,,False
+schleiden,observed EMS all passes,Kall (DE),rail,rail,unnamed rail (service=siding),1.36,,False
+schleiden,observed EMS all passes,Kall (DE),rail,rail,unnamed rail (service=yard),0.05,,False
+schleiden,observed EMS all passes,"Schleiden, Stadt (DE)",rail,rail,unnamed rail (service=siding),0.15,,False
+schleiden,observed EMS all passes,Kall (DE),road_main,road_secondary,L 105,1.24,,False
+schleiden,observed EMS all passes,Kall (DE),road_main,road_secondary,L 204,1.41,,False
+schleiden,observed EMS all passes,Kall (DE),road_main,road_secondary,unnamed,0.15,,False
+schleiden,observed EMS all passes,"Schleiden, Stadt (DE)",road_main,road_primary,B 258,0.32,,False
+schleiden,observed EMS all passes,"Schleiden, Stadt (DE)",road_main,road_primary,B 265,3.65,,False
+schleiden,observed EMS all passes,"Schleiden, Stadt (DE)",road_main,road_primary,B 266,2.48,,False
+schleiden,observed EMS all passes,"Schleiden, Stadt (DE)",road_main,road_primary,Blankenheimer Straße,0.04,,False
+schleiden,observed EMS all passes,"Schleiden, Stadt (DE)",road_main,road_primary,Gemünder Straße,0.04,,False
+schleiden,observed EMS all passes,"Schleiden, Stadt (DE)",road_main,road_primary,unnamed,0.16,,False
+schleiden,observed EMS all passes,Kall (DE),station,rail_station,Kall,,1.0,False
+schleiden,observed EMS all passes,"Schleiden, Stadt (DE)",station,rail_halt,Gemünd (Eifel),,1.0,False
+schleiden,observed EMS all passes,"Schleiden, Stadt (DE)",station,rail_halt,Olef,,1.0,False
+venlo,observed EMS all passes,Venlo (NL),bridge_road,road_secondary,N556,,1.0,True
+venlo,observed EMS all passes,Roerdalen (NL),road_main,road_secondary,N570,0.01,,False
+venlo,observed EMS all passes,Venlo (NL),road_main,road_motorway,A73,0.03,,False
+venlo,observed EMS all passes,Venlo (NL),road_main,road_secondary,N556,0.19,,False
+vesdre,modelled EFAS 500-yr,Chaudfontaine (BE),bridge_rail,rail,L37,,1.0,True
+vesdre,modelled EFAS 500-yr,Chaudfontaine (BE),bridge_rail,rail,L37,,1.0,True
+vesdre,modelled EFAS 500-yr,Chaudfontaine (BE),bridge_rail,rail,L37,,1.0,True
+vesdre,modelled EFAS 500-yr,Chaudfontaine (BE),bridge_rail,rail,L37,,1.0,True
+vesdre,modelled EFAS 500-yr,Chaudfontaine (BE),bridge_rail,rail,L37,,1.0,True
+vesdre,modelled EFAS 500-yr,Chaudfontaine (BE),bridge_rail,rail,L3; LGV 3; L3 LGV 3 - HSL 3,,1.0,True
+vesdre,modelled EFAS 500-yr,Chaudfontaine (BE),bridge_rail,rail,L3; LGV 3; L3 LGV 3 - HSL 3,,1.0,True
+vesdre,modelled EFAS 500-yr,Limburg (BE),bridge_rail,rail,L37,,1.0,True
+vesdre,modelled EFAS 500-yr,Limburg (BE),bridge_rail,rail,L37,,1.0,True
+vesdre,modelled EFAS 500-yr,Luik (BE),bridge_rail,rail,L3 LGV 3 - HSL 3 (service=yard); L37; L37; L3 LGV 3 - HSL 3; L3; LGV 3; L3 LGV 3 - HSL 3,,1.0,True
+vesdre,modelled EFAS 500-yr,Luik (BE),bridge_rail,rail,L37,,1.0,True
+vesdre,modelled EFAS 500-yr,Luik (BE),bridge_rail,rail,L37; L37; L3 LGV 3 - HSL 3; L3; LGV 3; L3 LGV 3 - HSL 3,,1.0,True
+vesdre,modelled EFAS 500-yr,Luik (BE),bridge_rail,rail,L37; L37A; unnamed rail (service=siding),,1.0,True
+vesdre,modelled EFAS 500-yr,Luik (BE),bridge_rail,rail,L43; unnamed rail (service=siding),,1.0,True
+vesdre,modelled EFAS 500-yr,Luik (BE),bridge_rail,rail,L43; unnamed rail (service=siding),,1.0,True
+vesdre,modelled EFAS 500-yr,Pepinster (BE),bridge_rail,rail,L37,,1.0,True
+vesdre,modelled EFAS 500-yr,Pepinster (BE),bridge_rail,rail,L37,,1.0,True
+vesdre,modelled EFAS 500-yr,Pepinster (BE),bridge_rail,rail,L37,,1.0,True
+vesdre,modelled EFAS 500-yr,Pepinster (BE),bridge_rail,rail,L37,,1.0,True
+vesdre,modelled EFAS 500-yr,Pepinster (BE),bridge_rail,rail,L37,,1.0,True
+vesdre,modelled EFAS 500-yr,Pepinster (BE),bridge_rail,rail,L37,,1.0,True
+vesdre,modelled EFAS 500-yr,Pepinster (BE),bridge_rail,rail,L37,,1.0,True
+vesdre,modelled EFAS 500-yr,Pepinster (BE),bridge_rail,rail,L37,,1.0,True
+vesdre,modelled EFAS 500-yr,Pepinster (BE),bridge_rail,rail,L37,,1.0,True
+vesdre,modelled EFAS 500-yr,Pepinster (BE),bridge_rail,rail,L37,,1.0,True
+vesdre,modelled EFAS 500-yr,Pepinster (BE),bridge_rail,rail,L44,,1.0,True
+vesdre,modelled EFAS 500-yr,Pepinster (BE),bridge_rail,rail,L44,,1.0,True
+vesdre,modelled EFAS 500-yr,Pepinster (BE),bridge_rail,rail,L44,,1.0,True
+vesdre,modelled EFAS 500-yr,Theux (BE),bridge_rail,rail,L44,,1.0,True
+vesdre,modelled EFAS 500-yr,Trooz (BE),bridge_rail,rail,L37,,1.0,True
+vesdre,modelled EFAS 500-yr,Trooz (BE),bridge_rail,rail,L37,,1.0,True
+vesdre,modelled EFAS 500-yr,Trooz (BE),bridge_rail,rail,L37,,1.0,True
+vesdre,modelled EFAS 500-yr,Trooz (BE),bridge_rail,rail,L37,,1.0,True
+vesdre,modelled EFAS 500-yr,Trooz (BE),bridge_rail,rail,L37,,1.0,True
+vesdre,modelled EFAS 500-yr,Trooz (BE),bridge_rail,rail,L37,,1.0,True
+vesdre,modelled EFAS 500-yr,Trooz (BE),bridge_rail,rail,L37,,1.0,True
+vesdre,modelled EFAS 500-yr,Trooz (BE),bridge_rail,rail,"L37; trains 528-529 528-529 : Welkenraedt - Oostende, 529-544 529-544 : Eupen - Oostende, 545 545 : Eupen - Oostende (via Waremme) (service=crossover)",,1.0,True
+vesdre,modelled EFAS 500-yr,Verviers (BE),bridge_rail,rail,L37,,1.0,True
+vesdre,modelled EFAS 500-yr,Chaudfontaine (BE),bridge_road,road_motorway,E25,,1.0,True
+vesdre,modelled EFAS 500-yr,Chaudfontaine (BE),bridge_road,road_primary,N61,,1.0,True
+vesdre,modelled EFAS 500-yr,Chaudfontaine (BE),bridge_road,road_secondary,N621,,1.0,True
+vesdre,modelled EFAS 500-yr,Limburg (BE),bridge_road,road_primary,N61,,1.0,True
+vesdre,modelled EFAS 500-yr,Limburg (BE),bridge_road,road_primary,N61,,1.0,True
+vesdre,modelled EFAS 500-yr,Limburg (BE),bridge_road,road_primary,N61,,1.0,True
+vesdre,modelled EFAS 500-yr,Limburg (BE),bridge_road,road_secondary,N620,,1.0,True
+vesdre,modelled EFAS 500-yr,Luik (BE),bridge_road,road_motorway; road_secondary,A602; N633; Pont des Grosses Battes,,1.0,True
+vesdre,modelled EFAS 500-yr,Luik (BE),bridge_road,road_motorway,E25,,1.0,True
+vesdre,modelled EFAS 500-yr,Luik (BE),bridge_road,road_primary,N30,,1.0,True
+vesdre,modelled EFAS 500-yr,Luik (BE),bridge_road,road_secondary,N633a,,1.0,True
+vesdre,modelled EFAS 500-yr,Pepinster (BE),bridge_road,road_primary,N61,,1.0,True
+vesdre,modelled EFAS 500-yr,Pepinster (BE),bridge_road,road_primary,N61,,1.0,True
+vesdre,modelled EFAS 500-yr,Pepinster (BE),bridge_road,road_secondary,N690,,1.0,True
+vesdre,modelled EFAS 500-yr,Pepinster (BE),bridge_road,road_secondary,N690,,1.0,True
+vesdre,modelled EFAS 500-yr,Pepinster (BE),bridge_road,road_secondary,N690,,1.0,True
+vesdre,modelled EFAS 500-yr,Pepinster (BE),bridge_road,road_secondary,N690,,1.0,True
+vesdre,modelled EFAS 500-yr,Pepinster (BE),bridge_road,road_secondary,N690,,1.0,True
+vesdre,modelled EFAS 500-yr,Trooz (BE),bridge_road,road_secondary,N604,,1.0,True
+vesdre,modelled EFAS 500-yr,Trooz (BE),bridge_road,road_secondary,N604,,1.0,True
+vesdre,modelled EFAS 500-yr,Trooz (BE),bridge_road,road_primary,N61,,1.0,True
+vesdre,modelled EFAS 500-yr,Trooz (BE),bridge_road,road_primary,N61,,1.0,True
+vesdre,modelled EFAS 500-yr,Trooz (BE),bridge_road,road_primary,N61,,1.0,True
+vesdre,modelled EFAS 500-yr,Trooz (BE),bridge_road,road_primary,N61,,1.0,True
+vesdre,modelled EFAS 500-yr,Verviers (BE),bridge_road,road_motorway,E42,,1.0,True
+vesdre,modelled EFAS 500-yr,Verviers (BE),bridge_road,road_primary,N61,,1.0,True
+vesdre,modelled EFAS 500-yr,Verviers (BE),bridge_road,road_secondary,N627,,1.0,True
+vesdre,modelled EFAS 500-yr,Chaudfontaine (BE),rail,rail,L37,5.26,,False
+vesdre,modelled EFAS 500-yr,Chaudfontaine (BE),rail,rail,L3; LGV 3; L3 LGV 3 - HSL 3,0.79,,False
+vesdre,modelled EFAS 500-yr,Chaudfontaine (BE),rail,rail,"trains 504-518 504-518 : Oostende - Eupen, 519-520 519-520 : Oostende - Welkenraedt, 521 : Oostende - Welkenraedt (via Waremme) (service=crossover)",0.01,,False
+vesdre,modelled EFAS 500-yr,Dison (BE),rail,rail,L37,0.35,,False
+vesdre,modelled EFAS 500-yr,Dison (BE),rail,rail,Tunnel de Chantoir,0.01,,False
+vesdre,modelled EFAS 500-yr,Esneux (BE),rail,rail,L43,0.7,,False
+vesdre,modelled EFAS 500-yr,Limburg (BE),rail,rail,L37,1.42,,False
+vesdre,modelled EFAS 500-yr,Luik (BE),rail,rail,L3 LGV 3 - HSL 3 (service=yard),0.01,,False
+vesdre,modelled EFAS 500-yr,Luik (BE),rail,rail,L37,2.87,,False
+vesdre,modelled EFAS 500-yr,Luik (BE),rail,rail,L37; L3 LGV 3 - HSL 3,0.51,,False
+vesdre,modelled EFAS 500-yr,Luik (BE),rail,rail,L37A,0.43,,False
+vesdre,modelled EFAS 500-yr,Luik (BE),rail,rail,L3; LGV 3; L3 LGV 3 - HSL 3,1.14,,False
+vesdre,modelled EFAS 500-yr,Luik (BE),rail,rail,L43,2.53,,False
+vesdre,modelled EFAS 500-yr,Luik (BE),rail,rail,"trains 528-529 528-529 : Welkenraedt - Oostende, 529-544 529-544 : Eupen - Oostende, 545 545 : Eupen - Oostende (via Waremme) (service=crossover)",0.18,,False
+vesdre,modelled EFAS 500-yr,Luik (BE),rail,rail,unnamed rail (service=siding),3.69,,False
+vesdre,modelled EFAS 500-yr,Luik (BE),rail,rail,unnamed rail (service=yard),0.52,,False
+vesdre,modelled EFAS 500-yr,Olne (BE),rail,rail,L37,0.17,,False
+vesdre,modelled EFAS 500-yr,Olne (BE),rail,rail,unnamed rail (service=siding),0.1,,False
+vesdre,modelled EFAS 500-yr,Pepinster (BE),rail,rail,L37,4.75,,False
+vesdre,modelled EFAS 500-yr,Pepinster (BE),rail,rail,L37; Tunnel de Louheau,0.04,,False
+vesdre,modelled EFAS 500-yr,Pepinster (BE),rail,rail,L37; Tunnel de Pepinster,0.02,,False
+vesdre,modelled EFAS 500-yr,Pepinster (BE),rail,rail,L44,0.71,,False
+vesdre,modelled EFAS 500-yr,Pepinster (BE),rail,rail,unnamed rail (service=yard),1.31,,False
+vesdre,modelled EFAS 500-yr,Theux (BE),rail,rail,L44,0.99,,False
+vesdre,modelled EFAS 500-yr,Trooz (BE),rail,rail,L37,6.5,,False
+vesdre,modelled EFAS 500-yr,Trooz (BE),rail,rail,"trains 504-518 504-518 : Oostende - Eupen, 519-520 519-520 : Oostende - Welkenraedt, 521 : Oostende - Welkenraedt (via Waremme) (service=crossover)",0.06,,False
+vesdre,modelled EFAS 500-yr,Trooz (BE),rail,rail,"trains 528-529 528-529 : Welkenraedt - Oostende, 529-544 529-544 : Eupen - Oostende, 545 545 : Eupen - Oostende (via Waremme) (service=crossover)",0.02,,False
+vesdre,modelled EFAS 500-yr,Trooz (BE),rail,rail,unnamed rail (service=siding),0.5,,False
+vesdre,modelled EFAS 500-yr,Verviers (BE),rail,rail,L37,1.24,,False
+vesdre,modelled EFAS 500-yr,Chaudfontaine (BE),road_main,road_motorway,A602,0.21,,False
+vesdre,modelled EFAS 500-yr,Chaudfontaine (BE),road_main,road_motorway,E25,1.82,,False
+vesdre,modelled EFAS 500-yr,Chaudfontaine (BE),road_main,road_primary,N30a,0.21,,False
+vesdre,modelled EFAS 500-yr,Chaudfontaine (BE),road_main,road_primary,N61,3.84,,False
+vesdre,modelled EFAS 500-yr,Chaudfontaine (BE),road_main,road_primary,N61a,0.09,,False
+vesdre,modelled EFAS 500-yr,Chaudfontaine (BE),road_main,road_secondary,N621,0.71,,False
+vesdre,modelled EFAS 500-yr,Dison (BE),road_main,road_primary,N61,0.59,,False
+vesdre,modelled EFAS 500-yr,Esneux (BE),road_main,road_secondary,N633,0.2,,False
+vesdre,modelled EFAS 500-yr,Esneux (BE),road_main,road_secondary,N635,0.11,,False
+vesdre,modelled EFAS 500-yr,Limburg (BE),road_main,road_primary,N61,2.89,,False
+vesdre,modelled EFAS 500-yr,Limburg (BE),road_main,road_secondary,N61b,0.22,,False
+vesdre,modelled EFAS 500-yr,Limburg (BE),road_main,road_secondary,N620,1.31,,False
+vesdre,modelled EFAS 500-yr,Luik (BE),road_main,road_motorway,A602,1.6,,False
+vesdre,modelled EFAS 500-yr,Luik (BE),road_main,road_motorway,E25,3.6,,False
+vesdre,modelled EFAS 500-yr,Luik (BE),road_main,road_primary,N30,2.77,,False
+vesdre,modelled EFAS 500-yr,Luik (BE),road_main,road_primary,N30a,0.53,,False
+vesdre,modelled EFAS 500-yr,Luik (BE),road_main,road_primary,N61,0.42,,False
+vesdre,modelled EFAS 500-yr,Luik (BE),road_main,road_primary,N61a,1.34,,False
+vesdre,modelled EFAS 500-yr,Luik (BE),road_main,road_secondary,N633,1.74,,False
+vesdre,modelled EFAS 500-yr,Luik (BE),road_main,road_secondary,N633a,0.45,,False
+vesdre,modelled EFAS 500-yr,Luik (BE),road_main,road_secondary,N635,0.03,,False
+vesdre,modelled EFAS 500-yr,Luik (BE),road_main,road_secondary,Pont des Grosses Battes,0.05,,False
+vesdre,modelled EFAS 500-yr,Luik (BE),road_main,road_primary,Quai des Ardennes,0.06,,False
+vesdre,modelled EFAS 500-yr,Luik (BE),road_main,road_secondary,Quai des Ardennes,0.14,,False
+vesdre,modelled EFAS 500-yr,Luik (BE),road_main,road_primary,unnamed,0.02,,False
+vesdre,modelled EFAS 500-yr,Luik (BE),road_main,road_secondary,unnamed,0.13,,False
+vesdre,modelled EFAS 500-yr,Olne (BE),road_main,road_primary,N61,0.9,,False
+vesdre,modelled EFAS 500-yr,Pepinster (BE),road_main,road_primary,N61,3.5,,False
+vesdre,modelled EFAS 500-yr,Pepinster (BE),road_main,road_secondary,N666,0.15,,False
+vesdre,modelled EFAS 500-yr,Pepinster (BE),road_main,road_secondary,N690,1.54,,False
+vesdre,modelled EFAS 500-yr,Theux (BE),road_main,road_secondary,N690,0.58,,False
+vesdre,modelled EFAS 500-yr,Trooz (BE),road_main,road_secondary,N604,0.29,,False
+vesdre,modelled EFAS 500-yr,Trooz (BE),road_main,road_primary,N61,4.15,,False
+vesdre,modelled EFAS 500-yr,Trooz (BE),road_main,road_secondary,N673,0.11,,False
+vesdre,modelled EFAS 500-yr,Verviers (BE),road_main,road_motorway,E42,0.69,,False
+vesdre,modelled EFAS 500-yr,Verviers (BE),road_main,road_motorway,N027076,0.09,,False
+vesdre,modelled EFAS 500-yr,Verviers (BE),road_main,road_primary,N61,1.31,,False
+vesdre,modelled EFAS 500-yr,Verviers (BE),road_main,road_secondary,N627,0.38,,False
+vesdre,modelled EFAS 500-yr,Verviers (BE),road_main,road_trunk,R61,0.44,,False
+vesdre,modelled EFAS 500-yr,Verviers (BE),road_main,road_trunk,R61;N61,0.02,,False
+vesdre,modelled EFAS 500-yr,Chaudfontaine (BE),station,rail_halt,Chaudfontaine,,1.0,False
+vesdre,modelled EFAS 500-yr,Luik (BE),station,rail_station,Chênée,,1.0,False
+vesdre,modelled EFAS 500-yr,Theux (BE),station,rail_station,Juslenville,,1.0,False
+wassenberg,observed EMS all passes,"Heinsberg, Stadt (DE)",road_main,road_primary,B 221,0.06,,False

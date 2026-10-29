@@ -3,6 +3,7 @@ who gives the order, and the message that tells them. Answers the 2021 failures 
 levels, warnings that never became instructions, missing local plans and drills, people who could not leave alone.
 Numbers: outputs/data/ (app_towns: walking plan; bus_plan: the 10 km max-flow plan, per shelter; critical_sites;
 receiving_sites). The roles and the message are team text, not data: labelled on the page and in the download."""
+import json
 from datetime import date
 from html import escape
 
@@ -19,6 +20,12 @@ head, towns, crit, shel, flood, *_ = anna.load()
 recv, bus = anna.load_moves()
 HOUSE = pd.read_csv(core.DATA / "housing_age.csv")          # notebooks/housing_age.py (GHS-OBAT construction period)
 B3D = pd.read_parquet(core.DATA / "buildings_3d.parquet")   # every OBAT building in the 2021 water, with height
+EVAC = pd.read_csv(core.DATA / "evac_towns.csv")             # notebooks/evac_sim.py: road simulation, towns >= 300 people
+INFRA = pd.read_csv(core.DATA / "infra_in_flood.csv")        # notebooks/infra.py: today's rail and bridges in the 2021 water
+EDGES = json.loads((core.DATA / "evac_edges.geojson").read_text())
+RAIL = json.loads((core.DATA / "infra_rail.geojson").read_text())
+feats = lambda g, m: {"type": "FeatureCollection", "features": [f for f in g["features"]
+                                                                 if f["properties"]["municipality"] == m]}
 V = "worst"                       # the bus plan exists only for all satellite passes (EFAS 500-year for the Vesdre)
 T = (towns[(towns.variant == V) & (towns.people >= 10)].sort_values("people", ascending=False).reset_index(drop=True))
 CC = {"BE": "Belgium", "NL": "Netherlands", "DE": "Germany"}
@@ -201,6 +208,38 @@ st.html("<div class='ev-n'>"
          "<div><b>0</b><span><i>no place</i> within 10 km: everyone fits</span></div></div>"))
 st.space("small")
 
+# ------------------------------------------------------------------ getting out: road simulation + rail in the water
+# OSM falls back to the road class when a road has no name
+road = lambda n: f"An unnamed {n} road" if n in {"motorway", "trunk", "primary", "secondary", "tertiary", "residential",
+                                                   "unclassified", "service", "living_street", "footway", "path", "track"} else n
+ev = EVAC[(EVAC.municipality == t.municipality) & (EVAC.area == t.area)]
+inf = INFRA[(INFRA.municipality == t.municipality) & (INFRA.area == t.area)]
+rail_km = inf.loc[inf.kind == "rail", "km_in_flood"].sum()
+stations = int(inf.loc[inf.kind == "station", "count"].sum())
+bridges = int(inf.loc[inf.kind.isin(["bridge_road", "bridge_rail"]), "count"].sum())
+rows = []
+if len(ev):
+    e = ev.iloc[0]
+    rows += [("<b>Leave the 2021 water on foot</b>", f"Half the residents within {e.exit_med_min_4kmh:.0f} min, 9 in 10 within "
+              f"{e.exit_p90_min_4kmh:.0f} min; {e.exit_p90_min_3kmh:.0f} min at an older person's pace (3 km/h).",
+              f"<b>{e.exit_p90_min_4kmh:.0f} min</b>"),
+             ("<b>Reach the shelter</b>", f"On foot or by bus: half within {e.route_med_min:.0f} min, 9 in 10 within "
+              f"{e.route_p90_min:.0f} min. Bus at 30 km/h without boarding: a minimum.", f"<b>{e.route_p90_min:.0f} min</b>"),
+             ("<b>Routes back through the water</b>", f"{e.reroute_share:.0%} of residents would cross the 2021 water again "
+              f"on the way to their shelter, over {int(e.flood_bridges_used)} bridge{'s' if e.flood_bridges_used != 1 else ''} in it. Move them before the river "
+              "rises.", f"<b>{e.reroute_share:.0%}</b>"),
+             ("<b>Busiest road</b>", f"{road(e.busiest_road)}: about {about(e.busiest_road_people)} people "
+              f"{'on foot' if e.busiest_road_mode == 'walk' else 'by bus'}. Put a marshal there.", "")]
+rows.append(("<b>Trains</b>", f"{rail_km:.1f} km of track and {stations} station{'s' if stations != 1 else ''} sat in the 2021 "
+             "water: no train evacuation from here." if rail_km >= .1 else "No railway in the 2021 water here.",
+             f"<b>{bridges}</b> bridges" if bridges else ""))
+core.group(rows, "Getting out")
+st.html("<p class='asof'>" + ("Road simulation on today's OpenStreetMap roads: residents spread evenly over the streets "
+        "in the 2021 water, walking 4 km/h, each sent to the shelter in the plan. " if len(ev) else
+        "Road simulation only for towns with at least 300 residents in the water. ")
+        + "Bridges: road and rail bridges in the 2021 water today; in the water does not mean damaged.</p>")
+st.space("small")
+
 # ------------------------------------------------------------------ map + shelter list
 MAP_H = 470
 lm, rm = st.columns([3, 2], gap="small")
@@ -208,6 +247,10 @@ with lm:
     a = 70 if modelled else 140
     layers = [pdk.Layer("GeoJsonLayer", flood[(t.area, V)], filled=True, stroked=True, line_width_min_pixels=1,
                         get_fill_color=[0, 113, 227, a], get_line_color=[0, 90, 200, 200])]
+    layers += [pdk.Layer("GeoJsonLayer", feats(RAIL, t.municipality), get_line_color=[29, 29, 31, 220],
+                         line_width_min_pixels=3),
+               pdk.Layer("GeoJsonLayer", feats(EDGES, t.municipality), get_line_color=core.rgb(core.PEOPLE, 230),
+                         line_width_min_pixels=4)]
     if len(care):
         cs = care.assign(tname=care.name, tinfo=[f"{k} in the 2021 water · {s:.0%} of the site"
                                                  for k, s in zip(care.type, care.share_of_site_flooded)])
@@ -243,10 +286,12 @@ with lm:
     core.legend(core.swatch(core.SHELTER, "Dry shelter (size = people sent there; the ten largest numbered as in the list)", True)
                 + (core.swatch(core.EVACUATE, "Hospital, care home or school in the 2021 water", True) if len(care) else "")
                 + core.swatch("rgba(0,113,227,.55)", "2021 water" + (" (modelled)" if modelled else ""))
-                + "<span><i style='border:3px solid #1d1d1f;border-radius:50%;background:#fff'></i>Town centre</span>")
+                + "<span><i style='border:3px solid #1d1d1f;border-radius:50%;background:#fff'></i>Town centre</span>"
+                + core.swatch(core.PEOPLE, "Busiest evacuation roads") + core.swatch("#1d1d1f", "Railway in the 2021 water"))
 with rm:
     if len(plan):
-        st.dataframe(plan[["n", "shelter", "km", "people", "places", "shared"]], hide_index=True, height=MAP_H - 10,
+        st.dataframe(plan[["n", "shelter", "km", "people", "places", "shared"]], hide_index=True,
+                     height=min(35 * len(plan) + 38, MAP_H - 10),
                      column_config={
                          "n": st.column_config.NumberColumn("#", width=36),
                          "shelter": st.column_config.TextColumn("Dry shelter", width=175),

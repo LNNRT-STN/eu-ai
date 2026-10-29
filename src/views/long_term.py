@@ -1,6 +1,7 @@
 """Long term: the gaps the 2021 data shows, the measure that closes each one, and the money that exists for it.
 Gaps come from outputs/data/ (q4_headline.json, app_towns.csv). Every amount comes from docs/BUDGETS.md (desk research,
 external sources, URL per row): copied as published, never summed across rows, 'partly' where the source is secondary."""
+import pandas as pd
 import streamlit as st
 
 import anna
@@ -13,6 +14,10 @@ T = towns[towns.variant == "worst"]
 gap_towns = int((T.no_shelter >= 50).sum())
 care = head["worst"]["sites"]["vulnerable"]
 schools = head["worst"]["sites"]["schools"]
+inf = pd.read_csv(core.DATA / "infra_in_flood.csv")   # notebooks/infra.py: today's network inside the 2021 water
+rail_obs = inf[(inf.kind == "rail") & ~inf.area.isin(anna.MODELLED)].km_in_flood.sum()
+rail_mod = inf[(inf.kind == "rail") & inf.area.isin(anna.MODELLED)].km_in_flood.sum()
+br = inf[inf.kind.isin(["bridge_road", "bridge_rail"])].groupby(inf.area.isin(anna.MODELLED))["count"].sum()
 b_obs, b_mod = T[~T.area.isin(anna.MODELLED)].buildings.sum(), T[T.area.isin(anna.MODELLED)].buildings.sum()
 
 EC = "https://ec.europa.eu/regional_policy/whats-new/newsroom/15-12-2022-eu-cohesion-policy-eur718-5-million-to-support-seven-member-states-following-devastating-natural-disasters-of-2021_en"
@@ -28,6 +33,9 @@ SIREN = "https://www.bundestag.de/presse/hib/kurzmeldungen-1195188"
 BREMEN = "https://www.rathaus.bremen.de/sixcms/media.php/13/20250624_top%2011_Warninfrastruktur_Bund_Laender_Vereinbarung.pdf"
 WRL = "https://zoek.officielebekendmakingen.nl/stcrt-2022-19467.pdf"
 AUG = "https://augustinum.de/fileadmin/Presse/Presseinfos/Augustinum-260128-BadNeuenahr-Renovierung.pdf"
+DB = "https://www.deutschebahn.com/de/presse/pressestart_zentrales_uebersicht/Die-Bahn-ist-zurueck-im-Ahrtal--13699724"
+INFRABEL = "https://infrabel.be/sites/default/files/generated/files/report/Rapport%20annuel%20de%20se%CC%81curite%CC%81%202021%20FR.pdf"
+BMV = "https://www.bmv.de/SharedDocs/DE/Artikel/K/zuege-fahren-wieder-gerolstein-koeln.html"
 WALREP = "https://www.wallonie.be/sites/default/files/2022-11/Inondations%20rapport%20de%20la%20commission%20parlementaire.pdf"
 
 src = lambda url, label, ok=True: (f"<a href='{url}' target='_blank'>{label}</a>"
@@ -83,6 +91,14 @@ ROWS = [
      "Buy out and demolish the most exposed homes; no rebuilding in the flow path.",
      f"Wallonia: €25 m for 9 communes (Verviers, Pepinster, Trooz, Chaudfontaine…) until July 2028 "
      f"({src(WAL, 'wallonie.be')})."),
+    ("Railways and bridges in the flow path",
+     f"Today's network: {rail_obs:.0f} km of track and {int(br.get(False, 0))} road and rail bridges in the observed "
+     f"2021 water; {rail_mod:.0f} km and {int(br.get(True, 0))} bridges in the modelled Vesdre zone.",
+     "Rebuild bridges with a wider span and higher deck; plan road evacuation, since trains will not run.",
+     f"Ahr valley line: 22 bridges, 5 tunnels and 10 stations rebuilt for about €590 m, open again 14 Dec 2025 "
+     f"({src(DB, 'Deutsche Bahn')}). Belgium: over 200 km of track on 13 lines damaged, about €60 m in three "
+     f"months ({src(INFRABEL, 'Infrabel')}). Eifel line Gerolstein–Kall back in 2025, 20 bridges renewed "
+     f"({src(BMV, 'transport ministry')})."),
     ("Too much water, too fast",
      "Stalled rain over steep, sealed valleys; models underestimated it.",
      "Retention basins upstream, and space for the river.",
