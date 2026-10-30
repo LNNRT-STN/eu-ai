@@ -3,8 +3,7 @@
 River status works as EFAS and GloFAS do: return-period thresholds (2-, 5-, 20-, 100-year flows) come from the
 same model's own record at the same cell, so a model that runs high or low in a small valley is rated against
 itself. The 51 ensemble runs give a probability: a level counts when at least PROB of the runs reach it within
-HORIZON days. The July 2021 peak is kept as context only. The 2021 replay (live.py) is the backtest: it rates the
-2021 flows against thresholds fitted on the record up to BACKTEST_YEAR, what was known before the flood."""
+HORIZON days. The July 2021 peak is kept as context only."""
 import json, time
 from datetime import date
 from functools import lru_cache
@@ -35,7 +34,6 @@ RAIN_AREAS = {"Upper Vesdre (Eupen)": (50.55, 6.05), "Upper Ourthe": (50.25, 5.6
 RP = (2, 5, 20, 100)  # return periods (years) on screen; levels 1-3 are the first three
 PROB = .3             # a level counts when at least 30 % of the ensemble runs reach it (EFAS notification rule)
 HORIZON = 10          # days ahead that set the status: GloFAS skill falls off beyond about ten days
-BACKTEST_YEAR = 2020  # the 2021 replay uses thresholds fitted on the record up to this year
 # river status in the water family, light blue → deep violet (EFAS marks its severe level purple): never the orange
 # of residents or the red/amber of commune priority, so the three keys on one map can't be confused
 LEVELS = [("Normal", "#b9d3f2"), ("Above 2-year flood", "#7c9cf0"), ("Above 5-year flood", "#6c3fd1"),
@@ -123,7 +121,7 @@ def rp_text(T):
 @lru_cache(4)
 def thresholds(upto=None):
     """{gauge: {"fit": (mu, beta), "years": "1997–2025", "q": {T: flow}}} from the annual peaks up to year `upto`
-    (the whole record when None). Live uses the whole record, the 2021 backtest stops at BACKTEST_YEAR."""
+    (the whole record when None). Live uses the whole record."""
     out = {}
     for g, by in json.loads(AMAX.read_text()).items():
         ys = [int(y) for y in by if upto is None or int(y) <= upto]

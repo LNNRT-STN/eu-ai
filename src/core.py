@@ -12,11 +12,14 @@ import streamlit as st
 import forecast
 
 OUT = Path(__file__).resolve().parent / "out"
-DST = OUT / "meuse"  # live-outlook files only: river reference flows and the July 2021 river replay
-DATA = Path(__file__).resolve().parents[1] / "outputs" / "data"  # cleaned exposure and shelter data (its README.md)
+DST = OUT / "meuse"  # live-outlook files only: river reference flows
+DATA = Path(__file__).resolve().parents[1] / "outputs" / "rp"  # EFAS 10/100/500-year zones: the response pages
+D2021 = DATA.parent / "data"  # July 2021 satellite floods (its README.md): the 2021 pages
 COUNTRY = {"BE": "Belgium", "NL": "Netherlands", "DE": "Germany"}
-# two flood maps per area; vesdre has no satellite polygons, so its two are EFAS 100-year (main) and 500-year (worst)
-VARIANT = {"worst": "July 2021 · all satellite passes", "main": "July 2021 · first pass only"}
+VARIANT = {"rp10": "10-year flood", "rp100": "100-year flood", "rp500": "500-year flood"}  # EFAS zones (model)
+RP_COL = {"rp10": "#0b3d91", "rp100": "#3f6fd1", "rp500": "#9db9ec"}  # nested zones, darkest = most frequent
+# 2021: two flood maps per area; vesdre has no satellite polygons, so its two are EFAS 100-year (main) and 500-year (worst)
+VARIANT_2021 = {"worst": "July 2021 · all satellite passes", "main": "July 2021 · first pass only"}
 REACH = {"low": "1 km walk · 5 m² · 40 % usable", "central": "1.5 km walk · 4 m² · 50 % usable",
          "high": "2.5 km walk · 3 m² · 60 % usable"}
 MISSED = "#8f8c84"  # flooded in reality, missed by the satellite: never draw these as "not reached"
@@ -32,8 +35,7 @@ GAP = {"No shelter in reach": ("#d70015", "Pre-agree sites further away, or plan
 WHY = {"shelters too far": "No shelter in reach", "shelters full": "Shelters full", "-": "Covered"}
 # how fresh each source is, shown under every panel
 AS_OF = {"obs": "Copernicus EMS satellite map, 15–20 Jul 2021 · GHS-OBAT · GHS-POP 2020",
-         "model": "Vesdre: EFAS 100-/500-year zone (model)", "osm": "OpenStreetMap sites, extracted 29 Oct 2026",
-         "replay": "GloFAS river flow, 12–20 Jul 2021 (model)"}
+         "model": "Vesdre: EFAS 100-/500-year zone (model)", "osm": "OpenStreetMap sites, extracted 29 Oct 2026"}
 rgb = lambda h, a=255: [int(h[i:i + 2], 16) for i in (1, 3, 5)] + [a]
 _lum = lambda h: sum(w * (c / 12.92 if c <= .04045 else ((c + .055) / 1.055) ** 2.4)
                      for w, c in zip((.2126, .7152, .0722), (v / 255 for v in rgb(h)[:3])))
@@ -150,14 +152,86 @@ def steps(items, title=""):
                 st.page_link(page, label=t)
 
 
+# page key: (file, title, icon, colour, what it is for); dashboard.py builds the role desks from these
+PAGES = {
+    "crisis": ("views/crisis.py", "Crisis room", ":material/crisis_alert:", "#d70015",
+               "The whole region live: which towns evacuate, who has reported safe, and the briefings to send."),
+    "plan": ("views/evacuate.py", "Town plan", ":material/directions_run:", "#c93400",
+             "One town: who leaves, where they go, the roads out and who gives the order."),
+    "doors": ("views/checkin.py", "Door-knock list", ":material/door_front:", "#a85400",
+              "Homes in the 2021 water with no news yet, street by street, and the closed roads."),
+    "resident": ("views/resident.py", "Am I at risk?", ":material/home_pin:", "#0071e3",
+                 "Type your address: do you need to leave, where to, and tell crews you are safe."),
+    "assess": ("views/then_now.py", "2021 vs today", ":material/history:", "#7b3fd1",
+               "What the July 2021 water covered, what has been done since, and what still needs fixing."),
+    "limits": ("views/limits.py", "Data & limits", ":material/info:", "#6e6e73",
+               "Where every number comes from, and what it cannot tell you."),
+}
+# the whole run, end to end: the opening page answers steps 1-3 (flood, town, who leaves), the desk does the rest
+FLOW = ["plan", "doors", "crisis"]
+STEP = {"plan": (4, "Roads out, who gives the order, the warning message"),
+        "doors": (5, "Knock on doors street by street, mark homes as left"),
+        "crisis": (6, "Every town live in one room, and the briefings to send")}
+
+TINT = {"#d70015": "red", "#c93400": "orange", "#a85400": "orange", "#0071e3": "blue", "#7b3fd1": "violet"}
+
+
+def tiles(items, key, small=False):
+    """Action cards in one row (they stack on a phone): (icon, colour, step label, title, subtitle, go). go is a page
+    file (a page link) or (on_click, args) for a button. Unless small, the first card is the recommended next step:
+    its button is the primary one. Small: one plain button per item, the subtitle as its tooltip."""
+    for n, (col, (ic, c, lab, title, sub, go)) in enumerate(zip(st.columns(len(items), gap="small"), items)):
+        with col:
+            if small:
+                if isinstance(go, str):
+                    st.page_link(go, label=title, icon=ic, help=sub, width="stretch")
+                else:
+                    st.button(title, key=f"tileb-{key}-{n}", icon=ic, help=sub, width="stretch",
+                              on_click=go[0], args=go[1])
+                continue
+            with st.container(border=True, height="stretch", key=f"tile-{key}-{n}"):
+                st.badge(lab or title, icon=ic, color=TINT.get(c, "gray"))
+                st.markdown(f"**{title}**  \n{sub}")
+                label, kind = ("Start", "primary") if n == 0 else ("Open", "secondary")
+                if isinstance(go, str):
+                    st.page_link(go, label=label, icon=":material/arrow_forward:", width="stretch")
+                else:
+                    st.button(label, key=f"tileb-{key}-{n}", type=kind, icon=":material/arrow_forward:",
+                              width="stretch", on_click=go[0], args=go[1])
+
+
+def next_steps(here):
+    """The foot of a desk page: the steps that follow this one in FLOW (then the ones before it), as cards, limited
+    to the pages this role has; then the way back to the opening page for another flood or town."""
+    have = st.session_state.get("_nav", FLOW)
+    i = FLOW.index(here) if here in FLOW else -1
+    ks = [k for k in FLOW[i + 1:] + FLOW[:max(i, 0)] if k in have and k != here]
+    st.space("medium")
+    st.subheader("Next step")
+    if ks:
+        tiles([(PAGES[k][2], PAGES[k][3], f"Step {STEP[k][0]}", PAGES[k][1], STEP[k][1], PAGES[k][0]) for k in ks],
+              f"next-{here}")
+    st.button("Start again: another flood or town", key=f"restart-{here}", icon=":material/restart_alt:",
+              type="tertiary", on_click=restart, args=(True,))
+
+
+def restart(fresh=False):
+    """Back to the opening page; fresh also forgets its answers (flood, town), so it asks again from step 1."""
+    for k in ["role"] + (["lf_flood", "lf_town"] if fresh else []):
+        st.session_state.pop(k, None)
+    st.query_params.clear()
+
+
 country = lambda m: m.str[-3:-1]  # "Pepinster (BE)" → "BE"
 plain = lambda m: m.str.replace(r" \(..\)$", "", regex=True)
 
 
 @st.cache_data
-def load():
-    """Cleaned data (outputs/data): areas, towns per flood map, ranking, care sites, shelters, quality checks."""
-    csv = lambda n: pd.read_csv(DATA / f"{n}.csv", encoding="utf-8-sig")
+def load(d=DATA):
+    """Cleaned data (outputs/rp, or D2021 for July 2021): areas, towns per flood map, ranking, care sites, shelters,
+    quality checks."""
+    DATA = Path(d)
+    csv = lambda n: pd.read_csv((DATA if (DATA / f"{n}.csv").exists() else D2021) / f"{n}.csv", encoding="utf-8-sig")
     areas, towns, rank, sites = csv("area_summary"), csv("app_towns"), csv("q4_ranking"), csv("critical_sites")
     towns["country"], rank["country"], sites["country"] = country(towns.municipality), country(rank.municipality), \
         country(sites.municipality)
@@ -174,18 +248,24 @@ def load():
     sh = pd.DataFrame(sh.drop(columns="geometry")).assign(
         lon=pt.x.round(5), lat=pt.y.round(5), type=sh.cat.map(CAT), name=sh["name"].fillna("(no name in OSM)"),
         country=country(sh.muni.fillna("(??)")))
-    js = lambda n: json.loads((DATA / f"{n}.json").read_text())
+    js = lambda n: json.loads(((DATA if (DATA / f"{n}.json").exists() else D2021) / f"{n}.json").read_text())
     return dict(areas=areas, towns=towns, rank=rank, sites=sites, shelters=sh, head=js("q4_headline"),
                 qc=js("qc_and_validation"), dq=csv("dq_report"))
 
 
 @st.cache_data
 def flood(variant):
-    """Flood extent of every area for one map, observed and modelled told apart by colour."""
+    """Flood extent of every area for one map: a return period (rp10/rp100/rp500, outputs/rp) or July 2021
+    (main/worst, outputs/data), observed and modelled told apart by colour."""
     feats = []
+    rp = variant.startswith("rp")
     for a in ("ahr", "erftstadt", "eschweiler", "euskirchen", "liege", "rochefort", "schleiden", "venlo", "vesdre",
               "wassenberg"):
-        for f in json.loads((DATA / f"flood_{a}_{variant}.geojson").read_text())["features"]:
+        for f in json.loads(((DATA if rp else D2021) / f"flood_{a}_{variant}.geojson").read_text())["features"]:
+            if rp:
+                feats.append({**f, "properties": {"area": a, "fill": rgb(RP_COL[variant], 110),
+                                                  "line": rgb(RP_COL[variant], 200)}})
+                continue
             m = a == "vesdre"
             feats.append({**f, "properties": {"area": a, "fill": rgb(MISSED, 100) if m else rgb("#0071e3", 85),
                                               "line": rgb(MISSED, 190) if m else rgb("#0071e3", 150)}})
@@ -198,13 +278,6 @@ def outlines():
     """GISCO LAU 2021 outline, residents and size of every municipality, by name (build_outlines.py)."""
     return {f["properties"]["municipality"]: f for f in
             json.loads((DATA / "municipality_outlines.geojson").read_text())["features"]}
-
-
-@st.cache_data
-def load_replay():
-    """GloFAS daily flows at the river points, 10–20 July 2021 (build_priority.py)."""
-    r = pd.DataFrame(json.loads((DST / "replay_2021.json").read_text()))
-    return r.set_axis(pd.to_datetime(r.index))
 
 
 @st.cache_data(ttl=3 * 3600, show_spinner="Fetching river and rain forecasts…")
@@ -273,13 +346,13 @@ def view(bbox, focus=None, zoom=11.5):
     return pdk.ViewState(longitude=(x0 + x1) / 2, latitude=(y0 + y1) / 2, zoom=zoom)
 
 
-def water(variant="worst"):
+def water(variant="rp100"):
     fc, _ = flood(variant)
     return [pdk.Layer("GeoJsonLayer", fc, filled=True, stroked=True, get_fill_color="properties.fill",
                       get_line_color="properties.line", line_width_min_pixels=1)]
 
 
-def bbox(variant="worst"):
+def bbox(variant="rp100"):
     return flood(variant)[1]
 
 
@@ -332,13 +405,15 @@ def _plain_tips(layer):
         layer.data = d.assign(tip=d.tip.map(_plain))
 
 
-def deck(layers, v, height=600, **kw):
+def deck(layers, v, height=600, scroll=True, **kw):
+    """scroll=False: the wheel scrolls the page, not the map (zoom with the buttons or a pinch)."""
     for layer in layers:
         _plain_tips(layer)
     tip = {"text": "{tip}", "style": {"backgroundColor": "#1d1d1f", "color": "#fff", "fontSize": "13px",
                                        "padding": "6px 9px", "borderRadius": "8px", "whiteSpace": "pre-line"}}
-    st.pydeck_chart(pdk.Deck(layers=layers, initial_view_state=v, map_style=pdk.map_styles.CARTO_LIGHT, tooltip=tip),
-                    height=height, **kw)
+    views = None if scroll else [pdk.View(type="MapView", controller={"scrollZoom": False})]
+    st.pydeck_chart(pdk.Deck(layers=layers, initial_view_state=v, map_style=pdk.map_styles.CARTO_LIGHT, tooltip=tip,
+                             views=views), height=height, **kw)
 
 
 def facts(items, asof=""):

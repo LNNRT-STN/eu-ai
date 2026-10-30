@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="648pt" height="259.2pt" viewBox="0 0 648 259.2" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-10-30T11:38:31.713624</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 259.2 
+L 648 259.2 
+L 648 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 172.8 175.68 
+L 570.24 175.68 
+L 570.24 108 
+L 172.8 108 
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 172.8 111.076364 
+L 353.90148 111.076364 
+L 353.90148 125.636253 
+L 172.8 125.636253 
+z
+" clip-path="url(#pe2dd6b592d)" style="fill: #d6dff2; stroke: #ffffff; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 172.8 134.560056 
+L 383.228423 134.560056 
+L 383.228423 149.119944 
+L 172.8 149.119944 
+z
+" clip-path="url(#pe2dd6b592d)" style="fill: #d6dff2; stroke: #ffffff; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 172.8 158.043747 
+L 392.215562 158.043747 
+L 392.215562 172.603636 
+L 172.8 172.603636 
+z
+" clip-path="url(#pe2dd6b592d)" style="fill: #d6dff2; stroke: #ffffff; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 353.90148 111.076364 
+L 401.713664 111.076364 
+L 401.713664 125.636253 
+L 353.90148 125.636253 
+z
+" clip-path="url(#pe2dd6b592d)" style="fill: #003399; stroke: #ffffff; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 383.228423 134.560056 
+L 472.362402 134.560056 
+L 472.362402 149.119944 
+L 383.228423 149.119944 
+z
+" clip-path="url(#pe2dd6b592d)" style="fill: #003399; stroke: #ffffff; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 392.215562 158.043747 
+L 509.563979 158.043747 
+L 509.563979 172.603636 
+L 392.215562 172.603636 
+z
+" clip-path="url(#pe2dd6b592d)" style="fill: #003399; stroke: #ffffff; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 401.713664 111.076364 
+L 416.820744 111.076364 
+L 416.820744 125.636253 
+L 401.713664 125.636253 
+z
+" clip-path="url(#pe2dd6b592d)" style="fill: #5a7fd6; stroke: #ffffff; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 472.362402 134.560056 
+L 503.293071 134.560056 
+L 503.293071 149.119944 
+L 472.362402 149.119944 
+z
+" clip-path="url(#pe2dd6b592d)" style="fill: #5a7fd6; stroke: #ffffff; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 509.563979 158.043747 
+L 551.314286 158.043747 
+L 551.314286 172.603636 
+L 509.563979 172.603636 
+z
+" clip-path="url(#pe2dd6b592d)" style="fill: #5a7fd6; stroke: #ffffff; stroke-linejoin: miter"/>
+   </g>
+   <g id="matplotlib.axis_1"/>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_1"/>
+     <g id="text_1">
+      <text style="font-size: 9.5px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; fill: #14213d" transform="translate(112.8225 117.278058)">10-year flood</text>
+      <text style="font-size: 9.5px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; fill: #14213d" transform="translate(64.422969 128.611558)">10 % chance in any year</text>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_2"/>
+     <g id="text_2">
+      <text style="font-size: 9.5px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; fill: #14213d" transform="translate(107.541094 140.76175)">100-year flood</text>
+      <text style="font-size: 9.5px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; fill: #14213d" transform="translate(69.704375 152.09525)">1 % chance in any year</text>
+     </g>
+    </g>
+    <g id="ytick_3">
+     <g id="line2d_3"/>
+     <g id="text_3">
+      <text style="font-size: 9.5px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; fill: #14213d" transform="translate(107.541094 164.245442)">500-year flood</text>
+      <text style="font-size: 9.5px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; fill: #14213d" transform="translate(61.782266 175.578942)">0.2 % chance in any year</text>
+     </g>
+    </g>
+   </g>
+   <g id="text_4">
+    <text style="font-weight: 700; font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #14213d" x="422.498458" y="122.146308" transform="rotate(-0 422.498458 122.146308)">54,200 without</text>
+   </g>
+   <g id="text_5">
+    <text style="font-weight: 700; font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #14213d" x="508.970786" y="145.63" transform="rotate(-0 508.970786 145.63)">103,400 without</text>
+   </g>
+   <g id="text_6">
+    <text style="font-weight: 700; font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #14213d" x="556.992" y="169.113692" transform="rotate(-0 556.992 169.113692)">137,000 without</text>
+   </g>
+   <g id="legend_1">
+    <g id="patch_12">
+     <path d="M 176.4 100.7208 
+L 187.2 100.7208 
+L 187.2 92.6658 
+L 176.4 92.6658 
+z
+" style="fill: #d6dff2; stroke: #5a7fd6; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_7">
+     <text style="font-size: 9px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #14213d" x="194.4" y="99.7758" transform="rotate(-0 194.4 99.7758)">Has a place</text>
+    </g>
+    <g id="patch_13">
+     <path d="M 258.103125 100.7208 
+L 268.903125 100.7208 
+L 268.903125 92.6658 
+L 258.103125 92.6658 
+z
+" style="fill: #003399; stroke: #003399; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_8">
+     <text style="font-size: 9px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #14213d" x="276.103125" y="99.7758" transform="rotate(-0 276.103125 99.7758)">Shelter nearby, but full</text>
+    </g>
+    <g id="patch_14">
+     <path d="M 382.317188 100.7208 
+L 393.117188 100.7208 
+L 393.117188 92.6658 
+L 382.317188 92.6658 
+z
+" style="fill: #5a7fd6; stroke: #5a7fd6; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_9">
+     <text style="font-size: 9px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #14213d" x="400.317188" y="99.7758" transform="rotate(-0 400.317188 99.7758)">No shelter within 20 min walk</text>
+    </g>
+   </g>
+  </g>
+  <g id="text_10">
+   <text style="font-weight: 700; font-size: 14px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #14213d" x="18" y="33.81" transform="rotate(-0 18 33.81)">In a 100-year flood, about 103,000 residents would have no shelter place on foot</text>
+  </g>
+  <g id="text_11">
+   <text style="font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #5b6577" x="18" y="54.16" transform="rotate(-0 18 54.16)">Residents of each flood zone by shelter outcome, today's homes and candidate shelters</text>
+  </g>
+  <g id="text_12">
+   <text style="font-size: 7.5px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; fill: #5b6577" transform="translate(18 207.033516)">With buses taking people up to 10 km, about 2,000 (10-year), 4,200 (100-year) and 5,300 (500-year) are left without a place.</text>
+   <text style="font-size: 7.5px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; fill: #5b6577" transform="translate(18 221.013516)">Shelters are candidates (schools, sports halls, civic buildings dry in that zone), not official; 1.5 km walk, 4 m² per person.</text>
+   <text style="font-size: 7.5px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; fill: #5b6577" transform="translate(18 234.993516)">Source: EFAS flood hazard maps (JRC), GHS-OBAT, GHS-POP 2020 (challenge data); OpenStreetMap. Team analysis. Zones are modelled with no dikes or</text>
+   <text style="font-size: 7.5px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; fill: #5b6577" transform="translate(18 249.12)">flood walls, so towns behind them (Liège, Venlo) are an upper bound. Residents are an order of magnitude.</text>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pe2dd6b592d">
+   <rect x="172.8" y="108" width="397.44" height="67.68"/>
+  </clipPath>
+ </defs>
+</svg>

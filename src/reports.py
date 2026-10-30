@@ -20,15 +20,14 @@ Rules:
   Never compute, round, estimate or invent a number, date, time, place or name, and never compare numbers
   with ratios such as "twice" or "half".
 - If a fact is missing, do not guess it; leave it out.
-- Line 1 says what changed and when. Then what it means for the recipient, then the concrete next step
-  that fits the recipient (a mayor: alert and evacuate residents, open shelters; a fire brigade: crews,
-  door-knocking, closed roads).
-- Say that river flows come from a model (GloFAS) and are not a gauge reading when flows are mentioned.
-  In a replay the flows were computed afterwards: never call them a live forecast, and never call the modelled
-  July 2021 peak the real peak. Call a replay a replay of the 2021 forecast in line 1, and use the date given as it is.
-- Say how rare the flood is with the "flow is a" words as given (a return period, e.g. "a 20-year flood"), and
-  the status rule once. A return period is how rare the flow is in the model's record, not a promise.
-- If the flood extent is modelled, say so whenever you give its number of people.
+- Line 1 says what changed: the planning scenario and the town's status. Then what it means for the recipient,
+  then the concrete next step that fits the recipient (a mayor: order the evacuation of the zone, open the named
+  shelters, ask the district for buses; a fire brigade: crews door to door, the number of homes to check, the
+  shelters to send people to, the closed roads to avoid).
+- The scenario is a modelled flood zone (EFAS) for a given return period, not a forecast and not an observed flood:
+  say so once. A return period says how rare a flood is ("a 100-year flood": 1 % chance in any year), not when it
+  comes. If people in other return-period zones are given, you may name them to show how the zone grows.
+- Say that the zone is modelled whenever you give its number of people.
 - End with this exact line: {FOOTER}"""
 
 _client = None
@@ -61,25 +60,23 @@ def _facts_text(facts):
 
 def template(kind, recipient, facts):
     f = facts
+    zone = next((k for k in f if k.startswith("people_in_") and k.endswith("_year_zone")
+                 and k.split("_")[2] in f.get("scenario", "")), None)
     lines = [f"To: {recipient}",
-             f"{f.get('town', 'Town')}: status {f.get('status', kind)} since {f.get('time', '?')}"
-             + (f" (was {f['from']})." if f.get("from") else ".")]
-    if "modelled_flow_m3s" in f:
-        lines.append(f"River point {f.get('river_point', '?')}: {f['modelled_flow_m3s']} m3/s modelled (GloFAS), "
-                     f"a {f.get('flow_is_a', '?')}. 20-year flood {f.get('modelled_twenty_year_flow_m3s', '?')}, "
-                     f"modelled July 2021 peak {f.get('modelled_july_2021_peak_m3s', '?')}.")
-    if "people_in_2021_satellite_flood_extent" in f:
-        lines.append(f"About {f['people_in_2021_satellite_flood_extent']} residents lived inside the 2021 satellite "
-                     "flood extent (a floor).")
-    if "people_in_modelled_flood_zone" in f:
-        lines.append(f"About {f['people_in_modelled_flood_zone']} residents live in the modelled flood zone "
-                     "(EFAS 500-year; the satellite did not map this valley).")
+             f"{f.get('town', 'Town')}: {f.get('status', kind)}. Scenario: {f.get('scenario', '?')}."]
+    if zone:
+        lines.append(f"About {f[zone]} residents live inside the modelled {zone.split('_')[2]}-year zone; "
+                     f"{f.get('homes_to_check', '?')} homes to check.")
+    if f.get("shelters"):
+        lines.append(f"Shelters in the plan (candidates, not official): {f['shelters']}.")
+    if f.get("people_without_a_shelter_place"):
+        lines.append(f"{f['people_without_a_shelter_place']} people have no shelter place within 10 km: ask the district.")
     if f.get("roads_closed"):
-        lines.append(f"Roads closed: {f['roads_closed']}.")
-    if f.get("status") == "evacuate":
-        lines.append("Next step: order evacuation of the 2021 flood zone, open shelters, send crews door to door.")
+        lines.append(f"Roads closed (inside the zone): {f['roads_closed']}.")
+    if recipient.startswith("Fire brigade"):
+        lines.append("Next step: crews door to door in the zone, help requests first; avoid the closed roads.")
     else:
-        lines.append("Next step: alert residents of the 2021 flood zone and prepare shelters and crews.")
+        lines.append("Next step: order the evacuation of the zone, open the shelters, ask the district for buses.")
     lines.append(TEMPLATE_FOOTER)
     return "\n".join(lines)
 
@@ -119,12 +116,11 @@ def write(kind, recipient, facts) -> str:
 
 
 if __name__ == "__main__":
-    t, s = draft("status", "Mayor of Pepinster", {"town": "Pepinster", "status": "evacuate", "from": "warn",
-                                                   "time": "13 Jul 2021 18:00", "river_point": "Vesdre · Chaudfontaine",
-                                                   "modelled_flow_m3s": 146,
-                                                   "flow_is_a": "above 100-year flood (return period from the model's "
-                                                                "own record 1997–2020)",
-                                                   "modelled_twenty_year_flow_m3s": 61, "modelled_july_2021_peak_m3s": 291,
-                                                   "people_in_modelled_flood_zone": 2163})
+    t, s = draft("status", "Fire brigade, Pepinster", {
+        "town": "Pepinster", "status": "evacuate", "from": "normal", "time": "30 Oct 2026 11:00",
+        "scenario": "planning scenario: a 100-year river flood (EFAS flood hazard map; a flood this size has a 1 % "
+                    "chance in any year). A model zone, not a forecast and not an observed flood",
+        "people_in_100_year_zone": 2163, "people_in_10_year_zone": 1520, "homes_to_check": 640,
+        "shelters": "Athénée royal (Rue des Écoles 1, Pepinster): about 900 people", "district": "Province of Liège"})
     print(s, last_error, last_usage)
     print(t)

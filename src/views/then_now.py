@@ -1,6 +1,7 @@
 """2021, today, next: the present-state assessment of the July 2021 floods in three layers (CHALLENGE_BRIEF.md
 §2a-2c). What the water covered (with the per-municipality map from risk_areas.py), what has been done there since
-(desk research below), and what to fix with the money that exists for it (long_term.py)."""
+(desk research below), and what to fix with the money that exists for it (long_term.py). July 2021 data only:
+outputs/data/ (core.D2021), never the return-period scenario of the response pages."""
 import re
 
 import streamlit as st
@@ -12,7 +13,7 @@ from views import long_term, risk_areas
 
 core.style()  # grouped lists, facts strip and banner
 
-d = core.load()
+d = core.load(core.D2021)
 a = d["areas"][d["areas"].variant == "worst"]
 obs, vesdre = a[a.area != "vesdre"].sum(numeric_only=True), a[a.area == "vesdre"].iloc[0]
 rank, sites = d["rank"], d["sites"]
@@ -62,6 +63,14 @@ with t1:
                help=f"Ahr: {fmt(a.set_index('area').buildings['ahr'])} buildings here vs over 9,000 reported (bpb, "
                     "2023). Press figures for the Vesdre run far higher (Verviers alone: about 10,000 people "
                     "displaced, Etopia 2025). The facts above use all satellite passes.")
+    rp = {ar: (x["RP100"], x["RP500"]) for ar, x in d["qc"]["efas_validation"].items()}
+    st.caption(f":blue[:material/compare:] 2021 against the return-period zones of the response pages: on the Ahr the "
+               f"EFAS 100-year zone holds {rp['ahr'][0]['recall']:.0%} of the {fmt(rp['ahr'][0]['observed_flooded'])} "
+               f"buildings the satellite saw flooded, the 500-year zone {rp['ahr'][1]['recall']:.0%}; in Liège "
+               f"{rp['liege'][1]['recall']:.0%} of the {fmt(rp['liege'][1]['observed_flooded'])}.",
+               help="Buildings inside both the satellite water and the EFAS zone, over the buildings in the satellite "
+                    "water (outputs/data/qc_and_validation.json). On the Ahr the 2021 water reached well beyond the "
+                    "modelled 500-year zone; in Liège the satellite saw little, so the share says little.")
     st.space("small")
     risk_areas.render(frozenset(named))
     with st.expander("How this is computed", icon=":material/info:"):

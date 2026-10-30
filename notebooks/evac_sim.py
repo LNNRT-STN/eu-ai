@@ -42,6 +42,7 @@ Method
 Limits: OSM is 2026, not 2021 (rebuilt bridges may differ); roads may already be flooded or blocked before the
 evacuation; Vesdre flood is modelled (EFAS 500-year), never add it to observed areas.
 """
+import os
 import time
 from pathlib import Path
 
@@ -56,7 +57,8 @@ from scipy.spatial import cKDTree
 from shapely.geometry import box
 
 ROOT = Path(__file__).resolve().parents[1]
-D = ROOT / "outputs" / "data"
+D = ROOT / os.environ.get("OUT_DIR", "outputs/data")   # OUT_DIR=outputs/rp: each return period (variant column)
+VARIANTS = ["rp10", "rp100", "rp500"] if D.name == "rp" else ["worst"]
 C = ROOT / "cache" / "osm"
 
 MIN_PEOPLE = 300
@@ -316,23 +318,26 @@ def run_town(row, sh, flood, outline, files):
 def main():
     t0 = time.time()
     files = highways()
-    towns = pd.read_csv(D / "app_towns.csv", encoding="utf-8-sig")
-    towns = towns[(towns.variant == "worst") & (towns.people >= MIN_PEOPLE)].sort_values("people", ascending=False)
-    bus = pd.read_csv(D / "bus_plan.csv", encoding="utf-8-sig")
+    towns_all = pd.read_csv(D / "app_towns.csv", encoding="utf-8-sig")
+    bus_all = pd.read_csv(D / "bus_plan.csv", encoding="utf-8-sig")
     outl = gpd.read_file(D / "municipality_outlines.geojson")
     rows, edges, skipped = [], [], []
-    for r in towns.itertuples():
+    for v in VARIANTS:
+      towns = towns_all[(towns_all.variant == v) & (towns_all.people >= MIN_PEOPLE)].sort_values("people", ascending=False)
+      bus = bus_all[bus_all.variant == v] if "variant" in bus_all else bus_all
+      for r in towns.itertuples():
         t1 = time.time()
-        print(f"{r.municipality} ({r.area}, {r.people} people)")
+        print(f"{v} {r.municipality} ({r.area}, {r.people} people)")
         sh = bus[bus.municipality == r.municipality]
         if sh.empty:
-            skipped.append((r.municipality, "no bus_plan shelters")); continue
-        flood = gpd.read_file(D / f"flood_{r.area}_worst.geojson").to_crs(4326)
+            skipped.append((v, r.municipality, "no bus_plan shelters")); continue
+        flood = gpd.read_file(D / f"flood_{r.area}_{v}.geojson").to_crs(4326)
         out, te, why = run_town(r, sh, flood, outl[outl.municipality == r.municipality], files)
         if out is None:
-            skipped.append((r.municipality, why)); print("  SKIP", why); continue
+            skipped.append((v, r.municipality, why)); print("  SKIP", why); continue
         out["runtime_s"] = round(time.time() - t1)
-        rows.append(out); edges.append(te)
+        out["variant"] = v
+        rows.append(out); edges.append(te.assign(variant=v))
         print("  exit 4 km/h med/p90 {exit_med_min_4kmh}/{exit_p90_min_4kmh} min | route med/p90 {route_med_min}/"
               "{route_p90_min} | walk {people_walk} bus {people_bus} no shelter {people_no_shelter} no route "
               "{people_no_route} | reroute {reroute_share} | flood bridges {flood_bridges_used} | busiest "
@@ -342,8 +347,8 @@ def main():
     df.to_csv(D / "evac_towns.csv", index=False)
     e = gpd.GeoDataFrame(pd.concat(edges, ignore_index=True), crs=4326)
     e["geometry"] = e.geometry.simplify(0.00005)
-    e[["municipality", "area", "mode", "name", "osm_id", "people", "length_m", "bridge", "in_flood_2021",
-       "geometry"]].to_file(D / "evac_edges.geojson", driver="GeoJSON", COORDINATE_PRECISION=5)
+    e[["municipality", "area", *(["variant"] if D.name == "rp" else []), "mode", "name", "osm_id", "people",
+       "length_m", "bridge", "in_flood_2021", "geometry"]].to_file(D / "evac_edges.geojson", driver="GeoJSON", COORDINATE_PRECISION=5)
     print("\nSkipped:", skipped or "none")
     print("Sanity: net/straight ratio medians", df.check_net_straight_ratio_med.tolist())
     print("Sanity: max |origin people - app_towns people|", (df.check_origin_people_sum - df.people).abs().max(),

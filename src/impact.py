@@ -1,9 +1,9 @@
 """Impact forecast per town from return periods: river flow → how rare it is at the town's river point → who lives
 in the EFAS flood zone of that return period → status. No training, and no use of the July 2021 flood: the same
-rule serves the live forecast and the 2021 backtest.
+rule serves the live forecast.
 
     python src/impact.py             → outputs/data/town_efas.csv (residents per town in the EFAS 10/100/500-year
-                                       zones) and outputs/data/backtest_2021.csv (the July 2021 replay, scored)
+                                       zones)
 
 Exposure: residents in the EFAS zones ignore dikes and flood walls (the Meuse numbers in Dutch Limburg and Liège are
 an upper bound) and skip small streams (Kall, Bad Münstereifel and Kelmis have no zone, so 0 there means "no data",
@@ -84,8 +84,7 @@ def impact_forecast(flows_by_gauge, town_gauge, upto=None):
     flows_by_gauge: {gauge: flow in m³/s}, or {gauge: list of ensemble run peaks}. Gauge names as in
         forecast.GAUGES (GloFAS daily discharge, the same model as the thresholds).
     town_gauge: DataFrame with area, municipality, gauge (load_town_gauge()).
-    upto: last year of the record the thresholds are fitted on (forecast.thresholds); None = the whole record,
-        forecast.BACKTEST_YEAR for the 2021 replay.
+    upto: last year of the record the thresholds are fitted on (forecast.thresholds); None = the whole record.
 
     Status: "none" / "watch" / "warn" / "evacuate" when the flow reaches the 2- / 5- / 20-year flood at the
     town's river point; with ensemble runs, when at least forecast.PROB of the runs reach it. "no gauge" when the
@@ -117,28 +116,5 @@ def impact_forecast(flows_by_gauge, town_gauge, upto=None):
     return out
 
 
-def backtest():
-    """The July 2021 replay scored: per town, the first day of each status on the GloFAS daily flows of 10-20 July
-    against thresholds fitted on 1997-2020, the return period of its 2021 peak, and people expected at that peak
-    next to the people the satellite saw in the water."""
-    flow = pd.DataFrame(json.loads((OUT / "meuse" / "replay_2021.json").read_text()))
-    flow.index = pd.to_datetime(flow.index)
-    tg = load_town_gauge()
-    lvl = pd.DataFrame({d: impact_forecast(flow.loc[d].to_dict(), tg, forecast.BACKTEST_YEAR)
-                        .drop_duplicates("municipality").set_index("municipality").level for d in flow.index})
-    peak = impact_forecast(flow.max().to_dict(), tg, forecast.BACKTEST_YEAR).drop_duplicates("municipality")
-    b = peak[["area", "municipality", "gauge", "return_period", "people_expected", "people_2021", "no_efas_zone"]].copy()
-    for i, s in enumerate(STATUS[1:], 1):
-        b[f"first_{s}"] = [next((f"{d:%d %b}" for d in lvl if lvl.at[m, d] >= i), "not reached")
-                           for m in b.municipality]
-    b["return_period"] = b.return_period.map(forecast.rp_text)  # past ~100 years the fit only extrapolates
-    b = b.rename(columns={"return_period": "return_period_2021_peak", "people_expected": "people_expected_at_peak"})
-    b.sort_values("people_2021", ascending=False).to_csv(DATA_OUT / "backtest_2021.csv", index=False)
-    return b
-
-
 if __name__ == "__main__":
-    exposure()
-    b = backtest()
-    pd.set_option("display.width", 220)
-    print(b.sort_values("people_2021", ascending=False).head(25).to_string(index=False))
+    print(exposure().head(25).to_string(index=False))

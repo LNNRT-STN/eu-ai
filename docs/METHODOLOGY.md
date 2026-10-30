@@ -129,8 +129,8 @@ Output: `regions.geojson`.
   Above 5-year → Above 20-year flood when at least 30 % of the runs reach it (the EFAS notification rule). Towns take
   their river point's level as watch / warn / evacuate (`impact.py`), with people expected from the EFAS zone of the
   forecast return period.
-- **Backtest:** the same rule on the July 2021 reanalysis flows, thresholds fitted on 1997–2020 only
-  (`python src/impact.py` → `outputs/data/backtest_2021.csv`).
+- **Planning scenario (the dashboard's plan):** not the outlook but a return period the crisis room switches on: the
+  EFAS 10-, 100- or 500-year zone (`outputs/rp/`, README "Run it"). The outlook is context for that choice.
 - **Rain:** 7-day forecast for four headwater points, largest 2-day total, vs. ERA5 total for 13–15 July 2021.
 - The dashboard caches these calls for 3 hours and works offline without the outlook.
 

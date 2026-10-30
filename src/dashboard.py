@@ -1,6 +1,6 @@
-"""Action dashboard for crisis and risk managers in the July 2021 flood areas. Reads the cleaned data in
-outputs/data; the river outlook needs forecast.py (once) and build_priority.py (replay). The First action page reads
-notebooks/pipeline.py, dq_report.py and q4_ranking.py outputs. Run: streamlit run src/dashboard.py
+"""Action dashboard for crisis managers, fire brigades and residents in the July 2021 flood areas, planning for a
+10-, 100- or 500-year river flood (EFAS zones, outputs/rp; built by notebooks/pipeline.py with FLOOD=rp and
+notebooks/rp_extras.py). The 2021 vs today page reads outputs/data. Run: streamlit run src/dashboard.py
 
 On launch the visitor picks a role (crisis manager, fire brigade, resident); each role sees only its
 pages. ?role=<key> in the URL skips the choice (demo links, test renders)."""
@@ -14,25 +14,11 @@ import live
 st.set_page_config(page_title="Flood desk", page_icon=":material/water:", layout="wide",
                    initial_sidebar_state="auto")
 
-# page key: (file, title, icon, colour, what it is for)
-PAGES = {
-    "crisis": ("views/crisis.py", "Crisis room", ":material/crisis_alert:", "#d70015",
-               "The whole region live: which towns evacuate, who has reported safe, and the briefings to send."),
-    "plan": ("views/evacuate.py", "Town plan", ":material/directions_run:", "#c93400",
-             "One town: who leaves, where they go, the roads out and who gives the order."),
-    "doors": ("views/checkin.py", "Door-knock list", ":material/door_front:", "#a85400",
-              "Homes in the 2021 water with no news yet, street by street, and the closed roads."),
-    "resident": ("views/resident.py", "Am I at risk?", ":material/home_pin:", "#0071e3",
-                 "Type your address: do you need to leave, where to, and tell crews you are safe."),
-    "assess": ("views/then_now.py", "2021 vs today", ":material/history:", "#7b3fd1",
-               "What the July 2021 water covered, what has been done since, and what still needs fixing."),
-    "limits": ("views/limits.py", "Data & limits", ":material/info:", "#6e6e73",
-               "Where every number comes from, and what it cannot tell you."),
-}
+PAGES = core.PAGES
 # role key: (name, icon, colour, who it is for, its pages in sections; the first page opens on arrival)
 ROLES = {
     "manager": ("Crisis manager", ":material/crisis_alert:", "#d70015",
-                "Decide which towns leave, follow who is safe, send the briefings.",
+                "Pick the flood to plan for, decide which towns leave, follow who is safe, send the briefings.",
                 {"Respond": ["crisis", "plan", "doors"], "Background": ["assess", "limits"]}),
     "brigade": ("Fire brigade", ":material/fire_truck:", "#c93400",
                 "Knock on the right doors first and take the open roads out.",
@@ -75,7 +61,7 @@ st.html("<style>" + "".join(
 [class*=st-key-nav-] [data-testid=stPageLink] a[aria-current=page] p{font-weight:650}
 [class*=st-key-nav-] [data-testid=stPageLink] p{font-size:.95rem}
 .navh{font-size:.72rem;font-weight:650;color:#5a6e87;letter-spacing:.04em;text-transform:uppercase;margin:.6rem 0 -.2rem .55rem}
-.st-key-scn{background:#fff;border-radius:14px;padding:.85rem .9rem .5rem;box-shadow:0 1px 2px rgba(0,0,0,.05),0 4px 14px rgba(0,0,0,.04)}
+.st-key-scn{background:#fff;border-radius:14px;padding:.85rem .9rem .6rem;box-shadow:0 1px 2px rgba(0,0,0,.05),0 4px 14px rgba(0,0,0,.04)}
 .clock{display:flex;align-items:center;gap:.6rem}
 .clock .ld{width:.6rem;height:.6rem;border-radius:50%;background:var(--c);flex:none}
 .clock.on .ld{animation:pulse 1.6s ease-out infinite}
@@ -94,10 +80,12 @@ def pick(k):
 
 def launch():
     st.title("Flood desk")
-    st.markdown(f"**The July 2021 flood, replayed as if it started {live.drill(live.START):%A %-d %B}.** Belgium, the "
-                "Netherlands and Germany: one shared clock for the crisis room, the fire brigade and residents.",
-                help="The river flows are those of 12-17 July 2021, modelled afterwards (GloFAS). Only the dates move. "
-                     "Not an official warning: those come from SPW, Rijkswaterstaat and the German state flood centres.")
+    st.markdown("**Plan for a 10-, 100- or 500-year river flood.** Belgium, the Netherlands and Germany, in the "
+                "valleys hit in July 2021: who sits in the water, where they go, which doors to knock on. One shared "
+                "scenario for the crisis room, the fire brigade and residents.",
+                help="Flood zones: EFAS flood hazard maps (JRC), every river at that return period at once, no dikes "
+                     "in the model. A planning map, not a forecast and not an official warning: those come from SPW, "
+                     "Rijkswaterstaat and the German state flood centres.")
     st.space("small")
     cols = st.columns(len(ROLES), gap="medium")
     for col, (k, (name, ic, _c, who, _p)) in zip(cols, ROLES.items()):
@@ -109,84 +97,59 @@ def launch():
                       type="primary" if k == "manager" else "secondary", width="stretch")
 
 
-# the replay's days, to jump to: its start, then each midnight (flows are daily, so status changes at midnight)
-DAYS = [live.START] + list(pd.date_range(live.START.normalize() + pd.Timedelta(days=1), live.END, freq="D"))
+RP_HELP = {10: "10 % chance in any year", 100: "1 % chance in any year", 500: "0.2 % chance in any year"}
 
 
-def seek():
-    live.seek(st.session_state.sc_time)
-    st.session_state._seeked = True  # the fragment reruns the whole page, so the other views follow
-
-
-def now(controls=True):
-    """Where the shared clock stands, big; a slider to jump to any day of the replay. Moves the clock while
-    playing, so every role sees the same moment."""
-    k = live.advance()
-    replay = k["mode"] == "replay"
-    t = live.drill(k["t"]) if replay else k["t"]
-    st.html(f"<div class='clock{' on' if k['playing'] else ''}' style='--c:{'#248a3d' if k['playing'] else '#8e8e93'}'>"
-            f"<i class='ld'></i><div><b>{t:%a %-d %b · %H:%M}</b><small>"
-            + ("Replay of July 2021" if replay else "Live forecast") + (" · playing" if k["playing"] else " · paused")
-            + "</small></div></div>")
-    if replay and controls:
-        st.session_state.sc_time = max(d for d in DAYS if d <= k["t"])
-        st.select_slider("Jump to day", DAYS, key="sc_time", on_change=seek, label_visibility="collapsed",
-                         format_func=lambda d: f"{live.drill(d):%a %-d %b}" + (" 06:00" if d == live.START else ""),
-                         help="Pick a day of the replay. Going back rebuilds that moment: alerts, briefings, "
-                              "closed roads and simulated check-ins as they stood then.")
-    if st.session_state.pop("_seeked", False):
-        st.rerun()
+def set_rps():
+    live.set_rps(st.session_state.sc_rps or [])
 
 
 def scenario(controls=True):
-    """The scenario player: one clock shared by all sessions (src/live.py), so what the crisis manager plays, the
-    fire brigade and the residents see too. Play and the day are in view; mode, speed and the outlook fold away."""
-    c = live.clock()
+    """The shared scenario: which return periods are on. The crisis room switches them; every role sees the same.
+    Several on = compare them; the response plans for the rarest one."""
+    k = live.advance()
+    p = k["plan"]
     with st.container(key="scn"):
-        st.fragment(now, run_every=1.5 if c["playing"] else 4)(controls)
+        col = "#d70015" if p else "#248a3d"
+        st.html(f"<div class='clock' style='--c:{col}'><i class='ld'></i><div><b>"
+                + (f"{p}-year flood" if p else "Normal") + "</b><small>"
+                + (f"Planning for a {p}-year river flood · {RP_HELP[p]}" if p else "No flood scenario switched on")
+                + "</small></div></div>")
         if not controls:
             return
-        b1, b2 = st.columns(2)
-        if c["playing"]:
-            b1.button("Pause", icon=":material/pause:", on_click=live.pause, width="stretch")
-        else:
-            b1.button("Play", icon=":material/play_arrow:", on_click=live.play, type="primary", width="stretch")
-        b2.button("Reset", icon=":material/replay:", on_click=live.reset, width="stretch",
-                  help=f"Back to {live.drill(live.START):%a %d %b} 06:00 (the 12 July 2021 river flows); clears "
-                       "alerts, reports, closures and simulated check-ins")
-        with st.expander("Settings", icon=":material/tune:"):
-            st.session_state.sc_mode = c["mode"]
-            st.session_state.sc_speed = float(c["speed"]) if c["speed"] in (1, 3, 6, 12) else 3.0
-            st.segmented_control("Mode", ["replay", "live"], key="sc_mode",
-                                 format_func={"replay": "Replay 2021", "live": "Live forecast"}.get,
-                                 on_change=lambda: st.session_state.sc_mode and live.set_mode(st.session_state.sc_mode),
-                                 help="Replay the July 2021 river flows as if they started today, or follow today's "
-                                      "real GloFAS outlook. The clock is shared: every role sees the same moment.")
-            st.select_slider("Speed", [1.0, 3.0, 6.0, 12.0], key="sc_speed", format_func=lambda x: f"{x:g} h per second",
-                             on_change=lambda: live.set_speed(st.session_state.sc_speed))
-            fetched = core.outlook()[-2]
-            if st.button("Refresh live outlook" + (f" · {fetched:%H:%M}" if fetched is not None else ""),
-                         icon=":material/refresh:", type="tertiary",
-                         help="Open-Meteo GloFAS, the real 30-day outlook for today (not the replay)."):
-                core._outlook.clear()
-                st.rerun()
+        st.session_state.sc_rps = k["rps"]
+        st.segmented_control("Return period", list(live.RPS), selection_mode="multi", key="sc_rps",
+                             format_func=lambda r: f"{r}-year", on_change=set_rps,
+                             help="Switch on one flood to plan for it, or several to compare them: the map shows each "
+                                  "zone, the plan follows the rarest one switched on. EFAS flood hazard maps, all "
+                                  "rivers at that return period at once; no dikes in the model. Every role sees "
+                                  "the same scenario.")
+        if k["rps"]:
+            st.button("Back to normal", icon=":material/restart_alt:", type="tertiary", width="stretch",
+                      on_click=lambda: live.set_rps([]),
+                      help="Switch every flood off: alerts, briefings and closed roads clear; check-ins stay.")
 
 
-if role is None:
-    st.navigation([st.Page(launch, title="Flood desk", icon=":material/water:")], position="hidden").run()
+if role is None:  # the opening page: flood, town, then the homes in order; the role desk is one click down
+    st.navigation([st.Page("views/start.py", title="Who leaves first", icon=":material/water:", default=True),
+                   st.Page(launch, title="Flood desk", icon=":material/apps:", url_path="desk")],
+                  position="hidden").run()
     st.stop()
 
 name, ric, rcol, _who, sections = ROLES[role]
 keys = [k for ks in sections.values() for k in ks]
 pages = {k: st.Page(PAGES[k][0], title=PAGES[k][1], icon=PAGES[k][2], default=(k == keys[0])) for k in keys}
 nav = st.navigation(list(pages.values()), position="hidden")
+st.session_state._nav = keys  # core.next_steps offers only this role's pages
+if st.session_state.get("_goto") in pages:  # sent here from a town on the opening page
+    st.switch_page(pages[st.session_state.pop("_goto")])
+st.session_state.pop("_goto", None)
 
 with st.sidebar:
     a, b = st.columns([5, 1], vertical_alignment="center")
     a.html(f"<div class='who'><div class='rchip' style='--c:{rcol};--s:2.1rem'><span>{ric.split('/')[1].rstrip(':')}"
            f"</span></div>{name}</div>")
-    b.button("", icon=":material/swap_horiz:", type="tertiary", help="Switch role",
-             on_click=lambda: (st.session_state.pop("role", None), st.query_params.clear()))
+    b.button("", icon=":material/swap_horiz:", type="tertiary", help="Back to the start", on_click=core.restart)
     if len(keys) > 1:
         for sec, ks in sections.items():
             if sec:
@@ -197,10 +160,12 @@ with st.sidebar:
     # one Town picker for every page that works on a town; _town keeps the choice while other pages are open
     if nav.title in TOWN_PAGES:
         tw = anna.load()[1]
-        tw = tw[(tw.variant == "worst") & (tw.people >= 10)].sort_values("people", ascending=False)
-        st.session_state.setdefault("_town", tw.municipality.iloc[0])
+        v = live.variant()
+        tw = tw[(tw.variant == v) & (tw.people >= 10)].sort_values("people", ascending=False)
+        if st.session_state.get("_town") not in set(tw.municipality):
+            st.session_state._town = tw.municipality.iloc[0]
         st.session_state.town = st.session_state._town
-        lab = dict(zip(tw.municipality, tw.label + " · " + tw.people.map(core.about) + " in the 2021 water"))
+        lab = dict(zip(tw.municipality, tw.label + " · " + tw.people.map(core.about) + f" in the {v[2:]}-year zone"))
         st.space("small")
         st.selectbox("Town", list(lab), format_func=lab.get, key="town",
                      on_change=lambda: st.session_state.update(_town=st.session_state.town))

@@ -1,6 +1,6 @@
 """What to fix: the gaps the 2021 data shows, the measure that closes each one, and the money that exists for it.
 A section of "2021, today, next" (then_now.py), tab "What to fix".
-Gaps come from outputs/data/ (q4_headline.json, app_towns.csv). Every amount comes from docs/BUDGETS.md (desk research,
+Gaps come from the July 2021 data, outputs/data/ (q4_headline.json, app_towns.csv; anna.D2021). Every amount comes from docs/BUDGETS.md (desk research,
 external sources, URL per row): copied as published, never summed across rows, 'partly' where the source is secondary."""
 import pandas as pd
 import streamlit as st
@@ -33,10 +33,10 @@ src = lambda url, label, ok=True: f"[{label}]({url})" + ("" if ok else PARTLY)
 
 def numbers():
     """The gap figures, from outputs/data/: also used by the verdict on top of then_now."""
-    head, towns, crit, *_ = anna.load()
+    head, towns, crit, *_ = anna.load(anna.D2021)
     T = towns[towns.variant == "worst"]
     sc = crit[(crit.type == "school") & crit.in_worst_flood.astype(bool) & crit.share_of_site_flooded.ge(.05)]
-    inf = pd.read_csv(core.DATA / "infra_in_flood.csv")   # notebooks/infra.py: today's network inside the 2021 water
+    inf = pd.read_csv(core.D2021 / "infra_in_flood.csv")   # notebooks/infra.py: today's network inside the 2021 water
     rail = inf[inf.kind == "rail"]
     return dict(
         obs=head["worst"]["observed"], mod=head["worst"]["modelled_vesdre"],

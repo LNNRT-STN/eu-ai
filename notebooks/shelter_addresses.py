@@ -5,18 +5,19 @@ Out: outputs/data/shelter_addresses.csv [shelter, s_lon, s_lat, street, housenum
 Method: nearest OSM object with addr:housenumber within 100 m of the shelter point (EPSG:3035). No match -> blank;
 nothing is guessed or interpolated. Licence: (c) OpenStreetMap contributors, ODbL 1.0.
 """
-import time, warnings
+import os, time, warnings
 from pathlib import Path
 warnings.filterwarnings("ignore")
 import numpy as np, pandas as pd, geopandas as gpd
 from scipy.spatial import cKDTree
 
 T0 = time.time()
-C = Path("cache/osm"); OUT = Path("outputs/data/shelter_addresses.csv"); MAX_M = 100.0
+D = Path(os.environ.get("OUT_DIR", "outputs/data")); TAG = "" if D.name == "data" else f".{D.name}"   # OUT_DIR=outputs/rp
+C = Path("cache/osm"); OUT = D / "shelter_addresses.csv"; MAX_M = 100.0
 TAGS = {"street": "addr:street", "place": "addr:place", "housenumber": "addr:housenumber",
         "postcode": "addr:postcode", "city": "addr:city"}
 
-s = (pd.read_csv("outputs/data/bus_plan.csv").drop_duplicates(["shelter", "s_lon", "s_lat"])
+s = (pd.read_csv(D / "bus_plan.csv").drop_duplicates(["shelter", "s_lon", "s_lat"])
      [["shelter", "s_lon", "s_lat"]].reset_index(drop=True))
 box = (s.s_lon.min() - .002, s.s_lat.min() - .002, s.s_lon.max() + .002, s.s_lat.max() + .002)
 
@@ -24,7 +25,7 @@ def tag(g, k):
     return g["other_tags"].astype("string").str.extract(rf'"{k}"=>"((?:[^"\\]|\\.)*)"', expand=False)
 
 frames = []
-for f in sorted(C.glob("*.addr.*.gpkg")):
+for f in sorted(C.glob(f"*-latest.addr{TAG}.[mp]*.gpkg")):
     g = gpd.read_file(f, bbox=box)
     if f.name.endswith("multipolygons.gpkg"):
         g["geometry"] = g.geometry.representative_point()

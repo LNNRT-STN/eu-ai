@@ -1,0 +1,434 @@
+﻿area,variant,municipality,people,covered,no_reach,full,buildings,people_2025,no_shelter,lon,lat,source,bus_covered
+liege,rp10,Luik (BE),59824,57696,0,2127,23414,60566,2127,5.5949,50.6263,modelled,59824.0
+liege,rp10,Seraing (BE),13844,11211,0,2633,3765,13999,2633,5.518,50.5883,modelled,13844.0
+rochefort,rp10,Andenne (BE),10315,1909,93,8313,2485,10340,8406,5.0577,50.4903,modelled,8374.0
+liege,rp10,Maasmechelen (BE),9861,6143,1065,2653,7711,9921,3718,5.6607,50.9587,modelled,9861.0
+liege,rp10,Flémalle (BE),6947,6934,0,13,2356,7033,13,5.4429,50.593,modelled,6947.0
+venlo,rp10,Roermond (NL),5218,2967,522,1730,4158,5143,2252,6.017,51.2105,modelled,5218.0
+liege,rp10,Verviers (BE),3982,3959,23,0,1403,3990,23,5.8725,50.5922,modelled,3982.0
+liege,rp10,Esneux (BE),3871,2086,29,1757,2126,3897,1786,5.5752,50.5432,modelled,3871.0
+liege,rp10,Wezet (BE),3633,2199,1013,422,3253,3678,1435,5.6993,50.7408,modelled,3633.0
+venlo,rp10,Maasgouw (NL),3343,2221,564,558,2026,3299,1122,5.8938,51.1579,modelled,3343.0
+liege,rp10,Bitsingen (BE),3340,1401,0,1939,2620,3369,1939,5.6215,50.7712,modelled,3340.0
+liege,rp10,Pepinster (BE),3163,998,62,2103,943,3195,2165,5.7981,50.5714,modelled,3163.0
+liege,rp10,Engis (BE),3069,1600,98,1371,734,2998,1469,5.3858,50.5618,modelled,3069.0
+ahr,rp10,"Bad Neuenahr-Ahrweiler, Stadt (DE)",3050,3049,0,1,992,3047,1,7.1228,50.5291,modelled,3050.0
+liege,rp10,Dilsen-Stokkem (BE),2804,2282,6,516,2544,2965,522,5.7165,51.0437,modelled,2804.0
+liege,rp10,Oupeye (BE),2803,1958,0,845,1416,2855,845,5.6407,50.7148,modelled,2802.0
+liege,rp10,Chaudfontaine (BE),2755,2747,0,8,1546,2791,8,5.6332,50.5772,modelled,2755.0
+ahr,rp10,"Unkel, Stadt (DE)",2703,1966,0,737,942,2632,737,7.2353,50.6093,modelled,2702.0
+venlo,rp10,Venlo (NL),2534,2452,57,25,2784,2322,82,6.1527,51.393,modelled,2534.0
+schleiden,rp10,"Schleiden, Stadt (DE)",2328,1332,219,776,1657,2261,995,6.4542,50.5597,modelled,2328.0
+eschweiler,rp10,"Eschweiler, Stadt (DE)",2297,2297,0,0,1027,2238,0,6.2713,50.8305,modelled,2297.0
+erftstadt,rp10,"Erftstadt, Stadt (DE)",2154,1696,1,457,1607,2127,458,6.7785,50.7952,modelled,2154.0
+liege,rp10,Tongeren (BE),2153,1940,2,212,2199,2147,214,5.4671,50.7699,modelled,2153.0
+liege,rp10,Trooz (BE),2131,325,17,1789,847,2160,1806,5.6815,50.5683,modelled,2132.0
+liege,rp10,Herstal (BE),2086,2086,0,0,760,2108,0,5.6071,50.6738,modelled,2086.0
+liege,rp10,Eijsden-Margraten (NL),2046,29,2018,0,44,1975,2018,5.762,50.8041,modelled,2046.0
+ahr,rp10,"Bad Breisig, Stadt (DE)",1860,1860,0,0,542,1852,0,7.2774,50.5139,modelled,1860.0
+ahr,rp10,"Sinzig, Stadt (DE)",1729,1729,0,0,664,1726,0,7.2187,50.522,modelled,1729.0
+ahr,rp10,"Mayen, Stadt (DE)",1706,1706,0,0,675,1685,0,7.2224,50.3228,modelled,1706.0
+rochefort,rp10,Hotton (BE),1697,430,458,809,1576,1697,1267,5.4367,50.2669,modelled,1697.0
+rochefort,rp10,Durbuy (BE),1696,645,1049,2,1857,1693,1051,5.5099,50.364,modelled,1696.0
+ahr,rp10,"Remagen, Stadt (DE)",1674,1540,0,134,1042,1641,134,7.1806,50.6051,modelled,1674.0
+eschweiler,rp10,"Düren, Stadt (DE)",1649,1649,0,0,732,1615,0,6.4685,50.7998,modelled,1649.0
+liege,rp10,Aywaille (BE),1644,959,149,535,1118,1628,684,5.7025,50.4534,modelled,1644.0
+liege,rp10,Theux (BE),1593,389,0,1204,1503,1576,1204,5.8128,50.5011,modelled,1593.0
+wassenberg,rp10,"Heinsberg, Stadt (DE)",1575,1570,5,0,1773,1583,5,6.106,51.0633,modelled,1575.0
+liege,rp10,Lanaken (BE),1532,651,15,867,1299,1529,882,5.6368,50.8877,modelled,1532.0
+liege,rp10,Saint-Nicolas (Luik) (BE),1497,1333,0,164,826,1512,164,5.5248,50.6322,modelled,1497.0
+ahr,rp10,Dernau (DE),1458,215,305,938,744,1455,1243,7.0458,50.5241,modelled,1458.0
+liege,rp10,Comblain-au-Pont (BE),1415,930,31,454,898,1420,485,5.5675,50.4835,modelled,1415.0
+liege,rp10,Maastricht (NL),1349,488,0,861,212,1385,861,5.6998,50.8605,modelled,1349.0
+liege,rp10,Stein (NL),1206,0,1206,0,33,1171,1206,5.7569,50.9702,modelled,1206.0
+rochefort,rp10,Rochefort (BE),1171,967,119,85,1032,1186,204,5.1689,50.162,modelled,1171.0
+liege,rp10,Limburg (BE),1083,391,14,677,605,1085,691,5.9382,50.6155,modelled,1083.0
+liege,rp10,Maaseik (BE),1072,884,29,158,1257,1101,187,5.6865,51.0765,modelled,1072.0
+ahr,rp10,Erpel (DE),977,436,0,541,443,963,541,7.278,50.6041,modelled,977.0
+venlo,rp10,Leudal (NL),941,638,118,185,825,912,303,5.8983,51.2382,modelled,941.0
+liege,rp10,Hasselt (BE),910,910,0,0,64,917,0,5.3023,50.9201,modelled,910.0
+eschweiler,rp10,"Jülich, Stadt (DE)",893,836,11,45,465,874,56,6.3614,50.929,modelled,893.0
+rochefort,rp10,La Roche-en-Ardenne (BE),690,169,186,335,1292,694,521,5.5621,50.1573,modelled,690.0
+euskirchen,rp10,Swisttal (DE),690,685,5,0,449,665,5,6.9313,50.6867,modelled,690.0
+venlo,rp10,Peel en Maas (NL),666,659,7,0,654,710,7,5.9823,51.3297,modelled,666.0
+liege,rp10,Oerle (BE),647,0,647,0,330,657,647,5.3397,50.7224,modelled,647.0
+venlo,rp10,Echt-Susteren (NL),646,646,0,0,174,631,0,5.9041,51.0843,modelled,646.0
+ahr,rp10,Altenahr (DE),638,638,0,0,332,631,0,6.988,50.5235,modelled,638.0
+rochefort,rp10,Namen (BE),542,66,476,0,282,552,476,4.8776,50.456,modelled,542.0
+rochefort,rp10,Hamoir (BE),539,177,0,362,414,545,362,5.5441,50.436,modelled,539.0
+eschweiler,rp10,Inden (DE),528,430,98,0,432,563,98,6.3744,50.864,modelled,528.0
+liege,rp10,Sprimont (BE),450,77,11,363,266,449,374,5.6598,50.5148,modelled,450.0
+rochefort,rp10,Yvoir (BE),418,63,355,0,277,437,355,4.9497,50.3251,modelled,418.0
+ahr,rp10,"Linz am Rhein, Stadt (DE)",413,413,0,0,175,404,0,7.3094,50.587,modelled,413.0
+ahr,rp10,Mayschoß (DE),384,50,0,334,185,379,334,7.0174,50.5192,modelled,384.0
+liege,rp10,Maasgouw (NL),348,33,184,131,127,340,315,5.8938,51.1579,modelled,348.0
+venlo,rp10,Horst aan de Maas (NL),342,309,32,0,328,333,32,6.0216,51.4447,modelled,342.0
+ahr,rp10,"Bad Hönningen, Stadt (DE)",325,325,0,0,267,320,0,7.3379,50.5292,modelled,325.0
+rochefort,rp10,Houyet (BE),315,175,51,89,335,304,140,5.0094,50.1928,modelled,315.0
+rochefort,rp10,Houffalize (BE),296,30,266,0,431,293,266,5.7553,50.1478,modelled,296.0
+rochefort,rp10,Rendeux (BE),291,66,82,142,539,295,224,5.5259,50.2128,modelled,291.0
+ahr,rp10,Schuld (DE),282,0,282,0,305,278,282,6.8844,50.4489,modelled,282.0
+rochefort,rp10,Marchin (BE),275,267,9,0,89,275,9,5.2428,50.4632,modelled,275.0
+liege,rp10,Riemst (BE),272,13,0,259,230,263,259,5.6045,50.8045,modelled,272.0
+liege,rp10,Hamoir (BE),259,187,0,72,314,266,72,5.5441,50.436,modelled,259.0
+liege,rp10,Kinrooi (BE),257,257,0,0,194,290,0,5.7409,51.1542,modelled,257.0
+ahr,rp10,Rheinbreitbach (DE),240,240,0,0,96,240,0,7.2483,50.6246,modelled,240.0
+wassenberg,rp10,"Hückelhoven, Stadt (DE)",230,230,0,0,246,251,0,6.2452,51.0406,modelled,230.0
+venlo,rp10,Beesel (NL),229,229,0,0,241,249,0,6.0739,51.2704,modelled,229.0
+liege,rp10,Echt-Susteren (NL),206,97,0,109,72,230,109,5.9041,51.0843,modelled,206.0
+eschweiler,rp10,Niederzier (DE),201,118,34,50,142,199,84,6.4703,50.8963,modelled,201.0
+wassenberg,rp10,"Wassenberg, Stadt (DE)",197,143,10,44,244,246,54,6.1403,51.1117,modelled,197.0
+rochefort,rp10,Nassogne (BE),194,192,1,0,162,187,1,5.3483,50.1352,modelled,194.0
+liege,rp10,Dison (BE),184,152,33,0,106,186,33,5.8763,50.6131,modelled,184.0
+liege,rp10,Baelen (BE),182,176,6,0,172,192,6,6.0488,50.5875,modelled,182.0
+eschweiler,rp10,Kreuzau (DE),178,124,0,54,222,178,54,6.483,50.7401,modelled,178.0
+venlo,rp10,Roerdalen (NL),159,158,1,0,111,168,1,6.032,51.1428,modelled,159.0
+eschweiler,rp10,"Stolberg (Rhld.), Kupferstadt (DE)",154,152,1,0,86,151,1,6.2679,50.7459,modelled,154.0
+ahr,rp10,Ahrbrück (DE),147,147,0,0,119,146,0,6.98,50.4782,modelled,147.0
+liege,rp10,Meerssen (NL),137,0,137,0,77,143,137,5.7358,50.9041,modelled,137.0
+rochefort,rp10,Modave (BE),130,118,12,0,87,137,12,5.2918,50.4705,modelled,130.0
+euskirchen,rp10,Weilerswist (DE),122,122,0,0,149,117,0,6.8511,50.7396,modelled,122.0
+ahr,rp10,Hönningen (DE),121,3,118,0,97,123,118,6.9472,50.4619,modelled,121.0
+eschweiler,rp10,"Nideggen, Stadt (DE)",112,37,60,15,260,113,75,6.4876,50.6749,modelled,112.0
+ahr,rp10,Leubsdorf (DE),110,110,0,0,72,106,0,7.3086,50.5464,modelled,110.0
+ahr,rp10,Insul (DE),99,75,0,25,69,95,25,6.9096,50.4398,modelled,100.0
+ahr,rp10,Trimbs (DE),96,96,0,0,73,83,0,7.3022,50.3372,modelled,96.0
+rochefort,rp10,Tellin (BE),92,71,21,0,139,89,21,5.2197,50.0646,modelled,92.0
+erftstadt,rp10,"Kerpen, Kolpingstadt (DE)",83,80,3,0,69,80,3,6.6698,50.8741,modelled,83.0
+erftstadt,rp10,Weilerswist (DE),76,68,8,0,100,121,8,6.8511,50.7396,modelled,76.0
+ahr,rp10,Brohl-Lützing (DE),73,73,0,0,27,73,0,7.3137,50.4767,modelled,73.0
+euskirchen,rp10,"Zülpich, Stadt (DE)",73,73,0,0,174,71,0,6.6607,50.6932,modelled,74.0
+rochefort,rp10,Wellin (BE),68,0,68,0,50,65,68,5.109,50.0743,modelled,68.0
+liege,rp10,Genk (BE),67,67,0,0,22,68,0,5.4801,50.9649,modelled,67.0
+liege,rp10,Zutendaal (BE),67,40,0,27,8,64,27,5.5739,50.9371,modelled,67.0
+rochefort,rp10,Tenneville (BE),61,0,61,0,111,60,61,5.4943,50.1006,modelled,61.0
+ahr,rp10,Wershofen (DE),59,0,59,0,40,57,59,6.8278,50.4435,modelled,59.0
+schleiden,rp10,"Heimbach, Stadt (DE)",58,0,58,0,16,56,58,6.4817,50.6305,modelled,58.0
+liege,rp10,Saint-Georges-sur-Meuse (BE),56,55,1,0,75,55,1,5.3616,50.5964,modelled,56.0
+ahr,rp10,Rech (DE),52,0,10,42,37,52,52,7.0367,50.5126,modelled,52.0
+rochefort,rp10,Dinant (BE),52,0,52,0,31,50,52,4.9462,50.2415,modelled,52.0
+ahr,rp10,Rheinbrohl (DE),51,51,0,0,18,51,0,7.3531,50.5058,modelled,51.0
+rochefort,rp10,Ferrières (BE),51,0,51,0,90,51,51,5.5931,50.4116,modelled,51.0
+liege,rp10,Eupen (BE),50,44,6,0,55,48,6,6.091,50.6092,modelled,50.0
+liege,rp10,Olne (BE),45,27,0,18,27,46,18,5.7381,50.5902,modelled,45.0
+ahr,rp10,Kasbach-Ohlenberg (DE),44,6,0,38,30,43,38,7.2694,50.5855,modelled,44.0
+rochefort,rp10,Sainte-Ode (BE),44,44,0,0,48,44,0,5.5548,50.0172,modelled,44.0
+ahr,rp10,Antweiler (DE),40,39,0,0,26,38,0,6.8275,50.4065,modelled,40.0
+rochefort,rp10,Stoumont (BE),39,10,29,0,38,40,29,5.8101,50.4163,modelled,40.0
+rochefort,rp10,Ciney (BE),29,0,29,0,17,33,29,5.1264,50.2784,modelled,29.0
+rochefort,rp10,Bertogne (BE),24,0,24,0,54,24,24,5.6449,50.0606,modelled,24.0
+ahr,rp10,Fuchshofen (DE),22,0,22,0,6,21,22,6.8573,50.4245,modelled,22.0
+ahr,rp10,Müsch (DE),22,0,22,0,24,22,22,6.8303,50.3862,modelled,22.0
+ahr,rp10,Sankt Johann (DE),21,16,4,0,20,20,4,7.1842,50.3556,modelled,21.0
+euskirchen,rp10,"Euskirchen, Stadt (DE)",21,21,0,0,30,27,0,6.8094,50.6319,modelled,21.0
+ahr,rp10,Dümpelfeld (DE),18,0,0,18,13,18,18,6.9467,50.4397,modelled,18.0
+ahr,rp10,Welling (DE),17,17,0,0,8,18,0,7.331,50.3335,modelled,17.0
+liege,rp10,Neupré (BE),17,0,17,0,11,17,17,5.493,50.5459,modelled,17.0
+euskirchen,rp10,"Erftstadt, Stadt (DE)",15,15,0,0,12,14,0,6.7785,50.7952,modelled,15.0
+liege,rp10,Voeren (BE),12,0,12,0,3,12,12,5.8382,50.7474,modelled,12.0
+ahr,rp10,Dorsel (DE),10,0,10,0,64,10,10,6.7948,50.3861,modelled,10.0
+rochefort,rp10,Saint-Hubert (BE),10,0,10,0,5,10,10,5.3459,50.0382,modelled,10.0
+rochefort,rp10,Somme-Leuze (BE),10,10,1,0,52,10,1,5.3216,50.313,modelled,10.0
+liege,rp10,Diepenbeek (BE),8,8,0,0,8,8,0,5.4189,50.9132,modelled,8.0
+rochefort,rp10,Hamois (BE),8,0,8,0,4,7,8,5.1467,50.3349,modelled,8.0
+eschweiler,rp10,Hürtgenwald (DE),8,8,0,0,12,8,0,6.3703,50.7097,modelled,8.0
+erftstadt,rp10,"Brühl, Stadt (DE)",7,6,1,0,8,7,1,6.8894,50.8203,modelled,7.0
+venlo,rp10,"Wassenberg, Stadt (DE)",6,6,0,0,1,21,0,6.1403,51.1117,modelled,6.0
+ahr,rp10,Blankenheim (DE),5,0,5,0,5,5,5,6.6912,50.4014,modelled,5.0
+venlo,rp10,Venray (NL),5,0,5,0,3,5,5,5.959,51.5091,modelled,5.0
+erftstadt,rp10,"Hürth, Stadt (DE)",4,4,0,0,4,4,0,6.8501,50.8734,modelled,4.0
+rochefort,rp10,Assesse (BE),3,0,3,0,5,3,3,5.0036,50.3751,modelled,3.0
+ahr,rp10,Glees (DE),2,0,2,0,1,2,2,7.244,50.4184,modelled,2.0
+rochefort,rp10,Daverdisse (BE),2,0,2,0,1,2,2,5.0674,50.0031,modelled,2.0
+ahr,rp10,Nickenich (DE),1,1,0,0,4,1,0,7.332,50.4128,modelled,1.0
+liege,rp10,Bilzen (BE),1,0,1,0,6,1,1,5.5408,50.871,modelled,2.0
+liege,rp10,Peer (BE),1,1,0,0,2,1,0,5.4546,51.1241,modelled,1.0
+liege,rp100,Luik (BE),70784,57649,0,13135,26837,71670,13135,5.5949,50.6263,modelled,70784.0
+liege,rp100,Maasmechelen (BE),14751,10122,2620,2009,11293,14797,4629,5.6607,50.9587,modelled,14752.0
+venlo,rp100,Venlo (NL),14311,12101,1316,894,13919,12824,2210,6.1527,51.393,modelled,14311.0
+liege,rp100,Seraing (BE),14280,11042,0,3239,3899,14439,3239,5.518,50.5883,modelled,14281.0
+rochefort,rp100,Andenne (BE),11953,1483,677,9793,2943,11985,10470,5.0577,50.4903,modelled,7740.0
+venlo,rp100,Roermond (NL),8869,4717,951,3201,6668,8758,4152,6.017,51.2105,modelled,8869.0
+liege,rp100,Flémalle (BE),7994,6998,0,996,2799,8095,996,5.4429,50.593,modelled,7994.0
+ahr,rp100,"Remagen, Stadt (DE)",6973,2816,672,3485,2910,6853,4157,7.1806,50.6051,modelled,6974.0
+liege,rp100,Wezet (BE),4927,2947,1468,511,4590,4979,1979,5.6993,50.7408,modelled,4927.0
+liege,rp100,Verviers (BE),4735,4712,23,0,1687,4747,23,5.8725,50.5922,modelled,4735.0
+venlo,rp100,Maasgouw (NL),4476,2429,1803,244,2990,4407,2047,5.8938,51.1579,modelled,4476.0
+liege,rp100,Oupeye (BE),4256,3014,21,1221,2084,4324,1242,5.6407,50.7148,modelled,4256.0
+liege,rp100,Esneux (BE),4112,2185,29,1898,2289,4138,1927,5.5752,50.5432,modelled,4112.0
+ahr,rp100,"Bad Neuenahr-Ahrweiler, Stadt (DE)",4018,4017,0,1,1311,4011,1,7.1228,50.5291,modelled,4018.0
+liege,rp100,Dilsen-Stokkem (BE),3848,2436,11,1402,3514,4046,1413,5.7165,51.0437,modelled,3849.0
+liege,rp100,Bitsingen (BE),3781,1384,0,2397,2882,3816,2397,5.6215,50.7712,modelled,3781.0
+liege,rp100,Engis (BE),3735,1426,135,2174,1024,3656,2309,5.3858,50.5618,modelled,3734.0
+ahr,rp100,"Sinzig, Stadt (DE)",3677,1704,0,1973,1481,3669,1973,7.2187,50.522,modelled,3677.0
+ahr,rp100,"Unkel, Stadt (DE)",3527,867,2145,514,1351,3443,2659,7.2353,50.6093,modelled,3527.0
+liege,rp100,Tongeren (BE),3214,2206,725,283,3129,3213,1008,5.4671,50.7699,modelled,3214.0
+liege,rp100,Pepinster (BE),3195,959,77,2159,964,3228,2236,5.7981,50.5714,modelled,3195.0
+erftstadt,rp100,"Erftstadt, Stadt (DE)",3145,1246,1,1898,2460,3098,1899,6.7785,50.7952,modelled,3145.0
+venlo,rp100,Peel en Maas (NL),2969,2409,88,472,2806,2993,560,5.9823,51.3297,modelled,2969.0
+ahr,rp100,"Bad Breisig, Stadt (DE)",2938,1990,80,868,845,2922,948,7.2774,50.5139,modelled,2938.0
+liege,rp100,Chaudfontaine (BE),2925,2901,0,24,1664,2963,24,5.6332,50.5772,modelled,2925.0
+eschweiler,rp100,"Eschweiler, Stadt (DE)",2859,2859,0,0,1322,2789,0,6.2713,50.8305,modelled,2860.0
+schleiden,rp100,"Schleiden, Stadt (DE)",2637,1179,1435,23,1921,2560,1458,6.4542,50.5597,modelled,2637.0
+liege,rp100,Herstal (BE),2607,2606,0,0,962,2636,0,5.6071,50.6738,modelled,2606.0
+liege,rp100,Lanaken (BE),2597,368,411,1818,2033,2590,2229,5.6368,50.8877,modelled,2597.0
+eschweiler,rp100,"Düren, Stadt (DE)",2558,2558,0,0,1232,2510,0,6.4685,50.7998,modelled,2558.0
+liege,rp100,Trooz (BE),2353,318,17,2017,1026,2384,2034,5.6815,50.5683,modelled,2353.0
+venlo,rp100,Leudal (NL),2338,1000,317,1020,1984,2268,1337,5.8983,51.2382,modelled,2338.0
+liege,rp100,Eijsden-Margraten (NL),2143,29,2114,0,46,2069,2114,5.762,50.8041,modelled,2143.0
+ahr,rp100,"Bad Hönningen, Stadt (DE)",2132,19,0,2113,867,2108,2113,7.3379,50.5292,modelled,2132.0
+ahr,rp100,"Mayen, Stadt (DE)",2085,2085,0,0,844,2060,0,7.2224,50.3228,modelled,2085.0
+rochefort,rp100,Durbuy (BE),2081,659,1106,317,2141,2075,1423,5.5099,50.364,modelled,2081.0
+liege,rp100,Maastricht (NL),2049,523,0,1526,297,2103,1526,5.6998,50.8605,modelled,2049.0
+liege,rp100,Maaseik (BE),2005,1701,154,151,2430,2064,305,5.6865,51.0765,modelled,2006.0
+rochefort,rp100,Hotton (BE),1999,149,559,1290,1768,1995,1849,5.4367,50.2669,modelled,2000.0
+liege,rp100,Aywaille (BE),1995,980,154,862,1332,1972,1016,5.7025,50.4534,modelled,1995.0
+wassenberg,rp100,"Heinsberg, Stadt (DE)",1982,1945,10,27,2305,1995,37,6.106,51.0633,modelled,1982.0
+liege,rp100,Theux (BE),1702,294,0,1408,1600,1684,1408,5.8128,50.5011,modelled,1702.0
+venlo,rp100,Horst aan de Maas (NL),1621,1079,124,418,1800,1607,542,6.0216,51.4447,modelled,1621.0
+liege,rp100,Comblain-au-Pont (BE),1546,974,31,541,1001,1551,572,5.5675,50.4835,modelled,1546.0
+ahr,rp100,Dernau (DE),1542,215,340,987,800,1540,1327,7.0458,50.5241,modelled,1542.0
+eschweiler,rp100,"Jülich, Stadt (DE)",1510,1382,12,116,896,1486,128,6.3614,50.929,modelled,1510.0
+liege,rp100,Saint-Nicolas (Luik) (BE),1505,1251,0,254,827,1519,254,5.5248,50.6322,modelled,1505.0
+rochefort,rp100,Rochefort (BE),1372,978,334,60,1208,1382,394,5.1689,50.162,modelled,1372.0
+liege,rp100,Limburg (BE),1362,392,18,952,729,1362,970,5.9382,50.6155,modelled,1362.0
+venlo,rp100,Beesel (NL),1327,183,1130,14,1250,1337,1144,6.0739,51.2704,modelled,1327.0
+liege,rp100,Stein (NL),1240,0,1240,0,88,1207,1240,5.7569,50.9702,modelled,1240.0
+ahr,rp100,Erpel (DE),1210,95,0,1115,537,1193,1115,7.278,50.6041,modelled,1210.0
+liege,rp100,Hasselt (BE),925,925,0,0,77,933,0,5.3023,50.9201,modelled,925.0
+ahr,rp100,Altenahr (DE),831,51,19,761,386,820,780,6.988,50.5235,modelled,831.0
+erftstadt,rp100,"Kerpen, Kolpingstadt (DE)",793,236,23,534,514,779,557,6.6698,50.8741,modelled,793.0
+eschweiler,rp100,Inden (DE),785,603,145,36,597,817,181,6.3744,50.864,modelled,785.0
+euskirchen,rp100,Swisttal (DE),771,762,9,0,514,744,9,6.9313,50.6867,modelled,771.0
+venlo,rp100,Echt-Susteren (NL),757,757,0,0,232,740,0,5.9041,51.0843,modelled,757.0
+rochefort,rp100,La Roche-en-Ardenne (BE),703,170,190,344,1338,708,534,5.5621,50.1573,modelled,704.0
+rochefort,rp100,Hamoir (BE),671,177,0,494,519,678,494,5.5441,50.436,modelled,671.0
+liege,rp100,Oerle (BE),658,0,658,0,339,668,658,5.3397,50.7224,modelled,658.0
+ahr,rp100,"Linz am Rhein, Stadt (DE)",638,638,0,0,273,625,0,7.3094,50.587,modelled,638.0
+rochefort,rp100,Namen (BE),613,85,528,0,311,624,528,4.8776,50.456,modelled,613.0
+liege,rp100,Riemst (BE),594,9,0,585,443,574,585,5.6045,50.8045,modelled,594.0
+liege,rp100,Sprimont (BE),465,57,11,397,279,464,408,5.6598,50.5148,modelled,465.0
+liege,rp100,Maasgouw (NL),452,33,275,144,150,441,419,5.8938,51.1579,modelled,452.0
+ahr,rp100,Mayschoß (DE),445,32,0,412,213,438,412,7.0174,50.5192,modelled,444.0
+wassenberg,rp100,"Hückelhoven, Stadt (DE)",425,425,0,0,443,441,0,6.2452,51.0406,modelled,425.0
+rochefort,rp100,Yvoir (BE),422,65,357,0,287,441,357,4.9497,50.3251,modelled,422.0
+rochefort,rp100,Houyet (BE),374,187,71,117,391,362,188,5.0094,50.1928,modelled,374.0
+liege,rp100,Hamoir (BE),367,179,0,188,443,376,188,5.5441,50.436,modelled,367.0
+liege,rp100,Kinrooi (BE),358,358,0,0,284,392,0,5.7409,51.1542,modelled,358.0
+ahr,rp100,Rheinbreitbach (DE),333,333,0,0,130,334,0,7.2483,50.6246,modelled,333.0
+rochefort,rp100,Rendeux (BE),328,67,87,174,595,331,261,5.5259,50.2128,modelled,328.0
+rochefort,rp100,Houffalize (BE),300,32,268,0,441,297,268,5.7553,50.1478,modelled,300.0
+ahr,rp100,Schuld (DE),291,0,291,0,309,287,291,6.8844,50.4489,modelled,291.0
+euskirchen,rp100,Weilerswist (DE),288,288,0,0,284,280,0,6.8511,50.7396,modelled,288.0
+rochefort,rp100,Marchin (BE),277,269,9,0,93,277,9,5.2428,50.4632,modelled,278.0
+wassenberg,rp100,"Wassenberg, Stadt (DE)",270,176,28,66,330,327,94,6.1403,51.1117,modelled,270.0
+eschweiler,rp100,Niederzier (DE),243,111,35,97,187,239,132,6.4703,50.8963,modelled,243.0
+liege,rp100,Dison (BE),229,197,33,0,130,232,33,5.8763,50.6131,modelled,229.0
+rochefort,rp100,Nassogne (BE),221,219,2,0,189,213,2,5.3483,50.1352,modelled,220.0
+liege,rp100,Echt-Susteren (NL),206,68,138,0,72,230,138,5.9041,51.0843,modelled,206.0
+liege,rp100,Baelen (BE),205,195,10,0,195,216,10,6.0488,50.5875,modelled,205.0
+venlo,rp100,Roerdalen (NL),197,196,1,0,150,207,1,6.032,51.1428,modelled,197.0
+ahr,rp100,Hönningen (DE),183,3,180,0,166,199,180,6.9472,50.4619,modelled,183.0
+eschweiler,rp100,Kreuzau (DE),181,127,0,54,225,181,54,6.483,50.7401,modelled,181.0
+ahr,rp100,Ahrbrück (DE),177,176,0,0,148,175,0,6.98,50.4782,modelled,176.0
+ahr,rp100,Brohl-Lützing (DE),160,35,0,124,83,159,124,7.3137,50.4767,modelled,160.0
+rochefort,rp100,Tellin (BE),155,92,63,0,293,150,63,5.2197,50.0646,modelled,155.0
+eschweiler,rp100,"Stolberg (Rhld.), Kupferstadt (DE)",154,152,1,0,86,151,1,6.2679,50.7459,modelled,154.0
+ahr,rp100,Leubsdorf (DE),146,142,0,3,90,141,3,7.3086,50.5464,modelled,146.0
+ahr,rp100,Rheinbrohl (DE),139,9,0,130,42,136,130,7.3531,50.5058,modelled,139.0
+liege,rp100,Meerssen (NL),137,0,137,0,77,143,137,5.7358,50.9041,modelled,137.0
+rochefort,rp100,Modave (BE),134,122,12,0,90,141,12,5.2918,50.4705,modelled,134.0
+eschweiler,rp100,"Nideggen, Stadt (DE)",130,37,75,18,307,131,93,6.4876,50.6749,modelled,130.0
+ahr,rp100,Insul (DE),121,75,0,47,92,117,47,6.9096,50.4398,modelled,121.0
+euskirchen,rp100,"Zülpich, Stadt (DE)",104,104,0,0,191,100,0,6.6607,50.6932,modelled,104.0
+ahr,rp100,Trimbs (DE),96,96,0,0,73,83,0,7.3022,50.3372,modelled,96.0
+ahr,rp100,Kasbach-Ohlenberg (DE),82,7,0,75,59,80,75,7.2694,50.5855,modelled,82.0
+erftstadt,rp100,Weilerswist (DE),81,74,8,0,114,132,8,6.8511,50.7396,modelled,82.0
+rochefort,rp100,Wellin (BE),74,0,74,0,58,70,74,5.109,50.0743,modelled,74.0
+rochefort,rp100,Tenneville (BE),69,0,69,0,123,68,69,5.4943,50.1006,modelled,69.0
+liege,rp100,Saint-Georges-sur-Meuse (BE),68,67,1,0,97,68,1,5.3616,50.5964,modelled,68.0
+liege,rp100,Genk (BE),67,67,0,0,22,68,0,5.4801,50.9649,modelled,67.0
+liege,rp100,Zutendaal (BE),67,40,0,27,8,64,27,5.5739,50.9371,modelled,67.0
+ahr,rp100,Wershofen (DE),65,0,65,0,45,63,65,6.8278,50.4435,modelled,65.0
+ahr,rp100,Rech (DE),59,0,17,42,38,59,59,7.0367,50.5126,modelled,59.0
+rochefort,rp100,Sainte-Ode (BE),58,56,1,0,72,57,1,5.5548,50.0172,modelled,58.0
+schleiden,rp100,"Heimbach, Stadt (DE)",58,0,58,0,16,56,58,6.4817,50.6305,modelled,58.0
+rochefort,rp100,Dinant (BE),52,0,52,0,31,50,52,4.9462,50.2415,modelled,52.0
+rochefort,rp100,Ferrières (BE),52,0,52,0,95,52,52,5.5931,50.4116,modelled,52.0
+liege,rp100,Eupen (BE),50,44,6,0,55,48,6,6.091,50.6092,modelled,50.0
+rochefort,rp100,Stoumont (BE),50,10,39,0,40,50,39,5.8101,50.4163,modelled,50.0
+liege,rp100,Olne (BE),45,27,0,18,27,46,18,5.7381,50.5902,modelled,45.0
+ahr,rp100,Dümpelfeld (DE),44,0,0,44,36,44,44,6.9467,50.4397,modelled,44.0
+ahr,rp100,Antweiler (DE),40,39,0,0,26,38,0,6.8275,50.4065,modelled,40.0
+euskirchen,rp100,"Euskirchen, Stadt (DE)",31,31,0,0,52,37,0,6.8094,50.6319,modelled,31.0
+rochefort,rp100,Ciney (BE),29,0,29,0,17,33,29,5.1264,50.2784,modelled,29.0
+rochefort,rp100,Bertogne (BE),24,0,24,0,55,24,24,5.6449,50.0606,modelled,24.0
+ahr,rp100,Fuchshofen (DE),22,0,22,0,6,21,22,6.8573,50.4245,modelled,22.0
+ahr,rp100,Müsch (DE),22,0,22,0,24,22,22,6.8303,50.3862,modelled,22.0
+ahr,rp100,Sankt Johann (DE),21,16,4,0,20,20,4,7.1842,50.3556,modelled,21.0
+ahr,rp100,Welling (DE),17,17,0,0,8,18,0,7.331,50.3335,modelled,17.0
+liege,rp100,Neupré (BE),17,0,17,0,11,17,17,5.493,50.5459,modelled,17.0
+venlo,rp100,"Wassenberg, Stadt (DE)",17,6,11,0,4,32,11,6.1403,51.1117,modelled,17.0
+euskirchen,rp100,"Erftstadt, Stadt (DE)",15,15,0,0,12,14,0,6.7785,50.7952,modelled,15.0
+ahr,rp100,Dorsel (DE),12,0,12,0,80,11,12,6.7948,50.3861,modelled,12.0
+liege,rp100,Voeren (BE),12,0,12,0,3,12,12,5.8382,50.7474,modelled,12.0
+rochefort,rp100,Saint-Hubert (BE),11,0,11,0,6,11,11,5.3459,50.0382,modelled,12.0
+rochefort,rp100,Somme-Leuze (BE),11,10,1,0,53,10,1,5.3216,50.313,modelled,10.0
+liege,rp100,Diepenbeek (BE),8,8,0,0,8,8,0,5.4189,50.9132,modelled,8.0
+rochefort,rp100,Hamois (BE),8,0,8,0,4,7,8,5.1467,50.3349,modelled,8.0
+eschweiler,rp100,Hürtgenwald (DE),8,8,0,0,12,8,0,6.3703,50.7097,modelled,8.0
+erftstadt,rp100,"Brühl, Stadt (DE)",7,6,1,0,8,7,1,6.8894,50.8203,modelled,7.0
+ahr,rp100,Blankenheim (DE),5,0,5,0,5,5,5,6.6912,50.4014,modelled,5.0
+venlo,rp100,Venray (NL),5,0,5,0,3,5,5,5.959,51.5091,modelled,5.0
+erftstadt,rp100,"Hürth, Stadt (DE)",4,4,0,0,4,4,0,6.8501,50.8734,modelled,4.0
+rochefort,rp100,Assesse (BE),3,0,3,0,5,3,3,5.0036,50.3751,modelled,3.0
+ahr,rp100,Glees (DE),2,0,2,0,1,2,2,7.244,50.4184,modelled,2.0
+rochefort,rp100,Daverdisse (BE),2,0,2,0,1,2,2,5.0674,50.0031,modelled,2.0
+ahr,rp100,Nickenich (DE),1,1,0,0,4,1,0,7.332,50.4128,modelled,1.0
+liege,rp100,Bilzen (BE),1,0,1,0,6,1,1,5.5408,50.871,modelled,2.0
+liege,rp100,Peer (BE),1,1,0,0,2,1,0,5.4546,51.1241,modelled,1.0
+liege,rp500,Luik (BE),74000,57052,0,16947,27952,74925,16947,5.5949,50.6263,modelled,74000.0
+venlo,rp500,Venlo (NL),23285,15094,1911,6280,23299,20751,8191,6.1527,51.393,modelled,23285.0
+liege,rp500,Maasmechelen (BE),16216,10716,4596,903,12369,16267,5499,5.6607,50.9587,modelled,16216.0
+liege,rp500,Seraing (BE),14979,11082,0,3897,3977,15148,3897,5.518,50.5883,modelled,14979.0
+venlo,rp500,Roermond (NL),13126,6671,1202,5253,9147,12959,6455,6.017,51.2105,modelled,13126.0
+rochefort,rp500,Andenne (BE),12301,1498,677,10125,3098,12333,10802,5.0577,50.4903,modelled,7744.0
+ahr,rp500,"Remagen, Stadt (DE)",10017,3067,1991,4959,3965,9824,6950,7.1806,50.6051,modelled,10017.0
+liege,rp500,Flémalle (BE),8631,7183,0,1448,2978,8740,1448,5.4429,50.593,modelled,8631.0
+venlo,rp500,Maasgouw (NL),5266,2902,2016,349,3424,5170,2365,5.8938,51.1579,modelled,5266.0
+liege,rp500,Wezet (BE),5145,2755,1621,769,4850,5201,2390,5.6993,50.7408,modelled,5145.0
+venlo,rp500,Peel en Maas (NL),5025,1156,1171,2697,4667,5022,3868,5.9823,51.3297,modelled,5025.0
+liege,rp500,Dilsen-Stokkem (BE),5005,1900,15,3090,4510,5225,3105,5.7165,51.0437,modelled,5006.0
+ahr,rp500,"Bad Neuenahr-Ahrweiler, Stadt (DE)",4990,4989,0,1,1542,4978,1,7.1228,50.5291,modelled,4990.0
+liege,rp500,Verviers (BE),4810,4786,23,2,1711,4822,25,5.8725,50.5922,modelled,4810.0
+liege,rp500,Oupeye (BE),4792,3265,21,1507,2447,4871,1528,5.6407,50.7148,modelled,4792.0
+ahr,rp500,"Sinzig, Stadt (DE)",4693,916,0,3777,1928,4677,3777,7.2187,50.522,modelled,4693.0
+liege,rp500,Esneux (BE),4318,2296,29,1992,2410,4344,2021,5.5752,50.5432,modelled,4318.0
+liege,rp500,Bitsingen (BE),4068,1373,502,2193,3140,4106,2695,5.6215,50.7712,modelled,4068.0
+liege,rp500,Engis (BE),3909,1114,140,2656,1140,3827,2796,5.3858,50.5618,modelled,3909.0
+ahr,rp500,"Unkel, Stadt (DE)",3845,790,2410,645,1480,3757,3055,7.2353,50.6093,modelled,3845.0
+liege,rp500,Tongeren (BE),3680,2509,872,299,3523,3679,1171,5.4671,50.7699,modelled,3680.0
+erftstadt,rp500,"Erftstadt, Stadt (DE)",3640,1461,1,2178,2799,3583,2179,6.7785,50.7952,modelled,3640.0
+venlo,rp500,Leudal (NL),3626,1174,1429,1023,2965,3534,2452,5.8983,51.2382,modelled,3626.0
+liege,rp500,Pepinster (BE),3379,901,604,1874,1010,3414,2478,5.7981,50.5714,modelled,3379.0
+ahr,rp500,"Bad Breisig, Stadt (DE)",3361,1765,275,1321,983,3341,1596,7.2774,50.5139,modelled,3361.0
+liege,rp500,Chaudfontaine (BE),3125,2932,0,193,1731,3164,193,5.6332,50.5772,modelled,3125.0
+eschweiler,rp500,"Eschweiler, Stadt (DE)",3090,3090,0,0,1471,3014,0,6.2713,50.8305,modelled,3090.0
+eschweiler,rp500,"Düren, Stadt (DE)",3087,3086,0,0,1458,3032,0,6.4685,50.7998,modelled,3086.0
+liege,rp500,Lanaken (BE),3062,413,521,2128,2466,3061,2649,5.6368,50.8877,modelled,3062.0
+liege,rp500,Herstal (BE),2907,2429,0,478,1061,2941,478,5.6071,50.6738,modelled,2907.0
+schleiden,rp500,"Schleiden, Stadt (DE)",2893,1179,1677,37,2100,2808,1714,6.4542,50.5597,modelled,2893.0
+liege,rp500,Maaseik (BE),2687,2358,154,176,3018,2751,330,5.6865,51.0765,modelled,2688.0
+venlo,rp500,Horst aan de Maas (NL),2669,1585,170,914,3109,2645,1084,6.0216,51.4447,modelled,2669.0
+ahr,rp500,"Bad Hönningen, Stadt (DE)",2509,0,0,2509,1004,2477,2509,7.3379,50.5292,modelled,1967.0
+liege,rp500,Trooz (BE),2474,186,54,2234,1117,2506,2288,5.6815,50.5683,modelled,2474.0
+wassenberg,rp500,"Heinsberg, Stadt (DE)",2260,2140,10,110,2712,2287,120,6.106,51.0633,modelled,2260.0
+ahr,rp500,"Mayen, Stadt (DE)",2153,2153,0,0,864,2127,0,7.2224,50.3228,modelled,2153.0
+liege,rp500,Eijsden-Margraten (NL),2143,29,2114,0,46,2069,2114,5.762,50.8041,modelled,2143.0
+liege,rp500,Aywaille (BE),2120,980,154,986,1398,2094,1140,5.7025,50.4534,modelled,2120.0
+rochefort,rp500,Durbuy (BE),2102,663,1106,333,2168,2095,1439,5.5099,50.364,modelled,2102.0
+rochefort,rp500,Hotton (BE),2066,149,569,1347,1830,2060,1916,5.4367,50.2669,modelled,2066.0
+liege,rp500,Maastricht (NL),2049,521,0,1527,297,2103,1527,5.6998,50.8605,modelled,2049.0
+liege,rp500,Theux (BE),1780,294,0,1485,1659,1760,1485,5.8128,50.5011,modelled,1780.0
+eschweiler,rp500,"Jülich, Stadt (DE)",1777,1588,24,165,1052,1747,189,6.3614,50.929,modelled,1777.0
+liege,rp500,Comblain-au-Pont (BE),1681,948,46,687,1082,1687,733,5.5675,50.4835,modelled,1681.0
+venlo,rp500,Beesel (NL),1636,92,1405,139,1599,1643,1544,6.0739,51.2704,modelled,1636.0
+liege,rp500,Saint-Nicolas (Luik) (BE),1559,1305,0,254,883,1574,254,5.5248,50.6322,modelled,1559.0
+ahr,rp500,Dernau (DE),1542,215,340,987,800,1540,1327,7.0458,50.5241,modelled,1542.0
+rochefort,rp500,Rochefort (BE),1518,1062,372,84,1334,1525,456,5.1689,50.162,modelled,1518.0
+liege,rp500,Limburg (BE),1461,392,18,1051,775,1456,1069,5.9382,50.6155,modelled,1461.0
+ahr,rp500,Erpel (DE),1338,95,0,1244,597,1318,1244,7.278,50.6041,modelled,1338.0
+liege,rp500,Stein (NL),1240,0,1240,0,88,1207,1240,5.7569,50.9702,modelled,1240.0
+venlo,rp500,Echt-Susteren (NL),965,949,15,0,325,933,15,5.9041,51.0843,modelled,964.0
+erftstadt,rp500,"Kerpen, Kolpingstadt (DE)",933,236,23,674,600,917,697,6.6698,50.8741,modelled,934.0
+liege,rp500,Hasselt (BE),932,932,0,0,86,939,0,5.3023,50.9201,modelled,932.0
+eschweiler,rp500,Inden (DE),848,624,162,62,674,880,224,6.3744,50.864,modelled,848.0
+ahr,rp500,Altenahr (DE),832,51,19,762,389,821,781,6.988,50.5235,modelled,832.0
+wassenberg,rp500,"Hückelhoven, Stadt (DE)",813,813,0,0,688,848,0,6.2452,51.0406,modelled,813.0
+euskirchen,rp500,Swisttal (DE),803,795,9,0,545,775,9,6.9313,50.6867,modelled,804.0
+liege,rp500,Oerle (BE),727,0,727,0,385,738,727,5.3397,50.7224,modelled,727.0
+rochefort,rp500,Hamoir (BE),727,177,0,550,578,734,550,5.5441,50.436,modelled,727.0
+rochefort,rp500,La Roche-en-Ardenne (BE),712,170,195,346,1354,716,541,5.5621,50.1573,modelled,712.0
+ahr,rp500,"Linz am Rhein, Stadt (DE)",663,663,0,0,304,650,0,7.3094,50.587,modelled,663.0
+liege,rp500,Riemst (BE),644,9,0,635,473,623,635,5.6045,50.8045,modelled,644.0
+rochefort,rp500,Namen (BE),636,86,550,0,324,648,550,4.8776,50.456,modelled,636.0
+liege,rp500,Sprimont (BE),470,57,11,402,284,469,413,5.6598,50.5148,modelled,470.0
+liege,rp500,Maasgouw (NL),464,33,275,156,169,453,431,5.8938,51.1579,modelled,464.0
+ahr,rp500,Mayschoß (DE),453,32,0,420,217,446,420,7.0174,50.5192,modelled,453.0
+rochefort,rp500,Yvoir (BE),422,65,357,0,287,441,357,4.9497,50.3251,modelled,422.0
+liege,rp500,Kinrooi (BE),421,421,0,0,322,462,0,5.7409,51.1542,modelled,421.0
+rochefort,rp500,Houyet (BE),408,187,72,149,428,395,221,5.0094,50.1928,modelled,408.0
+ahr,rp500,Rheinbreitbach (DE),393,393,0,0,160,393,0,7.2483,50.6246,modelled,393.0
+liege,rp500,Hamoir (BE),389,124,0,266,477,399,266,5.5441,50.436,modelled,390.0
+ahr,rp500,Rheinbrohl (DE),384,0,0,384,99,375,384,7.3531,50.5058,modelled,229.0
+rochefort,rp500,Rendeux (BE),367,67,89,212,621,371,301,5.5259,50.2128,modelled,367.0
+ahr,rp500,Schuld (DE),315,0,315,0,325,310,315,6.8844,50.4489,modelled,315.0
+rochefort,rp500,Houffalize (BE),313,32,281,0,460,310,281,5.7553,50.1478,modelled,313.0
+venlo,rp500,Roerdalen (NL),293,292,2,0,222,307,2,6.032,51.1428,modelled,293.0
+euskirchen,rp500,Weilerswist (DE),292,292,0,0,293,284,0,6.8511,50.7396,modelled,292.0
+eschweiler,rp500,Niederzier (DE),278,141,35,102,230,274,137,6.4703,50.8963,modelled,278.0
+rochefort,rp500,Marchin (BE),277,269,9,0,93,277,9,5.2428,50.4632,modelled,277.0
+wassenberg,rp500,"Wassenberg, Stadt (DE)",273,186,29,58,335,330,87,6.1403,51.1117,modelled,273.0
+liege,rp500,Baelen (BE),229,219,10,0,210,241,10,6.0488,50.5875,modelled,229.0
+liege,rp500,Dison (BE),229,197,33,0,130,232,33,5.8763,50.6131,modelled,229.0
+rochefort,rp500,Nassogne (BE),223,221,2,0,191,216,2,5.3483,50.1352,modelled,223.0
+ahr,rp500,Brohl-Lützing (DE),215,45,0,169,115,214,169,7.3137,50.4767,modelled,215.0
+ahr,rp500,Leubsdorf (DE),214,211,0,3,127,207,3,7.3086,50.5464,modelled,214.0
+liege,rp500,Echt-Susteren (NL),206,68,138,0,72,230,138,5.9041,51.0843,modelled,206.0
+ahr,rp500,Hönningen (DE),191,3,188,0,180,207,188,6.9472,50.4619,modelled,191.0
+eschweiler,rp500,Kreuzau (DE),181,127,0,54,225,181,54,6.483,50.7401,modelled,181.0
+ahr,rp500,Ahrbrück (DE),177,176,0,0,148,175,0,6.98,50.4782,modelled,176.0
+rochefort,rp500,Tellin (BE),155,92,63,0,293,150,63,5.2197,50.0646,modelled,155.0
+eschweiler,rp500,"Stolberg (Rhld.), Kupferstadt (DE)",154,152,1,0,86,151,1,6.2679,50.7459,modelled,154.0
+ahr,rp500,Insul (DE),152,75,0,78,112,147,78,6.9096,50.4398,modelled,152.0
+liege,rp500,Meerssen (NL),137,0,137,0,77,143,137,5.7358,50.9041,modelled,137.0
+ahr,rp500,Kasbach-Ohlenberg (DE),134,9,0,125,101,130,125,7.2694,50.5855,modelled,134.0
+rochefort,rp500,Modave (BE),134,122,12,0,90,141,12,5.2918,50.4705,modelled,134.0
+eschweiler,rp500,"Nideggen, Stadt (DE)",130,37,75,18,307,131,93,6.4876,50.6749,modelled,130.0
+euskirchen,rp500,"Zülpich, Stadt (DE)",104,104,0,0,191,100,0,6.6607,50.6932,modelled,104.0
+ahr,rp500,Trimbs (DE),96,96,0,0,73,83,0,7.3022,50.3372,modelled,96.0
+liege,rp500,Saint-Georges-sur-Meuse (BE),95,88,1,6,129,94,7,5.3616,50.5964,modelled,95.0
+ahr,rp500,Rech (DE),91,0,17,74,64,91,91,7.0367,50.5126,modelled,91.0
+erftstadt,rp500,Weilerswist (DE),81,74,8,0,114,132,8,6.8511,50.7396,modelled,82.0
+rochefort,rp500,Tenneville (BE),74,0,74,0,128,73,74,5.4943,50.1006,modelled,74.0
+rochefort,rp500,Wellin (BE),74,0,74,0,59,70,74,5.109,50.0743,modelled,74.0
+liege,rp500,Genk (BE),67,67,0,0,22,68,0,5.4801,50.9649,modelled,67.0
+liege,rp500,Zutendaal (BE),67,40,0,27,8,64,27,5.5739,50.9371,modelled,67.0
+ahr,rp500,Wershofen (DE),65,0,65,0,45,63,65,6.8278,50.4435,modelled,65.0
+rochefort,rp500,Sainte-Ode (BE),58,56,1,0,72,57,1,5.5548,50.0172,modelled,58.0
+schleiden,rp500,"Heimbach, Stadt (DE)",58,0,58,0,16,56,58,6.4817,50.6305,modelled,58.0
+rochefort,rp500,Dinant (BE),56,4,52,0,34,54,52,4.9462,50.2415,modelled,56.0
+rochefort,rp500,Ferrières (BE),52,0,52,0,95,52,52,5.5931,50.4116,modelled,52.0
+liege,rp500,Eupen (BE),50,44,6,0,55,48,6,6.091,50.6092,modelled,50.0
+rochefort,rp500,Stoumont (BE),50,11,39,0,41,50,39,5.8101,50.4163,modelled,50.0
+liege,rp500,Olne (BE),45,27,0,18,27,46,18,5.7381,50.5902,modelled,45.0
+ahr,rp500,Dümpelfeld (DE),44,0,0,44,37,44,44,6.9467,50.4397,modelled,44.0
+euskirchen,rp500,"Euskirchen, Stadt (DE)",42,42,0,0,56,54,0,6.8094,50.6319,modelled,42.0
+ahr,rp500,Antweiler (DE),40,39,0,0,26,38,0,6.8275,50.4065,modelled,40.0
+rochefort,rp500,Ciney (BE),29,0,29,0,17,33,29,5.1264,50.2784,modelled,29.0
+rochefort,rp500,Bertogne (BE),24,0,24,0,55,24,24,5.6449,50.0606,modelled,24.0
+ahr,rp500,Fuchshofen (DE),22,0,22,0,6,21,22,6.8573,50.4245,modelled,22.0
+ahr,rp500,Müsch (DE),22,0,22,0,24,22,22,6.8303,50.3862,modelled,22.0
+ahr,rp500,Sankt Johann (DE),21,16,4,0,20,20,4,7.1842,50.3556,modelled,21.0
+liege,rp500,Voeren (BE),20,7,12,0,10,19,12,5.8382,50.7474,modelled,20.0
+ahr,rp500,Welling (DE),17,17,0,0,8,18,0,7.331,50.3335,modelled,17.0
+liege,rp500,Neupré (BE),17,0,17,0,11,17,17,5.493,50.5459,modelled,17.0
+venlo,rp500,"Wassenberg, Stadt (DE)",17,6,11,0,4,32,11,6.1403,51.1117,modelled,17.0
+euskirchen,rp500,"Erftstadt, Stadt (DE)",15,15,0,0,12,14,0,6.7785,50.7952,modelled,15.0
+ahr,rp500,Dorsel (DE),12,0,12,0,80,11,12,6.7948,50.3861,modelled,12.0
+rochefort,rp500,Saint-Hubert (BE),11,0,11,0,6,11,11,5.3459,50.0382,modelled,12.0
+rochefort,rp500,Somme-Leuze (BE),11,10,1,0,53,10,1,5.3216,50.313,modelled,10.0
+liege,rp500,Diepenbeek (BE),8,8,0,0,8,8,0,5.4189,50.9132,modelled,8.0
+rochefort,rp500,Hamois (BE),8,0,8,0,4,7,8,5.1467,50.3349,modelled,8.0
+eschweiler,rp500,Hürtgenwald (DE),8,8,0,0,12,8,0,6.3703,50.7097,modelled,8.0
+erftstadt,rp500,"Brühl, Stadt (DE)",7,6,1,0,8,7,1,6.8894,50.8203,modelled,7.0
+ahr,rp500,Dattenberg (DE),6,6,0,0,5,5,0,7.3312,50.5645,modelled,6.0
+ahr,rp500,Blankenheim (DE),5,0,5,0,5,5,5,6.6912,50.4014,modelled,5.0
+venlo,rp500,Venray (NL),5,0,5,0,3,5,5,5.959,51.5091,modelled,5.0
+erftstadt,rp500,"Hürth, Stadt (DE)",4,4,0,0,4,4,0,6.8501,50.8734,modelled,4.0
+rochefort,rp500,Assesse (BE),3,0,3,0,5,3,3,5.0036,50.3751,modelled,3.0
+ahr,rp500,Glees (DE),2,0,2,0,1,2,2,7.244,50.4184,modelled,2.0
+rochefort,rp500,Daverdisse (BE),2,0,2,0,1,2,2,5.0674,50.0031,modelled,2.0
+ahr,rp500,Nickenich (DE),1,1,0,0,4,1,0,7.332,50.4128,modelled,1.0
+liege,rp500,Bilzen (BE),1,0,1,0,6,1,1,5.5408,50.871,modelled,2.0
+liege,rp500,Peer (BE),1,1,0,0,2,1,0,5.4546,51.1241,modelled,1.0

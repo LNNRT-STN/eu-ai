@@ -1,0 +1,434 @@
+﻿rank,variant,municipality,area,source,people,covered,no_shelter,why,no_reach,full,people_first_pass,no_shelter_first_pass,hospitals_carehomes_flooded,schools_flooded,vulnerable_sites,q2_evidence,lon,lat
+1,rp10,Andenne (BE),rochefort,MODELLED (EFAS 10-yr),10315,1909,8406,shelters full,93,8313,,,1,6,MRS Centre Sainte Barbe La Villette,,5.0577,50.4903
+2,rp10,Maasmechelen (BE),liege,MODELLED (EFAS 10-yr),9861,6143,3718,shelters full,1065,2653,,,2,9,'t Veer; Woonzorgcentrum Heyvis,,5.6607,50.9587
+3,rp10,Seraing (BE),liege,MODELLED (EFAS 10-yr),13844,11211,2633,shelters full,0,2633,,,2,6,Policliniques Universitaires d'Ougrée; Résidence Ange-Raymond Gilles,,5.518,50.5883
+4,rp10,Roermond (NL),venlo,MODELLED (EFAS 10-yr),5218,2967,2252,shelters full,522,1730,,,0,0,,,6.017,51.2105
+5,rp10,Pepinster (BE),liege,MODELLED (EFAS 10-yr),3163,998,2165,shelters full,62,2103,,,0,4,,,5.7981,50.5714
+6,rp10,Luik (BE),liege,MODELLED (EFAS 10-yr),59824,57696,2127,shelters full,0,2127,,,4,54,Hôpital de jour La Clé; Hôpital le Valdor; Le Cottage Rose; Maison de Repos et de Soins Un Air de Famille du Balloir,,5.5949,50.6263
+7,rp10,Eijsden-Margraten (NL),liege,MODELLED (EFAS 10-yr),2046,29,2018,shelters too far,2018,0,,,0,1,,,5.762,50.8041
+8,rp10,Bitsingen (BE),liege,MODELLED (EFAS 10-yr),3340,1401,1939,shelters full,0,1939,,,0,2,,,5.6215,50.7712
+9,rp10,Trooz (BE),liege,MODELLED (EFAS 10-yr),2131,325,1806,shelters full,17,1789,,,0,2,,,5.6815,50.5683
+10,rp10,Esneux (BE),liege,MODELLED (EFAS 10-yr),3871,2086,1786,shelters full,29,1757,,,0,5,,,5.5752,50.5432
+11,rp10,Engis (BE),liege,MODELLED (EFAS 10-yr),3069,1600,1469,shelters full,98,1371,,,0,1,,,5.3858,50.5618
+12,rp10,Wezet (BE),liege,MODELLED (EFAS 10-yr),3633,2199,1435,shelters too far,1013,422,,,2,7,Clinique CHC Hermalle; Résidence CHC Hermalle,,5.6993,50.7408
+13,rp10,Hotton (BE),rochefort,MODELLED (EFAS 10-yr),1697,430,1267,shelters full,458,809,,,0,3,,,5.4367,50.2669
+14,rp10,Dernau (DE),ahr,MODELLED (EFAS 10-yr),1458,215,1243,shelters full,305,938,,,0,2,,,7.0458,50.5241
+15,rp10,Stein (NL),liege,MODELLED (EFAS 10-yr),1206,0,1206,shelters too far,1206,0,,,0,0,,,5.7569,50.9702
+16,rp10,Theux (BE),liege,MODELLED (EFAS 10-yr),1593,389,1204,shelters full,0,1204,,,2,3,Home Franchimontois; Sainte Joséphine Asbl,,5.8128,50.5011
+17,rp10,Maasgouw (NL),venlo,MODELLED (EFAS 10-yr),3343,2221,1122,shelters too far,564,558,,,0,0,,,5.8938,51.1579
+18,rp10,Durbuy (BE),rochefort,MODELLED (EFAS 10-yr),1696,645,1051,shelters too far,1049,2,,,0,4,,,5.5099,50.364
+19,rp10,"Schleiden, Stadt (DE)",schleiden,MODELLED (EFAS 10-yr),2328,1332,995,shelters full,219,776,,,1,5,Franziskus - Haus,,6.4542,50.5597
+20,rp10,Lanaken (BE),liege,MODELLED (EFAS 10-yr),1532,651,882,shelters full,15,867,,,0,2,,,5.6368,50.8877
+21,rp10,Maastricht (NL),liege,MODELLED (EFAS 10-yr),1349,488,861,shelters full,0,861,,,3,14,(no name in OSM); Maastricht UMC+; Maasveld,,5.6998,50.8605
+22,rp10,Oupeye (BE),liege,MODELLED (EFAS 10-yr),2803,1958,845,shelters full,0,845,,,0,3,,,5.6407,50.7148
+23,rp10,"Unkel, Stadt (DE)",ahr,MODELLED (EFAS 10-yr),2703,1966,737,shelters full,0,737,,,0,1,,,7.2353,50.6093
+24,rp10,Limburg (BE),liege,MODELLED (EFAS 10-yr),1083,391,691,shelters full,14,677,,,0,2,,,5.9382,50.6155
+25,rp10,Aywaille (BE),liege,MODELLED (EFAS 10-yr),1644,959,684,shelters full,149,535,,,0,6,,,5.7025,50.4534
+26,rp10,Oerle (BE),liege,MODELLED (EFAS 10-yr),647,0,647,shelters too far,647,0,,,0,0,,,5.3397,50.7224
+27,rp10,Erpel (DE),ahr,MODELLED (EFAS 10-yr),977,436,541,shelters full,0,541,,,0,1,,,7.278,50.6041
+28,rp10,Dilsen-Stokkem (BE),liege,MODELLED (EFAS 10-yr),2804,2282,522,shelters full,6,516,,,0,3,,,5.7165,51.0437
+29,rp10,La Roche-en-Ardenne (BE),rochefort,MODELLED (EFAS 10-yr),690,169,521,shelters full,186,335,,,0,2,,,5.5621,50.1573
+30,rp10,Comblain-au-Pont (BE),liege,MODELLED (EFAS 10-yr),1415,930,485,shelters full,31,454,,,0,1,,,5.5675,50.4835
+31,rp10,Namen (BE),rochefort,MODELLED (EFAS 10-yr),542,66,476,shelters too far,476,0,,,0,1,,,4.8776,50.456
+32,rp10,"Erftstadt, Stadt (DE)",erftstadt,MODELLED (EFAS 10-yr),2154,1696,458,shelters full,1,457,,,0,3,,,6.7785,50.7952
+33,rp10,Sprimont (BE),liege,MODELLED (EFAS 10-yr),450,77,374,shelters full,11,363,,,0,0,,,5.6598,50.5148
+34,rp10,Hamoir (BE),rochefort,MODELLED (EFAS 10-yr),539,177,362,shelters full,0,362,,,0,1,,,5.5441,50.436
+35,rp10,Yvoir (BE),rochefort,MODELLED (EFAS 10-yr),418,63,355,shelters too far,355,0,,,0,0,,,4.9497,50.3251
+36,rp10,Mayschoß (DE),ahr,MODELLED (EFAS 10-yr),384,50,334,shelters full,0,334,,,0,0,,,7.0174,50.5192
+37,rp10,Maasgouw (NL),liege,MODELLED (EFAS 10-yr),348,33,315,shelters too far,184,131,,,0,2,,,5.8938,51.1579
+38,rp10,Leudal (NL),venlo,MODELLED (EFAS 10-yr),941,638,303,shelters full,118,185,,,0,1,,,5.8983,51.2382
+39,rp10,Schuld (DE),ahr,MODELLED (EFAS 10-yr),282,0,282,shelters too far,282,0,,,0,0,,,6.8844,50.4489
+40,rp10,Houffalize (BE),rochefort,MODELLED (EFAS 10-yr),296,30,266,shelters too far,266,0,,,0,2,,,5.7553,50.1478
+41,rp10,Riemst (BE),liege,MODELLED (EFAS 10-yr),272,13,259,shelters full,0,259,,,0,1,,,5.6045,50.8045
+42,rp10,Rendeux (BE),rochefort,MODELLED (EFAS 10-yr),291,66,224,shelters full,82,142,,,0,1,,,5.5259,50.2128
+43,rp10,Tongeren (BE),liege,MODELLED (EFAS 10-yr),2153,1940,214,shelters full,2,212,,,0,3,,,5.4671,50.7699
+44,rp10,Rochefort (BE),rochefort,MODELLED (EFAS 10-yr),1171,967,204,shelters too far,119,85,,,1,3,Résidence Préhyr,,5.1689,50.162
+45,rp10,Maaseik (BE),liege,MODELLED (EFAS 10-yr),1072,884,187,shelters full,29,158,,,0,2,,,5.6865,51.0765
+46,rp10,Saint-Nicolas (Luik) (BE),liege,MODELLED (EFAS 10-yr),1497,1333,164,shelters full,0,164,,,0,1,,,5.5248,50.6322
+47,rp10,Houyet (BE),rochefort,MODELLED (EFAS 10-yr),315,175,140,shelters full,51,89,,,0,1,,,5.0094,50.1928
+48,rp10,Meerssen (NL),liege,MODELLED (EFAS 10-yr),137,0,137,shelters too far,137,0,,,0,1,,,5.7358,50.9041
+49,rp10,"Remagen, Stadt (DE)",ahr,MODELLED (EFAS 10-yr),1674,1540,134,shelters full,0,134,,,0,3,,,7.1806,50.6051
+50,rp10,Hönningen (DE),ahr,MODELLED (EFAS 10-yr),121,3,118,shelters too far,118,0,,,0,1,,,6.9472,50.4619
+51,rp10,Echt-Susteren (NL),liege,MODELLED (EFAS 10-yr),206,97,109,shelters full,0,109,,,0,0,,,5.9041,51.0843
+52,rp10,Inden (DE),eschweiler,MODELLED (EFAS 10-yr),528,430,98,shelters too far,98,0,,,0,2,,,6.3744,50.864
+53,rp10,Niederzier (DE),eschweiler,MODELLED (EFAS 10-yr),201,118,84,shelters full,34,50,,,0,0,,,6.4703,50.8963
+54,rp10,Venlo (NL),venlo,MODELLED (EFAS 10-yr),2534,2452,82,shelters too far,57,25,,,1,2,VieCuri,,6.1527,51.393
+55,rp10,"Nideggen, Stadt (DE)",eschweiler,MODELLED (EFAS 10-yr),112,37,75,shelters too far,60,15,,,0,0,,,6.4876,50.6749
+56,rp10,Hamoir (BE),liege,MODELLED (EFAS 10-yr),259,187,72,shelters full,0,72,,,0,0,,,5.5441,50.436
+57,rp10,Wellin (BE),rochefort,MODELLED (EFAS 10-yr),68,0,68,shelters too far,68,0,,,0,0,,,5.109,50.0743
+58,rp10,Tenneville (BE),rochefort,MODELLED (EFAS 10-yr),61,0,61,shelters too far,61,0,,,0,0,,,5.4943,50.1006
+59,rp10,Wershofen (DE),ahr,MODELLED (EFAS 10-yr),59,0,59,shelters too far,59,0,,,0,0,,,6.8278,50.4435
+60,rp10,"Heimbach, Stadt (DE)",schleiden,MODELLED (EFAS 10-yr),58,0,58,shelters too far,58,0,,,0,0,,,6.4817,50.6305
+61,rp10,"Jülich, Stadt (DE)",eschweiler,MODELLED (EFAS 10-yr),893,836,56,shelters full,11,45,,,1,4,Altenzentrum St. Hildegard,,6.3614,50.929
+62,rp10,"Wassenberg, Stadt (DE)",wassenberg,MODELLED (EFAS 10-yr),197,143,54,shelters full,10,44,,,0,0,,,6.1403,51.1117
+63,rp10,Kreuzau (DE),eschweiler,MODELLED (EFAS 10-yr),178,124,54,shelters full,0,54,,,0,0,,,6.483,50.7401
+64,rp10,Rech (DE),ahr,MODELLED (EFAS 10-yr),52,0,52,shelters full,10,42,,,0,0,,,7.0367,50.5126
+65,rp10,Dinant (BE),rochefort,MODELLED (EFAS 10-yr),52,0,52,shelters too far,52,0,,,0,0,,,4.9462,50.2415
+66,rp10,Ferrières (BE),rochefort,MODELLED (EFAS 10-yr),51,0,51,shelters too far,51,0,,,0,0,,,5.5931,50.4116
+67,rp10,Kasbach-Ohlenberg (DE),ahr,MODELLED (EFAS 10-yr),44,6,38,shelters full,0,38,,,0,0,,,7.2694,50.5855
+68,rp10,Dison (BE),liege,MODELLED (EFAS 10-yr),184,152,33,shelters too far,33,0,,,0,0,,,5.8763,50.6131
+69,rp10,Horst aan de Maas (NL),venlo,MODELLED (EFAS 10-yr),342,309,32,shelters too far,32,0,,,0,0,,,6.0216,51.4447
+70,rp10,Stoumont (BE),rochefort,MODELLED (EFAS 10-yr),39,10,29,shelters too far,29,0,,,0,0,,,5.8101,50.4163
+71,rp10,Ciney (BE),rochefort,MODELLED (EFAS 10-yr),29,0,29,shelters too far,29,0,,,0,0,,,5.1264,50.2784
+72,rp10,Zutendaal (BE),liege,MODELLED (EFAS 10-yr),67,40,27,shelters full,0,27,,,0,0,,,5.5739,50.9371
+73,rp10,Insul (DE),ahr,MODELLED (EFAS 10-yr),99,75,25,shelters full,0,25,,,0,0,,,6.9096,50.4398
+74,rp10,Bertogne (BE),rochefort,MODELLED (EFAS 10-yr),24,0,24,shelters too far,24,0,,,0,0,,,5.6449,50.0606
+75,rp10,Verviers (BE),liege,MODELLED (EFAS 10-yr),3982,3959,23,shelters too far,23,0,,,0,4,,,5.8725,50.5922
+76,rp10,Fuchshofen (DE),ahr,MODELLED (EFAS 10-yr),22,0,22,shelters too far,22,0,,,0,0,,,6.8573,50.4245
+77,rp10,Müsch (DE),ahr,MODELLED (EFAS 10-yr),22,0,22,shelters too far,22,0,,,0,0,,,6.8303,50.3862
+78,rp10,Tellin (BE),rochefort,MODELLED (EFAS 10-yr),92,71,21,shelters too far,21,0,,,0,0,,,5.2197,50.0646
+79,rp10,Olne (BE),liege,MODELLED (EFAS 10-yr),45,27,18,shelters full,0,18,,,0,0,,,5.7381,50.5902
+80,rp10,Dümpelfeld (DE),ahr,MODELLED (EFAS 10-yr),18,0,18,shelters full,0,18,,,0,0,,,6.9467,50.4397
+81,rp10,Neupré (BE),liege,MODELLED (EFAS 10-yr),17,0,17,shelters too far,17,0,,,0,0,,,5.493,50.5459
+82,rp10,Flémalle (BE),liege,MODELLED (EFAS 10-yr),6947,6934,13,shelters full,0,13,,,1,5,Le Domaine du Château,,5.4429,50.593
+83,rp10,Modave (BE),rochefort,MODELLED (EFAS 10-yr),130,118,12,shelters too far,12,0,,,0,0,,,5.2918,50.4705
+84,rp10,Voeren (BE),liege,MODELLED (EFAS 10-yr),12,0,12,shelters too far,12,0,,,0,0,,,5.8382,50.7474
+85,rp10,Dorsel (DE),ahr,MODELLED (EFAS 10-yr),10,0,10,shelters too far,10,0,,,0,0,,,6.7948,50.3861
+86,rp10,Saint-Hubert (BE),rochefort,MODELLED (EFAS 10-yr),10,0,10,shelters too far,10,0,,,0,0,,,5.3459,50.0382
+87,rp10,Marchin (BE),rochefort,MODELLED (EFAS 10-yr),275,267,9,shelters too far,9,0,,,0,0,,,5.2428,50.4632
+88,rp10,Chaudfontaine (BE),liege,MODELLED (EFAS 10-yr),2755,2747,8,shelters full,0,8,,,0,3,,,5.6332,50.5772
+89,rp10,Weilerswist (DE),erftstadt,MODELLED (EFAS 10-yr),76,68,8,shelters too far,8,0,,,0,0,,,6.8511,50.7396
+90,rp10,Hamois (BE),rochefort,MODELLED (EFAS 10-yr),8,0,8,shelters too far,8,0,,,0,0,,,5.1467,50.3349
+91,rp10,Peel en Maas (NL),venlo,MODELLED (EFAS 10-yr),666,659,7,shelters too far,7,0,,,0,0,,,5.9823,51.3297
+92,rp10,Baelen (BE),liege,MODELLED (EFAS 10-yr),182,176,6,shelters too far,6,0,,,0,0,,,6.0488,50.5875
+93,rp10,Eupen (BE),liege,MODELLED (EFAS 10-yr),50,44,6,shelters too far,6,0,,,0,0,,,6.091,50.6092
+94,rp10,"Heinsberg, Stadt (DE)",wassenberg,MODELLED (EFAS 10-yr),1575,1570,5,shelters too far,5,0,,,0,2,,,6.106,51.0633
+95,rp10,Swisttal (DE),euskirchen,MODELLED (EFAS 10-yr),690,685,5,shelters too far,5,0,,,0,3,,,6.9313,50.6867
+96,rp10,Blankenheim (DE),ahr,MODELLED (EFAS 10-yr),5,0,5,shelters too far,5,0,,,0,0,,,6.6912,50.4014
+97,rp10,Venray (NL),venlo,MODELLED (EFAS 10-yr),5,0,5,shelters too far,5,0,,,0,0,,,5.959,51.5091
+98,rp10,Sankt Johann (DE),ahr,MODELLED (EFAS 10-yr),21,16,4,shelters too far,4,0,,,0,0,,,7.1842,50.3556
+99,rp10,"Kerpen, Kolpingstadt (DE)",erftstadt,MODELLED (EFAS 10-yr),83,80,3,shelters too far,3,0,,,0,0,,,6.6698,50.8741
+100,rp10,Assesse (BE),rochefort,MODELLED (EFAS 10-yr),3,0,3,shelters too far,3,0,,,0,0,,,5.0036,50.3751
+101,rp10,Glees (DE),ahr,MODELLED (EFAS 10-yr),2,0,2,shelters too far,2,0,,,0,0,,,7.244,50.4184
+102,rp10,Daverdisse (BE),rochefort,MODELLED (EFAS 10-yr),2,0,2,shelters too far,2,0,,,0,0,,,5.0674,50.0031
+103,rp10,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,MODELLED (EFAS 10-yr),3050,3049,1,shelters full,0,1,,,4,8,Augustinum Seniorenresidenz Bad Neuenahr; Dr. v. Ehrenwall'sche Klinik; Krankenhaus Maria Hilf Bad Neuenahr-Ahrweiler; Orthopädische Fachklinik Kurköln,,7.1228,50.5291
+104,rp10,Nassogne (BE),rochefort,MODELLED (EFAS 10-yr),194,192,1,shelters too far,1,0,,,0,1,,,5.3483,50.1352
+105,rp10,Roerdalen (NL),venlo,MODELLED (EFAS 10-yr),159,158,1,shelters too far,1,0,,,0,0,,,6.032,51.1428
+106,rp10,"Stolberg (Rhld.), Kupferstadt (DE)",eschweiler,MODELLED (EFAS 10-yr),154,152,1,shelters too far,1,0,,,0,0,,,6.2679,50.7459
+107,rp10,Saint-Georges-sur-Meuse (BE),liege,MODELLED (EFAS 10-yr),56,55,1,shelters too far,1,0,,,0,0,,,5.3616,50.5964
+108,rp10,Somme-Leuze (BE),rochefort,MODELLED (EFAS 10-yr),10,10,1,shelters too far,1,0,,,0,0,,,5.3216,50.313
+109,rp10,"Brühl, Stadt (DE)",erftstadt,MODELLED (EFAS 10-yr),7,6,1,shelters too far,1,0,,,0,0,,,6.8894,50.8203
+110,rp10,Bilzen (BE),liege,MODELLED (EFAS 10-yr),1,0,1,shelters too far,1,0,,,0,0,,,5.5408,50.871
+111,rp10,"Eschweiler, Stadt (DE)",eschweiler,MODELLED (EFAS 10-yr),2297,2297,0,-,0,0,,,1,6,AGO Senotel Eschweiler,,6.2713,50.8305
+112,rp10,"Bad Breisig, Stadt (DE)",ahr,MODELLED (EFAS 10-yr),1860,1860,0,-,0,0,,,1,2,Haus Kleine Perle am Rhein,,7.2774,50.5139
+113,rp10,Herstal (BE),liege,MODELLED (EFAS 10-yr),2086,2086,0,-,0,0,,,0,2,,,5.6071,50.6738
+114,rp10,"Sinzig, Stadt (DE)",ahr,MODELLED (EFAS 10-yr),1729,1729,0,-,0,0,,,0,2,,,7.2187,50.522
+115,rp10,"Mayen, Stadt (DE)",ahr,MODELLED (EFAS 10-yr),1706,1706,0,-,0,0,,,0,4,,,7.2224,50.3228
+116,rp10,"Düren, Stadt (DE)",eschweiler,MODELLED (EFAS 10-yr),1649,1649,0,-,0,0,,,0,3,,,6.4685,50.7998
+117,rp10,Hasselt (BE),liege,MODELLED (EFAS 10-yr),910,910,0,-,0,0,,,0,1,,,5.3023,50.9201
+118,rp10,Echt-Susteren (NL),venlo,MODELLED (EFAS 10-yr),646,646,0,-,0,0,,,0,0,,,5.9041,51.0843
+119,rp10,Altenahr (DE),ahr,MODELLED (EFAS 10-yr),638,638,0,-,0,0,,,0,0,,,6.988,50.5235
+120,rp10,"Linz am Rhein, Stadt (DE)",ahr,MODELLED (EFAS 10-yr),413,413,0,-,0,0,,,0,2,,,7.3094,50.587
+121,rp10,"Bad Hönningen, Stadt (DE)",ahr,MODELLED (EFAS 10-yr),325,325,0,-,0,0,,,0,0,,,7.3379,50.5292
+122,rp10,Kinrooi (BE),liege,MODELLED (EFAS 10-yr),257,257,0,-,0,0,,,0,0,,,5.7409,51.1542
+123,rp10,Rheinbreitbach (DE),ahr,MODELLED (EFAS 10-yr),240,240,0,-,0,0,,,0,0,,,7.2483,50.6246
+124,rp10,"Hückelhoven, Stadt (DE)",wassenberg,MODELLED (EFAS 10-yr),230,230,0,-,0,0,,,0,0,,,6.2452,51.0406
+125,rp10,Beesel (NL),venlo,MODELLED (EFAS 10-yr),229,229,0,-,0,0,,,0,0,,,6.0739,51.2704
+126,rp10,Ahrbrück (DE),ahr,MODELLED (EFAS 10-yr),147,147,0,-,0,0,,,0,0,,,6.98,50.4782
+127,rp10,Weilerswist (DE),euskirchen,MODELLED (EFAS 10-yr),122,122,0,-,0,0,,,0,0,,,6.8511,50.7396
+128,rp10,Leubsdorf (DE),ahr,MODELLED (EFAS 10-yr),110,110,0,-,0,0,,,0,0,,,7.3086,50.5464
+129,rp10,Trimbs (DE),ahr,MODELLED (EFAS 10-yr),96,96,0,-,0,0,,,0,0,,,7.3022,50.3372
+130,rp10,Brohl-Lützing (DE),ahr,MODELLED (EFAS 10-yr),73,73,0,-,0,0,,,0,1,,,7.3137,50.4767
+131,rp10,"Zülpich, Stadt (DE)",euskirchen,MODELLED (EFAS 10-yr),73,73,0,-,0,0,,,0,0,,,6.6607,50.6932
+132,rp10,Genk (BE),liege,MODELLED (EFAS 10-yr),67,67,0,-,0,0,,,0,0,,,5.4801,50.9649
+133,rp10,Rheinbrohl (DE),ahr,MODELLED (EFAS 10-yr),51,51,0,-,0,0,,,0,0,,,7.3531,50.5058
+134,rp10,Sainte-Ode (BE),rochefort,MODELLED (EFAS 10-yr),44,44,0,-,0,0,,,0,0,,,5.5548,50.0172
+135,rp10,Antweiler (DE),ahr,MODELLED (EFAS 10-yr),40,39,0,-,0,0,,,0,0,,,6.8275,50.4065
+136,rp10,"Euskirchen, Stadt (DE)",euskirchen,MODELLED (EFAS 10-yr),21,21,0,-,0,0,,,0,0,,,6.8094,50.6319
+137,rp10,Welling (DE),ahr,MODELLED (EFAS 10-yr),17,17,0,-,0,0,,,0,0,,,7.331,50.3335
+138,rp10,"Erftstadt, Stadt (DE)",euskirchen,MODELLED (EFAS 10-yr),15,15,0,-,0,0,,,0,0,,,6.7785,50.7952
+139,rp10,Diepenbeek (BE),liege,MODELLED (EFAS 10-yr),8,8,0,-,0,0,,,0,0,,,5.4189,50.9132
+140,rp10,Hürtgenwald (DE),eschweiler,MODELLED (EFAS 10-yr),8,8,0,-,0,0,,,0,0,,,6.3703,50.7097
+141,rp10,"Wassenberg, Stadt (DE)",venlo,MODELLED (EFAS 10-yr),6,6,0,-,0,0,,,0,0,,,6.1403,51.1117
+142,rp10,"Hürth, Stadt (DE)",erftstadt,MODELLED (EFAS 10-yr),4,4,0,-,0,0,,,0,0,,,6.8501,50.8734
+143,rp10,Nickenich (DE),ahr,MODELLED (EFAS 10-yr),1,1,0,-,0,0,,,0,0,,,7.332,50.4128
+144,rp10,Peer (BE),liege,MODELLED (EFAS 10-yr),1,1,0,-,0,0,,,0,0,,,5.4546,51.1241
+1,rp100,Luik (BE),liege,MODELLED (EFAS 100-yr),70784,57649,13135,shelters full,0,13135,,,4,59,Hôpital de jour La Clé; Hôpital le Valdor; Le Cottage Rose; Maison de Repos et de Soins Un Air de Famille du Balloir,,5.5949,50.6263
+2,rp100,Andenne (BE),rochefort,MODELLED (EFAS 100-yr),11953,1483,10470,shelters full,677,9793,,,1,7,MRS Centre Sainte Barbe La Villette,,5.0577,50.4903
+3,rp100,Maasmechelen (BE),liege,MODELLED (EFAS 100-yr),14751,10122,4629,shelters too far,2620,2009,,,2,11,'t Veer; Woonzorgcentrum Heyvis,,5.6607,50.9587
+4,rp100,"Remagen, Stadt (DE)",ahr,MODELLED (EFAS 100-yr),6973,2816,4157,shelters full,672,3485,,,1,10,Seniorenresidenz Curanum Remagen,,7.1806,50.6051
+5,rp100,Roermond (NL),venlo,MODELLED (EFAS 100-yr),8869,4717,4152,shelters full,951,3201,,,0,1,,,6.017,51.2105
+6,rp100,Seraing (BE),liege,MODELLED (EFAS 100-yr),14280,11042,3239,shelters full,0,3239,,,2,6,Policliniques Universitaires d'Ougrée; Résidence Ange-Raymond Gilles,,5.518,50.5883
+7,rp100,"Unkel, Stadt (DE)",ahr,MODELLED (EFAS 100-yr),3527,867,2659,shelters too far,2145,514,,,0,2,,,7.2353,50.6093
+8,rp100,Bitsingen (BE),liege,MODELLED (EFAS 100-yr),3781,1384,2397,shelters full,0,2397,,,0,2,,,5.6215,50.7712
+9,rp100,Engis (BE),liege,MODELLED (EFAS 100-yr),3735,1426,2309,shelters full,135,2174,,,0,1,,,5.3858,50.5618
+10,rp100,Pepinster (BE),liege,MODELLED (EFAS 100-yr),3195,959,2236,shelters full,77,2159,,,0,4,,,5.7981,50.5714
+11,rp100,Lanaken (BE),liege,MODELLED (EFAS 100-yr),2597,368,2229,shelters full,411,1818,,,0,2,,,5.6368,50.8877
+12,rp100,Venlo (NL),venlo,MODELLED (EFAS 100-yr),14311,12101,2210,shelters too far,1316,894,,,1,9,VieCuri,,6.1527,51.393
+13,rp100,Eijsden-Margraten (NL),liege,MODELLED (EFAS 100-yr),2143,29,2114,shelters too far,2114,0,,,0,2,,,5.762,50.8041
+14,rp100,"Bad Hönningen, Stadt (DE)",ahr,MODELLED (EFAS 100-yr),2132,19,2113,shelters full,0,2113,,,0,0,,,7.3379,50.5292
+15,rp100,Maasgouw (NL),venlo,MODELLED (EFAS 100-yr),4476,2429,2047,shelters too far,1803,244,,,0,0,,,5.8938,51.1579
+16,rp100,Trooz (BE),liege,MODELLED (EFAS 100-yr),2353,318,2034,shelters full,17,2017,,,0,2,,,5.6815,50.5683
+17,rp100,Wezet (BE),liege,MODELLED (EFAS 100-yr),4927,2947,1979,shelters too far,1468,511,,,2,7,Clinique CHC Hermalle; Résidence CHC Hermalle,,5.6993,50.7408
+18,rp100,"Sinzig, Stadt (DE)",ahr,MODELLED (EFAS 100-yr),3677,1704,1973,shelters full,0,1973,,,0,2,,,7.2187,50.522
+19,rp100,Esneux (BE),liege,MODELLED (EFAS 100-yr),4112,2185,1927,shelters full,29,1898,,,0,5,,,5.5752,50.5432
+20,rp100,"Erftstadt, Stadt (DE)",erftstadt,MODELLED (EFAS 100-yr),3145,1246,1899,shelters full,1,1898,,,1,4,Marien-Hospital,,6.7785,50.7952
+21,rp100,Hotton (BE),rochefort,MODELLED (EFAS 100-yr),1999,149,1849,shelters full,559,1290,,,0,4,,,5.4367,50.2669
+22,rp100,Maastricht (NL),liege,MODELLED (EFAS 100-yr),2049,523,1526,shelters full,0,1526,,,4,24,(no name in OSM); De Zeven Bronnen; Maastricht UMC+; Maasveld,,5.6998,50.8605
+23,rp100,"Schleiden, Stadt (DE)",schleiden,MODELLED (EFAS 100-yr),2637,1179,1458,shelters too far,1435,23,,,3,6,Franziskus - Haus; Lebenshilfe HPZ; Liebfrauenhof Schleiden GmbH,,6.4542,50.5597
+24,rp100,Durbuy (BE),rochefort,MODELLED (EFAS 100-yr),2081,659,1423,shelters too far,1106,317,,,1,4,L'Orange,,5.5099,50.364
+25,rp100,Dilsen-Stokkem (BE),liege,MODELLED (EFAS 100-yr),3848,2436,1413,shelters full,11,1402,,,0,3,,,5.7165,51.0437
+26,rp100,Theux (BE),liege,MODELLED (EFAS 100-yr),1702,294,1408,shelters full,0,1408,,,2,3,Home Franchimontois; Sainte Joséphine Asbl,,5.8128,50.5011
+27,rp100,Leudal (NL),venlo,MODELLED (EFAS 100-yr),2338,1000,1337,shelters full,317,1020,,,0,3,,,5.8983,51.2382
+28,rp100,Dernau (DE),ahr,MODELLED (EFAS 100-yr),1542,215,1327,shelters full,340,987,,,0,2,,,7.0458,50.5241
+29,rp100,Oupeye (BE),liege,MODELLED (EFAS 100-yr),4256,3014,1242,shelters full,21,1221,,,0,4,,,5.6407,50.7148
+30,rp100,Stein (NL),liege,MODELLED (EFAS 100-yr),1240,0,1240,shelters too far,1240,0,,,0,0,,,5.7569,50.9702
+31,rp100,Beesel (NL),venlo,MODELLED (EFAS 100-yr),1327,183,1144,shelters too far,1130,14,,,0,0,,,6.0739,51.2704
+32,rp100,Erpel (DE),ahr,MODELLED (EFAS 100-yr),1210,95,1115,shelters full,0,1115,,,0,1,,,7.278,50.6041
+33,rp100,Aywaille (BE),liege,MODELLED (EFAS 100-yr),1995,980,1016,shelters full,154,862,,,0,6,,,5.7025,50.4534
+34,rp100,Tongeren (BE),liege,MODELLED (EFAS 100-yr),3214,2206,1008,shelters too far,725,283,,,0,4,,,5.4671,50.7699
+35,rp100,Flémalle (BE),liege,MODELLED (EFAS 100-yr),7994,6998,996,shelters full,0,996,,,1,6,Le Domaine du Château,,5.4429,50.593
+36,rp100,Limburg (BE),liege,MODELLED (EFAS 100-yr),1362,392,970,shelters full,18,952,,,0,2,,,5.9382,50.6155
+37,rp100,"Bad Breisig, Stadt (DE)",ahr,MODELLED (EFAS 100-yr),2938,1990,948,shelters full,80,868,,,1,2,Haus Kleine Perle am Rhein,,7.2774,50.5139
+38,rp100,Altenahr (DE),ahr,MODELLED (EFAS 100-yr),831,51,780,shelters full,19,761,,,1,1,Ahrschleife Seniorenzentrum,,6.988,50.5235
+39,rp100,Oerle (BE),liege,MODELLED (EFAS 100-yr),658,0,658,shelters too far,658,0,,,0,0,,,5.3397,50.7224
+40,rp100,Riemst (BE),liege,MODELLED (EFAS 100-yr),594,9,585,shelters full,0,585,,,0,1,,,5.6045,50.8045
+41,rp100,Comblain-au-Pont (BE),liege,MODELLED (EFAS 100-yr),1546,974,572,shelters full,31,541,,,0,1,,,5.5675,50.4835
+42,rp100,Peel en Maas (NL),venlo,MODELLED (EFAS 100-yr),2969,2409,560,shelters full,88,472,,,0,2,,,5.9823,51.3297
+43,rp100,"Kerpen, Kolpingstadt (DE)",erftstadt,MODELLED (EFAS 100-yr),793,236,557,shelters full,23,534,,,0,0,,,6.6698,50.8741
+44,rp100,Horst aan de Maas (NL),venlo,MODELLED (EFAS 100-yr),1621,1079,542,shelters full,124,418,,,0,0,,,6.0216,51.4447
+45,rp100,La Roche-en-Ardenne (BE),rochefort,MODELLED (EFAS 100-yr),703,170,534,shelters full,190,344,,,0,2,,,5.5621,50.1573
+46,rp100,Namen (BE),rochefort,MODELLED (EFAS 100-yr),613,85,528,shelters too far,528,0,,,0,1,,,4.8776,50.456
+47,rp100,Hamoir (BE),rochefort,MODELLED (EFAS 100-yr),671,177,494,shelters full,0,494,,,0,1,,,5.5441,50.436
+48,rp100,Maasgouw (NL),liege,MODELLED (EFAS 100-yr),452,33,419,shelters too far,275,144,,,0,2,,,5.8938,51.1579
+49,rp100,Mayschoß (DE),ahr,MODELLED (EFAS 100-yr),445,32,412,shelters full,0,412,,,0,0,,,7.0174,50.5192
+50,rp100,Sprimont (BE),liege,MODELLED (EFAS 100-yr),465,57,408,shelters full,11,397,,,0,0,,,5.6598,50.5148
+51,rp100,Rochefort (BE),rochefort,MODELLED (EFAS 100-yr),1372,978,394,shelters too far,334,60,,,1,3,Résidence Préhyr,,5.1689,50.162
+52,rp100,Yvoir (BE),rochefort,MODELLED (EFAS 100-yr),422,65,357,shelters too far,357,0,,,0,0,,,4.9497,50.3251
+53,rp100,Maaseik (BE),liege,MODELLED (EFAS 100-yr),2005,1701,305,shelters too far,154,151,,,0,3,,,5.6865,51.0765
+54,rp100,Schuld (DE),ahr,MODELLED (EFAS 100-yr),291,0,291,shelters too far,291,0,,,0,0,,,6.8844,50.4489
+55,rp100,Houffalize (BE),rochefort,MODELLED (EFAS 100-yr),300,32,268,shelters too far,268,0,,,0,2,,,5.7553,50.1478
+56,rp100,Rendeux (BE),rochefort,MODELLED (EFAS 100-yr),328,67,261,shelters full,87,174,,,0,1,,,5.5259,50.2128
+57,rp100,Saint-Nicolas (Luik) (BE),liege,MODELLED (EFAS 100-yr),1505,1251,254,shelters full,0,254,,,0,1,,,5.5248,50.6322
+58,rp100,Houyet (BE),rochefort,MODELLED (EFAS 100-yr),374,187,188,shelters full,71,117,,,0,1,,,5.0094,50.1928
+59,rp100,Hamoir (BE),liege,MODELLED (EFAS 100-yr),367,179,188,shelters full,0,188,,,0,0,,,5.5441,50.436
+60,rp100,Inden (DE),eschweiler,MODELLED (EFAS 100-yr),785,603,181,shelters too far,145,36,,,0,2,,,6.3744,50.864
+61,rp100,Hönningen (DE),ahr,MODELLED (EFAS 100-yr),183,3,180,shelters too far,180,0,,,0,1,,,6.9472,50.4619
+62,rp100,Echt-Susteren (NL),liege,MODELLED (EFAS 100-yr),206,68,138,shelters too far,138,0,,,0,1,,,5.9041,51.0843
+63,rp100,Meerssen (NL),liege,MODELLED (EFAS 100-yr),137,0,137,shelters too far,137,0,,,0,1,,,5.7358,50.9041
+64,rp100,Niederzier (DE),eschweiler,MODELLED (EFAS 100-yr),243,111,132,shelters full,35,97,,,0,0,,,6.4703,50.8963
+65,rp100,Rheinbrohl (DE),ahr,MODELLED (EFAS 100-yr),139,9,130,shelters full,0,130,,,0,1,,,7.3531,50.5058
+66,rp100,"Jülich, Stadt (DE)",eschweiler,MODELLED (EFAS 100-yr),1510,1382,128,shelters full,12,116,,,1,4,Altenzentrum St. Hildegard,,6.3614,50.929
+67,rp100,Brohl-Lützing (DE),ahr,MODELLED (EFAS 100-yr),160,35,124,shelters full,0,124,,,0,1,,,7.3137,50.4767
+68,rp100,"Wassenberg, Stadt (DE)",wassenberg,MODELLED (EFAS 100-yr),270,176,94,shelters full,28,66,,,0,0,,,6.1403,51.1117
+69,rp100,"Nideggen, Stadt (DE)",eschweiler,MODELLED (EFAS 100-yr),130,37,93,shelters too far,75,18,,,0,0,,,6.4876,50.6749
+70,rp100,Kasbach-Ohlenberg (DE),ahr,MODELLED (EFAS 100-yr),82,7,75,shelters full,0,75,,,0,0,,,7.2694,50.5855
+71,rp100,Wellin (BE),rochefort,MODELLED (EFAS 100-yr),74,0,74,shelters too far,74,0,,,0,0,,,5.109,50.0743
+72,rp100,Tenneville (BE),rochefort,MODELLED (EFAS 100-yr),69,0,69,shelters too far,69,0,,,0,0,,,5.4943,50.1006
+73,rp100,Wershofen (DE),ahr,MODELLED (EFAS 100-yr),65,0,65,shelters too far,65,0,,,0,0,,,6.8278,50.4435
+74,rp100,Tellin (BE),rochefort,MODELLED (EFAS 100-yr),155,92,63,shelters too far,63,0,,,0,0,,,5.2197,50.0646
+75,rp100,Rech (DE),ahr,MODELLED (EFAS 100-yr),59,0,59,shelters full,17,42,,,0,0,,,7.0367,50.5126
+76,rp100,"Heimbach, Stadt (DE)",schleiden,MODELLED (EFAS 100-yr),58,0,58,shelters too far,58,0,,,0,0,,,6.4817,50.6305
+77,rp100,Kreuzau (DE),eschweiler,MODELLED (EFAS 100-yr),181,127,54,shelters full,0,54,,,0,0,,,6.483,50.7401
+78,rp100,Dinant (BE),rochefort,MODELLED (EFAS 100-yr),52,0,52,shelters too far,52,0,,,0,0,,,4.9462,50.2415
+79,rp100,Ferrières (BE),rochefort,MODELLED (EFAS 100-yr),52,0,52,shelters too far,52,0,,,0,0,,,5.5931,50.4116
+80,rp100,Insul (DE),ahr,MODELLED (EFAS 100-yr),121,75,47,shelters full,0,47,,,0,0,,,6.9096,50.4398
+81,rp100,Dümpelfeld (DE),ahr,MODELLED (EFAS 100-yr),44,0,44,shelters full,0,44,,,0,0,,,6.9467,50.4397
+82,rp100,Stoumont (BE),rochefort,MODELLED (EFAS 100-yr),50,10,39,shelters too far,39,0,,,0,0,,,5.8101,50.4163
+83,rp100,"Heinsberg, Stadt (DE)",wassenberg,MODELLED (EFAS 100-yr),1982,1945,37,shelters full,10,27,,,0,3,,,6.106,51.0633
+84,rp100,Dison (BE),liege,MODELLED (EFAS 100-yr),229,197,33,shelters too far,33,0,,,0,0,,,5.8763,50.6131
+85,rp100,Ciney (BE),rochefort,MODELLED (EFAS 100-yr),29,0,29,shelters too far,29,0,,,0,0,,,5.1264,50.2784
+86,rp100,Zutendaal (BE),liege,MODELLED (EFAS 100-yr),67,40,27,shelters full,0,27,,,0,0,,,5.5739,50.9371
+87,rp100,Chaudfontaine (BE),liege,MODELLED (EFAS 100-yr),2925,2901,24,shelters full,0,24,,,0,3,,,5.6332,50.5772
+88,rp100,Bertogne (BE),rochefort,MODELLED (EFAS 100-yr),24,0,24,shelters too far,24,0,,,0,0,,,5.6449,50.0606
+89,rp100,Verviers (BE),liege,MODELLED (EFAS 100-yr),4735,4712,23,shelters too far,23,0,,,0,4,,,5.8725,50.5922
+90,rp100,Fuchshofen (DE),ahr,MODELLED (EFAS 100-yr),22,0,22,shelters too far,22,0,,,0,0,,,6.8573,50.4245
+91,rp100,Müsch (DE),ahr,MODELLED (EFAS 100-yr),22,0,22,shelters too far,22,0,,,0,0,,,6.8303,50.3862
+92,rp100,Olne (BE),liege,MODELLED (EFAS 100-yr),45,27,18,shelters full,0,18,,,0,0,,,5.7381,50.5902
+93,rp100,Neupré (BE),liege,MODELLED (EFAS 100-yr),17,0,17,shelters too far,17,0,,,0,0,,,5.493,50.5459
+94,rp100,Modave (BE),rochefort,MODELLED (EFAS 100-yr),134,122,12,shelters too far,12,0,,,0,0,,,5.2918,50.4705
+95,rp100,Dorsel (DE),ahr,MODELLED (EFAS 100-yr),12,0,12,shelters too far,12,0,,,0,0,,,6.7948,50.3861
+96,rp100,Voeren (BE),liege,MODELLED (EFAS 100-yr),12,0,12,shelters too far,12,0,,,0,0,,,5.8382,50.7474
+97,rp100,"Wassenberg, Stadt (DE)",venlo,MODELLED (EFAS 100-yr),17,6,11,shelters too far,11,0,,,0,0,,,6.1403,51.1117
+98,rp100,Saint-Hubert (BE),rochefort,MODELLED (EFAS 100-yr),11,0,11,shelters too far,11,0,,,0,0,,,5.3459,50.0382
+99,rp100,Baelen (BE),liege,MODELLED (EFAS 100-yr),205,195,10,shelters too far,10,0,,,0,0,,,6.0488,50.5875
+100,rp100,Swisttal (DE),euskirchen,MODELLED (EFAS 100-yr),771,762,9,shelters too far,9,0,,,0,3,,,6.9313,50.6867
+101,rp100,Marchin (BE),rochefort,MODELLED (EFAS 100-yr),277,269,9,shelters too far,9,0,,,0,0,,,5.2428,50.4632
+102,rp100,Weilerswist (DE),erftstadt,MODELLED (EFAS 100-yr),81,74,8,shelters too far,8,0,,,0,0,,,6.8511,50.7396
+103,rp100,Hamois (BE),rochefort,MODELLED (EFAS 100-yr),8,0,8,shelters too far,8,0,,,0,0,,,5.1467,50.3349
+104,rp100,Eupen (BE),liege,MODELLED (EFAS 100-yr),50,44,6,shelters too far,6,0,,,0,0,,,6.091,50.6092
+105,rp100,Blankenheim (DE),ahr,MODELLED (EFAS 100-yr),5,0,5,shelters too far,5,0,,,0,0,,,6.6912,50.4014
+106,rp100,Venray (NL),venlo,MODELLED (EFAS 100-yr),5,0,5,shelters too far,5,0,,,0,0,,,5.959,51.5091
+107,rp100,Sankt Johann (DE),ahr,MODELLED (EFAS 100-yr),21,16,4,shelters too far,4,0,,,0,0,,,7.1842,50.3556
+108,rp100,Leubsdorf (DE),ahr,MODELLED (EFAS 100-yr),146,142,3,shelters full,0,3,,,0,0,,,7.3086,50.5464
+109,rp100,Assesse (BE),rochefort,MODELLED (EFAS 100-yr),3,0,3,shelters too far,3,0,,,0,0,,,5.0036,50.3751
+110,rp100,Nassogne (BE),rochefort,MODELLED (EFAS 100-yr),221,219,2,shelters too far,2,0,,,0,1,,,5.3483,50.1352
+111,rp100,Glees (DE),ahr,MODELLED (EFAS 100-yr),2,0,2,shelters too far,2,0,,,0,0,,,7.244,50.4184
+112,rp100,Daverdisse (BE),rochefort,MODELLED (EFAS 100-yr),2,0,2,shelters too far,2,0,,,0,0,,,5.0674,50.0031
+113,rp100,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,MODELLED (EFAS 100-yr),4018,4017,1,shelters full,0,1,,,4,8,Augustinum Seniorenresidenz Bad Neuenahr; Dr. v. Ehrenwall'sche Klinik; Krankenhaus Maria Hilf Bad Neuenahr-Ahrweiler; Orthopädische Fachklinik Kurköln,,7.1228,50.5291
+114,rp100,Roerdalen (NL),venlo,MODELLED (EFAS 100-yr),197,196,1,shelters too far,1,0,,,0,0,,,6.032,51.1428
+115,rp100,"Stolberg (Rhld.), Kupferstadt (DE)",eschweiler,MODELLED (EFAS 100-yr),154,152,1,shelters too far,1,0,,,0,0,,,6.2679,50.7459
+116,rp100,Saint-Georges-sur-Meuse (BE),liege,MODELLED (EFAS 100-yr),68,67,1,shelters too far,1,0,,,0,0,,,5.3616,50.5964
+117,rp100,Sainte-Ode (BE),rochefort,MODELLED (EFAS 100-yr),58,56,1,shelters too far,1,0,,,0,0,,,5.5548,50.0172
+118,rp100,Somme-Leuze (BE),rochefort,MODELLED (EFAS 100-yr),11,10,1,shelters too far,1,0,,,0,0,,,5.3216,50.313
+119,rp100,"Brühl, Stadt (DE)",erftstadt,MODELLED (EFAS 100-yr),7,6,1,shelters too far,1,0,,,0,0,,,6.8894,50.8203
+120,rp100,Bilzen (BE),liege,MODELLED (EFAS 100-yr),1,0,1,shelters too far,1,0,,,0,0,,,5.5408,50.871
+121,rp100,"Eschweiler, Stadt (DE)",eschweiler,MODELLED (EFAS 100-yr),2859,2859,0,-,0,0,,,1,7,AGO Senotel Eschweiler,,6.2713,50.8305
+122,rp100,Herstal (BE),liege,MODELLED (EFAS 100-yr),2607,2606,0,-,0,0,,,0,2,,,5.6071,50.6738
+123,rp100,"Düren, Stadt (DE)",eschweiler,MODELLED (EFAS 100-yr),2558,2558,0,-,0,0,,,0,3,,,6.4685,50.7998
+124,rp100,"Mayen, Stadt (DE)",ahr,MODELLED (EFAS 100-yr),2085,2085,0,-,0,0,,,0,5,,,7.2224,50.3228
+125,rp100,Hasselt (BE),liege,MODELLED (EFAS 100-yr),925,925,0,-,0,0,,,0,1,,,5.3023,50.9201
+126,rp100,Echt-Susteren (NL),venlo,MODELLED (EFAS 100-yr),757,757,0,-,0,0,,,0,0,,,5.9041,51.0843
+127,rp100,"Linz am Rhein, Stadt (DE)",ahr,MODELLED (EFAS 100-yr),638,638,0,-,0,0,,,0,2,,,7.3094,50.587
+128,rp100,"Hückelhoven, Stadt (DE)",wassenberg,MODELLED (EFAS 100-yr),425,425,0,-,0,0,,,0,0,,,6.2452,51.0406
+129,rp100,Kinrooi (BE),liege,MODELLED (EFAS 100-yr),358,358,0,-,0,0,,,0,1,,,5.7409,51.1542
+130,rp100,Rheinbreitbach (DE),ahr,MODELLED (EFAS 100-yr),333,333,0,-,0,0,,,0,0,,,7.2483,50.6246
+131,rp100,Weilerswist (DE),euskirchen,MODELLED (EFAS 100-yr),288,288,0,-,0,0,,,0,0,,,6.8511,50.7396
+132,rp100,Ahrbrück (DE),ahr,MODELLED (EFAS 100-yr),177,176,0,-,0,0,,,0,0,,,6.98,50.4782
+133,rp100,"Zülpich, Stadt (DE)",euskirchen,MODELLED (EFAS 100-yr),104,104,0,-,0,0,,,0,0,,,6.6607,50.6932
+134,rp100,Trimbs (DE),ahr,MODELLED (EFAS 100-yr),96,96,0,-,0,0,,,0,0,,,7.3022,50.3372
+135,rp100,Genk (BE),liege,MODELLED (EFAS 100-yr),67,67,0,-,0,0,,,0,0,,,5.4801,50.9649
+136,rp100,Antweiler (DE),ahr,MODELLED (EFAS 100-yr),40,39,0,-,0,0,,,0,0,,,6.8275,50.4065
+137,rp100,"Euskirchen, Stadt (DE)",euskirchen,MODELLED (EFAS 100-yr),31,31,0,-,0,0,,,0,0,,,6.8094,50.6319
+138,rp100,Welling (DE),ahr,MODELLED (EFAS 100-yr),17,17,0,-,0,0,,,0,0,,,7.331,50.3335
+139,rp100,"Erftstadt, Stadt (DE)",euskirchen,MODELLED (EFAS 100-yr),15,15,0,-,0,0,,,0,0,,,6.7785,50.7952
+140,rp100,Diepenbeek (BE),liege,MODELLED (EFAS 100-yr),8,8,0,-,0,0,,,0,0,,,5.4189,50.9132
+141,rp100,Hürtgenwald (DE),eschweiler,MODELLED (EFAS 100-yr),8,8,0,-,0,0,,,0,0,,,6.3703,50.7097
+142,rp100,"Hürth, Stadt (DE)",erftstadt,MODELLED (EFAS 100-yr),4,4,0,-,0,0,,,0,0,,,6.8501,50.8734
+143,rp100,Nickenich (DE),ahr,MODELLED (EFAS 100-yr),1,1,0,-,0,0,,,0,0,,,7.332,50.4128
+144,rp100,Peer (BE),liege,MODELLED (EFAS 100-yr),1,1,0,-,0,0,,,0,0,,,5.4546,51.1241
+1,rp500,Luik (BE),liege,MODELLED (EFAS 500-yr),74000,57052,16947,shelters full,0,16947,,,4,63,Hôpital de jour La Clé; Hôpital le Valdor; Le Cottage Rose; Maison de Repos et de Soins Un Air de Famille du Balloir,,5.5949,50.6263
+2,rp500,Andenne (BE),rochefort,MODELLED (EFAS 500-yr),12301,1498,10802,shelters full,677,10125,,,1,7,MRS Centre Sainte Barbe La Villette,,5.0577,50.4903
+3,rp500,Venlo (NL),venlo,MODELLED (EFAS 500-yr),23285,15094,8191,shelters full,1911,6280,,,1,11,VieCuri,,6.1527,51.393
+4,rp500,"Remagen, Stadt (DE)",ahr,MODELLED (EFAS 500-yr),10017,3067,6950,shelters full,1991,4959,,,1,12,Seniorenresidenz Curanum Remagen,,7.1806,50.6051
+5,rp500,Roermond (NL),venlo,MODELLED (EFAS 500-yr),13126,6671,6455,shelters full,1202,5253,,,0,2,,,6.017,51.2105
+6,rp500,Maasmechelen (BE),liege,MODELLED (EFAS 500-yr),16216,10716,5499,shelters too far,4596,903,,,2,12,'t Veer; Woonzorgcentrum Heyvis,,5.6607,50.9587
+7,rp500,Seraing (BE),liege,MODELLED (EFAS 500-yr),14979,11082,3897,shelters full,0,3897,,,2,6,Policliniques Universitaires d'Ougrée; Résidence Ange-Raymond Gilles,,5.518,50.5883
+8,rp500,Peel en Maas (NL),venlo,MODELLED (EFAS 500-yr),5025,1156,3868,shelters full,1171,2697,,,0,5,,,5.9823,51.3297
+9,rp500,"Sinzig, Stadt (DE)",ahr,MODELLED (EFAS 500-yr),4693,916,3777,shelters full,0,3777,,,0,2,,,7.2187,50.522
+10,rp500,Dilsen-Stokkem (BE),liege,MODELLED (EFAS 500-yr),5005,1900,3105,shelters full,15,3090,,,0,5,,,5.7165,51.0437
+11,rp500,"Unkel, Stadt (DE)",ahr,MODELLED (EFAS 500-yr),3845,790,3055,shelters too far,2410,645,,,0,2,,,7.2353,50.6093
+12,rp500,Engis (BE),liege,MODELLED (EFAS 500-yr),3909,1114,2796,shelters full,140,2656,,,0,2,,,5.3858,50.5618
+13,rp500,Bitsingen (BE),liege,MODELLED (EFAS 500-yr),4068,1373,2695,shelters full,502,2193,,,0,3,,,5.6215,50.7712
+14,rp500,Lanaken (BE),liege,MODELLED (EFAS 500-yr),3062,413,2649,shelters full,521,2128,,,0,2,,,5.6368,50.8877
+15,rp500,"Bad Hönningen, Stadt (DE)",ahr,MODELLED (EFAS 500-yr),2509,0,2509,shelters full,0,2509,,,0,0,,,7.3379,50.5292
+16,rp500,Pepinster (BE),liege,MODELLED (EFAS 500-yr),3379,901,2478,shelters full,604,1874,,,0,4,,,5.7981,50.5714
+17,rp500,Leudal (NL),venlo,MODELLED (EFAS 500-yr),3626,1174,2452,shelters too far,1429,1023,,,0,3,,,5.8983,51.2382
+18,rp500,Wezet (BE),liege,MODELLED (EFAS 500-yr),5145,2755,2390,shelters too far,1621,769,,,2,7,Clinique CHC Hermalle; Résidence CHC Hermalle,,5.6993,50.7408
+19,rp500,Maasgouw (NL),venlo,MODELLED (EFAS 500-yr),5266,2902,2365,shelters too far,2016,349,,,0,0,,,5.8938,51.1579
+20,rp500,Trooz (BE),liege,MODELLED (EFAS 500-yr),2474,186,2288,shelters full,54,2234,,,0,3,,,5.6815,50.5683
+21,rp500,"Erftstadt, Stadt (DE)",erftstadt,MODELLED (EFAS 500-yr),3640,1461,2179,shelters full,1,2178,,,1,4,Marien-Hospital,,6.7785,50.7952
+22,rp500,Eijsden-Margraten (NL),liege,MODELLED (EFAS 500-yr),2143,29,2114,shelters too far,2114,0,,,0,2,,,5.762,50.8041
+23,rp500,Esneux (BE),liege,MODELLED (EFAS 500-yr),4318,2296,2021,shelters full,29,1992,,,0,5,,,5.5752,50.5432
+24,rp500,Hotton (BE),rochefort,MODELLED (EFAS 500-yr),2066,149,1916,shelters full,569,1347,,,0,4,,,5.4367,50.2669
+25,rp500,"Schleiden, Stadt (DE)",schleiden,MODELLED (EFAS 500-yr),2893,1179,1714,shelters too far,1677,37,,,3,6,Franziskus - Haus; Lebenshilfe HPZ; Liebfrauenhof Schleiden GmbH,,6.4542,50.5597
+26,rp500,"Bad Breisig, Stadt (DE)",ahr,MODELLED (EFAS 500-yr),3361,1765,1596,shelters full,275,1321,,,1,2,Haus Kleine Perle am Rhein,,7.2774,50.5139
+27,rp500,Beesel (NL),venlo,MODELLED (EFAS 500-yr),1636,92,1544,shelters too far,1405,139,,,0,0,,,6.0739,51.2704
+28,rp500,Oupeye (BE),liege,MODELLED (EFAS 500-yr),4792,3265,1528,shelters full,21,1507,,,0,4,,,5.6407,50.7148
+29,rp500,Maastricht (NL),liege,MODELLED (EFAS 500-yr),2049,521,1527,shelters full,0,1527,,,4,26,(no name in OSM); De Zeven Bronnen; Maastricht UMC+; Maasveld,,5.6998,50.8605
+30,rp500,Theux (BE),liege,MODELLED (EFAS 500-yr),1780,294,1485,shelters full,0,1485,,,2,3,Home Franchimontois; Sainte Joséphine Asbl,,5.8128,50.5011
+31,rp500,Flémalle (BE),liege,MODELLED (EFAS 500-yr),8631,7183,1448,shelters full,0,1448,,,1,6,Le Domaine du Château,,5.4429,50.593
+32,rp500,Durbuy (BE),rochefort,MODELLED (EFAS 500-yr),2102,663,1439,shelters too far,1106,333,,,1,4,L'Orange,,5.5099,50.364
+33,rp500,Dernau (DE),ahr,MODELLED (EFAS 500-yr),1542,215,1327,shelters full,340,987,,,0,2,,,7.0458,50.5241
+34,rp500,Erpel (DE),ahr,MODELLED (EFAS 500-yr),1338,95,1244,shelters full,0,1244,,,0,1,,,7.278,50.6041
+35,rp500,Stein (NL),liege,MODELLED (EFAS 500-yr),1240,0,1240,shelters too far,1240,0,,,0,0,,,5.7569,50.9702
+36,rp500,Tongeren (BE),liege,MODELLED (EFAS 500-yr),3680,2509,1171,shelters too far,872,299,,,0,4,,,5.4671,50.7699
+37,rp500,Aywaille (BE),liege,MODELLED (EFAS 500-yr),2120,980,1140,shelters full,154,986,,,0,6,,,5.7025,50.4534
+38,rp500,Horst aan de Maas (NL),venlo,MODELLED (EFAS 500-yr),2669,1585,1084,shelters full,170,914,,,0,1,,,6.0216,51.4447
+39,rp500,Limburg (BE),liege,MODELLED (EFAS 500-yr),1461,392,1069,shelters full,18,1051,,,0,2,,,5.9382,50.6155
+40,rp500,Altenahr (DE),ahr,MODELLED (EFAS 500-yr),832,51,781,shelters full,19,762,,,1,1,Ahrschleife Seniorenzentrum,,6.988,50.5235
+41,rp500,Comblain-au-Pont (BE),liege,MODELLED (EFAS 500-yr),1681,948,733,shelters full,46,687,,,0,1,,,5.5675,50.4835
+42,rp500,Oerle (BE),liege,MODELLED (EFAS 500-yr),727,0,727,shelters too far,727,0,,,0,0,,,5.3397,50.7224
+43,rp500,"Kerpen, Kolpingstadt (DE)",erftstadt,MODELLED (EFAS 500-yr),933,236,697,shelters full,23,674,,,0,0,,,6.6698,50.8741
+44,rp500,Riemst (BE),liege,MODELLED (EFAS 500-yr),644,9,635,shelters full,0,635,,,0,1,,,5.6045,50.8045
+45,rp500,Hamoir (BE),rochefort,MODELLED (EFAS 500-yr),727,177,550,shelters full,0,550,,,0,1,,,5.5441,50.436
+46,rp500,Namen (BE),rochefort,MODELLED (EFAS 500-yr),636,86,550,shelters too far,550,0,,,0,1,,,4.8776,50.456
+47,rp500,La Roche-en-Ardenne (BE),rochefort,MODELLED (EFAS 500-yr),712,170,541,shelters full,195,346,,,0,2,,,5.5621,50.1573
+48,rp500,Herstal (BE),liege,MODELLED (EFAS 500-yr),2907,2429,478,shelters full,0,478,,,0,3,,,5.6071,50.6738
+49,rp500,Rochefort (BE),rochefort,MODELLED (EFAS 500-yr),1518,1062,456,shelters too far,372,84,,,1,3,Résidence Préhyr,,5.1689,50.162
+50,rp500,Maasgouw (NL),liege,MODELLED (EFAS 500-yr),464,33,431,shelters too far,275,156,,,0,2,,,5.8938,51.1579
+51,rp500,Mayschoß (DE),ahr,MODELLED (EFAS 500-yr),453,32,420,shelters full,0,420,,,0,0,,,7.0174,50.5192
+52,rp500,Sprimont (BE),liege,MODELLED (EFAS 500-yr),470,57,413,shelters full,11,402,,,0,0,,,5.6598,50.5148
+53,rp500,Rheinbrohl (DE),ahr,MODELLED (EFAS 500-yr),384,0,384,shelters full,0,384,,,0,1,,,7.3531,50.5058
+54,rp500,Yvoir (BE),rochefort,MODELLED (EFAS 500-yr),422,65,357,shelters too far,357,0,,,0,0,,,4.9497,50.3251
+55,rp500,Maaseik (BE),liege,MODELLED (EFAS 500-yr),2687,2358,330,shelters full,154,176,,,1,3,Ziekenhuis Maas en Kempen,,5.6865,51.0765
+56,rp500,Schuld (DE),ahr,MODELLED (EFAS 500-yr),315,0,315,shelters too far,315,0,,,0,0,,,6.8844,50.4489
+57,rp500,Rendeux (BE),rochefort,MODELLED (EFAS 500-yr),367,67,301,shelters full,89,212,,,0,1,,,5.5259,50.2128
+58,rp500,Houffalize (BE),rochefort,MODELLED (EFAS 500-yr),313,32,281,shelters too far,281,0,,,0,2,,,5.7553,50.1478
+59,rp500,Hamoir (BE),liege,MODELLED (EFAS 500-yr),389,124,266,shelters full,0,266,,,0,1,,,5.5441,50.436
+60,rp500,Saint-Nicolas (Luik) (BE),liege,MODELLED (EFAS 500-yr),1559,1305,254,shelters full,0,254,,,0,1,,,5.5248,50.6322
+61,rp500,Inden (DE),eschweiler,MODELLED (EFAS 500-yr),848,624,224,shelters too far,162,62,,,0,2,,,6.3744,50.864
+62,rp500,Houyet (BE),rochefort,MODELLED (EFAS 500-yr),408,187,221,shelters full,72,149,,,0,1,,,5.0094,50.1928
+63,rp500,Chaudfontaine (BE),liege,MODELLED (EFAS 500-yr),3125,2932,193,shelters full,0,193,,,0,3,,,5.6332,50.5772
+64,rp500,"Jülich, Stadt (DE)",eschweiler,MODELLED (EFAS 500-yr),1777,1588,189,shelters full,24,165,,,1,4,Altenzentrum St. Hildegard,,6.3614,50.929
+65,rp500,Hönningen (DE),ahr,MODELLED (EFAS 500-yr),191,3,188,shelters too far,188,0,,,0,1,,,6.9472,50.4619
+66,rp500,Brohl-Lützing (DE),ahr,MODELLED (EFAS 500-yr),215,45,169,shelters full,0,169,,,0,1,,,7.3137,50.4767
+67,rp500,Echt-Susteren (NL),liege,MODELLED (EFAS 500-yr),206,68,138,shelters too far,138,0,,,0,2,,,5.9041,51.0843
+68,rp500,Niederzier (DE),eschweiler,MODELLED (EFAS 500-yr),278,141,137,shelters full,35,102,,,0,0,,,6.4703,50.8963
+69,rp500,Meerssen (NL),liege,MODELLED (EFAS 500-yr),137,0,137,shelters too far,137,0,,,0,1,,,5.7358,50.9041
+70,rp500,Kasbach-Ohlenberg (DE),ahr,MODELLED (EFAS 500-yr),134,9,125,shelters full,0,125,,,0,0,,,7.2694,50.5855
+71,rp500,"Heinsberg, Stadt (DE)",wassenberg,MODELLED (EFAS 500-yr),2260,2140,120,shelters full,10,110,,,0,3,,,6.106,51.0633
+72,rp500,"Nideggen, Stadt (DE)",eschweiler,MODELLED (EFAS 500-yr),130,37,93,shelters too far,75,18,,,0,0,,,6.4876,50.6749
+73,rp500,Rech (DE),ahr,MODELLED (EFAS 500-yr),91,0,91,shelters full,17,74,,,0,0,,,7.0367,50.5126
+74,rp500,"Wassenberg, Stadt (DE)",wassenberg,MODELLED (EFAS 500-yr),273,186,87,shelters full,29,58,,,0,0,,,6.1403,51.1117
+75,rp500,Insul (DE),ahr,MODELLED (EFAS 500-yr),152,75,78,shelters full,0,78,,,0,0,,,6.9096,50.4398
+76,rp500,Tenneville (BE),rochefort,MODELLED (EFAS 500-yr),74,0,74,shelters too far,74,0,,,0,0,,,5.4943,50.1006
+77,rp500,Wellin (BE),rochefort,MODELLED (EFAS 500-yr),74,0,74,shelters too far,74,0,,,0,0,,,5.109,50.0743
+78,rp500,Wershofen (DE),ahr,MODELLED (EFAS 500-yr),65,0,65,shelters too far,65,0,,,0,0,,,6.8278,50.4435
+79,rp500,Tellin (BE),rochefort,MODELLED (EFAS 500-yr),155,92,63,shelters too far,63,0,,,0,0,,,5.2197,50.0646
+80,rp500,"Heimbach, Stadt (DE)",schleiden,MODELLED (EFAS 500-yr),58,0,58,shelters too far,58,0,,,0,0,,,6.4817,50.6305
+81,rp500,Kreuzau (DE),eschweiler,MODELLED (EFAS 500-yr),181,127,54,shelters full,0,54,,,0,0,,,6.483,50.7401
+82,rp500,Dinant (BE),rochefort,MODELLED (EFAS 500-yr),56,4,52,shelters too far,52,0,,,0,0,,,4.9462,50.2415
+83,rp500,Ferrières (BE),rochefort,MODELLED (EFAS 500-yr),52,0,52,shelters too far,52,0,,,0,0,,,5.5931,50.4116
+84,rp500,Dümpelfeld (DE),ahr,MODELLED (EFAS 500-yr),44,0,44,shelters full,0,44,,,0,0,,,6.9467,50.4397
+85,rp500,Stoumont (BE),rochefort,MODELLED (EFAS 500-yr),50,11,39,shelters too far,39,0,,,0,0,,,5.8101,50.4163
+86,rp500,Dison (BE),liege,MODELLED (EFAS 500-yr),229,197,33,shelters too far,33,0,,,0,0,,,5.8763,50.6131
+87,rp500,Ciney (BE),rochefort,MODELLED (EFAS 500-yr),29,0,29,shelters too far,29,0,,,0,0,,,5.1264,50.2784
+88,rp500,Zutendaal (BE),liege,MODELLED (EFAS 500-yr),67,40,27,shelters full,0,27,,,0,0,,,5.5739,50.9371
+89,rp500,Verviers (BE),liege,MODELLED (EFAS 500-yr),4810,4786,25,shelters too far,23,2,,,0,4,,,5.8725,50.5922
+90,rp500,Bertogne (BE),rochefort,MODELLED (EFAS 500-yr),24,0,24,shelters too far,24,0,,,0,0,,,5.6449,50.0606
+91,rp500,Fuchshofen (DE),ahr,MODELLED (EFAS 500-yr),22,0,22,shelters too far,22,0,,,0,0,,,6.8573,50.4245
+92,rp500,Müsch (DE),ahr,MODELLED (EFAS 500-yr),22,0,22,shelters too far,22,0,,,0,0,,,6.8303,50.3862
+93,rp500,Olne (BE),liege,MODELLED (EFAS 500-yr),45,27,18,shelters full,0,18,,,0,0,,,5.7381,50.5902
+94,rp500,Neupré (BE),liege,MODELLED (EFAS 500-yr),17,0,17,shelters too far,17,0,,,0,0,,,5.493,50.5459
+95,rp500,Echt-Susteren (NL),venlo,MODELLED (EFAS 500-yr),965,949,15,shelters too far,15,0,,,0,0,,,5.9041,51.0843
+96,rp500,Modave (BE),rochefort,MODELLED (EFAS 500-yr),134,122,12,shelters too far,12,0,,,0,0,,,5.2918,50.4705
+97,rp500,Voeren (BE),liege,MODELLED (EFAS 500-yr),20,7,12,shelters too far,12,0,,,0,0,,,5.8382,50.7474
+98,rp500,Dorsel (DE),ahr,MODELLED (EFAS 500-yr),12,0,12,shelters too far,12,0,,,0,0,,,6.7948,50.3861
+99,rp500,"Wassenberg, Stadt (DE)",venlo,MODELLED (EFAS 500-yr),17,6,11,shelters too far,11,0,,,0,0,,,6.1403,51.1117
+100,rp500,Saint-Hubert (BE),rochefort,MODELLED (EFAS 500-yr),11,0,11,shelters too far,11,0,,,0,0,,,5.3459,50.0382
+101,rp500,Baelen (BE),liege,MODELLED (EFAS 500-yr),229,219,10,shelters too far,10,0,,,0,0,,,6.0488,50.5875
+102,rp500,Swisttal (DE),euskirchen,MODELLED (EFAS 500-yr),803,795,9,shelters too far,9,0,,,0,3,,,6.9313,50.6867
+103,rp500,Marchin (BE),rochefort,MODELLED (EFAS 500-yr),277,269,9,shelters too far,9,0,,,0,0,,,5.2428,50.4632
+104,rp500,Weilerswist (DE),erftstadt,MODELLED (EFAS 500-yr),81,74,8,shelters too far,8,0,,,0,0,,,6.8511,50.7396
+105,rp500,Hamois (BE),rochefort,MODELLED (EFAS 500-yr),8,0,8,shelters too far,8,0,,,0,0,,,5.1467,50.3349
+106,rp500,Saint-Georges-sur-Meuse (BE),liege,MODELLED (EFAS 500-yr),95,88,7,shelters full,1,6,,,0,0,,,5.3616,50.5964
+107,rp500,Eupen (BE),liege,MODELLED (EFAS 500-yr),50,44,6,shelters too far,6,0,,,0,0,,,6.091,50.6092
+108,rp500,Blankenheim (DE),ahr,MODELLED (EFAS 500-yr),5,0,5,shelters too far,5,0,,,0,0,,,6.6912,50.4014
+109,rp500,Venray (NL),venlo,MODELLED (EFAS 500-yr),5,0,5,shelters too far,5,0,,,0,0,,,5.959,51.5091
+110,rp500,Sankt Johann (DE),ahr,MODELLED (EFAS 500-yr),21,16,4,shelters too far,4,0,,,0,0,,,7.1842,50.3556
+111,rp500,Leubsdorf (DE),ahr,MODELLED (EFAS 500-yr),214,211,3,shelters full,0,3,,,0,0,,,7.3086,50.5464
+112,rp500,Assesse (BE),rochefort,MODELLED (EFAS 500-yr),3,0,3,shelters too far,3,0,,,0,0,,,5.0036,50.3751
+113,rp500,Roerdalen (NL),venlo,MODELLED (EFAS 500-yr),293,292,2,shelters too far,2,0,,,0,0,,,6.032,51.1428
+114,rp500,Nassogne (BE),rochefort,MODELLED (EFAS 500-yr),223,221,2,shelters too far,2,0,,,0,1,,,5.3483,50.1352
+115,rp500,Glees (DE),ahr,MODELLED (EFAS 500-yr),2,0,2,shelters too far,2,0,,,0,0,,,7.244,50.4184
+116,rp500,Daverdisse (BE),rochefort,MODELLED (EFAS 500-yr),2,0,2,shelters too far,2,0,,,0,0,,,5.0674,50.0031
+117,rp500,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,MODELLED (EFAS 500-yr),4990,4989,1,shelters full,0,1,,,4,9,Augustinum Seniorenresidenz Bad Neuenahr; Dr. v. Ehrenwall'sche Klinik; Krankenhaus Maria Hilf Bad Neuenahr-Ahrweiler; Orthopädische Fachklinik Kurköln,,7.1228,50.5291
+118,rp500,"Stolberg (Rhld.), Kupferstadt (DE)",eschweiler,MODELLED (EFAS 500-yr),154,152,1,shelters too far,1,0,,,0,0,,,6.2679,50.7459
+119,rp500,Sainte-Ode (BE),rochefort,MODELLED (EFAS 500-yr),58,56,1,shelters too far,1,0,,,0,0,,,5.5548,50.0172
+120,rp500,Somme-Leuze (BE),rochefort,MODELLED (EFAS 500-yr),11,10,1,shelters too far,1,0,,,0,0,,,5.3216,50.313
+121,rp500,"Brühl, Stadt (DE)",erftstadt,MODELLED (EFAS 500-yr),7,6,1,shelters too far,1,0,,,0,0,,,6.8894,50.8203
+122,rp500,Bilzen (BE),liege,MODELLED (EFAS 500-yr),1,0,1,shelters too far,1,0,,,0,0,,,5.5408,50.871
+123,rp500,"Eschweiler, Stadt (DE)",eschweiler,MODELLED (EFAS 500-yr),3090,3090,0,-,0,0,,,1,7,AGO Senotel Eschweiler,,6.2713,50.8305
+124,rp500,"Düren, Stadt (DE)",eschweiler,MODELLED (EFAS 500-yr),3087,3086,0,-,0,0,,,0,3,,,6.4685,50.7998
+125,rp500,"Mayen, Stadt (DE)",ahr,MODELLED (EFAS 500-yr),2153,2153,0,-,0,0,,,0,5,,,7.2224,50.3228
+126,rp500,Hasselt (BE),liege,MODELLED (EFAS 500-yr),932,932,0,-,0,0,,,0,1,,,5.3023,50.9201
+127,rp500,"Hückelhoven, Stadt (DE)",wassenberg,MODELLED (EFAS 500-yr),813,813,0,-,0,0,,,0,1,,,6.2452,51.0406
+128,rp500,"Linz am Rhein, Stadt (DE)",ahr,MODELLED (EFAS 500-yr),663,663,0,-,0,0,,,0,2,,,7.3094,50.587
+129,rp500,Kinrooi (BE),liege,MODELLED (EFAS 500-yr),421,421,0,-,0,0,,,0,1,,,5.7409,51.1542
+130,rp500,Rheinbreitbach (DE),ahr,MODELLED (EFAS 500-yr),393,393,0,-,0,0,,,0,0,,,7.2483,50.6246
+131,rp500,Weilerswist (DE),euskirchen,MODELLED (EFAS 500-yr),292,292,0,-,0,0,,,0,0,,,6.8511,50.7396
+132,rp500,Ahrbrück (DE),ahr,MODELLED (EFAS 500-yr),177,176,0,-,0,0,,,0,0,,,6.98,50.4782
+133,rp500,"Zülpich, Stadt (DE)",euskirchen,MODELLED (EFAS 500-yr),104,104,0,-,0,0,,,0,0,,,6.6607,50.6932
+134,rp500,Trimbs (DE),ahr,MODELLED (EFAS 500-yr),96,96,0,-,0,0,,,0,0,,,7.3022,50.3372
+135,rp500,Genk (BE),liege,MODELLED (EFAS 500-yr),67,67,0,-,0,0,,,0,0,,,5.4801,50.9649
+136,rp500,"Euskirchen, Stadt (DE)",euskirchen,MODELLED (EFAS 500-yr),42,42,0,-,0,0,,,0,0,,,6.8094,50.6319
+137,rp500,Antweiler (DE),ahr,MODELLED (EFAS 500-yr),40,39,0,-,0,0,,,0,0,,,6.8275,50.4065
+138,rp500,Welling (DE),ahr,MODELLED (EFAS 500-yr),17,17,0,-,0,0,,,0,0,,,7.331,50.3335
+139,rp500,"Erftstadt, Stadt (DE)",euskirchen,MODELLED (EFAS 500-yr),15,15,0,-,0,0,,,0,0,,,6.7785,50.7952
+140,rp500,Diepenbeek (BE),liege,MODELLED (EFAS 500-yr),8,8,0,-,0,0,,,0,0,,,5.4189,50.9132
+141,rp500,Hürtgenwald (DE),eschweiler,MODELLED (EFAS 500-yr),8,8,0,-,0,0,,,0,0,,,6.3703,50.7097
+142,rp500,Dattenberg (DE),ahr,MODELLED (EFAS 500-yr),6,6,0,-,0,0,,,0,0,,,7.3312,50.5645
+143,rp500,"Hürth, Stadt (DE)",erftstadt,MODELLED (EFAS 500-yr),4,4,0,-,0,0,,,0,0,,,6.8501,50.8734
+144,rp500,Nickenich (DE),ahr,MODELLED (EFAS 500-yr),1,1,0,-,0,0,,,0,0,,,7.332,50.4128
+145,rp500,Peer (BE),liege,MODELLED (EFAS 500-yr),1,1,0,-,0,0,,,0,0,,,5.4546,51.1241

@@ -1,5 +1,5 @@
 """Shared loaders for the challenge data (local copy in challenge_data/). Metric CRS: EPSG:3035."""
-import warnings
+import os, warnings
 from pathlib import Path
 warnings.filterwarnings("ignore")
 import numpy as np, pandas as pd, geopandas as gpd, rasterio
@@ -8,7 +8,16 @@ from shapely.validation import make_valid
 
 D = Path("challenge_data")
 M = "EPSG:3035"
-POP = {y: D / f"ghs_pop/GHS_POP_E{y}_GLOBE_R2023A_4326_30ss_V1_0/GHS_POP_E{y}_GLOBE_R2023A_4326_30ss_V1_0.tif" for y in (2020, 2025)}
+GS = "/vsigs/datasets_challenge/working_data"   # the public challenge bucket, read in place when a file is not local
+os.environ.setdefault("GS_NO_SIGN_REQUEST", "YES")
+
+
+def src(rel):
+    """challenge_data/<rel> if downloaded, else the same file read in place from the bucket (rasterio windows only)."""
+    return D / rel if (D / rel).exists() else f"{GS}/{rel}"
+
+
+POP = {y: src(f"ghs_pop/GHS_POP_E{y}_GLOBE_R2023A_4326_30ss_V1_0/GHS_POP_E{y}_GLOBE_R2023A_4326_30ss_V1_0.tif") for y in (2020, 2025)}
 OBAT = {"be": D / "obat_be/GHS_OBAT_GPKG_BEL_E2020_R2024A_V1_0/GHS_OBAT_GPKG_BEL_E2020_R2024A_V1_0.gpkg",
         "nl": D / "obat_nl/GHS_OBAT_GPKG_NLD_E2020_R2024A_V1_0/GHS_OBAT_GPKG_NLD_E2020_R2024A_V1_0.gpkg",
         "de": D / "obat_de/GHS_OBAT_GPKG_DEU_E2020_R2024A_V1_0/GHS_OBAT_GPKG_DEU_E2020_R2024A_V1_0.gpkg"}

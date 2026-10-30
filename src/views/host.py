@@ -3,7 +3,8 @@ register next to the official shelters. Prototype: no name, address or phone is 
 who the host can take, under a reference code. A real roll-out is run by the municipality, which collects contacts
 under the GDPR. Offers are kept on this machine in data/host_offers.csv (gitignored; HOST_OFFERS env overrides it for
 test servers), never in the repository. The crisis manager moves each offer Offered -> Checked -> Guest placed on the
-Town plan (views/evacuate.py); only Offered and Checked beds count as available.
+Town plan (views/evacuate.py); only Offered and Checked beds count as available. Hosts confirm their home is outside
+the EFAS 500-year zone (all three return-period zones); the column keeps its old name outside_2021 for the Town plan.
 
 A tab of the resident page (views/resident.py): render() draws it."""
 import os
@@ -36,7 +37,7 @@ def offers():
 
 
 def available(o=None):
-    """Offers from homes that stayed dry and still have their beds free (Offered or Checked)."""
+    """Offers from homes outside the flood zones and still have their beds free (Offered or Checked)."""
     o = offers() if o is None else o
     return o[o.outside_2021.astype(bool) & o.status.isin(OPEN)] if len(o) else o
 
@@ -68,7 +69,9 @@ def render(muni=None):
                             index=munis.index(muni) if muni in munis else None, placeholder="Pick your town")
         beds = st.number_input("Beds you can offer", 1, 10, 1, key="host_beds")
         fits = st.pills("You can take", list(FITS), format_func=FITS.get, selection_mode="multi", key="host_fits")
-        dry = st.checkbox("My home stayed dry in July 2021 and is on higher ground", key="host_dry")
+        dry = st.checkbox("My home is outside all three flood zones and on higher ground", key="host_dry",
+                          help="Type your address in the first tab: a home not on its list is outside the 10-, "
+                               "100- and 500-year zones.")
         st.caption("No name, address or phone: you get a reference code.",
                    help="Keep the code: the municipality asks for it to match a guest, and you need it to withdraw "
                         "the offer.")
@@ -77,7 +80,7 @@ def render(muni=None):
         if town is None:
             left.warning("Pick your town first.")
         elif not dry:
-            left.warning("Only homes that stayed dry can host. Thank you: you can still help by checking on "
+            left.warning("Only homes outside the flood zones can host. Thank you: you can still help by checking on "
                          "neighbours.")
         else:
             code = secrets.token_hex(3).upper()

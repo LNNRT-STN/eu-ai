@@ -1,5 +1,6 @@
-"""Loads the notebooks/ pipeline outputs (outputs/data/) for the First action page: every mapped area, Ahr included,
-with shelter capacity per town. Run notebooks/pipeline.py, dq_report.py and q4_ranking.py to rebuild them."""
+"""Loads the notebooks/ pipeline outputs: outputs/rp/ (the EFAS 10-, 100-, 500-year zones, variants rp10 / rp100 /
+rp500; notebooks/pipeline.py with FLOOD=rp, then rp_extras.py) for the response pages, and outputs/data/ (July 2021,
+variants main / worst) for the 2021 pages: pass d=D2021."""
 import json
 from pathlib import Path
 
@@ -7,8 +8,10 @@ import geopandas as gpd
 import pandas as pd
 import streamlit as st
 
-DATA = Path(__file__).resolve().parents[1] / "outputs" / "data"
-VARIANT = {"worst": "All satellite passes", "main": "First pass only"}
+DATA = Path(__file__).resolve().parents[1] / "outputs" / "rp"
+D2021 = DATA.parent / "data"
+VARIANT = {"rp10": "10-year flood", "rp100": "100-year flood", "rp500": "500-year flood"}
+VARIANT_2021 = {"worst": "All satellite passes", "main": "First pass only"}
 AREA = {"ahr": "Ahr", "vesdre": "Vesdre", "liege": "Liège area", "rochefort": "Rochefort area", "venlo": "Venlo area",
         "eschweiler": "Eschweiler", "wassenberg": "Wassenberg", "schleiden": "Schleiden area",
         "euskirchen": "Euskirchen area", "erftstadt": "Erftstadt"}
@@ -28,13 +31,14 @@ def town(name):
     return LOCAL.get(n, n)
 
 
-def load():
-    """Cached, but keyed on the newest file time, so rebuilding outputs/data/ refreshes a running app."""
-    return _load(max(f.stat().st_mtime for f in DATA.glob("*.*")))
+def load(d=DATA):
+    """Cached, but keyed on the newest file time, so rebuilding the data refreshes a running app."""
+    return _load(max(f.stat().st_mtime for f in d.glob("*.*")), str(d))
 
 
 @st.cache_data
-def _load(_stamp):
+def _load(_stamp, d):
+    DATA = Path(d)
     head = json.loads((DATA / "q4_headline.json").read_text())
     towns = pd.read_csv(DATA / "app_towns.csv")
     towns["name"] = towns.municipality.map(town)
@@ -45,14 +49,16 @@ def _load(_stamp):
     pt = shel.geometry.representative_point()
     shel = pd.DataFrame(shel.drop(columns="geometry").assign(lon=pt.x, lat=pt.y))
     shel["town"] = shel.muni.map(town)
-    flood = {(a, v): json.loads((DATA / f"flood_{a}_{v}.geojson").read_text()) for a in AREA for v in VARIANT}
+    flood = {(a, v): json.loads((DATA / f"flood_{a}_{v}.geojson").read_text()) for a in AREA
+             for v in (VARIANT if DATA.name == "rp" else VARIANT_2021)}
     summary = pd.read_csv(DATA / "area_summary.csv")
     qc = json.loads((DATA / "qc_and_validation.json").read_text())
     return head, towns, crit, shel, flood, summary, qc
 
 
 def load_moves():
-    """Where people go: receiving hospitals / care homes per flooded site, and the 10 km bus plan per town."""
+    """Where people go: receiving hospitals / care homes per flooded site, and the 10 km bus plan per town and
+    return period (column variant)."""
     return _load_moves(max(f.stat().st_mtime for f in DATA.glob("*.*")))
 
 
@@ -76,10 +82,10 @@ def shelter_address(r):
 
 
 @st.cache_data
-def plan_shelters():
-    """Per town, the shelters its people go to in the 10 km plan, each with its street address
+def plan_shelters(variant="rp100"):
+    """Per town, the shelters its people go to in the 10 km plan for one return period, each with its street address
     (notebooks/shelter_addresses.py)."""
-    bus = load_moves()[1]
+    bus = load_moves()[1].query("variant == @variant")
     p = bus.groupby(["municipality", "shelter", "cat", "s_lon", "s_lat"], as_index=False).people.sum()
     p = p[p.people >= .5]
     ad = pd.read_csv(DATA / "shelter_addresses.csv", dtype=str)
@@ -92,10 +98,11 @@ def plan_shelters():
     return p
 
 
-def destinations(muni, homes):
-    """For each home (lon, lat) of one town: its nearest plan shelter, that shelter's address and the road km."""
+def destinations(muni, homes, variant="rp100"):
+    """For each home (lon, lat) of one town: its nearest plan shelter (dry in that return period's zone), that
+    shelter's address and the road km."""
     import numpy as np
-    p = plan_shelters().query("municipality == @muni").reset_index(drop=True)
+    p = plan_shelters(variant).query("municipality == @muni").reset_index(drop=True)
     if p.empty:
         return homes.assign(go="", go_address="", go_km=np.nan)
     lat0 = np.radians(homes.lat.values)[:, None]

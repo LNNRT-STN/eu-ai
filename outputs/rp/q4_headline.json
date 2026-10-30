@@ -1,0 +1,77 @@
+{
+  "rp10": {
+    "modelled": {
+      "people": 210133,
+      "people_2025": 211036,
+      "sheltered": 155950,
+      "no_shelter": 54181,
+      "too_far": 13009,
+      "full": 41172,
+      "no_shelter_range": [
+        18896,
+        120447
+      ],
+      "coordination_gain": 25026,
+      "bus_covered": 208180,
+      "bus_no_shelter": 1953,
+      "buildings": 108486,
+      "flood_km2": 605.8
+    },
+    "sites": {
+      "vulnerable": 27,
+      "schools": 238,
+      "top_town": "Bad Neuenahr-Ahrweiler, Stadt (DE)",
+      "top_town_count": 4
+    }
+  },
+  "rp100": {
+    "modelled": {
+      "people": 284593,
+      "people_2025": 284110,
+      "sheltered": 181204,
+      "no_shelter": 103390,
+      "too_far": 26635,
+      "full": 76755,
+      "no_shelter_range": [
+        33145,
+        183682
+      ],
+      "coordination_gain": 32245,
+      "bus_covered": 280363,
+      "bus_no_shelter": 4230,
+      "buildings": 156067,
+      "flood_km2": 731.1
+    },
+    "sites": {
+      "vulnerable": 34,
+      "schools": 297,
+      "top_town": "Luik (BE)",
+      "top_town_count": 4
+    }
+  },
+  "rp500": {
+    "modelled": {
+      "people": 325945,
+      "people_2025": 324248,
+      "sheltered": 188943,
+      "no_shelter": 137003,
+      "too_far": 35952,
+      "full": 101051,
+      "no_shelter_range": [
+        50242,
+        221322
+      ],
+      "coordination_gain": 32714,
+      "bus_covered": 320669,
+      "bus_no_shelter": 5276,
+      "buildings": 184915,
+      "flood_km2": 793.1
+    },
+    "sites": {
+      "vulnerable": 36,
+      "schools": 324,
+      "top_town": "Maastricht (NL)",
+      "top_town_count": 4
+    }
+  }
+}

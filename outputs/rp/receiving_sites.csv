@@ -1,0 +1,109 @@
+﻿from_name,from_town,from_area,type,to_name,km,lon,lat
+Ahrschleife Seniorenzentrum,Altenahr (DE),ahr,care home,Seniorenzentrum St. Anna,8.8,7.10297,50.53665
+Ahrschleife Seniorenzentrum,Altenahr (DE),ahr,care home,Unnamed care home,8.8,7.09871,50.54313
+Ahrschleife Seniorenzentrum,Altenahr (DE),ahr,care home,Seniorenzentrum St. Martin,9.0,7.10098,50.54532
+Augustinum Seniorenresidenz Bad Neuenahr,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,care home,Villa Sibilla,1.4,7.13281,50.54164
+Augustinum Seniorenresidenz Bad Neuenahr,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,care home,Seniorenzentrum St. Anna,3.6,7.10297,50.53665
+Augustinum Seniorenresidenz Bad Neuenahr,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,care home,Seniorenzentrum St. Martin,3.7,7.10098,50.54532
+Haus Kleine Perle am Rhein,"Bad Breisig, Stadt (DE)",ahr,care home,Alloheim Senioren-Residenz,1.9,7.32875,50.50724
+Haus Kleine Perle am Rhein,"Bad Breisig, Stadt (DE)",ahr,care home,Rheinwaldheim Arienheller,2.3,7.33363,50.50982
+Haus Kleine Perle am Rhein,"Bad Breisig, Stadt (DE)",ahr,care home,Johanniter-Haus Sinzig,5.4,7.24989,50.54287
+Seniorenresidenz Curanum Remagen,"Remagen, Stadt (DE)",ahr,care home,"Betreute Wohngemeinschaft, Bad Bodendorf",2.4,7.22219,50.55811
+Seniorenresidenz Curanum Remagen,"Remagen, Stadt (DE)",ahr,care home,Senioren-Residenz Sankt Antonius,3.4,7.28539,50.56686
+Seniorenresidenz Curanum Remagen,"Remagen, Stadt (DE)",ahr,care home,Johanniter-Haus Sinzig,3.8,7.24989,50.54287
+Dr. v. Ehrenwall'sche Klinik,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,hospital,Unnamed hospital,2.5,7.1265,50.54026
+Dr. v. Ehrenwall'sche Klinik,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,hospital,Krankenhaus Maria Hilf Bad Neuenahr-Ahrweiler,2.5,7.1272,50.54067
+Dr. v. Ehrenwall'sche Klinik,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,hospital,Unnamed hospital,2.6,7.1272,50.54105
+Krankenhaus Maria Hilf Bad Neuenahr-Ahrweiler,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,hospital,Median Klinik Tönisstein,0.4,7.13241,50.54066
+Krankenhaus Maria Hilf Bad Neuenahr-Ahrweiler,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,hospital,Venen-Clinic,0.4,7.13274,50.5404
+Krankenhaus Maria Hilf Bad Neuenahr-Ahrweiler,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,hospital,Klinik Niederrhein,0.5,7.13404,50.5399
+Orthopädische Fachklinik Kurköln,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,hospital,DRK Fachklinik Bad Neuenahr,0.4,7.13823,50.54362
+Orthopädische Fachklinik Kurköln,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,hospital,Klinik Niederrhein,0.8,7.13404,50.5399
+Orthopädische Fachklinik Kurköln,"Bad Neuenahr-Ahrweiler, Stadt (DE)",ahr,hospital,Venen-Clinic,0.8,7.13274,50.5404
+Le Domaine du Château,Flémalle (BE),liege,care home,Seigneurie du Val Saint-Lambert,1.3,5.48789,50.59582
+Le Domaine du Château,Flémalle (BE),liege,care home,SRA Mon Logis,2.5,5.50888,50.62253
+Le Domaine du Château,Flémalle (BE),liege,care home,Les Acacias,3.0,5.44995,50.62419
+Résidence Ange-Raymond Gilles,Seraing (BE),liege,care home,SRA Mon Logis,0.9,5.50888,50.62253
+Résidence Ange-Raymond Gilles,Seraing (BE),liege,care home,Seigneurie du Val Saint-Lambert,2.4,5.48789,50.59582
+Résidence Ange-Raymond Gilles,Seraing (BE),liege,care home,Résidence Églantine,3.4,5.5049,50.58452
+Le Cottage Rose,Luik (BE),liege,care home,Astrée résidence du fort,2.6,5.58976,50.59634
+Le Cottage Rose,Luik (BE),liege,care home,Le Centenaire,3.1,5.54728,50.58425
+Le Cottage Rose,Luik (BE),liege,care home,Les Mirwettes,3.2,5.54756,50.58319
+Maison de Repos et de Soins Un Air de Famille du Balloir,Luik (BE),liege,care home,Les Remparts,2.0,5.56455,50.64174
+Maison de Repos et de Soins Un Air de Famille du Balloir,Luik (BE),liege,care home,Le Clos sur la Fontaine,2.0,5.56426,50.64216
+Maison de Repos et de Soins Un Air de Famille du Balloir,Luik (BE),liege,care home,La Reverdie II,4.0,5.57977,50.67244
+Résidence CHC Hermalle,Wezet (BE),liege,care home,Maison de repos les Bouleaux,2.0,5.66085,50.72238
+Résidence CHC Hermalle,Wezet (BE),liege,care home,Le Doux Biquet,2.1,5.64938,50.70894
+Résidence CHC Hermalle,Wezet (BE),liege,care home,L'Ancre,2.4,5.64459,50.70951
+De Zeven Bronnen,Maastricht (NL),liege,care home,Lenculenhof,3.3,5.68445,50.84688
+De Zeven Bronnen,Maastricht (NL),liege,care home,Residentie Kasteel Zuyderhoudt,4.6,5.79033,50.86693
+De Zeven Bronnen,Maastricht (NL),liege,care home,de Mins,5.3,5.64993,50.8618
+Woonzorgcentrum Heyvis,Maasmechelen (BE),liege,care home,Campus Fabor,3.8,5.72299,51.02002
+Woonzorgcentrum Heyvis,Maasmechelen (BE),liege,care home,WZC Lindenheuvel,7.2,5.81623,50.98389
+Woonzorgcentrum Heyvis,Maasmechelen (BE),liege,care home,Woonzorgcentrum Franciscus,7.7,5.79155,50.93766
+'t Veer,Maasmechelen (BE),liege,care home,Campus Fabor,3.5,5.72299,51.02002
+'t Veer,Maasmechelen (BE),liege,care home,WZC Lindenheuvel,7.1,5.81623,50.98389
+'t Veer,Maasmechelen (BE),liege,care home,Woonzorgcentrum Franciscus,7.8,5.79155,50.93766
+Home Franchimontois,Theux (BE),liege,care home,Sainte Joséphine Asbl,0.4,5.81256,50.53475
+Home Franchimontois,Theux (BE),liege,care home,Résidence CHC Heusy,5.0,5.86381,50.56315
+Home Franchimontois,Theux (BE),liege,care home,Les Heures Claires,5.1,5.85022,50.49118
+Sainte Joséphine Asbl,Theux (BE),liege,care home,Résidence CHC Heusy,4.9,5.86381,50.56315
+Sainte Joséphine Asbl,Theux (BE),liege,care home,Les Heures Claires,5.5,5.85022,50.49118
+Sainte Joséphine Asbl,Theux (BE),liege,care home,Résidence CHC Banneux Fawes,5.6,5.73324,50.53421
+Maasveld,Maastricht (NL),liege,care home,Lenculenhof,3.3,5.68445,50.84688
+Maasveld,Maastricht (NL),liege,care home,de Mins,6.1,5.64993,50.8618
+Maasveld,Maastricht (NL),liege,care home,Unnamed care home,6.3,5.61817,50.82897
+(no name in OSM),Maastricht (NL),liege,care home,Lenculenhof,2.8,5.68445,50.84688
+(no name in OSM),Maastricht (NL),liege,care home,de Mins,5.7,5.64993,50.8618
+(no name in OSM),Maastricht (NL),liege,care home,Unnamed care home,6.4,5.61817,50.82897
+Aldenborgh,Roermond (NL),liege,care home,Villa Casimir,3.7,5.99316,51.19807
+Aldenborgh,Roermond (NL),liege,care home,Huize Bethanië,4.3,5.92823,51.20782
+Aldenborgh,Roermond (NL),liege,care home,Sint Anna,4.6,5.89235,51.17661
+Policliniques Universitaires d'Ougrée,Seraing (BE),liege,hospital,Hôpital psychiatrique Le Petit Bourgogne,1.5,5.55791,50.61439
+Policliniques Universitaires d'Ougrée,Seraing (BE),liege,hospital,Unnamed hospital,2.9,5.55607,50.63021
+Policliniques Universitaires d'Ougrée,Seraing (BE),liege,hospital,Citadelle  Site Laveu,2.9,5.55602,50.6304
+Hôpital le Valdor,Luik (BE),liege,hospital,Hôpital Agora ISoSL,2.0,5.57084,50.64812
+Hôpital le Valdor,Luik (BE),liege,hospital,ISoSL Services Les Pléiades,2.1,5.5699,50.64785
+Hôpital le Valdor,Luik (BE),liege,hospital,Hôpital Pèrî,2.2,5.5705,50.64924
+Hôpital de jour La Clé,Luik (BE),liege,hospital,Hôpital de la Citadelle (CHR),1.3,5.57813,50.65224
+Hôpital de jour La Clé,Luik (BE),liege,hospital,Urgences,1.3,5.57812,50.65287
+Hôpital de jour La Clé,Luik (BE),liege,hospital,Hôpital de la Citadelle,1.3,5.57696,50.65197
+Clinique CHC Hermalle,Wezet (BE),liege,hospital,Citadelle Hôpital - Site administratif,6.1,5.61829,50.69978
+Clinique CHC Hermalle,Wezet (BE),liege,hospital,Unnamed hospital,6.2,5.63658,50.68623
+Clinique CHC Hermalle,Wezet (BE),liege,hospital,Unnamed hospital,7.4,5.63339,50.67478
+Maastricht UMC+,Maastricht (NL),liege,hospital,Annadal Kliniek,3.5,5.66883,50.84792
+Maastricht UMC+,Maastricht (NL),liege,hospital,Medish Centrum Maastricht Annadal,3.5,5.66874,50.84826
+Maastricht UMC+,Maastricht (NL),liege,hospital,ZOL Ziekenhuis Oost Limburg Campus Sint-Barbara,10.3,5.62815,50.90958
+Ziekenhuis Maas en Kempen,Maaseik (BE),liege,hospital,Zuyderland,14.1,5.84029,50.98385
+Ziekenhuis Maas en Kempen,Maaseik (BE),liege,hospital,Unnamed hospital,14.2,5.84481,50.98391
+Ziekenhuis Maas en Kempen,Maaseik (BE),liege,hospital,Sint Jans Gasthuis,17.4,5.71325,51.25465
+Résidence Préhyr,Rochefort (BE),rochefort,care home,La Reine des Prés,9.0,5.33025,50.2084
+Résidence Préhyr,Rochefort (BE),rochefort,care home,La Douce Quietude,9.6,5.29954,50.23577
+Résidence Préhyr,Rochefort (BE),rochefort,care home,Maison de retraite Libert,11.5,5.34531,50.23285
+MRS Centre Sainte Barbe La Villette,Andenne (BE),rochefort,care home,La Roseraie,6.8,5.07532,50.43308
+MRS Centre Sainte Barbe La Villette,Andenne (BE),rochefort,care home,Les Avelines,10.4,5.21277,50.53984
+MRS Centre Sainte Barbe La Villette,Andenne (BE),rochefort,care home,Résidence des Sources,10.5,4.94526,50.52492
+L'Orange,Durbuy (BE),rochefort,care home,Résidence Véronique,8.4,5.34293,50.29005
+L'Orange,Durbuy (BE),rochefort,care home,Maison de retraite Libert,13.5,5.34531,50.23285
+L'Orange,Durbuy (BE),rochefort,care home,La Douce Quietude,14.9,5.29954,50.23577
+VieCuri,Venlo (NL),venlo,hospital,Unnamed hospital,3.3,6.1903,51.33912
+VieCuri,Venlo (NL),venlo,hospital,Unnamed hospital,3.4,6.19277,51.33867
+VieCuri,Venlo (NL),venlo,hospital,Laurentius Ziekenhuis,21.3,6.00048,51.19175
+AGO Senotel Eschweiler,"Eschweiler, Stadt (DE)",eschweiler,care home,Senioren- und Betreuungszentrum der StädteRegion Aachen,0.8,6.25588,50.81579
+AGO Senotel Eschweiler,"Eschweiler, Stadt (DE)",eschweiler,care home,Pro Seniore Residenz,0.9,6.25357,50.81678
+AGO Senotel Eschweiler,"Eschweiler, Stadt (DE)",eschweiler,care home,AGO Seniorenzentrum Eschweiler,1.3,6.26006,50.8089
+Altenzentrum St. Hildegard,"Jülich, Stadt (DE)",eschweiler,care home,Seniorenheim St. Bonifatius,0.6,6.36747,50.92037
+Altenzentrum St. Hildegard,"Jülich, Stadt (DE)",eschweiler,care home,Wohnanlage Schirmer Quartier,1.3,6.35661,50.92547
+Altenzentrum St. Hildegard,"Jülich, Stadt (DE)",eschweiler,care home,Gut Köttenich,5.6,6.28939,50.89864
+Liebfrauenhof Schleiden GmbH,"Schleiden, Stadt (DE)",schleiden,care home,Lebenshilfe HPZ,1.2,6.4873,50.53276
+Liebfrauenhof Schleiden GmbH,"Schleiden, Stadt (DE)",schleiden,care home,Wohngemeinschaft Ad vitam,5.9,6.55297,50.53984
+Liebfrauenhof Schleiden GmbH,"Schleiden, Stadt (DE)",schleiden,care home,EvA Pflegewohnhaus,6.0,6.55402,50.53979
+Lebenshilfe HPZ,"Schleiden, Stadt (DE)",schleiden,care home,Lebenshilfe HPZ,4.9,6.4873,50.53276
+Lebenshilfe HPZ,"Schleiden, Stadt (DE)",schleiden,care home,Pflegewohnhaus Hergarten,5.3,6.5343,50.61614
+Lebenshilfe HPZ,"Schleiden, Stadt (DE)",schleiden,care home,Liebfrauenhof Schleiden GmbH,5.5,6.47191,50.52882
+Franziskus - Haus,"Schleiden, Stadt (DE)",schleiden,hospital,Krankenhaus Schleiden,0.9,6.4871,50.53335
+Franziskus - Haus,"Schleiden, Stadt (DE)",schleiden,hospital,Unnamed hospital,8.6,6.57271,50.48255
+Franziskus - Haus,"Schleiden, Stadt (DE)",schleiden,hospital,Unnamed hospital,14.2,6.64986,50.5927
+Marien-Hospital,"Erftstadt, Stadt (DE)",erftstadt,hospital,TELOS Fachklinik Liblar,1.0,6.80884,50.81649
+Marien-Hospital,"Erftstadt, Stadt (DE)",erftstadt,hospital,Haus Zwei Höfe,6.0,6.72547,50.79983
+Marien-Hospital,"Erftstadt, Stadt (DE)",erftstadt,hospital,Oberberg Somnia Fachklinik Köln Herrig,6.0,6.72512,50.79948

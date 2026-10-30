@@ -1,6 +1,5 @@
-"""Crisis room, Rivers tab. Two parts, kept apart on purpose:
-  1 the live GloFAS ensemble outlook at the river points (real, today), rated on return periods, with each curve
-  2 the backtest: the July 2021 flows on the drill dates, rated on thresholds fitted before 2021 (a replay)."""
+"""Crisis room, Rivers tab: the live GloFAS ensemble outlook at the river points (real, today), rated on return
+periods, with each curve. Context for the scenario switch: it does not drive the plan."""
 import altair as alt
 import pandas as pd
 import streamlit as st
@@ -11,17 +10,6 @@ import live
 
 ORDER = ["Lesse · Rochefort", "Ourthe · Tabreux", "Vesdre · Verviers", "Vesdre · Chaudfontaine", "Meuse · Liège",
          "Meuse · Maastricht", "Meuse · Roermond", "Meuse · Venlo", "Inde · Eschweiler", "Rur · Wassenberg"]
-DAY0 = pd.Timestamp("2021-07-12")  # the replay's first day: rivers still normal, the rain has not fallen yet
-
-
-def levels():
-    """Per point and day of the 2021 replay, on thresholds fitted on the record up to forecast.BACKTEST_YEAR (what
-    was known before the flood): (flow, return period, level 0 normal · 1 above 2-year · 2 above 5-year · 3 above
-    20-year flood)."""
-    flow, thr = core.load_replay(), forecast.thresholds(forecast.BACKTEST_YEAR)
-    flow = flow[[g for g in flow if g in thr]]
-    return (flow, pd.DataFrame({g: forecast.period_of(thr[g]["fit"], flow[g].values) for g in flow}, index=flow.index),
-            pd.DataFrame({g: forecast.level(flow[g].values, thr[g]) for g in flow}, index=flow.index))
 
 
 def short(T):
@@ -38,7 +26,7 @@ def outlook():
                       ". Each river point is rated against its own 2-, 5-, 20- and 100-year floods from the same "
                       f"model's record. A level counts when {forecast.PROB:.0%} of the runs reach it. Refresh it "
                       "from the sidebar.")
-    st.caption("Real and current: today's forecast, not the replay. A heads-up from a model, not an official warning.")
+    st.caption("Real and current: today's forecast. A heads-up from a model, not an official warning.")
     core.banner(color, head, detail, note=False)
     if gauges is None:
         return
@@ -101,54 +89,10 @@ def outlook():
                                                             "measured more.")})
 
 
-def peaks():
-    """The 2021 river peaks on the drill dates; the black frame follows the drill clock (briefing's step control,
-    folded into the scenario player)."""
-    flow, rp, lvl = levels()
-    c = live.clock()
-    day = min(max(c["t"].normalize(), DAY0), DAY0 + pd.Timedelta(days=5)) if c["mode"] == "replay" else None
-    heat = pd.DataFrame([(t, g, short(rp.loc[t, g]), forecast.rp_text(rp.loc[t, g]), *forecast.LEVELS[lvl.loc[t, g]])
-                         for t in flow.index for g in ORDER], columns=["day", "gauge", "rp", "rp_long", "status", "fill"])
-    heat["ink"] = heat.fill.map(core.ink)
-    heat = heat[(heat.day >= DAY0) & (heat.day <= DAY0 + pd.Timedelta(days=5))]
-    heat["d"] = heat.day.map(live.drill).dt.strftime("%a %d")  # plain labels: a year-less time unit prints 2012 weekdays
-    x = alt.X("d:O", sort=list(heat.d.unique()), title=None, axis=alt.Axis(labelAngle=0, orient="top"))
-    y = alt.Y("gauge:N", sort=ORDER, title=None, axis=alt.Axis(labelLimit=220))
-    base = alt.Chart(heat).encode(x=x, y=y)
-    layers = [
-        base.mark_rect(stroke="#fff", strokeWidth=2, cornerRadius=4).encode(
-            color=alt.Color("status:N", scale=alt.Scale(domain=[l for l, _ in forecast.LEVELS],
-                                                        range=[c for _, c in forecast.LEVELS]), legend=None),
-            tooltip=[alt.Tooltip("gauge:N", title="River"),
-                     alt.Tooltip("day:T", format="%d %b %Y", title="July 2021 flow of"),
-                     alt.Tooltip("status:N"), alt.Tooltip("rp_long:N", title="Return period, record to 2020")]),
-        base.mark_text(fontSize=11).encode(text="rp:N", color=alt.Color("ink:N", scale=None))]
-    if day is not None:
-        layers.append(alt.Chart(pd.DataFrame({"d": [f"{live.drill(day):%a %d}"]})).mark_rect(
-            fill=None, stroke="#1d1d1f", strokeWidth=2).encode(x=alt.X("d:O", sort=list(heat.d.unique()))))
-    st.altair_chart(alt.layer(*layers).properties(
-        height=330, background="#ffffff", padding={"left": 12, "right": 12, "top": 8, "bottom": 8})
-                    .configure_view(stroke=None)
-                    .configure_axis(domain=False, ticks=False, labelColor="#1d1d1f", labelFontSize=12), width="stretch")
-    core.legend("".join(core.swatch(c, lab) for lab, c in forecast.LEVELS)
-                + ("<span><i style='border:2px solid #1d1d1f;background:none'></i>replay clock</span>" if day is not None
-                   else ""))
-
-
 def render():
     outlook()
-    st.divider()
-    flow = core.load_replay()
-    lag = (flow["Meuse · Venlo"].idxmax() - flow["Vesdre · Chaudfontaine"].idxmax()).days
-    st.subheader(":orange[:material/timeline:] Backtest: the 2021 flows on the same rule",
-                 help="Daily river flow from the GloFAS model for 12–17 July 2021, as the return period it had on "
-                      f"the record up to {forecast.BACKTEST_YEAR} (what was known before the flood), on the replay "
-                      "dates. Top to bottom follows the water: the Ardennes tributaries peak first. Covers the Meuse "
-                      "basin only, not the Ahr or Erft.")
-    st.caption(f"Replay of the 2021 forecast: the July 2021 flows, dated from {live.drill(DAY0):%a %-d %b}. Dutch Limburg "
-               f"peaks about {lag} day{'s' if lag != 1 else ''} after the Vesdre: that gap is the downstream lead time.")
-    st.fragment(peaks, run_every=6 if live.clock()["playing"] else None)()
-
+    st.caption("The plan does not follow this outlook: switch on the return period to plan for in the sidebar. A "
+               "point heading for its 100-year flood is a reason to switch on the 100-year scenario.")
     st.space("small")
     with st.expander("Who issues the real warnings", icon=":material/campaign:"):
         core.group([
@@ -172,7 +116,4 @@ def render():
             f"{forecast.HORIZON} days is rated: above the 2-year flood → watch, 5-year → warn, 20-year → evacuate. A "
             f"level counts when at least {forecast.PROB:.0%} of the runs reach it (the EFAS notification rule). "
             "The wettest run is shown beside it.\n"
-            "- **Backtest:** GloFAS reanalysis, daily, computed after the event, rated on thresholds fitted on "
-            f"1997–{forecast.BACKTEST_YEAR} only. It tests the rule, not the forecasts available on the day. The "
-            "black frame is the day the replay clock stands on.\n"
-            f"- **Source:** {core.AS_OF['replay']}.")
+            "- **Source:** Open-Meteo GloFAS v4 (model, not a gauge reading).")

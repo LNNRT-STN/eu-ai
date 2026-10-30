@@ -1,13 +1,14 @@
-"""Resident: type your address and see at once whether to leave, the exact place to go and the way there; then tell
-the fire brigade "I am safe" or "I need help" in one tap, for that same address; or offer a bed. Two tabs, the only
-page the Resident role sees (no sidebar Town picker: the town comes from the address typed in the first tab, shared
-through st.session_state.res_home).
-Homes in the 2021 water: outputs/data/addresses.parquet (OSM addresses matched to GHS-OBAT buildings). Where to go:
-the town's 10 km shelter plan (bus_plan.csv), nearest shelter that takes people from this town, with its OSM street
-address (anna.destinations, notebooks/shelter_addresses.py); walking or bus by
-straight-line distance × 1.3 (road / straight ratio measured 1.2-1.4 in notebooks/evac_sim.py). Spare beds offered
-by residents: data/host_offers.csv. Nothing typed in the address box is stored; a check-in stores only the address,
-where people are and how many (src/live.py)."""
+"""Resident: type your address and see at once whether your home is in a flood zone, whether to leave now and the
+exact place to go; then tell the fire brigade "I am safe" or "I need help" in one tap, for that same address; or offer
+a bed. Two tabs, the only page the Resident role sees (no sidebar Town picker: the town comes from the address typed in
+the first tab, shared through st.session_state.res_home).
+Homes in a flood zone: outputs/rp/addresses.parquet (OSM addresses matched to GHS-OBAT buildings inside the EFAS
+500-year zone, flags in_rp10 / in_rp100 / in_rp500). The order follows the scenario the crisis room switched on
+(live.plan(): the rarest return period on). Where to go: the town's 10 km shelter plan for that return period
+(bus_plan.csv), nearest shelter dry in that zone that takes people from this town, with its OSM street address
+(anna.destinations, notebooks/shelter_addresses.py); walking or bus by straight-line distance × 1.3 (road / straight
+ratio measured 1.2-1.4 in notebooks/evac_sim.py). Spare beds offered by residents: data/host_offers.csv. Nothing typed
+in the address box is stored; a check-in stores only the address, where people are and how many (src/live.py)."""
 import math
 import re
 
@@ -18,9 +19,10 @@ import streamlit as st
 import anna
 import core
 import live
-from views import checkin, host
+from views import host
 
 WALK_KMH, BUS_KMH, ROAD = 4, 30, 1.3
+CHANCE = {10: "10 %", 100: "1 %", 500: "0.2 %"}  # chance in any year of a flood this size or larger
 
 
 @st.cache_data
@@ -30,26 +32,28 @@ def homes():
     a["town"] = a.municipality.map(anna.town)
     a["single"] = (a.storeys == 1) & (a.height_m != 2.5)
     return (a.groupby(["municipality", "town", "street", "housenumber"], as_index=False)
-            .agg(lon=("lon", "mean"), lat=("lat", "mean"), single=("single", "any"), area=("area", "first")))
+            .agg(lon=("lon", "mean"), lat=("lat", "mean"), single=("single", "any"), area=("area", "first"),
+                 **{f"r{r}": (f"in_rp{r}", "any") for r in live.RPS}))
 
 
 @st.cache_data
 def addresses():
-    """'Street 12, Town' for every home in the water, for the address box's autocomplete."""
+    """'Street 12, Town' for every home in a flood zone, for the address box's autocomplete."""
     H = homes()
     return sorted(H.street + " " + H.housenumber + ", " + H.town)
 
 
-EXAMPLES = {  # demo addresses for the address box, one per kind of answer
-    "Ahrstraße 28, Ahrbrück": "Ahr, in the 2021 water",
-    "Ahruferstraße 29, Bad Neuenahr-Ahrweiler": "Ahr, single storey",
-    "Avenue Albert Ier 3, Pepinster": "Vesdre, modelled",
-    "Quai Saint-Paul de Sinçay 126, Liège": "Liège",
-    "Aachener Straße 10, Schleiden": "Schleiden",
-    "An der Schwarzau 11, Erftstadt": "Erftstadt",
-    "Kirchstraße 3, Altenahr": "dry in 2021",
+EXAMPLES = {  # demo addresses for the address box, one per kind of answer (checked in outputs/rp/addresses.parquet)
+    "Ahrstraße 28, Ahrbrück": "Ahr, 10-year zone",
+    "Ahruferstraße 29, Bad Neuenahr-Ahrweiler": "Ahr, 10-year zone, single storey",
+    "Avenue Albert Ier 3, Pepinster": "Vesdre, 10-year zone",
+    "Pützgasse 1, Bad Neuenahr-Ahrweiler": "Ahr, from the 100-year flood",
+    "Zülpicher Straße 20, Erftstadt": "Erft, from the 100-year flood",
+    "Quai Saint-Paul de Sinçay 126, Liège": "Meuse, only the 500-year flood",
+    "Flère 11, Pepinster": "Vesdre, only the 500-year flood",
+    "Kirchstraße 3, Altenahr": "outside all three",
 }
-KIND = {"civic":"civic building", "school": "school", "sports hall": "sports hall"}
+KIND = {"civic": "civic building", "school": "school", "sports hall": "sports hall"}
 LEAVE, BED = ("Do I need to leave?", "Offer a bed")
 
 
@@ -57,27 +61,38 @@ def norm(x):
     return x.casefold().replace("ß", "ss").strip()
 
 
-def method(modelled=False):
+def zones(h):
+    """The three return periods in plain language, with whether this home is in each (h: a homes() row)."""
+    wet = f"<b style='color:{core.EVACUATE}'>In the water</b>"
+    core.group([(f"<b>{r}-year flood</b>", f"{CHANCE[r]} chance in any year", wet if h[f"r{r}"] else "Dry")
+                for r in live.RPS], "Your home in each flood",
+                "A 100-year flood is not one that comes once a century: it has a 1 % chance in any year, and can come "
+                "twice in a row.")
+
+
+def method():
     with st.expander("How this is computed", icon=":material/info:"):
         st.markdown(
-            "- **Homes in the water.** Homes inside the July 2021 satellite flood map" + (
-                " (here the EFAS 500-year model, as the satellite missed the Vesdre)" if modelled else
-                " (and the modelled Vesdre zone)") + " that have an OpenStreetMap address. The satellite missed water "
-            "in narrow valleys, so a home not on the list is not guaranteed safe.\n"
-            f"- **Where to go.** The nearest candidate shelter that takes people from your town in the 10 km shelter "
-            "plan: a school, sports hall or civic building that stayed dry in 2021 and in the 100-year model. Not an "
-            "official shelter: follow the municipality's instructions.\n"
+            "- **Flood zones.** EFAS flood hazard maps (JRC): where the water is deeper than 10 cm in a 10-, 100- and "
+            "500-year river flood. A model of every river at that return period at once, not a forecast. It has no "
+            "dikes or flood walls, and leaves out streams with a catchment under 500 km², so a home not on the list is "
+            "not guaranteed safe.\n"
+            "- **Homes.** Buildings in the 500-year zone (GHS-OBAT) that have an OpenStreetMap address.\n"
+            "- **Leave now.** Only when the crisis room has switched on a flood whose zone reaches your home.\n"
+            "- **Where to go.** The nearest candidate shelter that takes people from your town in the 10 km shelter "
+            "plan for that flood: a school, sports hall or civic building outside its zone. Not an official shelter: "
+            "follow the municipality's instructions.\n"
             f"- **How long.** Road distance taken as straight line × {ROAD}; on foot up to 1.5 km at {WALK_KMH} km/h, "
             f"further by bus or car at {BUS_KMH} km/h. A minimum.\n"
             "- **Upper floor.** Single-storey homes from the GHS-OBAT building heights.\n"
-            "- **Sources.** Addresses: OpenStreetMap (ODbL). Buildings: GHS-OBAT. Map: © CARTO, © OpenStreetMap "
-            "contributors.")
+            "- **Sources.** Flood zones: EFAS (Copernicus). Addresses: OpenStreetMap (ODbL). Buildings: GHS-OBAT. "
+            "Map: © CARTO, © OpenStreetMap contributors.")
 
 
 def lookup():
     """Address → verdict, then where to go. Sets st.session_state.res_home for the other tabs."""
     H = homes()
-    # one box that autocompletes: demo examples first, then every home in the water; any other address can be typed
+    # one box that autocompletes: demo examples first, then every home in a zone; any other address can be typed
     q = st.selectbox("Your address", list(EXAMPLES) + [a for a in addresses() if a not in EXAMPLES], index=None,
                      format_func=lambda a: f"{a}  ·  {EXAMPLES[a]}" if a in EXAMPLES else a,
                      accept_new_options=True, key="res_q", placeholder="Start typing, or pick an example",
@@ -92,16 +107,18 @@ def lookup():
     hit = H[H.street.map(norm).str.contains(norm(q_street), regex=False)] if len(q_street) >= 3 else H.iloc[0:0]
     if q_town and hit.town.map(norm).str.contains(norm(q_town), regex=False).any():
         hit = hit[hit.town.map(norm).str.contains(norm(q_town), regex=False)]
+    elif q_town and len(q_town) >= 3 and H.town.map(norm).str.contains(norm(q_town), regex=False).any():
+        hit = hit.iloc[0:0]  # a known town without this street: not another town's street of the same name
     streets = (hit.drop_duplicates(["street", "town"]).assign(k=lambda d: d.street + ", " + d.town)
                .sort_values("k").k.tolist()[:30])
     st.session_state.res_home = None
 
     if len(q_street) >= 3 and not streets:
-        st.success("**Your street was not in the 2021 water.** You are most likely outside it. Stay alert to official "
+        st.success("**Your street is outside all three flood zones** (10-, 100- and 500-year). Stay alert to official "
                    "warnings.", icon=":material/check_circle:")
-        st.markdown(f":green[:material/bed:] If your home stayed dry, you can offer a bed to a neighbour who has to "
-                    f"leave: see **{BED}** above.")
-        st.caption("Not on the list does not guarantee safety: the satellite missed water in narrow valleys.")
+        st.markdown(f":green[:material/bed:] You can offer a bed to a neighbour who has to leave: see **{BED}** above.")
+        st.caption("Not on the list does not guarantee safety: the flood model leaves out small streams and heavy rain "
+                   "running off slopes.")
         method()
         return
     if not streets:
@@ -121,35 +138,42 @@ def lookup():
     num = c2.selectbox("Number", numbers, index=known[0] if known else (None if typed_num else 0),
                        placeholder="Number", label_visibility="collapsed")
     if num is None:
-        st.info(f"Number {typed_num} is not among the homes in the 2021 water on {street}. Pick your number if it is "
-                "listed; if not, your home was most likely outside the water. Follow official warnings.",
+        st.info(f"Number {typed_num} is not among the homes in a flood zone on {street}. Pick your number if it is "
+                "listed; if not, your home is most likely outside all three zones. Follow official warnings.",
                 icon=":material/info:")
         return
     h = nums[nums.housenumber == num].iloc[0]
     st.session_state.res_home = dict(municipality=h.municipality, street=street, number=num)
-    modelled = h.area in anna.MODELLED
 
-    go = anna.destinations(h.municipality, pd.DataFrame({"lon": [h.lon], "lat": [h.lat]})).iloc[0]
-    S = live.towns_status().sort_values("level").drop_duplicates("municipality", keep="last")  # worst status
-    status = S.set_index("municipality").status.get(h.municipality, "none")
+    # the rarest flood switched on decides the order; otherwise the most frequent flood that reaches the home
+    p = live.plan()
+    order = p is not None and bool(h[f"r{p}"])
+    zone = next(r for r in live.RPS if h[f"r{r}"])
+    v = live.variant() if order else f"rp{zone}"
+    go = anna.destinations(h.municipality, pd.DataFrame({"lon": [h.lon], "lat": [h.lat]}), v).iloc[0]
     has_go = bool(go.go)
     walk = has_go and go.go_km <= 1.5
     mins = go.go_km / (WALK_KMH if walk else BUS_KMH) * 60 if has_go else None
     how = (f"{'On foot' if walk else 'By bus or car'}, about {mins:.0f} min ({go.go_km:.1f} km)" if has_go else "")
     dest = f"{go.go}" + (f", {go.go_address}" if has_go and go.go_address else "")
-    head, color = {
-        "evacuate": (f"Leave now. Go to {go.go}." if has_go else "Leave now.", core.EVACUATE),
-        "warn": (f"Get ready to leave. Your shelter: {go.go}." if has_go else "Get ready to leave.", "#c93400"),
-        "watch": ("The river is rising. No order yet.", "#b38600"),
-    }.get(status, ("No alert now.", "#4f6580"))
-    detail = (f"{street} {num}, {town} was in the 2021 water{' (modelled)' if modelled else ''}. "
-              + ("" if status in ("evacuate", "warn") or not has_go else f"If the order comes, go to {go.go}. ")
-              + ("Your home has no upper floor: leave early." if h.single else ""))
-    core.banner(color, head, detail, note=False)
-    k = live.clock()
-    st.caption((f"Replay of the 2021 forecast, {live.drill(k['t']):%a %-d %b, %H:%M}" if k["mode"] == "replay"
-                else f"Live forecast, {k['t']:%a %-d %b, %H:%M}") + ". Follow the municipality's instructions.")
-    safe_now(h.municipality, f"{street} {num}", dest if has_go else "")
+    door = f"{street} {num}, {town}"
+    where = {10: "inside the 10-year flood zone", 100: "inside the 100-year flood zone, not the 10-year",
+             500: "only inside the 500-year flood zone"}[zone]
+    upstairs = " Your home has no upper floor: leave early." if h.single else ""
+    if order:
+        core.banner(core.EVACUATE, f"Leave now. Go to {go.go}." if has_go else "Leave now.",
+                    f"The crisis room is planning for a {p}-year flood, and {door} is in its water.{upstairs}",
+                    note=False)
+    else:
+        core.banner("#4f6580", "No order for your home now.",
+                    (f"The {p}-year flood switched on does not reach {door}. " if p else "No flood is switched on. ")
+                    + f"In a {zone}-year flood your home would be in the water"
+                    + (f": your shelter would be {go.go}." if has_go else ".") + upstairs, note=False)
+    st.caption(f"{door} is {where} ({CHANCE[zone]} chance in any year). "
+               + (f"Scenario: {p}-year flood. " if p else "Scenario: normal. ")
+               + "Follow the municipality's instructions.")
+    if order:
+        safe_now(h.municipality, f"{street} {num}", dest if has_go else "")
     st.space("small")
 
     if not has_go:
@@ -157,14 +181,15 @@ def lookup():
     else:
         left, right = st.columns([3, 2], gap="medium")
         with right:
-            st.markdown("**Where to go**")
+            st.markdown("**Where to go**" if order else f"**Where you would go in a {zone}-year flood**")
             st.markdown(f"### {go.go}")
             st.markdown(f":material/location_on: **{go.go_address or 'No street address in OpenStreetMap'}**  \n"
                         f":material/{'directions_walk' if walk else 'directions_bus'}: {how}")
             st.link_button("Directions", icon=":material/directions:", width="stretch",
                            url=f"https://www.google.com/maps/dir/?api=1&destination={go.go_lat:.5f},{go.go_lon:.5f}"
                                f"&travelmode={'walking' if walk else 'driving'}")
-            st.caption(f"A candidate {KIND.get(go.go_cat, go.go_cat)}, dry in 2021: not an official shelter.")
+            st.caption(f"A candidate {KIND.get(go.go_cat, go.go_cat)}, outside the {v[2:]}-year zone: not an "
+                       "official shelter.")
         with left:
             pts = pd.DataFrame({"lon": [h.lon, go.go_lon], "lat": [h.lat, go.go_lat],
                                 "c": [core.rgb(core.EVACUATE), core.rgb(core.SHELTER)]})
@@ -179,18 +204,19 @@ def lookup():
                                                  zoom=max(10, min(15, 13.5 - math.log2(max(go.go_km, .3))))),
                 map_style=pdk.map_styles.CARTO_LIGHT), height=300)
             st.caption(":red[●] Your home · :green[●] Your shelter")
+    zones(h)
 
     o = host.available()  # placed guests and withdrawn offers no longer count
     towns = anna.load()[1]
     o = o[o.municipality.isin(towns.municipality)] if len(o) else o
-    if len(o):
+    if order and len(o):
         ctr = towns.drop_duplicates("municipality").set_index("municipality")
         d = core.km(h.lon, h.lat, ctr.loc[o.municipality, "lon"].values, ctr.loc[o.municipality, "lat"].values)
         near = o[d <= 10]
         if len(near):
             st.caption(f":material/bed: {int(near.beds.sum())} spare bed{'s' if near.beds.sum() != 1 else ''} still "
                        "free with residents within 10 km. Older, ill or with small children? Ask the help line for one.")
-    method(modelled)
+    method()
 
 
 def safe_now(muni, door, dest):
@@ -209,7 +235,7 @@ def safe_now(muni, door, dest):
         st.markdown("**Tell the crews where you are**", help="Crews go first to homes with no news. No name or phone "
                     "number is stored: only the address, where you are and how many. In a real roll-out this is "
                     "reached from the link in the BE-Alert or NL-Alert SMS.")
-        places = ([f"At {dest}"] if dest else []) + checkin.WHERE[1:]
+        places = ([f"At {dest}"] if dest else []) + live.WHERE[1:]
 
         def send(status):
             live.add_checkin(muni, door, status, st.session_state[f"res_where_{door}"] if status == "safe" else "",

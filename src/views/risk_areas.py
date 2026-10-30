@@ -1,23 +1,48 @@
 """Who sat in the July 2021 water, per municipality, and which care sites and schools were in it: map, list, details.
 A section of "2021, today, next" (then_now.py), tab "What the water covered". Its selection lives in
-st.session_state.risk_town, because the sidebar Town picker owns `town`."""
+st.session_state.risk_town, because the sidebar Town picker owns `town`. July 2021 data: outputs/data/ (core.D2021)."""
+import json
+
+import pydeck as pdk
 import streamlit as st
 
 import anna
 import core
+import live
 from core import about, fmt
 
 KEY = "risk_town"
 
 
+@st.cache_data
+def outlines():
+    """GISCO LAU 2021 outlines of the 2021 towns (outputs/data; core.outlines() holds the return-period towns)."""
+    return {f["properties"]["municipality"]: f for f in
+            json.loads((core.D2021 / "municipality_outlines.geojson").read_text())["features"]}
+
+
+def regions(df, fill, sel=None):
+    """core.regions on the 2021 outlines."""
+    shapes = outlines()
+    feats = [{"type": "Feature", "geometry": shapes[r["municipality"]]["geometry"],
+              "properties": {**r, "line": [29, 29, 31, 255 if r["municipality"] == sel else 110],
+                             "w": 3 if r["municipality"] == sel else 1}}
+             for r in json.loads(df.to_json(orient="records")) if r["municipality"] in shapes]
+    return pdk.Layer("GeoJsonLayer", {"type": "FeatureCollection", "features": feats}, filled=True, stroked=True,
+                     get_fill_color=f"properties.{fill}", get_line_color="properties.line", get_line_width="properties.w",
+                     line_width_units="'pixels'", pickable=True, auto_highlight=True,
+                     highlight_color=[29, 29, 31, 45], id=f"regions-{fill}")
+
+
 def render(named=frozenset()):
     """named: municipalities (plain names) that appear in a measure on record, marked in the list."""
-    d = core.load()
+    d = core.load(core.D2021)
     areas, towns, sites, shelters = d["areas"], d["towns"], d["sites"], d["shelters"]
     gauges, *_ = core.outlook()
 
     c1, c2, c3 = st.columns([3, 2, 2], vertical_alignment="center")
-    variant = c1.segmented_control("Flood map", list(core.VARIANT), format_func=core.VARIANT.get, default="worst",
+    variant = c1.segmented_control("Flood map", list(anna.VARIANT_2021), format_func=anna.VARIANT_2021.get,
+                                   default="worst",
                                    required=True, label_visibility="collapsed", key="risk_variant",
                                    help="All passes: the headline, closer to official counts. First pass: a lower bound.")
     names = dict(zip(areas.area, areas.name))
@@ -88,7 +113,7 @@ def render(named=frozenset()):
         else:
             here = ev[ev.municipality == sel.municipality]
             near = (core.km(sel.lon, sel.lat, shelters.lon, shelters.lat) <= 1.5).sum()
-            o = core.outlines()[sel.municipality]["properties"]
+            o = outlines()[sel.municipality]["properties"]
             core.group([("Residents", f"Eurostat 2021 · {o['area_km2']:,.0f} km²", fmt(o["population_2021"])),
                         ("People in the water", f"{sel.people / o['population_2021']:.0%} of residents · "
                          + ("EFAS model" if sel.modelled else "satellite map, 2020 census grid"),
@@ -105,9 +130,10 @@ def render(named=frozenset()):
             if len(here):
                 core.group([(f"<b>{n}</b>", f"{ty} · {s:.0%} of the site in the water", "") for n, ty, s in
                             zip(here.name, here.type, here.share_of_site_flooded)], "Which sites")
-            # the Town plan holds this town's shelters and evacuation; only towns in its picker can be opened there
+            # the Town plan holds this town's shelters and evacuation; only towns in its picker (the return-period
+            # zone of the current scenario, dashboard.py) can be opened there
             tw = anna.load()[1]
-            if sel.municipality in set(tw[(tw.variant == "worst") & (tw.people >= 10)].municipality):
+            if sel.municipality in set(tw[(tw.variant == live.variant()) & (tw.people >= 10)].municipality):
                 if st.button("Open its town plan", icon=":material/directions_run:", type="primary", width="stretch",
                              key="risk_open_plan", help="Shelters, roads out and who gives the order, for this town."):
                     st.session_state._town = st.session_state.near = sel.municipality
@@ -116,7 +142,7 @@ def render(named=frozenset()):
     tips = [f"{m}\n≈ {about(p)} people in the water" + (" (modelled)" if mo else "") + f"\n{b:,} buildings\nClick for details"
             for m, p, b, mo in zip(com.municipality, com.people, com.buildings, com.modelled)]
     pick = None if sel is None else sel.municipality
-    layers = [core.regions(com.assign(fill=[core.rgb(core.MISSED if mo else core.PEOPLE, 120 if m == pick else 30 if pick else 55)
+    layers = [regions(com.assign(fill=[core.rgb(core.MISSED if mo else core.PEOPLE, 120 if m == pick else 30 if pick else 55)
                                             for m, mo in zip(com.municipality, com.modelled)], tip=tips), "fill", pick)]
     layers += core.water(variant) + [core.towns(com.assign(
         fill=[core.rgb(core.MISSED if m else core.PEOPLE, 210) for m in com.modelled], tip=tips), "people", "fill", 20)]

@@ -1,14 +1,15 @@
 """Region map: a bidirectional Streamlit component (plain HTML + MapLibre GL JS 5.6.0, no build step).
 
 A new call with new data updates the live map in place (setData / setPaintProperty / marker updates), so a page
-that reruns every 1-2 s during a replay does not flicker or lose the camera. Keep `key` constant.
+that reruns every 1-2 s does not flicker or lose the camera. Keep `key` constant.
 
 data = {
   "towns":   [{municipality, label, lon, lat, status: none|watch|warn|evacuate, people, people_expected, modelled}],
-  "flood":   GeoJSON FeatureCollection, each feature with properties.municipality,
+  "flood":   GeoJSON FeatureCollection, each feature with properties.municipality and optional .rp (10 | 100 | 500:
+             colour of that return-period zone; send the widest first),
   "areas":   optional GeoJSON of municipality outlines (properties.municipality), filled by the town's status,
   "homes":   optional GeoJSON points (properties.s: needs help|no news|safe), drawn from zoom 11 (the selected town),
-  "routes":  optional GeoJSON LineStrings of evacuation roads (properties.people, .flooded: sat in the 2021 water),
+  "routes":  optional GeoJSON LineStrings of evacuation roads (properties.people, .flooded: inside the flood zone),
   "closures": GeoJSON FeatureCollection of Point / LineString closed roads (optional),
   "selected": municipality or None (change it to fly there; None = region overview),
   "camera":  optional {center: [lon, lat], zoom, pitch, bearing}; applied whenever it changes,

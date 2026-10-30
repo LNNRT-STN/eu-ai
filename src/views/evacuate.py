@@ -1,11 +1,14 @@
-"""Evacuation plan, one town at a time: if the July 2021 water came back, who leaves, which dry shelter they go to,
-who gives the order, and the message that tells them. Answers the 2021 failures the team listed: unclear roles across
-levels, warnings that never became instructions, missing local plans and drills, people who could not leave alone.
-Page layout: the verdict (first action), the three key numbers and the plan map, then five tabs (Getting out, Evacuate
-first, Shelters with views/shelters.py, Orders & message, 3D with views/view3d.py), then the region call order folded
-in an expander. Numbers: outputs/data/ (app_towns: walking plan; bus_plan: the 10 km max-flow plan, per shelter; critical_sites;
-receiving_sites). The roles and the message are team text, not data: labelled on the page and in the download."""
-import json
+"""Evacuation plan, one town at a time, for the scenario the crisis room switched on (the rarest EFAS return period
+on: 10-, 100- or 500-year river flood; the 100-year zone, for planning, when none is): who leaves, which dry shelter
+they go to, who gives the order, the message that tells them and what fire crews tell each home. Answers the 2021
+failures the team listed: unclear roles across levels, warnings that never became instructions, missing local plans
+and drills, people who could not leave alone.
+Page layout: the verdict (first action), the three key numbers, the town across return periods and the plan map,
+then five tabs (Getting out, Evacuate first, Shelters with views/shelters.py, Orders & message, 3D with
+views/view3d.py), then the region call order folded in an expander. Numbers: outputs/rp/ (app_towns: walking plan;
+bus_plan: the 10 km max-flow plan, per shelter; critical_sites; receiving_sites; evac_towns / evac_edges: road
+simulation; each per variant rp10 / rp100 / rp500). The roles and the message are team text, not data: labelled on
+the page and in the download."""
 from datetime import date
 from html import escape
 
@@ -15,23 +18,22 @@ import streamlit as st
 
 import anna
 import core
-import map3d
 import forecast
 import live
 from core import about, fmt
-from views import host, shelters as shelter_list, view3d
+from views import checkin, host, shelters as shelter_list, view3d
 
 head, towns, crit, shel, flood, *_ = anna.load()
 recv, bus = anna.load_moves()
-HOUSE = pd.read_csv(core.DATA / "housing_age.csv")          # notebooks/housing_age.py (GHS-OBAT construction period)
-B3D = pd.read_parquet(core.DATA / "buildings_3d.parquet")   # every OBAT building in the 2021 water, with height
+B3D = view3d.B3D                                             # every OBAT building in the 500-year zone, flags in_rp*
 EVAC = pd.read_csv(core.DATA / "evac_towns.csv")             # notebooks/evac_sim.py: road simulation, towns >= 300 people
-INFRA = pd.read_csv(core.DATA / "infra_in_flood.csv")        # notebooks/infra.py: today's rail and bridges in the 2021 water
-EDGES = json.loads((core.DATA / "evac_edges.geojson").read_text())
-RAIL = json.loads((core.DATA / "infra_rail.geojson").read_text())
 feats = lambda g, m: {"type": "FeatureCollection", "features": [f for f in g["features"]
                                                                  if f["properties"]["municipality"] == m]}
-V = "worst"                       # the bus plan exists only for all satellite passes (EFAS 500-year for the Vesdre)
+P = live.plan()                   # the return period the response plans for; None = normal
+V = live.variant()                # its data variant (rp100 when normal, for planning)
+RP = int(V[2:])
+ZONE = f"{RP}-year zone"
+EDGES = checkin.edges(V)
 T = (towns[(towns.variant == V) & (towns.people >= 10)].sort_values("people", ascending=False).reset_index(drop=True))
 CC = {"BE": "Belgium", "NL": "Netherlands", "DE": "Germany"}
 BED = "#d9a400"                   # spare beds offered by residents: yellow, clear of shelter green and water blue
@@ -63,22 +65,22 @@ CHAIN = {
 
 # Draft evacuation message. Team-written template (AI-assisted, ai_log.md 15); have a native speaker check it.
 MSG = {
-    "English": ("FLOOD WARNING – {town}. The river may flood the streets that flooded in July 2021. Leave now. "
+    "English": ("FLOOD WARNING – {town}. The river may flood the streets near it. Leave now. "
                 "Take medicines, ID papers and a phone charger. Go to a shelter on higher ground: {near}. "
                 "Cannot leave on your own? Call {line}. A bus will take you to {far}. "
                 "Check on neighbours who are old, ill or alone. Never walk or drive through flood water."),
-    "Français": ("ALERTE INONDATION – {town}. La rivière risque d'inonder les rues déjà touchées en juillet 2021. "
+    "Français": ("ALERTE INONDATION – {town}. La rivière risque d'inonder les rues proches. "
                  "Quittez votre domicile maintenant. Prenez vos médicaments, vos papiers d'identité et un chargeur de "
                  "téléphone. Rendez-vous dans un centre d'accueil situé en hauteur : {near}. Vous ne pouvez pas partir "
                  "par vos propres moyens ? Appelez le {line}. Un bus vous conduira à {far}. Prenez des nouvelles de vos "
                  "voisins âgés, malades ou isolés. Ne traversez jamais une zone inondée, ni à pied ni en voiture."),
-    "Deutsch": ("HOCHWASSERWARNUNG – {town}. Der Fluss kann die Straßen überfluten, die im Juli 2021 unter Wasser "
-                "standen. Verlassen Sie jetzt Ihr Haus. Nehmen Sie Medikamente, Ausweis und Handy-Ladegerät mit. "
+    "Deutsch": ("HOCHWASSERWARNUNG – {town}. Der Fluss kann die Straßen in seiner Nähe überfluten. "
+                "Verlassen Sie jetzt Ihr Haus. Nehmen Sie Medikamente, Ausweis und Handy-Ladegerät mit. "
                 "Gehen Sie zu einer höher gelegenen Notunterkunft: {near}. Können Sie nicht selbst gehen? Rufen Sie "
                 "{line} an. Ein Bus bringt Sie zu {far}. Sehen Sie nach älteren, kranken oder alleinlebenden "
                 "Nachbarn. Gehen oder fahren Sie niemals durch Hochwasser."),
-    "Nederlands": ("WAARSCHUWING OVERSTROMING – {town}. De rivier kan de straten overstromen die in juli 2021 onder water "
-                   "stonden. Vertrek nu. Neem medicijnen, uw identiteitsbewijs en een oplader mee. Ga naar een hoger "
+    "Nederlands": ("WAARSCHUWING OVERSTROMING – {town}. De rivier kan de straten in de buurt overstromen. "
+                   "Vertrek nu. Neem medicijnen, uw identiteitsbewijs en een oplader mee. Ga naar een hoger "
                    "gelegen opvanglocatie: {near}. Kunt u niet zelf weg? Bel {line}. Een bus brengt u naar {far}. Kijk "
                    "om naar buren die oud, ziek of alleen zijn. Loop of rijd nooit door overstromingswater."),
 }
@@ -96,10 +98,12 @@ PREPARE = ["Confirm each shelter with its owner: keys, a 24/7 contact, beds, foo
 
 
 
-cs_all = crit[crit.in_worst_flood.astype(bool) & crit.share_of_site_flooded.ge(.05) & crit.type.isin(["hospital", "care home"])]
+# care sites: in the scenario's zone; share_of_site_flooded is of the 500-year zone (below 5 % only the site's edge)
+wet = lambda k: crit[f"in_{k}_flood"].astype(bool) & crit.share_of_site_flooded.ge(.05)
+cs_all = crit[wet(V) & crit.type.isin(["hospital", "care home"])]
 first_n = cs_all.groupby(["area", "municipality"]).size()
 calls = (T.assign(care=[int(first_n.get((a, m), 0)) for a, m in zip(T.area, T.municipality)], call=[live.district(a, m) for a, m in zip(T.area, T.municipality)],
-                  short=T.label.str.replace(" (modelled)", " *"))
+                  short=T["name"])
          .sort_values(["no_shelter", "care"], ascending=False).head(6))
 
 
@@ -112,9 +116,9 @@ def pick_call():
 pick = T[T.municipality == st.session_state.get("town")]
 t = (pick if len(pick) else T).iloc[0]
 cc = t.municipality[-3:-1]
-modelled = t.area in anna.MODELLED
 
 # ------------------------------------------------------------------ where the people go (10 km max-flow plan)
+bus = bus[bus.variant == V]      # only the shelters dry in this zone
 plan = bus[(bus.municipality == t.municipality) & (bus.area == t.area)].copy()
 plan["km"] = core.km(t.lon, t.lat, plan.s_lon, plan.s_lat).round(1)
 others = bus[bus.municipality != t.municipality].groupby(["s_lon", "s_lat"]).municipality.nunique()
@@ -125,8 +129,9 @@ walk = min(t.covered, t.people)
 ride = max(t.bus_covered - t.covered, 0) if pd.notna(t.bus_covered) else 0
 left = max(t.people - walk - ride, 0)
 
-care = crit[(crit.municipality == t.municipality) & (crit.area == t.area) & crit.in_worst_flood.astype(bool)
-            & crit.share_of_site_flooded.ge(.05)]
+care = crit[(crit.municipality == t.municipality) & (crit.area == t.area) & wet(V)]
+# the most frequent flood that reaches each site (zones are nested)
+care = care.assign(rp=[next(int(k[2:]) for k in core.VARIANT if r[f"in_{k}_flood"]) for _, r in care.iterrows()])
 care = care.sort_values(["share_of_site_flooded"], ascending=False)
 weak = care[care.type.isin(["hospital", "care home"])]
 
@@ -141,25 +146,23 @@ beds = beds[beds.km <= 10].sort_values(["km", "when"]).reset_index(drop=True) if
 free = beds[beds.status.isin(host.OPEN)] if len(beds) else beds  # Guest placed and Withdrawn are no longer free
 schools = care[care.type == "school"]
 
-# ------------------------------------------------------------------ getting out: road simulation + rail in the water
+# ------------------------------------------------------------------ getting out: road simulation
 # OSM falls back to the road class when a road has no name
 road = lambda n: f"An unnamed {n} road" if n in {"motorway", "trunk", "primary", "secondary", "tertiary", "residential",
                                                    "unclassified", "service", "living_street", "footway", "path", "track"} else n
-ev = EVAC[(EVAC.municipality == t.municipality) & (EVAC.area == t.area)]
-inf = INFRA[(INFRA.municipality == t.municipality) & (INFRA.area == t.area)]
-rail_km = inf.loc[inf.kind == "rail", "km_in_flood"].sum()
-stations = int(inf.loc[inf.kind == "station", "count"].sum())
-bridges = int(inf.loc[inf.kind.isin(["bridge_road", "bridge_rail"]), "count"].sum())
-verdict = (f"Move about {about(t.people)} residents to {len(plan)} dry shelters"
+ev = EVAC[(EVAC.municipality == t.municipality) & (EVAC.area == t.area) & (EVAC.variant == V)]
+verdict = ((f"Move about {about(t.people)} residents of the {ZONE} to {len(plan)} dry shelters" if P else
+            f"In a {RP}-year flood, about {about(t.people)} residents live in the zone; {len(plan)} dry shelters "
+            "could take them")
            + (f"; {about(left)} still have no place within 10 km" if left >= 5 else ", all of them have a place"))
 sub = (f"{about(walk)} can walk to one (within 1.5 km); {about(ride)} need a bus or car (up to 10 km)."
        + (f" Evacuate {len(weak)} hospital{'s' if len(weak) != 1 else ''} or care home{'s' if len(weak) != 1 else ''} "
           "first." if len(weak) else ""))
 if len(ev) and ev.reroute_share.iloc[0] >= .5:
-    sub += (f" {ev.reroute_share.iloc[0]:.0%} of routes to a shelter cross the 2021 water again: leave before the river "
+    sub += (f" {ev.reroute_share.iloc[0]:.0%} of routes to a shelter cross the {ZONE} again: leave before the river "
             "rises.")
-note = ("Modelled: the satellite missed the Vesdre, so the EFAS 500-year flood zone stands in."
-        if modelled else "Observed: all Copernicus satellite passes of July 2021, a floor, not the peak.")
+note = (f"Modelled: the EFAS {RP}-year flood zone, all rivers at once and no dikes or flood walls, so towns behind "
+        "dikes (the Meuse) are an upper bound. A planning map, not a forecast.")
 # the first action for this town: the same steps as the region call list, in the order they take longest
 pl = lambda n, one, many: f"{n} {one if n == 1 else many}"
 todo = ([f"start moving its {pl(len(weak), 'hospital or care home', 'hospitals and care homes')}"] if len(weak) else []) \
@@ -202,11 +205,16 @@ st.html("<style>@media (max-width:640px){[class*=st-key-kpi] [data-testid=stHori
         "[class*=st-key-kpi] [data-testid=stMetricLabel] *{white-space:normal!important;text-overflow:clip!important;"
         "overflow:visible!important;line-height:1.25}"
         "[class*=st-key-kpi] [data-testid=stMetric]{padding:.5rem .6rem}}</style>")
-st.title(t.label, anchor=False)
-st.caption("Town plan: if the July 2021 flood came back, who leaves, where they go, who gives the order.")
-urgent = left >= 5 or len(weak) or (len(ev) and ev.reroute_share.iloc[0] >= .5)
-(st.error if urgent else st.info)(f"**First action: {first_action}.**\n\n{verdict}. {sub}",
-                                  icon=":material/warning:" if urgent else ":material/info:")
+st.title(t["name"], anchor=False)
+if P:
+    st.caption(f"Town plan for a {RP}-year river flood ({100 / RP:g} % chance in any year): who leaves, where they go, "
+               "who gives the order.")
+    urgent = left >= 5 or len(weak) or (len(ev) and ev.reroute_share.iloc[0] >= .5)
+    (st.error if urgent else st.info)(f"**First action: {first_action}.**\n\n{verdict}. {sub}",
+                                      icon=":material/warning:" if urgent else ":material/info:")
+else:
+    st.caption(f"No flood scenario is on: the town as it would be in a {RP}-year flood, for planning.")
+    st.info(f"{verdict}.", icon=":material/info:")
 river_line()
 
 m1, m2, m3 = st.container(key="kpi_top").columns(3)
@@ -219,9 +227,37 @@ m3.metric("No place within 10 km", about(left), help="Ask the next municipality"
           border=True)
 st.caption(note)
 
-a = 70 if modelled else 140
+
+def across():
+    """The town in the 10-, 100- and 500-year zone: who and what is in the water, and the shelters left."""
+    hb = B3D[(B3D.municipality == t.municipality) & (B3D.area == t.area)]
+    tw = towns[(towns.municipality == t.municipality) & (towns.area == t.area)].set_index("variant")
+    sh = core.load()["shelters"]
+    near = sh[core.km(t.lon, t.lat, sh.lon, sh.lat) <= 10]
+    here = crit[(crit.municipality == t.municipality) & (crit.area == t.area) & crit.type.isin(["hospital", "care home"])]
+    rows = []
+    for k in core.VARIANT:
+        b = bus_all[(bus_all.variant == k) & (bus_all.municipality == t.municipality) & (bus_all.area == t.area)]
+        ppl = int(tw.people.get(k, 0))
+        rows.append({"Flood": f"{k[2:]}-year" + (" · plan" if k == V and P else ""), "Residents": ppl,
+                     "Homes": int(((hb.use == 1) & hb[f"in_{k}"]).sum()),
+                     "Care sites": int((here[f"in_{k}_flood"].astype(bool) & here.share_of_site_flooded.ge(.05)).sum()),
+                     "Shelters lost": int(near[f"in_{k}"].astype(bool).sum()),
+                     "No place within 10 km": max(ppl - int(round(b.people.sum())), 0) if ppl else 0})
+    st.markdown(f":blue[:material/stacked_line_chart:] **{t['name']} as the flood gets rarer**",
+                help="Each row is one EFAS flood zone; the zones are nested. Care sites: hospitals and care homes in "
+                     "the zone. Shelters lost: candidate sites within 10 km of the centre inside the zone. No place: "
+                     "residents the 10 km shelter plan of that flood cannot place.")
+    st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch",
+                 column_config={c: st.column_config.NumberColumn(format="localized")
+                                for c in ["Residents", "Homes", "No place within 10 km"]})
+
+
+bus_all = anna.load_moves()[1]
+across()
+
 layers = [pdk.Layer("GeoJsonLayer", flood[(t.area, V)], filled=True, stroked=True, line_width_min_pixels=1,
-                    get_fill_color=[0, 113, 227, a], get_line_color=[0, 90, 200, 200])]
+                    get_fill_color=core.rgb(core.RP_COL[V], 90), get_line_color=core.rgb(core.RP_COL[V], 200))]
 # where people go: a line from the town centre to each shelter of the plan, wider with the people it takes
 if len(plan):
     top = plan.nlargest(10, "people")  # the numbered shelters; the long tail would turn the map into a starburst
@@ -229,7 +265,7 @@ if len(plan):
                        w=top.people ** .5 * .1 + 1.5)
     layers.append(pdk.Layer("LineLayer", flows, get_source_position="a", get_target_position="b", get_width="w",
                             width_units="'pixels'", get_color=core.rgb(core.SHELTER, 110)))
-# the evacuation roads themselves: white casing, blue where dry, orange where they sat in the 2021 water, red if closed
+# the evacuation roads themselves: white casing, blue where dry, orange where inside the zone, red if closed
 shut = set(live.closures().osm_id.dropna().astype(str))
 ed = feats(EDGES, t.municipality)
 for f in ed["features"]:
@@ -237,17 +273,14 @@ for f in ed["features"]:
     q["c"] = core.rgb("#d70015") if str(q["osm_id"]) in shut else core.rgb("#c93400") if q["in_flood_2021"] else core.rgb("#0071e3")
     q["w"] = 3 + 5 * min(1, (q["people"] or 0) / 3000)
     q["tname"] = (q["name"] if str(q["name"])[:1].isupper() else "Unnamed road") + (
-        " · closed" if str(q["osm_id"]) in shut else " · flooded in 2021" if q["in_flood_2021"] else "")
+        " · closed" if str(q["osm_id"]) in shut else f" · in the {ZONE}" if q["in_flood_2021"] else "")
     q["tinfo"] = f"Evacuation road for about {about(q['people'] or 0)} people"
-layers += [pdk.Layer("GeoJsonLayer", feats(RAIL, t.municipality), get_line_color=[29, 29, 31, 220],
-                     line_width_min_pixels=3),
-           pdk.Layer("GeoJsonLayer", ed, get_line_color=[255, 255, 255, 240], get_line_width="properties.w + 4",
+layers += [pdk.Layer("GeoJsonLayer", ed, get_line_color=[255, 255, 255, 240], get_line_width="properties.w + 4",
                      line_width_units="'pixels'", line_cap_rounded=True),
            pdk.Layer("GeoJsonLayer", ed, get_line_color="properties.c", get_line_width="properties.w",
                      line_width_units="'pixels'", line_cap_rounded=True, pickable=True)]
 if len(care):
-    cs = care.assign(tname=care.name, tinfo=[f"{k} in the 2021 water · {s:.0%} of the site"
-                                             for k, s in zip(care.type, care.share_of_site_flooded)])
+    cs = care.assign(tname=care.name, tinfo=[f"{k} · flooded from a {r}-year flood" for k, r in zip(care.type, care.rp)])
     layers.append(core.points(cs, core.rgb("#7b3fd1"), 6))
 if len(plan):
     ps = plan.assign(lon=plan.s_lon, lat=plan.s_lat, tname=[f"{n}. {s}" for n, s in zip(plan.n, plan.shelter)],
@@ -288,14 +321,13 @@ st.pydeck_chart(pdk.Deck(layers=layers, map_style=pdk.map_styles.CARTO_LIGHT, to
                          initial_view_state=pdk.ViewState(longitude=t.lon, latitude=t.lat, zoom=z),
                          views=[pdk.View(type="MapView", controller={"scrollZoom": False})]), height=480)
 st.caption(":green[●] Dry candidate shelter, size = people sent there (numbered as in the Shelters tab) · "
-           + (":violet[●] Hospital, care home or school in the 2021 water · " if len(care) else "")
-           + f":blue[■] 2021 water{' (modelled)' if modelled else ''} · "
+           + (f":violet[●] Hospital, care home or school in the {ZONE} · " if len(care) else "")
+           + f":blue[■] {RP}-year flood zone (EFAS model) · "
            + (":yellow[●] Spare beds offered by residents (at their town centre) · " if len(free) else "")
            + ":material/radio_button_unchecked: Town centre · :green[━] To the 10 largest shelters · "
-           ":blue[━] Evacuation road · :orange[━] Evacuation road flooded in 2021 · :red[━] Closed · "
-           ":material/remove: Railway in the 2021 water",
-           help="Map © OpenStreetMap contributors, © CARTO. Shelters, roads and rail: OpenStreetMap; water: Copernicus "
-                "EMS (observed) or EFAS (modelled, Vesdre).")
+           f":blue[━] Evacuation road · :orange[━] Evacuation road in the {ZONE} · :red[━] Closed",
+           help="Map © OpenStreetMap contributors, © CARTO. Shelters and roads: OpenStreetMap; flood zone: EFAS "
+                "(Copernicus Emergency Management Service), modelled.")
 
 
 def save_beds(key):
@@ -337,6 +369,50 @@ def spare_beds():
                                                                                   "Guest placed")})
 
 
+def crews():
+    """Fire brigade: the doors to knock in this zone, help requests then single-storey homes first, the shelter to send
+    each street to (views/checkin.py builds the same list, home by home) and the closed roads."""
+    st.markdown(":red[:material/door_front:] **Fire brigade: door to door**",
+                help="For homes the alert does not reach. The Door-knock list has every home, the shelter to send it "
+                     "to, and lets crews mark it done.")
+    D = checkin.doors(V)
+    D = D[D.municipality == t.municipality]
+    if D.empty:
+        st.caption(f"No home of {t['name']} in the {ZONE}.")
+        return
+    ck = live.checkins(t.municipality)
+    last = live.latest(ck).set_index("door").status if len(ck) else pd.Series(dtype=str)
+    D = anna.destinations(t.municipality, D.assign(status=D.door.map(last).fillna("no news")), V)
+    todo = D[D.status != "safe"]
+    helpn = int((todo.status == "needs help").sum())
+    c = st.container(key="kpi_doors").columns(3)
+    c[0].metric("Doors to knock", fmt(len(todo)), border=True, help=f"Homes in the {ZONE} not yet reported gone")
+    c[1].metric("Asked for help", fmt(helpn), border=True, help="Residents who reported 'I need help': go there first")
+    c[2].metric("Single-storey", fmt(int(todo.single.sum())), border=True,
+                help="No upper floor to escape to: knock on these next")
+    by = (todo.assign(h=todo.status == "needs help").groupby("street", dropna=False)
+          .agg(homes=("door", "size"), help=("h", "sum"), single=("single", "sum"),
+               go=("go", lambda x: x.mode().iat[0] if len(x.mode()) else ""),
+               addr=("go_address", lambda x: x.mode().iat[0] if len(x.mode()) else ""), km=("go_km", "median"))
+          .reset_index().sort_values(["help", "single", "homes"], ascending=False))
+    by["street"] = by.street.fillna("(no street name)")
+    st.caption("Street by street: tell each home to leave now and go to its shelter. Help requests first, then "
+               "single-storey homes.")
+    st.dataframe(by, hide_index=True, height=min(35 * len(by) + 38, 320), column_config={
+        "street": "Street", "homes": st.column_config.NumberColumn("Homes", format="%d", width="small"),
+        "help": st.column_config.NumberColumn("Help", format="%d", width="small", help="Asked for help"),
+        "single": st.column_config.NumberColumn("1 storey", format="%d", width="small"),
+        "go": st.column_config.TextColumn("Send them to", help="The shelter nearest most homes of the street in the "
+                                                               "10 km plan: a candidate site, not an official one"),
+        "addr": "Shelter address",
+        "km": st.column_config.NumberColumn("km", format="%.1f", width="small", help="By road, about: straight line × 1.3")})
+    cl = live.closures()
+    cl = cl[cl.municipality == t.municipality]
+    st.markdown("**Roads closed:** " + (", ".join(cl.name.fillna(cl.osm_id).astype(str)) + ". Send people round them."
+                                         if len(cl) else "none in this town."))
+    st.page_link("views/checkin.py", label="Open the Door-knock list, home by home", icon=":material/door_front:")
+
+
 def how(text):
     """One collapsed method note at the end of a tab."""
     with st.expander("How this is computed", icon=":material/info:"):
@@ -361,52 +437,49 @@ with out:
                     help=f"9 in 10 residents, on foot or by bus; half within {e.route_med_min:.0f} min. Bus at 30 km/h "
                          "without boarding: a minimum.")
         c[2].metric("Routes back through the water", f"{e.reroute_share:.0%}", border=True,
-                    help=f"Share of residents whose route to the shelter crosses the 2021 water again, over "
+                    help=f"Share of residents whose route to the shelter crosses the {ZONE} again, over "
                          f"{int(e.flood_bridges_used)} bridges in it.")
         st.caption("Road times are a minimum: buses at 30 km/h, no boarding, no traffic.")
-        st.markdown(f"- **Leave before the river rises:** {e.reroute_share:.0%} of routes go back through the 2021 water.\n"
+        st.markdown(f"- **Leave before the river rises:** {e.reroute_share:.0%} of routes go back through the {ZONE}.\n"
                     f"- **Busiest road** (the widest line on the map): {road(e.busiest_road)}, about "
                     f"{about(e.busiest_road_people)} people {'on foot' if e.busiest_road_mode == 'walk' else 'by bus'}. "
                     "Put a marshal there.")
     else:
-        st.caption("Road simulation only for towns with at least 300 residents in the water.")
-    st.markdown(f"- **Trains:** {rail_km:.1f} km of track" + (f" and {stations} station{'s' if stations != 1 else ''}"
-                                                               if stations else "")
-                + f" sat in the 2021 water: no train evacuation from here. {bridges} road and rail bridges in the water."
-                if rail_km >= .1 else f"- **Trains:** no railway in the 2021 water here. {bridges} road bridges in it.")
-    how("Road simulation on today's OpenStreetMap roads: residents spread evenly over the streets in the 2021 water, "
-        "walking 4 km/h, each sent to the shelter in the plan; buses at 30 km/h without boarding. Rail, stations and "
-        "bridges: today's OpenStreetMap network inside the 2021 water. In the water does not mean damaged.")
+        st.caption(f"Road simulation only for towns with at least 300 residents in the {ZONE}.")
+    how(f"Road simulation on today's OpenStreetMap roads: residents spread evenly over the streets in the {ZONE}, "
+        "walking 4 km/h, each sent to the shelter in the plan for this flood; buses at 30 km/h without boarding. "
+        "Bridges: OpenStreetMap bridges inside the zone that a route uses. In the zone does not mean damaged.")
 
 with first:
     if len(weak):
         nearest = recv.sort_values("km").drop_duplicates("from_name").set_index("from_name")
         st.markdown(f":violet[:material/local_hospital:] **{pl(len(weak), 'hospital or care home', 'hospitals and care homes')} "
-                    "in the 2021 water: evacuate first**",
-                    help="Free beds in the receiving sites are not in the data: confirm with each operator.")
+                    f"in the {ZONE}: evacuate first**",
+                    help="Receiving sites lie outside the 500-year zone, so they hold for every flood. Free beds there "
+                         "are not in the data: confirm with each operator.")
         st.dataframe(pd.DataFrame({
-            "Site": weak.name.values, "Type": weak.type.values, "Under water": weak.share_of_site_flooded.values * 100,
+            "Site": weak.name.values, "Type": weak.type.values,
+            "Flooded from": [f"{r}-year flood" for r in weak.rp],
             "Nearest dry site of the same kind": [f"{nearest.to_name[n]} ({nearest.km[n]:.1f} km)" if n in nearest.index
                                                   else "none in reach" for n in weak.name]}),
-            hide_index=True, column_config={"Under water": st.column_config.NumberColumn(format="%d%%")})
+            hide_index=True, column_config={"Flooded from": st.column_config.TextColumn(
+                help="The most frequent flood whose zone reaches the site: a 10-year site floods first")})
     else:
-        st.markdown(":violet[:material/local_hospital:] **No hospital or care home in the 2021 water here.** "
-                    "Still check sites at the edge of the flood.")
+        st.markdown(f":violet[:material/local_hospital:] **No hospital or care home in the {ZONE} here.** "
+                    "Still check sites at the edge of the zone.")
     if len(schools):
-        st.markdown(f":violet[:material/school:] **{pl(len(schools), 'school', 'schools')} in the 2021 water: close "
+        st.markdown(f":violet[:material/school:] **{pl(len(schools), 'school', 'schools')} in the {ZONE}: close "
                     "them, and do not use them as shelters**")
-        st.dataframe(pd.DataFrame({"School": schools.name.values,
-                                   "Under water": schools.share_of_site_flooded.values * 100},),
-                     hide_index=True, column_config={"Under water": st.column_config.NumberColumn(format="%d%%")})
+        st.dataframe(pd.DataFrame({"School": schools.name.values, "Flooded from": [f"{r}-year flood" for r in schools.rp]}),
+                     hide_index=True)
 
     # homes with no upper floor: OBAT height under ~4.5 m; 2.5 m is OBAT's fill-in value, so it counts as unknown
-    hb = B3D[(B3D.municipality == t.municipality) & (B3D.area == t.area)]
+    hb = B3D[(B3D.municipality == t.municipality) & (B3D.area == t.area) & B3D[f"in_{V}"]]
     homes = hb[hb.use == 1]
     one = homes[(homes.storeys == 1) & (homes.height_m != 2.5)]
     unk = int((homes.height_m == 2.5).sum())
-    ha = HOUSE[(HOUSE.municipality == t.municipality) & (HOUSE.area == t.area)]
-    old = int(ha.res_pre1980.sum()) if len(ha) else 0
-    nonres = int(ha.nonres_in_flood.sum()) if len(ha) else 0
+    old = int((homes.epoch == 1).sum())       # GHS-OBAT construction period of the 100 m area: before 1980
+    nonres = int((hb.use == 2).sum())
     st.markdown(":red[:material/house:] **Homes to knock on first**",
                 help="People without a car and those who cannot leave alone are in no dataset: they need the "
                      "municipality's own list.")
@@ -426,25 +499,26 @@ with first:
         hv["c"] = [core.rgb(core.EVACUATE) if x else [142, 142, 147, 200] for x in hv.single]
         hv["z"] = hv.height_m.clip(lower=3)
         st.pydeck_chart(pdk.Deck(
-            layers=[pdk.Layer("GeoJsonLayer", flood[(t.area, V)], filled=True, get_fill_color=[0, 113, 227, 60],
-                              stroked=False),
+            layers=[pdk.Layer("GeoJsonLayer", flood[(t.area, V)], filled=True,
+                              get_fill_color=core.rgb(core.RP_COL[V], 60), stroked=False),
                     pdk.Layer("ColumnLayer", hv, get_position=["lon", "lat"], get_elevation="z", elevation_scale=6,
                               radius=7, get_fill_color="c", pickable=True, extruded=True)],
             initial_view_state=pdk.ViewState(longitude=homes.lon.median(), latitude=homes.lat.median(), zoom=14.2,
                                              pitch=55, bearing=-20),
             map_style=pdk.map_styles.CARTO_LIGHT, tooltip={"html": "<b>{tname}</b><br/>{tinfo}"},
             views=[pdk.View(type="MapView", controller={"scrollZoom": False})]), height=420)
-        st.caption(":red[●] Single-storey home · :gray[●] Home with an upper floor · :blue[■] 2021 water")
-    how("Care sites: OpenStreetMap hospitals, care homes and schools with at least 5 % of the site in the 2021 water; "
-        "the nearest dry site of the same kind is a straight line. Homes: GHS-OBAT buildings in the 2021 water; "
+        st.caption(f":red[●] Single-storey home · :gray[●] Home with an upper floor · :blue[■] {RP}-year flood zone")
+    how(f"Care sites: OpenStreetMap hospitals, care homes and schools inside the {ZONE} (at least 5 % of the site in "
+        "the 500-year zone); the nearest dry site of the same kind is a straight line, outside the 500-year zone. "
+        f"Homes: GHS-OBAT buildings in the {ZONE}; "
         "single-storey = under about 4.5 m high; 2.5 m is OBAT's fill-in value, so those count as unknown. Column "
         "height on the map is the building height ×6. Old neighbourhoods: GHS-OBAT construction period of the 100 m "
         "area. Not in any dataset: age, income, disability or who lives alone.")
 
 with shel_tab:
     st.markdown(f":green[:material/home_health:] **Where {t['name']} goes: {pl(len(plan), 'dry shelter', 'dry shelters')}**",
-                help="One plan that fits the most people in (max-flow, 10 km straight line from each home), the "
-                     "biggest first. Numbers match the plan map.")
+                help=f"One plan that fits the most people in (max-flow, 10 km straight line from each home), the "
+                     f"biggest first, using only sites outside the {ZONE}. Numbers match the plan map.")
     st.caption("Candidates, not official shelters: confirm keys, staff and access with each owner.")
     if len(plan):
         st.dataframe(plan[["n", "shelter", "km", "people", "places", "shared"]], hide_index=True,
@@ -466,11 +540,12 @@ with shel_tab:
         st.info("No dry candidate shelter within 10 km in the data. Ask the neighbouring municipalities.")
     spare_beds()
     st.markdown(f":green[:material/search:] **All candidate sites near {t['name']}**",
-                help="Every candidate site, not only those in the plan: the 25 nearest to the town centre, or all of "
-                     "them by size. Select a row to see it on the map.")
-    shelter_list.render(t)
-    how("Shelters are OpenStreetMap schools, sports halls and civic buildings with at least 200 m² of floor, dry in "
-        "July 2021 and outside the EFAS 100-year zone: candidates, not official shelters. Places: floor area × 50 % "
+                help=f"Every candidate site outside the {ZONE}, not only those in the plan: the 25 nearest to the town "
+                     "centre, or all of them by size. Select a row to see it on the map.")
+    shelter_list.render(t, V)
+    how("Shelters are OpenStreetMap schools, sports halls and civic buildings with at least 200 m² of floor, outside "
+        f"the EFAS {RP}-year zone (a site inside a zone is not used in that flood): candidates, not official shelters. "
+        "Places: floor area × 50 % "
         "usable ÷ 4 m² per person, an order of magnitude. The plan is one max-flow share-out that fits the most "
         f"people within 10 km (straight line). Source: {core.AS_OF['osm']}. Map © OpenStreetMap contributors, © CARTO.")
 
@@ -500,6 +575,7 @@ with order:
     st.code(text, language=None, wrap_lines=True)
     st.caption("Draft, AI-assisted and checked by the team: a native speaker and the communication officer approve it "
                "before use.")
+    crews()
 
     st.markdown(":red[:material/checklist:] **Plan and drill: before the flood season**")
     for k, p_ in enumerate(PREPARE):
@@ -507,19 +583,19 @@ with order:
     rows = "".join(f"<tr><td>{r.n}</td><td>{escape(r.shelter)}</td><td>{r.km:.1f}</td><td>{r.people:.0f}</td>"
                    f"<td>{r.places:.0f}</td><td>{r.shared}</td></tr>" for r in plan.itertuples())
     who = "".join(f"<tr><td><b>{r}</b></td><td>{escape(w)}</td><td>{escape(h)}</td></tr>" for r, w, h in CHAIN[cc])
-    first_rows = "".join(f"<li>{escape(r.name)} ({r.type}, {r.share_of_site_flooded:.0%} under water)</li>"
-                         for r in weak.itertuples()) or "<li>None in the 2021 water</li>"
+    first_rows = "".join(f"<li>{escape(r.name)} ({r.type}, flooded from a {r.rp}-year flood)</li>"
+                         for r in weak.itertuples()) or f"<li>None in the {ZONE}</li>"
     doc = f"""<!doctype html><html><head><meta charset="utf-8"><title>Evacuation plan · {escape(t['name'])}</title>
 <style>body{{font:14px/1.45 -apple-system,'Segoe UI',Roboto,Arial,sans-serif;color:#1d1d1f;max-width:800px;margin:2rem auto;
 padding:0 1rem}}h1{{font-size:1.6rem;margin:0}}h2{{font-size:1.1rem;margin:1.6rem 0 .4rem}}table{{border-collapse:collapse;
 width:100%}}td,th{{border-bottom:1px solid #ddd;padding:.3rem .4rem;text-align:left;vertical-align:top}}
 .n{{color:#4f6580;font-size:.85rem}}.box{{border:1px solid #ccc;border-radius:8px;padding:.6rem .8rem}}</style></head><body>
 <h1>Evacuation plan · {escape(t['name'])}</h1>
-<p class="n">Draft from the July 2021 flood data, {date.today():%d %b %Y}. {escape(note)}</p>
-<h2>Who leaves</h2><p>About {about(t.people)} residents lived in the 2021 water. {about(walk)} can walk to a shelter
+<p class="n">Draft for a {RP}-year river flood, {date.today():%d %b %Y}. {escape(note)}</p>
+<h2>Who leaves</h2><p>About {about(t.people)} residents live in the {ZONE}. {about(walk)} can walk to a shelter
 within 1.5 km; {about(ride)} need transport (up to 10 km); {about(left)} have no place within 10 km.</p>
 <h2>Evacuate first</h2><ul>{first_rows}</ul>
-<p>In the 2021 water: {fmt(len(one))} single-storey homes (no upper floor to escape to; {fmt(unk)} with no reliable
+<p>In the {ZONE}: {fmt(len(one))} single-storey homes (no upper floor to escape to; {fmt(unk)} with no reliable
 height), {fmt(old)} homes in neighbourhoods built before 1980, {fmt(nonres)} non-residential buildings.</p>
 <h2>Where they go</h2><table><tr><th>#</th><th>Dry shelter</th><th>km from centre</th><th>People sent</th>
 <th>Places in all</th><th>Other towns sent here</th></tr>{rows}</table>
@@ -529,7 +605,7 @@ municipality's emergency plan.</p>
 <h2>Warning message</h2><div class="box">{escape(text)}</div>
 <h2>Before the flood season</h2><ul>{''.join(f'<li>{escape(p)}</li>' for p in PREPARE)}</ul>
 <h2>Limits</h2><p class="n">Residents: GHS-POP 2020 spread over homes, an order of magnitude. Shelters: OpenStreetMap
-candidates, dry in 2021 and in the EFAS 100-year model, not official; capacity = floor area × 50 % ÷ 4 m². Distances are
+candidates outside the {ZONE}, not official; capacity = floor area × 50 % ÷ 4 m². Distances are
 straight lines from the town centre. No data on age, income or disability.</p></body></html>"""
     st.download_button("Download the town plan (print it or save as PDF)", doc,
                        file_name=f"evacuation_plan_{t['name'].replace(' ', '_')}.html", mime="text/html",
@@ -539,13 +615,14 @@ straight lines from the town centre. No data on age, income or disability.</p></
         "download holds the whole town plan on one printable page.")
 
 with v3d:
-    view3d.render(t)
+    view3d.render(t, V)
 
 # ================================================================== the region call order (also in the Crisis room)
 st.divider()
-with st.expander("First action across the region: call these towns, in this order", icon=":material/call:"):
+with st.expander("First action across the region: call these towns, in this order" if P else
+                 f"Across the region in a {RP}-year flood: the towns that would need help first", icon=":material/call:"):
     top = calls.iloc[0]
-    st.markdown(f"Start with {top.short.rstrip(' *')} and {top.call}: book buses for about {about(top.no_shelter)} "
+    st.markdown(f"Start with {top.short} and {top.call}: book buses for about {about(top.no_shelter)} "
                 "residents who cannot walk to a shelter"
                 + (f", and start moving its {top.care} hospitals and care homes" if top.care else "") + ".")
     st.dataframe(calls[["short", "call", "no_shelter", "care"]].assign(no_shelter=calls.no_shelter.map(about)),
@@ -553,8 +630,10 @@ with st.expander("First action across the region: call these towns, in this orde
                  column_config={"short": st.column_config.TextColumn("Town (and its mayor)"),
                                 "call": st.column_config.TextColumn("Also call"),
                                 "no_shelter": st.column_config.TextColumn("No shelter on foot",
-                                                                          help="Residents in the 2021 water with no free "
+                                                                          help=f"Residents in the {ZONE} with no free "
                                                                                "shelter place within 1.5 km"),
                                 "care": st.column_config.NumberColumn("Care sites to evacuate", format="%d")})
     st.caption("Ordered by residents with no shelter place on foot: they need transport, so these calls take longest "
-               "to act on. \\* modelled (Vesdre). Click a town to open its plan above.")
+               f"to act on. {RP}-year flood zone. Click a town to open its plan above.")
+
+core.next_steps("plan")

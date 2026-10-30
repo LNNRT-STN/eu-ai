@@ -1,83 +1,67 @@
-"""Valley in 3D, a tab of the Town plan: one town's July 2021 water draped on satellite terrain, with the homes, dry
-shelters, evacuation roads, rail and care sites in it, and a day-by-day river replay. MapLibre GL JS (open source, no
-token) in a component; elevation: AWS Terrain Tiles (Terrarium); imagery: EOX Sentinel-2 cloudless or Esri World
-Imagery. Numbers: outputs/data/ (app_towns, buildings_3d, bus_plan, critical_sites, evac_edges, infra_rail) and the
-GloFAS replay (core.load_replay). The water opacity on the timeline is a visual cue, not a flood simulation.
+"""3D tab of the Town plan: the town's buildings in the 500-year flood zone, raised to their height and coloured by
+the most frequent EFAS flood that reaches them (10-, 100- or 500-year), with the dry shelters of the plan. Shows how
+the town grows into the water as the flood gets rarer. Numbers: outputs/rp/buildings_3d.parquet (GHS-OBAT, flags
+in_rp10 / in_rp100 / in_rp500) and the 10 km bus plan of the scenario.
 
 Imported once by views/evacuate.py, so everything that draws lives in render()."""
+import math
 
-import altair as alt
-import numpy as np
 import pandas as pd
+import pydeck as pdk
 import streamlit as st
 
 import anna
 import core
-import map3d
-import forecast
 from core import fmt
+from views.shelters import _legend as shelters_legend
 
-LAYERS = {"water": "2021 water", "homes": "Homes", "shelters": "Dry shelters", "roads": "Evacuation roads",
-          "rail": "Rail in the water", "care": "Care sites"}
+B3D = pd.read_parquet(core.DATA / "buildings_3d.parquet")   # every OBAT building in the 500-year zone, with height
+ZONE = {"rp10": "10-year zone", "rp100": "100-year zone (not the 10-year)", "rp500": "500-year zone only"}
 
 
-def render(t):
-    """Draw town row `t` (app_towns, variant worst) in 3D, controls in a popover above the map."""
-    modelled = t.area in anna.MODELLED
+def render(t, v):
+    """Draw town row `t` (app_towns) in 3D; `v` is the scenario's variant (rp10 / rp100 / rp500)."""
+    hb = B3D[(B3D.municipality == t.municipality) & (B3D.area == t.area)]
+    if hb.empty:
+        st.info("No building of this town lies in the modelled flood zones.")
+        return
+    # the most frequent flood that reaches each building (zones are nested: rp10 inside rp100 inside rp500)
+    z = pd.Series("rp500", index=hb.index).mask(hb.in_rp100, "rp100").mask(hb.in_rp10, "rp10")
+    n = z.value_counts()
+    home = hb.use == 1
+    c = st.container(key="kpi_3d").columns(3)
+    for col, k in zip(c, core.VARIANT):
+        inside = hb[f"in_{k}"]
+        col.metric(f"{core.VARIANT[k].capitalize()} zone", f"{fmt(int((home & inside).sum()))} homes", border=True,
+                   help=f"{fmt(int(inside.sum()))} buildings in all" + (" · the planned flood" if k == v else ""))
 
-    # river replay: nearest GloFAS point within 15 km of the town centre
-    rep = core.load_replay().loc["2021-07-12":"2021-07-20"]
-    g_lat, g_lon = np.array(list(forecast.GAUGES.values())).T
-    d_km = core.km(t.lon, t.lat, g_lon, g_lat)
-    gauge = list(forecast.GAUGES)[int(d_km.argmin())] if d_km.min() <= 15 else None
-
-    c_pop, c_day = st.columns([1, 3], vertical_alignment="bottom")
-    with c_pop.popover("Layers", icon=":material/layers:", width="stretch"):
-        on = {k: st.toggle(lab, True, key=f"v3d_{k}") for k, lab in LAYERS.items()}
-        exag = st.slider("Terrain exaggeration", 1.0, 3.0, 1.5, 0.25, key="v3d_exag", help="Heights ×; 1 = true relief")
-        imagery = st.segmented_control("Imagery", ["Sentinel-2", "Esri"], default="Sentinel-2", key="v3d_img",
-                                       help="Sentinel-2 cloudless (10 m, EOX) or Esri World Imagery (sharper)") \
-            or "Sentinel-2"
-
-    opacity, day = .45, None
-    if gauge:
-        days = list(rep.index)
-        q = rep[gauge]
-        day = c_day.select_slider("Day, July 2021", days, value=q.idxmax(), format_func=lambda d: f"{d:%a %d %b}",
-                                  key=f"v3d_day_{gauge}",
-                                  help="Water opacity on the map follows the river flow that day, as a visual cue only: "
-                                       "the map always shows the final 2021 extent, not the water on that day.")
-        lo, hi = q.min(), q.max()
-        opacity = .1 + .4 * (q[day] - lo) / (hi - lo) if hi > lo else .45
-    else:
-        c_day.caption("No river point of the replay lies within 15 km of this town, so there is no timeline here.")
-    if modelled:
-        st.caption(":gray[Modelled water: EFAS 500-year zone, no satellite map of the Vesdre.]")
-
-    map_col, side = st.columns([3, 1], gap="medium")
-    with map_col:
-        map3d.render(t, on, exag, imagery, opacity, height=560, attribution=False)
-    with side:
-        if gauge:
-            ch = pd.DataFrame({"day": rep.index, "flow": rep[gauge].values})
-            base = alt.Chart(ch).encode(x=alt.X("day:T", title=None, axis=alt.Axis(format="%d", tickCount=9)))
-            line = base.mark_line(color="#0071e3", strokeWidth=2).encode(
-                y=alt.Y("flow:Q", title="m³/s", axis=alt.Axis(tickCount=3)))
-            rule = alt.Chart(pd.DataFrame({"day": [day]})).mark_rule(color="#1d1d1f", strokeDash=[3, 3]).encode(x="day:T")
-            dot = base.transform_filter(alt.datum.day == alt.expr.toDate(day.isoformat())).mark_point(
-                filled=True, size=50, color="#1d1d1f").encode(y="flow:Q")
-            st.markdown(f"**River flow, {gauge}**", help=f"{d_km.min():.0f} km from the town centre. GloFAS model, "
-                                                           "modelled after the event.")
-            st.altair_chart((line + rule + dot).properties(height=140), width="stretch")
-            st.caption(f"{day:%a %d %b}: {fmt(rep.loc[day, gauge])} m³/s (modelled)")
-        st.caption("Drag to pan, right-drag or Ctrl-drag to tilt and turn, scroll to zoom.")
-
+    hv = hb.assign(z=hb.height_m.clip(lower=3), c=[core.rgb(core.RP_COL[k], 230) for k in z],
+                   tname=[("Home" if u == 1 else "Building") + f" · {ZONE[k]}" for u, k in zip(hb.use, z)],
+                   tinfo=[f"about {h:.0f} m high" if h != 2.5 else "height unknown" for h in hb.height_m])
+    hv = hv[["lon", "lat", "z", "c", "tname", "tinfo"]]
+    layers = [pdk.Layer("ColumnLayer", hv, get_position=["lon", "lat"], get_elevation="z", elevation_scale=4, radius=6,
+                        get_fill_color="c", pickable=True, extruded=True)]
+    bus = anna.load_moves()[1]
+    sh = (bus[(bus.variant == v) & (bus.municipality == t.municipality) & (bus.people >= .5)]
+          .groupby(["shelter", "s_lon", "s_lat"], as_index=False).people.sum())
+    if len(sh):
+        sh = sh.assign(lon=sh.s_lon, lat=sh.s_lat, tname=sh.shelter,
+                       tinfo=[f"dry shelter · about {p:.0f} people from {t['name']}" for p in sh.people])
+        layers.append(core.points(sh, core.rgb(core.SHELTER, 230), 7))
+    x0, x1 = hb.lon.quantile([.05, .95])
+    y0, y1 = hb.lat.quantile([.05, .95])
+    span = max(x1 - x0, (y1 - y0) * 1.6, .01)
+    zoom = min(15.5, math.log2(1000 * 360 / (512 * span)) + .2)
+    st.pydeck_chart(pdk.Deck(
+        layers=layers, map_style=pdk.map_styles.CARTO_LIGHT, tooltip={"html": "<b>{tname}</b><br/>{tinfo}"},
+        initial_view_state=pdk.ViewState(longitude=(x0 + x1) / 2, latitude=(y0 + y1) / 2, zoom=zoom, pitch=55,
+                                         bearing=-20),
+        views=[pdk.View(type="MapView", controller={"scrollZoom": False})]), height=520)
+    shelters_legend([(core.RP_COL[k], f"{ZONE[k]}: {fmt(int(n.get(k, 0)))} buildings", False) for k in core.VARIANT]
+                    + ([(core.SHELTER, "Dry shelter of the plan", True)] if len(sh) else []))
+    st.caption("Darker = flooded more often. Drag to pan, right-drag or Ctrl-drag to tilt and turn.")
     with st.expander("How this is computed", icon=":material/info:"):
-        st.caption("Elevation: AWS Terrain Tiles (Mapzen, Terrarium; SRTM, EU-DEM and other open sources). Imagery: "
-                   + ("Sentinel-2 cloudless 2021 by EOX IT Services GmbH (contains modified Copernicus Sentinel data), "
-                      "CC BY-NC-SA 4.0, non-commercial use." if imagery == "Sentinel-2" else
-                      "Esri World Imagery (Esri, Maxar, Earthstar Geographics), attribution required, Esri terms of use.")
-                   + " Map: MapLibre GL JS (BSD). Homes are OBAT points drawn as 9 m blocks, not real outlines; "
-                     "red = single-storey; 2.5 m tall homes have no reliable height. Dry shelters are the candidate "
-                     "sites of the 10 km plan, not official. The water opacity follows the GloFAS replay flow as a "
-                     "visual cue, not a flood simulation.")
+        st.caption("Buildings: GHS-OBAT points inside the EFAS 500-year zone, drawn as columns (height × 4), not real "
+                   "outlines; 2.5 m is OBAT's fill-in value, so those heights are unknown. Colour: the most frequent "
+                   "flood whose zone covers the building. Zones are modelled (EFAS, no dikes or flood walls), so "
+                   "towns behind dikes are an upper bound. Map © OpenStreetMap contributors, © CARTO.")

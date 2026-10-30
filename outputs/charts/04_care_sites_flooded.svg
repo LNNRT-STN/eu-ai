@@ -6,7 +6,7 @@
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2026-10-30T10:46:58.828507</dc:date>
+    <dc:date>2026-10-30T11:38:31.933910</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
@@ -31,59 +31,83 @@ z
   <g id="axes_1">
    <g id="patch_2">
     <path d="M 172.8 202.32 
-L 570.24 202.32 
-L 570.24 108 
+L 375.84 202.32 
+L 375.84 108 
 L 172.8 108 
 z
 " style="fill: #ffffff"/>
    </g>
    <g id="patch_3">
     <path d="M 172.8 112.287273 
-L 233.018182 112.287273 
-L 233.018182 132.578182 
+L 179.961905 112.287273 
+L 179.961905 132.578182 
 L 172.8 132.578182 
 z
-" clip-path="url(#p481497703d)" style="fill: #003399; stroke: #003399; stroke-linejoin: miter"/>
+" clip-path="url(#pcf011a6759)" style="fill: #d6dff2; stroke: #5a7fd6; stroke-width: 0.8; stroke-linejoin: miter"/>
    </g>
    <g id="patch_4">
     <path d="M 172.8 145.014545 
-L 241.620779 145.014545 
-L 241.620779 165.305455 
+L 187.12381 145.014545 
+L 187.12381 165.305455 
 L 172.8 165.305455 
 z
-" clip-path="url(#p481497703d)" style="fill: #003399; stroke: #003399; stroke-linejoin: miter"/>
+" clip-path="url(#pcf011a6759)" style="fill: #d6dff2; stroke: #5a7fd6; stroke-width: 0.8; stroke-linejoin: miter"/>
    </g>
    <g id="patch_5">
     <path d="M 172.8 177.741818 
-L 396.467532 177.741818 
-L 396.467532 198.032727 
+L 366.171429 177.741818 
+L 366.171429 198.032727 
 L 172.8 198.032727 
 z
-" clip-path="url(#p481497703d)" style="fill: #003399; stroke: #003399; stroke-linejoin: miter"/>
+" clip-path="url(#pcf011a6759)" style="fill: #d6dff2; stroke: #5a7fd6; stroke-width: 0.8; stroke-linejoin: miter"/>
    </g>
    <g id="patch_6">
-    <path d="M 233.018182 112.287273 
-L 233.018182 112.287273 
-L 233.018182 132.578182 
-L 233.018182 132.578182 
+    <path d="M 172.8 112.287273 
+L 179.365079 112.287273 
+L 179.365079 132.578182 
+L 172.8 132.578182 
 z
-" clip-path="url(#p481497703d)" style="fill: url(#h93ddde1a75); stroke: #003399; stroke-linejoin: miter"/>
+" clip-path="url(#pcf011a6759)" style="fill: #5a7fd6; stroke: #5a7fd6; stroke-width: 0.8; stroke-linejoin: miter"/>
    </g>
    <g id="patch_7">
-    <path d="M 241.620779 145.014545 
-L 241.620779 145.014545 
-L 241.620779 165.305455 
-L 241.620779 165.305455 
+    <path d="M 172.8 145.014545 
+L 186.526984 145.014545 
+L 186.526984 165.305455 
+L 172.8 165.305455 
 z
-" clip-path="url(#p481497703d)" style="fill: url(#h93ddde1a75); stroke: #003399; stroke-linejoin: miter"/>
+" clip-path="url(#pcf011a6759)" style="fill: #5a7fd6; stroke: #5a7fd6; stroke-width: 0.8; stroke-linejoin: miter"/>
    </g>
    <g id="patch_8">
-    <path d="M 396.467532 177.741818 
-L 551.314286 177.741818 
-L 551.314286 198.032727 
-L 396.467532 198.032727 
+    <path d="M 172.8 177.741818 
+L 350.057143 177.741818 
+L 350.057143 198.032727 
+L 172.8 198.032727 
 z
-" clip-path="url(#p481497703d)" style="fill: url(#h93ddde1a75); stroke: #003399; stroke-linejoin: miter"/>
+" clip-path="url(#pcf011a6759)" style="fill: #5a7fd6; stroke: #5a7fd6; stroke-width: 0.8; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 172.8 112.287273 
+L 178.768254 112.287273 
+L 178.768254 132.578182 
+L 172.8 132.578182 
+z
+" clip-path="url(#pcf011a6759)" style="fill: #003399; stroke: #003399; stroke-width: 0.8; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 172.8 145.014545 
+L 182.946032 145.014545 
+L 182.946032 165.305455 
+L 172.8 165.305455 
+z
+" clip-path="url(#pcf011a6759)" style="fill: #003399; stroke: #003399; stroke-width: 0.8; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 172.8 177.741818 
+L 314.844444 177.741818 
+L 314.844444 198.032727 
+L 172.8 198.032727 
+z
+" clip-path="url(#pcf011a6759)" style="fill: #003399; stroke: #003399; stroke-width: 0.8; stroke-linejoin: miter"/>
    </g>
    <g id="matplotlib.axis_1"/>
    <g id="matplotlib.axis_2">
@@ -107,16 +131,43 @@ z
     </g>
    </g>
    <g id="text_4">
-    <text style="font-weight: 700; font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #14213d" x="238.695896" y="126.222727" transform="rotate(-0 238.695896 126.222727)">7</text>
+    <text style="font-size: 9px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #5b6577" x="433.44" y="102.3102" transform="rotate(-0 433.44 102.3102)">10-year</text>
    </g>
    <g id="text_5">
-    <text style="font-weight: 700; font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #14213d" x="247.298494" y="158.95" transform="rotate(-0 247.298494 158.95)">8</text>
+    <text style="font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #5b6577" x="433.44" y="126.127727" transform="rotate(-0 433.44 126.127727)">10</text>
    </g>
    <g id="text_6">
-    <text style="font-weight: 700; font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #14213d" x="556.992" y="191.677273" transform="rotate(-0 556.992 191.677273)">44</text>
+    <text style="font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #5b6577" x="433.44" y="158.855" transform="rotate(-0 433.44 158.855)">17</text>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #5b6577" x="433.44" y="191.582273" transform="rotate(-0 433.44 191.582273)">238</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 9px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #5b6577" x="491.04" y="102.3102" transform="rotate(-0 491.04 102.3102)">100-year</text>
+   </g>
+   <g id="text_9">
+    <text style="font-weight: 700; font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #14213d" x="491.04" y="126.222727" transform="rotate(-0 491.04 126.222727)">11</text>
+   </g>
+   <g id="text_10">
+    <text style="font-weight: 700; font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #14213d" x="491.04" y="158.95" transform="rotate(-0 491.04 158.95)">23</text>
+   </g>
+   <g id="text_11">
+    <text style="font-weight: 700; font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #14213d" x="491.04" y="191.677273" transform="rotate(-0 491.04 191.677273)">297</text>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 9px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #5b6577" x="548.64" y="102.3102" transform="rotate(-0 548.64 102.3102)">500-year</text>
+   </g>
+   <g id="text_13">
+    <text style="font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #5b6577" x="548.64" y="126.127727" transform="rotate(-0 548.64 126.127727)">12</text>
+   </g>
+   <g id="text_14">
+    <text style="font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #5b6577" x="548.64" y="158.855" transform="rotate(-0 548.64 158.855)">24</text>
+   </g>
+   <g id="text_15">
+    <text style="font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #5b6577" x="548.64" y="191.582273" transform="rotate(-0 548.64 191.582273)">324</text>
    </g>
    <g id="legend_1">
-    <g id="patch_9">
+    <g id="patch_12">
      <path d="M 176.4 99.6552 
 L 187.2 99.6552 
 L 187.2 91.6002 
@@ -124,91 +175,46 @@ L 176.4 91.6002
 z
 " style="fill: #003399; stroke: #003399; stroke-linejoin: miter"/>
     </g>
-    <g id="text_7">
-     <text style="font-size: 9px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #14213d" x="194.4" y="98.7102" transform="rotate(-0 194.4 98.7102)">Satellite-mapped</text>
+    <g id="text_16">
+     <text style="font-size: 9px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #14213d" x="194.4" y="98.7102" transform="rotate(-0 194.4 98.7102)">10-year</text>
     </g>
-    <g id="patch_10">
-     <path d="M 279.451406 99.6552 
-L 290.251406 99.6552 
-L 290.251406 91.6002 
-L 279.451406 91.6002 
+    <g id="patch_13">
+     <path d="M 241.271719 99.6552 
+L 252.071719 99.6552 
+L 252.071719 91.6002 
+L 241.271719 91.6002 
 z
-" style="fill: url(#h93ddde1a75); stroke: #003399; stroke-linejoin: miter"/>
+" style="fill: #5a7fd6; stroke: #5a7fd6; stroke-linejoin: miter"/>
     </g>
-    <g id="text_8">
-     <text style="font-size: 9px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #14213d" x="297.451406" y="98.7102" transform="rotate(-0 297.451406 98.7102)">Vesdre, modelled</text>
+    <g id="text_17">
+     <text style="font-size: 9px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #14213d" x="259.271719" y="98.7102" transform="rotate(-0 259.271719 98.7102)">100-year</text>
+    </g>
+    <g id="patch_14">
+     <path d="M 311.146875 99.6552 
+L 321.946875 99.6552 
+L 321.946875 91.6002 
+L 311.146875 91.6002 
+z
+" style="fill: #d6dff2; stroke: #5a7fd6; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_18">
+     <text style="font-size: 9px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #14213d" x="329.146875" y="98.7102" transform="rotate(-0 329.146875 98.7102)">500-year</text>
     </g>
    </g>
   </g>
-  <g id="text_9">
-   <text style="font-weight: 700; font-size: 14px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #14213d" x="18" y="33.81" transform="rotate(-0 18 33.81)">15 hospitals and care homes stood in the 2021 water</text>
+  <g id="text_19">
+   <text style="font-weight: 700; font-size: 14px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #14213d" x="18" y="33.81" transform="rotate(-0 18 33.81)">34 hospitals and care homes stand in the 100-year flood zone</text>
   </g>
-  <g id="text_10">
-   <text style="font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #5b6577" x="18" y="54.16" transform="rotate(-0 18 54.16)">Sites with at least 5 % of their footprint flooded: evacuate these first</text>
+  <g id="text_20">
+   <text style="font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #5b6577" x="18" y="54.16" transform="rotate(-0 18 54.16)">Sites with at least 5 % of their footprint in each zone: evacuate these first. 27 are already in the 10-year zone.</text>
   </g>
-  <g id="text_11">
-   <text style="font-size: 7.5px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #5b6577" x="18" y="234.72" transform="rotate(-0 18 234.72)">Source: OpenStreetMap × Copernicus EMS flood extent; Vesdre: EFAS 500-year model. OSM misses some care homes: a floor.</text>
+  <g id="text_21">
+   <text style="font-size: 7.5px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #5b6577" x="18" y="234.72" transform="rotate(-0 18 234.72)">Source: OpenStreetMap × EFAS flood hazard maps (JRC), modelled, no dikes. OSM misses some care homes: a floor.</text>
   </g>
  </g>
  <defs>
-  <clipPath id="p481497703d">
-   <rect x="172.8" y="108" width="397.44" height="94.32"/>
+  <clipPath id="pcf011a6759">
+   <rect x="172.8" y="108" width="203.04" height="94.32"/>
   </clipPath>
- </defs>
- <defs>
-  <pattern id="h93ddde1a75" patternUnits="userSpaceOnUse" x="0" y="0" width="72" height="72">
-   <rect x="0" y="0" width="73" height="73" fill="#ffffff"/>
-   <path d="M -36 36 
-L 36 -36 
-M -33 39 
-L 39 -33 
-M -30 42 
-L 42 -30 
-M -27 45 
-L 45 -27 
-M -24 48 
-L 48 -24 
-M -21 51 
-L 51 -21 
-M -18 54 
-L 54 -18 
-M -15 57 
-L 57 -15 
-M -12 60 
-L 60 -12 
-M -9 63 
-L 63 -9 
-M -6 66 
-L 66 -6 
-M -3 69 
-L 69 -3 
-M 0 72 
-L 72 0 
-M 3 75 
-L 75 3 
-M 6 78 
-L 78 6 
-M 9 81 
-L 81 9 
-M 12 84 
-L 84 12 
-M 15 87 
-L 87 15 
-M 18 90 
-L 90 18 
-M 21 93 
-L 93 21 
-M 24 96 
-L 96 24 
-M 27 99 
-L 99 27 
-M 30 102 
-L 102 30 
-M 33 105 
-L 105 33 
-M 36 108 
-L 108 36 
-" style="fill: #003399; stroke: #003399; stroke-width: 0.8; stroke-linecap: butt; stroke-linejoin: miter"/>
-  </pattern>
  </defs>
 </svg>

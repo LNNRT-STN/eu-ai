@@ -7,20 +7,23 @@ Out: outputs/data/addresses.parquet; raw OSM address read cached in cache/osm/<e
 Method: every OSM object with addr:housenumber (nodes; building ways/relations by representative point) inside the
 areas' bounding boxes (+150 m); each OBAT point gets the nearest one within 30 m (EPSG:3035). One address may serve
 several OBAT points. No match -> no address; nothing is guessed or interpolated.
+OUT_DIR=outputs/rp: the return-period buildings (flags in_rp10 / in_rp100 / in_rp500 kept); OSM reads cached as
+<extract>.addr.rp.<layer>.gpkg, since the zones reach beyond the 2021 boxes.
 Licence: address data (c) OpenStreetMap contributors, ODbL 1.0 (attribution and share-alike apply to the output).
 """
-import time, warnings
+import os, time, warnings
 from pathlib import Path
 warnings.filterwarnings("ignore")
 import numpy as np, pandas as pd, geopandas as gpd, pyogrio
 from scipy.spatial import cKDTree
 
 T0 = time.time()
-C = Path("cache/osm"); OUT = Path("outputs/data/addresses.parquet"); MAX_M = 30.0; PAD = 0.002   # ~150 m
+D = Path(os.environ.get("OUT_DIR", "outputs/data")); TAG = "" if D.name == "data" else f".{D.name}"
+C = Path("cache/osm"); OUT = D / "addresses.parquet"; MAX_M = 30.0; PAD = 0.002   # ~150 m
 TAGS = {"street": "addr:street", "place": "addr:place", "housenumber": "addr:housenumber",
         "postcode": "addr:postcode", "city": "addr:city"}
 
-b = pd.read_parquet("outputs/data/buildings_3d.parquet").reset_index(drop=True)
+b = pd.read_parquet(D / "buildings_3d.parquet").reset_index(drop=True)
 b.insert(0, "bid", b["area"] + "-" + b.index.astype(str))
 boxes = b.groupby("area").agg(x0=("lon", "min"), x1=("lon", "max"), y0=("lat", "min"), y1=("lat", "max"))
 boxes[["x0", "y0"]] -= PAD; boxes[["x1", "y1"]] += PAD
@@ -32,7 +35,7 @@ def tag(g, k):
 frames = []
 for f in sorted(C.glob("*-latest.osm.pbf")):
     for layer in ("points", "multipolygons"):
-        cache = C / f.name.replace(".osm.pbf", f".addr.{layer}.gpkg")
+        cache = C / f.name.replace(".osm.pbf", f".addr{TAG}.{layer}.gpkg")
         if cache.exists(): g = gpd.read_file(cache)
         else:
             g = pyogrio.read_dataframe(f, layer=layer, bbox=full, where="other_tags LIKE '%\"addr:housenumber\"%'")
@@ -65,7 +68,7 @@ b["label"] = np.where(hit, (b["street"].fillna("") + " " + b["housenumber"].fill
 b["country"] = b["municipality"].str.extract(r"\((\w\w)\)\s*$", expand=False)
 
 cols = ["bid", "area", "municipality", "lon", "lat", "use", "storeys", "height_m",
-        "street", "housenumber", "postcode", "city", "match_m", "label"]
+        "street", "housenumber", "postcode", "city", "match_m", "label", *[c for c in b if c.startswith("in_rp")]]
 b[cols].to_parquet(OUT, index=False)
 
 b["matched"] = hit; b["res"] = b["use"] == 1

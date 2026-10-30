@@ -1,34 +1,41 @@
-"""Crisis room, Priorities tab (render), in order of importance:
-  1 Do now   evacuate the hospitals and care homes in the 2021 water: per district, in order, and where to take them
-  2 Next     (brief Q3) who has a candidate shelter within walking distance, who does not; schools in the water
-  how()      warning time, 'better prepared?', how the numbers were made: for the tab's How this is computed expander
-Numbers come from outputs/data/ (notebooks/pipeline.py, q4_ranking.py, receiving.py) and src/out/meuse/replay_2021.json."""
+"""Crisis room, Priorities tab (render), for the flood the room plans for (live.variant()), in order of importance:
+  1 Do now   evacuate the hospitals and care homes in the flood zone: per district, in order, and where to take them
+  2 Next     (brief Q3) who has a candidate shelter within walking distance, who does not; schools in the zone
+  how()      'better prepared?', how the numbers were made: for the tab's How this is computed expander
+Numbers come from outputs/rp/ (notebooks/pipeline.py with FLOOD=rp, rp_extras.py)."""
 import pandas as pd
 import pydeck as pdk
 import streamlit as st
 
 import anna
 import core
+import live
 from core import about, fmt
 
 head, towns, crit, shel, flood, summary, qc = anna.load()
 recv, bus = anna.load_moves()
-V = "worst"                                               # all satellite passes: closest to official 2021 figures
-obs, mod = head[V]["observed"], head[V]["modelled_vesdre"]
-T = towns[towns.variant == V].assign(no_shelter=lambda d: d.no_reach + d.full)
-C = crit[crit.share_of_site_flooded.ge(.05) & crit.in_worst_flood.astype(bool)]
-care = C[C.type.isin(["hospital", "care home"])]
-DISTRICT = {"ahr": "Ahrweiler", "erftstadt": "Rhein-Erft", "schleiden": "Euskirchen"}
-by_d = care.groupby(care.area.map(DISTRICT)).size().sort_values(ascending=False)
-flow = core.load_replay()
-lead = (flow.idxmax().max() - flow.idxmax().min()).days
+MAX_DISTRICTS = 4                                         # district cards side by side; the rest under "All"
 MAP_H = 480
 TIP = {"html": "<b>{tname}</b><br/>{tinfo}",
        "style": {"backgroundColor": "#1d1d1f", "color": "#fff", "fontSize": "13px", "borderRadius": "8px"}}
-WATER = [pdk.Layer("GeoJsonLayer", flood[(a, V)], filled=True, stroked=True, line_width_min_pixels=1,
-                   get_fill_color=[0, 113, 227, 70 if a in anna.MODELLED else 140], get_line_color=[0, 90, 200, 200])
-         for a in anna.AREA]
 GREEN = core.rgb(core.SHELTER)
+
+
+def scenario(v):
+    """The tab's numbers for return period v (the module stays imported between reruns, so they are set per run)."""
+    global V, RP, obs, T, C, care, by_d, WATER, ZONE
+    V, RP = v, int(v[2:])
+    ZONE = f"{RP}-year zone"
+    obs = head[V]["modelled"]
+    T = towns[towns.variant == V].assign(no_shelter=lambda d: d.no_reach + d.full)
+    C = crit[crit.share_of_site_flooded.ge(.05) & crit[f"in_{V}_flood"].astype(bool)].copy()
+    C["district"] = [live.district(a, m).replace("Province of ", "").replace(" (governor)", "")
+                     for a, m in zip(C.area, C.municipality)]
+    care = C[C.type.isin(["hospital", "care home"])]
+    by_d = care.groupby("district").size().sort_values(ascending=False).head(MAX_DISTRICTS)
+    WATER = [pdk.Layer("GeoJsonLayer", flood[(a, V)], filled=True, stroked=True, line_width_min_pixels=1,
+                       get_fill_color=core.rgb(core.RP_COL[V], 120), get_line_color=core.rgb(core.RP_COL[V], 200))
+             for a in anna.AREA]
 
 
 
@@ -104,9 +111,13 @@ CSS = """<style>
 
 
 def render():
+    scenario(live.variant())
     st.html(CSS)
+    if live.plan() is None:
+        st.info("No flood switched on: these are the priorities for a 100-year flood, for preparation.",
+                icon=":material/info:")
     # =============================================================================== 1 · DO NOW
-    st.html(f"<div class='act'><i></i><div><h2>Across all towns: move the {len(care)} hospitals and care homes in the flood zone first"
+    st.html(f"<div class='act'><i></i><div><h2>Across all towns: move the {len(care)} hospitals and care homes in the {ZONE} first"
             "</h2><p>Pick a district: its sites in evacuation order, and the nearest dry hospitals and care homes."
             "</p></div></div>")
     st.space("small")
@@ -120,7 +131,7 @@ def render():
 
     cards = st.columns(len(by_d), gap="small")
     for col, (d, n) in zip(cards, by_d.items()):
-        in_d = care[care.area.map(DISTRICT) == d].town.value_counts()
+        in_d = care[care.district == d].town.value_counts().head(4)
         with col, st.container(key=f"dcard-{d}"):
             st.html(f"<div class='dc{' on' if st.session_state.district == d else ''}'><b>{n}</b>"
                     f"<h3>{d} district crisis staff</h3><span>{' · '.join(f'{t} {k}' for t, k in in_d.items())}</span></div>")
@@ -128,8 +139,9 @@ def render():
     st.space("small")
 
     dist = st.session_state.district
-    sites = evac_order(care[care.area.map(DISTRICT) == dist] if dist else care)
-    sites["district"] = sites.area.map(DISTRICT)
+    if dist not in by_d.index:  # the scenario changed under a picked district
+        dist = st.session_state.district = None
+    sites = evac_order(care[care.district == dist] if dist else care)
     all1 = st.session_state.get(f"all1-{dist}", False)
     k1 = f"sites-{dist}-{st.session_state.get('v1', 0)}-{all1}"
     i1 = picked_row(k1)
@@ -159,9 +171,9 @@ def render():
                      f"{site.share_of_site_flooded:.0%} of the site under water<br>")
                     + core.swatch(core.EVACUATE, "Hospital / care home to evacuate", True)
                     + (core.swatch(core.SHELTER, "Nearest dry site of the same kind", True) if site is not None else "")
-                    + core.swatch("rgba(0,113,227,.55)", "2021 water"))
+                    + core.swatch(core.RP_COL[V], ZONE))
     with right:
-        head_txt = f"{dist} district crisis staff" if dist else "All three districts"
+        head_txt = f"{dist} district crisis staff" if dist else "All districts"
         st.html(f"<div class='bars'><div class='cap'>{head_txt}</div><div class='one'><b>{len(sites)} sites</b>"
                 "<span>to evacuate, in this order · click one to see the nearest dry sites</span></div></div>")
         cols = ["order", "name", "town", "pct"] if dist else ["order", "name", "district", "pct"]
@@ -193,18 +205,18 @@ def render():
     far_more = obs["bus_covered"] - obs["sheltered"]
     st.html(f"<div class='act next'><i></i><div><h2>Next: {about(obs['no_shelter'])} people would have no shelter place "
             "within walking distance</h2>"
-            f"<p>{about(obs['sheltered'])} of the {about(obs['people'])} residents in the 2021 water have one within 1.5 km. "
-            f"{int((~schools.area.isin(anna.MODELLED)).sum())} schools sat in the water themselves "
-            f"(+{int(schools.area.isin(anna.MODELLED).sum())} modelled). Candidate shelters 1.5–10 km away have empty places for "
-            f"{about(far_more)} more.</p></div></div>")
+            f"<p>{about(obs['sheltered'])} of the {about(obs['people'])} residents in the {ZONE} have one within 1.5 km. "
+            f"{len(schools)} schools lie in the zone themselves. Candidate shelters 1.5–10 km away have empty places for "
+            f"{about(far_more)} more; about {about(obs['bus_no_shelter'])} have no place within 10 km.</p></div></div>")
     st.space("small")
 
     top = T.nlargest(5, "no_shelter").reset_index(drop=True)
-    top["short"] = top.label.str.replace(" (modelled)", " *")
+    top["short"] = top.label.str.replace(" (modelled)", "")
     st.session_state.setdefault("pr_town", "All")
     pick = st.pills("Town", ["All", *top.short], label_visibility="collapsed", key="pr_town")
     sel = None if pick in (None, "All") else top[top.short == pick].iloc[0]
-    cands = (shel[(shel.town == sel["name"]) & (shel.area == sel.area)].sort_values("capacity_central", ascending=False)
+    dry = shel[~shel[f"in_{V}"].astype(bool)]  # candidate sites that stay dry in this zone
+    cands = (dry[(dry.town == sel["name"]) & (dry.area == sel.area)].sort_values("capacity_central", ascending=False)
              .reset_index(drop=True) if sel is not None else shel.iloc[0:0])
     cands["label"] = [n if isinstance(n, str) else f"Unnamed {c}" for n, c in zip(cands.name, cands.cat)]
     town_schools = schools[(schools.town == sel["name"]) & (schools.area == sel.area)] if sel is not None else schools
@@ -215,7 +227,7 @@ def render():
 
     left, right = st.columns([3, 2], gap="small")
     with left:
-        sch = town_schools.assign(tname=town_schools.name, tinfo=[f"school in the 2021 water · {s:.0%} of the site"
+        sch = town_schools.assign(tname=town_schools.name, tinfo=[f"school in the {ZONE} · {s:.0%} of the site"
                                                                  for s in town_schools.share_of_site_flooded])
         school_layer = pdk.Layer("ScatterplotLayer", sch, get_position=["lon", "lat"], get_radius=6, radius_units="'pixels'",
                                  filled=False, stroked=True, get_line_color=core.rgb(core.EVACUATE), line_width_min_pixels=2,
@@ -253,14 +265,14 @@ def render():
         deck(layers, view)
         if sel is None:
             core.legend(core.swatch(core.EVACUATE, "People with no shelter place within 1.5 km (circle size)", True)
-                        + "<span><i style='border:2px solid #d70015;border-radius:50%;background:none'></i>School in the 2021 water</span>"
-                        + core.swatch("rgba(0,113,227,.55)", "2021 water"))
+                        + f"<span><i style='border:2px solid #d70015;border-radius:50%;background:none'></i>School in the {ZONE}</span>"
+                        + core.swatch(core.RP_COL[V], ZONE))
         else:
             core.legend(("" if stop is None else f"<b>◯ {stop.label}</b> · candidate {stop['cat']} · rough capacity "
                          f"≈ {about(stop.capacity_central)} places<br>")
                         + core.swatch(core.SHELTER, "Candidate shelter, dry (size = rough capacity)", True)
-                        + "<span><i style='border:2px solid #d70015;border-radius:50%;background:none'></i>School in the 2021 water</span>"
-                        + core.swatch("rgba(0,113,227,.55)", "2021 water"))
+                        + f"<span><i style='border:2px solid #d70015;border-radius:50%;background:none'></i>School in the {ZONE}</span>"
+                        + core.swatch(core.RP_COL[V], ZONE))
     with right:
         if sel is None:
             mx = top.people.max()
@@ -269,15 +281,15 @@ def render():
                            f"background:#f2f2f7'><i style='width:{100 * r.covered / mx:.0f}%;background:{core.SHELTER}'></i>"
                            f"<i style='width:{100 * r.no_shelter / mx:.0f}%;background:{core.EVACUATE}'></i></div>"
                            f"<div class='v'>{about(r.no_shelter)}</div></div>" for r in top.itertuples())
-            st.html(f"<div class='bars'><div class='cap'>Residents in the 2021 water: shelter place within 1.5 km?</div>"
+            st.html(f"<div class='bars'><div class='cap'>Residents in the {ZONE}: shelter place within 1.5 km?</div>"
                     f"{bars}</div>")
             core.legend(core.swatch(core.SHELTER, "Has a place") + core.swatch(core.EVACUATE, "No place (number)"))
-            st.html("<p class='asof'>* modelled: the satellite missed the Vesdre valley</p>")
+            st.html("<p class='asof'>Modelled zone (EFAS, no dikes): towns behind the Meuse dikes are an upper bound.</p>")
         else:
-            st.html(f"<div class='bars'><div class='cap'>{sel.label} · residents in the 2021 water</div><div class='trio'>"
+            st.html(f"<div class='bars'><div class='cap'>{sel.label} · residents in the {ZONE}</div><div class='trio'>"
                     f"<div><b style='color:{core.SHELTER}'>{about(sel.covered)}</b><span>have a shelter place within 1.5 km"
                     f"</span></div><div><b style='color:{core.EVACUATE}'>{about(sel.no_shelter)}</b><span>have none</span></div>"
-                    f"<div><b>{len(town_schools)}</b><span>schools in the water</span></div></div></div>")
+                    f"<div><b>{len(town_schools)}</b><span>schools in the zone</span></div></div></div>")
             shown2 = cands if all2 else cands.head(3)
             st.dataframe(shown2[["label", "cat", "capacity_central"]], key=k2, on_select="rerun", selection_mode="single-row",
                          hide_index=True, height=min(36 * len(shown2) + 40, MAP_H - 230),
@@ -292,26 +304,23 @@ def render():
 
 def how():
     """Method notes for the How this is computed expander (no nested expander: this sits inside one)."""
+    scenario(live.variant())
     st.markdown(
-        f"- **No place on foot:** {about(obs['no_shelter'])} people where the satellite saw the 2021 water; "
+        f"- **No place on foot ({RP}-year flood):** {about(obs['no_shelter'])} people in the zone; "
         f"{about(obs['full'])} of them have a shelter within 1.5 km, but it is full (4 m² per person, half the floor "
         f"usable). Range {about(obs['no_shelter_range'][0])} to {about(obs['no_shelter_range'][1])} with stricter or "
         "looser assumptions.\n"
         f"- **Within 10 km:** the same candidate shelters, up to 10 km away in a straight line, have empty places for "
         f"{about(obs['bus_covered'] - obs['sheltered'])} of them.\n"
-        f"- **Vesdre (modelled):** {about(mod['no_shelter'])} more people with no place on foot; the satellite map has "
-        "no flood there.\n"
-        "- **Hospitals and care homes:** at least 5 % of the site under water in July 2021, most of the site under "
-        "water first, hospitals before care homes. Receiving sites: the nearest OpenStreetMap hospitals or care homes "
-        "that were dry in 2021 and in the 100-year model; free beds and residents are in no dataset.\n"
-        "- **Candidate shelters:** schools, sports halls and civic buildings from OpenStreetMap, dry in 2021 and in the "
-        "100-year model, at least 200 m². Rough capacity: floor area × 50 % usable ÷ 4 m² per person.\n"
+        "- **Hospitals and care homes:** at least 5 % of the site inside the 500-year zone and in this zone, most of "
+        "the site under water first, hospitals before care homes. Receiving sites: the nearest OpenStreetMap hospitals "
+        "or care homes outside the 500-year zone; free beds and residents are in no dataset.\n"
+        "- **Candidate shelters:** schools, sports halls and civic buildings from OpenStreetMap, dry in this zone, at "
+        "least 200 m². Rough capacity: floor area × 50 % usable ÷ 4 m² per person. A rarer flood takes sites away.\n"
         f"- **People in the flood zone:** {about(obs['people'])} in 2020, {about(obs['people_2025'])} in 2025 "
-        "(projection).\n"
-        f"- **Warning time:** in the July 2021 replay, Maastricht to Venlo peaked {lead} day after the Vesdre and "
-        "Liège.\n"
+        "(projection). EFAS zone, modelled; no dikes in the model.\n"
         "- **Better prepared than 2021? Partly.** Warning: Germany's cell broadcast has run since Feb 2023 and a €88 m "
         "siren programme followed. Rail: the Ahr valley line reopened in Dec 2025. Still open: shelter places on foot, "
-        "the Ahr's retention basins (unfunded). Partly verified desk research: docs/BUDGETS.md and the 2021, today, "
-        "next page.\n"
+        "the Ahr's retention basins (unfunded). Partly verified desk research: docs/BUDGETS.md and the 2021 vs today "
+        "page.\n"
         "- **Sources and checks:** Data & limits.")

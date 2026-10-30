@@ -7,8 +7,11 @@ Decisions (change here):
   shelters    = OSM schools / sports halls / civic buildings, capacity from OBAT footprint x floors (height / 3 m),
                 excluded if they touch the worst-case flood; reach = straight-line distance
 Outputs in outputs/data/.
+FLOOD=rp: the return-period demo. Same areas (each 2021 flood's box), but the floods are the EFAS 10-, 100- and
+500-year zones (variants rp10 / rp100 / rp500); a shelter counts for a variant only when it is dry in that zone.
+Outputs in outputs/rp/.
 """
-import sys, json, time, pickle, warnings
+import os, sys, json, time, pickle, warnings
 from pathlib import Path
 warnings.filterwarnings("ignore")
 sys.path.insert(0, str(Path(__file__).parent))
@@ -17,7 +20,7 @@ from rasterio import features as rfeat
 from rasterio.windows import from_bounds
 from shapely.validation import make_valid
 import osmnx as ox
-from common import D, M, flood_geom, read_pop, read_buildings, attach_people
+from common import D, M, src, flood_geom, read_pop, read_buildings, attach_people
 
 OUT = Path("outputs/data"); OUT.mkdir(parents=True, exist_ok=True)
 ox.settings.use_cache = True; ox.settings.cache_folder = "cache/osmnx"; ox.settings.log_console = False; ox.settings.requests_timeout = 300
@@ -39,11 +42,14 @@ MIN_GFA, FLOOR_H, MAX_FLOORS = 200, 3.0, 10
 SCEN = {"low": dict(use=0.4, m2=5.0, walk=1000), "central": dict(use=0.5, m2=4.0, walk=1500), "high": dict(use=0.6, m2=3.0, walk=2500),
         "bus": dict(use=0.5, m2=4.0, walk=10000)}   # central capacity, but buses take people up to 10 km (straight line)
 VARIANTS = ("main", "worst")
+RP = os.environ.get("FLOOD") == "rp"
+if RP: VARIANTS = ("rp10", "rp100", "rp500"); OUT = Path("outputs/rp"); OUT.mkdir(parents=True, exist_ok=True)
+W = VARIANTS[-1]                                     # the widest flood: exposure QC, care sites and duplicates use it
 def say(*a): print(*a, flush=True)
 
 # ---------------------------------------------------------------- helpers
 def efas_depth(rp, bbox):
-    with rasterio.open(D / f"cems-efas/Europe_RP{rp}_filled_depth.tif") as r:
+    with rasterio.open(src(f"cems-efas/Europe_RP{rp}_filled_depth.tif")) as r:
         win = from_bounds(*bbox, transform=r.transform).round_offsets().round_lengths()
         return r.read(1, window=win), r.window_transform(win)
 
@@ -224,7 +230,11 @@ for A in AREAS:
         qc_all[key] = p["qc"]; validation.update(p["val"]); seen |= p["seen"]; bus_rows += p.get("bus", [])
         say("  (cached)"); continue
     n0 = (len(summary), len(muni_rows), len(crit_rows), len(bus_rows))
-    if "efas" in A:
+    if RP:
+        bbox = A.get("bbox") or tuple(gpd.read_file(f"outputs/data/flood_{key}_worst.geojson").total_bounds + [-.05, -.05, .05, .05])
+        fl = {v: efas_polygon(int(v[2:]), bbox) for v in VARIANTS}
+        npoly = dict.fromkeys(VARIANTS); source = "EFAS modelled (10-, 100-, 500-year)"
+    elif "efas" in A:
         bbox = A["bbox"]; fl = {"main": efas_polygon(A["efas"][0], bbox), "worst": efas_polygon(A["efas"][1], bbox)}
         npoly = {"main": None, "worst": None}; source = f"EFAS modelled {A['efas'][0]}-year (main) / {A['efas'][1]}-year (worst)"
     else:
@@ -239,7 +249,7 @@ for A in AREAS:
     # Missing-data analysis (book p.210) and sanity checks on the exposed group
     win_pop = float(read_pop(bbox, 2020)[0].sum()); placed = float(b["people"].sum())
     assert placed <= win_pop * 1.0001, "dasymetric placed more people than exist"
-    ex = b[b.in_worst]
+    ex = b[b[f"in_{W}"]]
     ppm2 = (ex["people"] / ex["area"].where(ex["area"] > 0)).dropna()     # ["area"] = OBAT footprint, not .area (geometry)
     qc.update(window_population=round(win_pop), population_not_on_any_home=round(win_pop - placed),
               population_not_on_any_home_pct=round(100 * (win_pop - placed) / max(win_pop, 1), 1),
@@ -247,28 +257,30 @@ for A in AREAS:
               exposed_use0_outside_builtup=int((ex.use == 0).sum()),
               exposed_people_per_m2_max=round(float(ppm2.max()), 2) if len(ppm2) else None,
               exposed_buildings_people_density_outliers=int((ppm2 > tukey_upper(ppm2)).sum()) if len(ppm2) else 0)
-    b["dup"] = b["id"].isin(seen) & (b.in_main | b.in_worst)
+    b["dup"] = b["id"].isin(seen) & b[[f"in_{v}" for v in VARIANTS]].any(axis=1)
     qc["exposed_already_counted_in_earlier_area"] = int(b["dup"].sum())
-    seen |= set(b.loc[b.in_worst, "id"])
+    seen |= set(b.loc[b[f"in_{W}"], "id"])
     munis = municipalities(bbox); qc["municipalities"] = len(munis)
     sites = capacity(osm_sites(bbox, qc), b, qc)
-    sites["in_main"], sites["in_worst"] = sites.intersects(fl["main"]), sites.intersects(fl["worst"])
+    for v in VARIANTS: sites[f"in_{v}"] = sites.intersects(fl[v])
     # share of each site under water (a campus whose car park touches the edge is not "flooded" like a submerged one)
     poly_area = sites.area.where(sites.area > 0)
-    sites["share_worst"] = (sites.intersection(fl["worst"]).area / poly_area).fillna(sites["in_worst"].astype(float)).round(2)
+    sites["share_worst"] = (sites.intersection(fl[W]).area / poly_area).fillna(sites[f"in_{W}"].astype(float)).round(2)
     # "not mapped" is not "safe": a shelter must also be dry in the EFAS 100-year model, outside the satellite AOIs too
     rp = sites.representative_point().to_crs(4326)
     sites["in_efas100"] = sample(*efas_depth(100, bbox), pd.DataFrame({"lon": rp.x.values, "lat": rp.y.values})) > EFAS_THR
     sites["muni"] = assign_muni(gpd.GeoDataFrame(geometry=sites.centroid, crs=M), munis)
     is_shelter_type = sites["cat"].isin(["school", "sports hall", "civic"])
-    shel = sites[is_shelter_type & ~sites["in_worst"] & ~sites["in_efas100"] & (sites.gfa >= MIN_GFA)].copy()
-    qc["usable_shelters"] = len(shel); qc["shelter_sites_flooded"] = int((is_shelter_type & sites.in_worst).sum())
-    qc["shelter_sites_excluded_by_efas100_only"] = int((is_shelter_type & ~sites.in_worst & sites.in_efas100).sum())
+    # return periods: dry in the 10-year zone here; each variant then keeps only the shelters dry in its own zone
+    dry = ~sites[f"in_{VARIANTS[0]}"] if RP else ~sites[f"in_{W}"] & ~sites["in_efas100"]
+    shel = sites[is_shelter_type & dry & (sites.gfa >= MIN_GFA)].copy()
+    qc["usable_shelters"] = len(shel); qc["shelter_sites_flooded"] = int((is_shelter_type & sites[f"in_{W}"]).sum())
+    qc["shelter_sites_excluded_by_efas100_only"] = int((is_shelter_type & ~sites[f"in_{W}"] & sites.in_efas100).sum())
     shelters_all.append(shel.assign(area=key, capacity_central=(shel.gfa * .5 / 4).round()))
-    for _, r in sites[sites["cat"].isin(["hospital", "care home", "school"]) & sites.in_worst].iterrows():
+    for _, r in sites[sites["cat"].isin(["hospital", "care home", "school"]) & sites[f"in_{W}"]].iterrows():
         c = gpd.GeoSeries([r.geometry.centroid], crs=M).to_crs(4326).iloc[0]
         crit_rows.append(dict(area=key, municipality=r["muni"], type=r["cat"], name=r["name"] if isinstance(r["name"], str) else "(no name in OSM)",
-                              osm_parts=int(r.parts), in_main_flood=bool(r.in_main), in_worst_flood=True,
+                              osm_parts=int(r.parts), **{f"in_{v}_flood": bool(r[f"in_{v}"]) for v in VARIANTS},
                               share_of_site_flooded=float(r.share_worst), also_in_efas100=bool(r.in_efas100), lon=round(c.x, 5), lat=round(c.y, 5), source=source))
     bm = gpd.GeoDataFrame(b, geometry=gpd.points_from_xy(b.x, b.y), crs=M)
     bm["muni"] = assign_muni(bm, munis)
@@ -278,25 +290,26 @@ for A in AREAS:
                    buildings=len(e), residential=int((e.use == 1).sum()), non_residential=int((e.use == 2).sum()),
                    people_2020=round(e.people.sum()), people_2025=round(e.people25.sum()))
         exp = e[e.people > 0][["people", "muni", "geometry"]]
+        sv = shel[~shel[f"in_{v}"]] if RP else shel           # return periods: only shelters dry in this zone
         for sc, s in SCEN.items():
-            al = allocate_maxflow(exp, shel, s, flows=(sc == "bus" and v == "worst"))   # best coordinated plan
-            nf = allocate(exp, shel, s)                         # everyone goes to the nearest shelter with room
+            al = allocate_maxflow(exp, sv, s, flows=(sc == "bus" and (RP or v == W)))   # best coordinated plan
+            nf = allocate(exp, sv, s)                         # everyone goes to the nearest shelter with room
             if al.covered.sum() < nf.covered.sum() - max(1, 0.001 * exp.people.sum()):     # 0.1-person rounding tolerance
                 pickle.dump((exp, shel, s), open(OUT / "debug_maxflow.pkl", "wb"))
                 raise AssertionError(f"max-flow below greedy: bug ({al.covered.sum():.0f} < {nf.covered.sum():.0f}), case saved")
             row.update({f"{sc}_covered": round(al.covered.sum()), f"{sc}_no_reach": round(al.no_reach.sum()), f"{sc}_full": round(al.full.sum()),
                         f"{sc}_covered_nearest_first": round(nf.covered.sum())})
-            if sc == "bus" and v == "worst" and len(al.attrs.get("flows", [])):
+            if sc == "bus" and (RP or v == W) and len(al.attrs.get("flows", [])):
                 fdf = al.attrs["flows"]
-                pts = gpd.GeoSeries(shel.geometry.values, crs=M).representative_point().to_crs(4326)
+                pts = gpd.GeoSeries(sv.geometry.values, crs=M).representative_point().to_crs(4326)
                 fdf = fdf.assign(municipality=exp["muni"].values[fdf.i.values],
                                  shelter=[n if isinstance(n, str) else f"Unnamed {c}" for n, c in
-                                          zip(shel["name"].values[fdf.j.values], shel["cat"].values[fdf.j.values])],
-                                 cat=shel["cat"].values[fdf.j.values], s_lon=pts.x.values[fdf.j.values].round(5),
+                                          zip(sv["name"].values[fdf.j.values], sv["cat"].values[fdf.j.values])],
+                                 cat=sv["cat"].values[fdf.j.values], s_lon=pts.x.values[fdf.j.values].round(5),
                                  s_lat=pts.y.values[fdf.j.values].round(5),
-                                 places=(shel["gfa"].values[fdf.j.values] * s["use"] / s["m2"]).round())
+                                 places=(sv["gfa"].values[fdf.j.values] * s["use"] / s["m2"]).round())
                 agg = fdf.groupby(["municipality", "shelter", "cat", "s_lon", "s_lat", "places"], as_index=False).people.sum()
-                bus_rows += agg.assign(area=key, people=agg.people.round(1)).to_dict("records")
+                bus_rows += agg.assign(area=key, people=agg.people.round(1), **({"variant": v} if RP else {})).to_dict("records")
             if sc == "central":
                 g = al.groupby("muni")[["people", "covered", "no_reach", "full"]].sum().round()
                 g2 = e.groupby("muni").agg(buildings=("id", "size"), people_2025=("people25", "sum")).round()
@@ -305,9 +318,9 @@ for A in AREAS:
         row["critical_sites_in_flood"] = int((sites["cat"].isin(["hospital", "care home", "school"]) & sites[f"in_{v}"]).sum())
         summary.append(row); say({k: row[k] for k in ("variant", "flood_km2", "buildings", "people_2020", "people_2025", "central_covered", "central_no_reach", "central_full", "critical_sites_in_flood")})
     # EFAS proxy validation where we have observed EMS floods
-    if key in ("ahr", "liege"):
+    if key in ("ahr", "liege") and not RP:
         inside_aoi = shapely.contains_xy(aoi_union(cc, A["ems"]), b["x"].values, b["y"].values)
-        bb, obs = b[inside_aoi], b.loc[inside_aoi, "in_worst"].values
+        bb, obs = b[inside_aoi], b.loc[inside_aoi, f"in_{W}"].values
         val = {}
         for rp in (10, 100, 500):
             wet = sample(*efas_depth(rp, bbox), bb) > EFAS_THR
@@ -320,13 +333,13 @@ for A in AREAS:
         gpd.GeoSeries([fl[v]], crs=M).simplify(15).to_crs(4326).to_file(OUT / f"flood_{key}_{v}.geojson", driver="GeoJSON")
     pickle.dump(dict(summary=summary[n0[0]:], muni=muni_rows[n0[1]:], crit=crit_rows[n0[2]:], shel=shelters_all[-1], qc=qc,
                      bus=bus_rows[n0[3]:],
-                     val={key: validation[key]} if key in validation else {}, seen=set(b.loc[b.in_worst, "id"])), open(part, "wb"))
+                     val={key: validation[key]} if key in validation else {}, seen=set(b.loc[b[f"in_{W}"], "id"])), open(part, "wb"))
 
 pd.DataFrame(summary).to_csv(OUT / "area_summary.csv", index=False, encoding="utf-8-sig")
 pd.DataFrame(muni_rows).sort_values(["variant", "people"], ascending=[True, False]).to_csv(OUT / "municipalities.csv", index=False, encoding="utf-8-sig")
 pd.DataFrame(crit_rows).to_csv(OUT / "critical_sites.csv", index=False, encoding="utf-8-sig")
 pd.DataFrame(bus_rows).to_csv(OUT / "bus_plan.csv", index=False, encoding="utf-8-sig")
-gpd.GeoDataFrame(pd.concat(shelters_all, ignore_index=True), crs=M).to_crs(4326)[["area", "muni", "name", "cat", "gfa", "capacity_central", "geometry"]] \
+gpd.GeoDataFrame(pd.concat(shelters_all, ignore_index=True), crs=M).to_crs(4326)[["area", "muni", "name", "cat", "gfa", "capacity_central", *([f"in_{v}" for v in VARIANTS] if RP else []), "geometry"]] \
     .to_file(OUT / "shelters.geojson", driver="GeoJSON")
 json.dump(dict(qc=qc_all, efas_validation=validation, decisions=__doc__), open(OUT / "qc_and_validation.json", "w"), indent=2, default=str)
 say("\nDONE ->", OUT)
