@@ -14,14 +14,14 @@ html,body{margin:0;height:100%;font:13px/1.35 "Source Sans Pro",system-ui,sans-s
 .pin.sel b{outline:2px solid #1d1d1f}
 body.far .pin.none:not(.sel) b,body.far .pin.watch:not(.sel) b,body.far .pin.minor:not(.sel) b{display:none}
 body.far .pin b em{display:none}
-body.far .bar{display:none}
+body.far .bar b{display:none}
 body.near .pin b{display:none}
 .pin.evacuate b{background:#d70015;color:#fff}.pin.evacuate b em{color:#fff}.pin.evacuate b span{color:#ffe1e3}
 .pin.hid b{display:none}
 .bar{display:flex;align-items:center;gap:4px;pointer-events:none}
-.bar s{width:22px;height:10px;border:1px solid #1d1d1f;border-radius:2px;
-  background:repeating-linear-gradient(45deg,#1d1d1f 0 4px,#fff 4px 8px)}
-.bar b{background:#fff;color:#1d1d1f;font-size:11px;padding:0 4px;border-radius:3px;border:1px solid #1d1d1f}
+.bar s{width:12px;height:12px;border-radius:50%;background:#d70015;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.bar b{background:#d70015;color:#fff;font-size:11px;font-weight:700;padding:1px 6px;border-radius:5px;
+  box-shadow:0 1px 3px rgba(0,0,0,.25);white-space:nowrap}
 .mode{position:absolute;top:10px;left:10px;z-index:3;display:flex;gap:2px;padding:2px;border-radius:9px;
   background:#e5e5ea;box-shadow:0 1px 4px rgba(0,0,0,.22)}
 .mode button{border:0;background:transparent;font:inherit;font-size:12px;font-weight:600;color:#3a3a3c;
@@ -50,7 +50,7 @@ const fmt = n => n == null ? null : Math.round(n).toLocaleString("en-GB");
 
 let map = null, ready = false, pending = null, prev = {};
 const pins = new Map(), bars = new Map();
-let floodSig = null, closSig = null, areaSig = null, homeSig = null, cur = null;  // cur = municipality the camera is on (or null)
+let floodSig = null, closSig = null, routeSig = null, areaSig = null, homeSig = null, cur = null;  // cur = municipality the camera is on (or null)
 let bounds = null;  // [w, s, e, n] of every town and all the water: the "whole region" view
 // "map": flat light basemap, status colours read best (default). "sat": Sentinel-2 imagery on 3D terrain.
 let mode = "map";
@@ -106,6 +106,7 @@ function build(p) {
         areas: {type: "geojson", data: EMPTY},
         homes: {type: "geojson", data: EMPTY},
         flood: {type: "geojson", data: EMPTY},
+        routes: {type: "geojson", data: EMPTY},
         closures: {type: "geojson", data: EMPTY}},
       layers: [{id: "img", type: "raster", source: "img"},
         {id: "hs", type: "hillshade", source: "hs", paint: {"hillshade-exaggeration": 0.25, "hillshade-shadow-color": "#1d1d1f"}},
@@ -121,10 +122,26 @@ function build(p) {
           paint: {"circle-radius": ["interpolate", ["linear"], ["zoom"], 10, 2.5, 15, ["match", ["get", "s"], "needs help", 7, 4.5]],
             "circle-color": ["match", ["get", "s"], "needs help", "#d70015", "safe", "#248a3d", "#f2994a"],
             "circle-stroke-color": "#ffffff", "circle-stroke-width": ["interpolate", ["linear"], ["zoom"], 12, 0, 14, 1]}},
+        // evacuation roads: blue, wider with the people who take them; the stretches that sat in the 2021 water
+        // dashed orange (leave before the river rises); closed roads red. Region view: hairlines; town view: bold.
+        {id: "route-case", type: "line", source: "routes", layout: {"line-cap": "round", "line-join": "round"},
+          paint: {"line-color": "#ffffff", "line-opacity": ["interpolate", ["linear"], ["zoom"], 9, 0, 11, 0.95],
+            "line-width": ["interpolate", ["linear"], ["zoom"], 9, 2, 12, ["+", 4, ["*", 4, ["min", 1, ["/", ["get", "people"], 3000]]]], 15, ["+", 7, ["*", 6, ["min", 1, ["/", ["get", "people"], 3000]]]]]}},
+        {id: "route-line", type: "line", source: "routes", filter: ["!", ["get", "flooded"]],
+          layout: {"line-cap": "round", "line-join": "round"},
+          paint: {"line-color": "#0071e3", "line-opacity": ["interpolate", ["linear"], ["zoom"], 8.5, 0.6, 11, 1],
+            "line-width": ["interpolate", ["linear"], ["zoom"], 9, 1, 12, ["+", 2, ["*", 3, ["min", 1, ["/", ["get", "people"], 3000]]]], 15, ["+", 4, ["*", 5, ["min", 1, ["/", ["get", "people"], 3000]]]]]}},
+        {id: "route-flooded", type: "line", source: "routes", filter: ["get", "flooded"],
+          layout: {"line-join": "round"},
+          paint: {"line-color": "#c93400", "line-opacity": ["interpolate", ["linear"], ["zoom"], 8.5, 0.6, 11, 1],
+            "line-dasharray": [2, 1.2],
+            "line-width": ["interpolate", ["linear"], ["zoom"], 9, 1, 12, ["+", 2, ["*", 3, ["min", 1, ["/", ["get", "people"], 3000]]]], 15, ["+", 4, ["*", 5, ["min", 1, ["/", ["get", "people"], 3000]]]]]}},
         {id: "closure-case", type: "line", source: "closures", filter: ["==", ["geometry-type"], "LineString"],
-          layout: {"line-cap": "butt"}, paint: {"line-color": "#ffffff", "line-width": 6}},
+          layout: {"line-cap": "round"}, paint: {"line-color": "#ffffff",
+            "line-width": ["interpolate", ["linear"], ["zoom"], 9, 4, 14, 11]}},
         {id: "closure-line", type: "line", source: "closures", filter: ["==", ["geometry-type"], "LineString"],
-          paint: {"line-color": "#1d1d1f", "line-width": 4, "line-dasharray": [1.5, 1]}}]};
+          layout: {"line-cap": "round"}, paint: {"line-color": "#d70015",
+            "line-width": ["interpolate", ["linear"], ["zoom"], 9, 2.5, 14, 7]}}]};
   let style = own;
   if (p) {
     const under = p.layers.filter(l => l.type !== "symbol"), names = p.layers.filter(l => l.type === "symbol");
@@ -260,11 +277,11 @@ function updateWater(towns) {
   const color = keys.length ? ["match", ["get", "municipality"]] : null, op = keys.length ? ["match", ["get", "municipality"]] : null;
   const OP = {none: 0.04, watch: 0.28, warn: 0.36, evacuate: 0.42};
   const near = op && ["match", ["get", "municipality"]];
-  for (const k of keys) { color.push(k, STATUS[by[k].s]); op.push(k, OP[by[k].s]); near.push(k, OP[by[k].s] / 4); }
+  for (const k of keys) { color.push(k, STATUS[by[k].s]); op.push(k, OP[by[k].s]); near.push(k, OP[by[k].s] / 5); }
   map.setPaintProperty("area-fill", "fill-color", color ? color.concat(["#8e8e93"]) : "#8e8e93");
   // strong across the region, faint inside a town so its streets and homes stay readable
-  map.setPaintProperty("area-fill", "fill-opacity", op ? ["interpolate", ["linear"], ["zoom"], 10, op.concat([0.04]),
-                                                          13, near.concat([0.01])] : 0.04);
+  map.setPaintProperty("area-fill", "fill-opacity", op ? ["interpolate", ["linear"], ["zoom"], 9.5, op.concat([0.04]),
+                                                          11, near.concat([0.01]), 12, 0.02] : 0.04);
   const mod = keys.filter(k => by[k].mod);
   const inMod = ["in", ["get", "municipality"], ["literal", mod]];
   map.setFilter("flood-edge-modelled", inMod);
@@ -288,7 +305,7 @@ function updateClosures(fc) {
     if (!bars.has(k)) {
       const el = document.createElement("div"); el.className = "bar";
       el.title = (f.properties && f.properties.name ? f.properties.name + ": " : "") + "road closed";
-      el.innerHTML = "<s></s><b>closed</b>";
+      el.innerHTML = "<s></s><b>" + (f.properties && f.properties.name ? esc(f.properties.name) + " · " : "") + "closed</b>";
       bars.set(k, new maplibregl.Marker({element: el, anchor: "left"}).setLngLat(at).addTo(map));
     }
   }
@@ -304,6 +321,8 @@ function update(d, first) {
   if (!bounds) bounds = extent(towns, d.flood);
   updateWater(towns);
   updateClosures(d.closures);
+  const rsig = d.routes ? JSON.stringify(d.routes).length + ":" + (d.routes.features || []).length : "0";
+  if (rsig !== routeSig) { routeSig = rsig; map.getSource("routes").setData(d.routes || EMPTY); }
   const sel = d.selected || null;
   // Fly only when Python changes `selected` (and the camera is not already there): a user click flies at once,
   // and a page that never echoes the selection back does not yank the camera home on its next rerun.

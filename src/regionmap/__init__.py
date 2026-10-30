@@ -8,6 +8,7 @@ data = {
   "flood":   GeoJSON FeatureCollection, each feature with properties.municipality,
   "areas":   optional GeoJSON of municipality outlines (properties.municipality), filled by the town's status,
   "homes":   optional GeoJSON points (properties.s: needs help|no news|safe), drawn from zoom 11 (the selected town),
+  "routes":  optional GeoJSON LineStrings of evacuation roads (properties.people, .flooded: sat in the 2021 water),
   "closures": GeoJSON FeatureCollection of Point / LineString closed roads (optional),
   "selected": municipality or None (change it to fly there; None = region overview),
   "camera":  optional {center: [lon, lat], zoom, pitch, bearing}; applied whenever it changes,

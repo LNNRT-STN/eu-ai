@@ -4,64 +4,48 @@ outputs/charts/*.png (print, slides) and *.svg (editable). Reads only the cleane
 Observed (satellite) areas and the modelled Vesdre are never summed: the Vesdre is drawn apart, hatched."""
 from pathlib import Path
 
-import matplotlib
-
-matplotlib.use("Agg")
 import matplotlib.lines
 import matplotlib.patches
 import matplotlib.pyplot as plt
 import pandas as pd
 
+from chart_style import HATCH, INK, MUTED, NAVY, NAVY_MID, NAVY_PALE, PAPER, WATER, heading, note, save as _save
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "outputs" / "data"
 OUT = ROOT / "outputs" / "charts"
 
-# dataviz reference palette (light): slots 1-3 validate as a set; text stays in ink, never series colour
-INK, INK2, MUTED, SURFACE = "#0b0b0b", "#4f6580", "#5a6e87", "#fcfcfb"
-BLUE, ORANGE, VIOLET, NEUTRAL = "#2a78d6", "#eb6834", "#6250d6", "#c3c2b7"
 SOURCE = "Source: Copernicus EMS, EFAS, GHS-OBAT, GHS-POP 2020 (challenge data); OpenStreetMap. Team analysis. " \
          "Residents are an order of magnitude."
 SMALL = 1000  # observed areas below this many residents fold into one row: their bars would be invisible
-
-plt.rcParams.update({
-    "font.family": "sans-serif", "font.sans-serif": ["Helvetica Neue", "Arial", "DejaVu Sans"], "font.size": 10,
-    "text.color": INK, "ytick.color": INK, "axes.facecolor": SURFACE, "figure.facecolor": SURFACE,
-    "axes.spines.top": False, "axes.spines.right": False, "axes.spines.left": False, "axes.spines.bottom": False,
-    "xtick.bottom": False, "xtick.labelbottom": False, "ytick.major.size": 0, "legend.frameon": False,
-    "savefig.dpi": 200, "svg.fonttype": "none", "hatch.linewidth": 0.8,  # SVG text stays editable
-})
-LABEL_W = 2.2  # inches for the category labels, the same in every bar chart so they line up in the brief
+LABEL_W = 2.4  # inches for the category labels, the same in every bar chart so they line up in the brief
+W = 9
 
 
-def frame(title, subtitle, note=SOURCE, height=4.4, legend=False):
-    """Message title, one-line subtitle, source line: each chart must stand alone in a brief. No axis: bars carry
+def frame(title, subtitle, notes=SOURCE, height=4.4, legend=False):
+    """Message title, one-line subtitle, notes: each chart must stand alone in a brief. No axis: bars carry
     their own value labels. Spacing is set in inches so every chart has the same rhythm whatever its height."""
-    fig, ax = plt.subplots(figsize=(9, height))
-    pad, top = 0.2 / 9, 1 - (1.0 + 0.3 * legend) / height
-    bottom = (0.25 + 0.15 * (note.count("\n") + 1)) / height
-    fig.subplots_adjust(left=LABEL_W / 9, right=0.9, top=top, bottom=bottom)
-    fig.text(pad, 1 - 0.25 / height, title, fontsize=14, weight="bold", va="top")
-    fig.text(pad, 1 - 0.6 / height, subtitle, fontsize=10, color=INK2, va="top")
-    fig.text(pad, 0.12 / height, note, fontsize=7.5, color=MUTED, linespacing=1.5)
+    fig, ax = plt.subplots(figsize=(W, height))
+    top = 1 - (1.05 + 0.45 * legend) / height
+    bottom = (0.4 + 0.19 * (notes.count("\n") + 1)) / height
+    fig.subplots_adjust(left=LABEL_W / W, right=0.88, top=top, bottom=bottom)
+    heading(fig, title, subtitle, height)
+    note(fig, notes, height)
     return fig, ax
 
 
 def legend(ax, handles):
-    """One row above the plot, clear of the bars."""
-    ax.legend(handles=handles, loc="lower left", bbox_to_anchor=(0, 1.02), ncol=4, fontsize=9, handlelength=1.4,
-              borderaxespad=0)
+    """One row above the plot, aligned with the bars."""
+    ax.legend(handles=handles, loc="lower left", bbox_to_anchor=(0, 1.04), ncol=4, fontsize=9, handlelength=1.2,
+              handleheight=1.0, borderaxespad=0, columnspacing=1.8)
 
 
 def patch(label, color, hatch=""):
-    return matplotlib.patches.Patch(facecolor=color, edgecolor=BLUE if hatch else color, hatch=hatch, label=label)
+    return matplotlib.patches.Patch(facecolor=color, edgecolor=NAVY if hatch else color, hatch=hatch, label=label)
 
 
 def save(fig, name):
-    for ext in ("png", "svg"):
-        fig.savefig(OUT / f"{name}.{ext}")
-    plt.close(fig)
-    print("wrote", OUT / f"{name}.png")
+    _save(fig, OUT, name)
 
 
 def areas():
@@ -82,19 +66,27 @@ def areas():
     return rows, ", ".join(names)
 
 
+def mute(ax, w):
+    """Modelled rows read as context: grey label, the observed rows stay in ink."""
+    for t, m in zip(ax.get_yticklabels(), w.modelled):
+        t.set_color(MUTED if m else INK)
+
+
 def bars(ax, w, col, left=0, **kw):
-    ax.barh(w.y, w[col], left=left, height=0.62, hatch=["////" if m else "" for m in w.modelled], **kw)
+    ax.barh(w.y, w[col], left=left, height=0.62, hatch=[HATCH if m else "" for m in w.modelled], **kw)
 
 
 def people_in_water(w, small):
     total = w[~w.modelled].people_2020.sum()
     fig, ax = frame(f"About {round(total, -3):,.0f} residents lived in buildings the 2021 flood reached",
                     "Residents of flooded buildings, July 2021", height=4.2,
-                    note=f"* {small}. Vesdre: no satellite map, EFAS 500-year model, not in the total.\n" + SOURCE)
-    bars(ax, w, "people_2020", color=[SURFACE if m else BLUE for m in w.modelled], edgecolor=BLUE, linewidth=1.2)
-    for y, v in zip(w.y, w.people_2020):
-        ax.text(v + w.people_2020.max() * 0.012, y, f"{round(v, -2):,.0f}", va="center", fontsize=9.5)
+                    notes=f"* {small}. Vesdre: no satellite map, EFAS 500-year model, not in the total.\n" + SOURCE)
+    bars(ax, w, "people_2020", color=[PAPER if m else NAVY for m in w.modelled], edgecolor=NAVY, linewidth=1)
+    for y, v, m in zip(w.y, w.people_2020, w.modelled):
+        ax.text(v + w.people_2020.max() * 0.015, y, f"{round(v, -2):,.0f}", va="center", fontsize=10,
+                weight="normal" if m else "bold", color=MUTED if m else INK)
     ax.set_yticks(w.y, w.label)
+    mute(ax, w)
     save(fig, "01_people_in_water_2021")
 
 
@@ -103,18 +95,20 @@ def shelter_gap(w, small):
     no = (gap.central_no_reach + gap.central_full).sum()
     fig, ax = frame(f"If 2021 happened today, about {round(no, -3):,.0f} residents would have no shelter place",
                     "Residents of the 2021 flood zone by shelter outcome", height=4.6, legend=True,
-                    note=f"* {small}. Vesdre modelled, not in the total.\nShelters are candidates (schools, sports "
-                         f"halls, civic buildings dry in 2021), not official; 1.5 km walk, 4 m² per person.\n" + SOURCE)
-    parts = [("central_covered", "Has a place", NEUTRAL), ("central_no_reach", "No shelter within walking distance",
-             ORANGE), ("central_full", "Shelters in reach are full", VIOLET)]
+                    notes=f"* {small}. Vesdre modelled, not in the total.\nShelters are candidates (schools, sports "
+                          f"halls, civic buildings dry in 2021), not official; 1.5 km walk, 4 m² per person.\n" + SOURCE)
+    parts = [("central_covered", "Has a place", NAVY_PALE), ("central_full", "Shelter nearby, but full", NAVY),
+             ("central_no_reach", "No shelter within 20 min walk", NAVY_MID)]
     left = 0
-    for col, _, c in parts:
-        bars(ax, w, col, left=left, color=c, edgecolor=SURFACE, linewidth=1.5)
+    for col, _, c in parts:  # hatch stays visible on every segment: navy on pale, white on navy
+        bars(ax, w, col, left=left, color=c, edgecolor=PAPER, linewidth=1, hatchcolor=NAVY if c == NAVY_PALE else PAPER)
         left = left + w[col]
-    for y, l, n in zip(w.y, left, w.central_no_reach + w.central_full):
-        ax.text(l + left.max() * 0.012, y, f"{round(n, -2):,.0f} without" if n >= 50 else "covered", va="center",
-                fontsize=9.5, color=INK if n >= 50 else MUTED)
+    for y, l, n, m in zip(w.y, left, w.central_no_reach + w.central_full, w.modelled):
+        ax.text(l + left.max() * 0.015, y, f"{round(n, -2):,.0f} without" if n >= 50 else "all have a place",
+                va="center", fontsize=10, weight="bold" if n >= 50 and not m else "normal",
+                color=INK if n >= 50 and not m else MUTED)
     ax.set_yticks(w.y, w.label)
+    mute(ax, w)
     legend(ax, [patch(lab, c) for _, lab, c in parts])
     save(fig, "03_shelter_gap")
 
@@ -126,17 +120,17 @@ def care_sites():
     n = s.groupby(["type", "kind"]).size().unstack(fill_value=0).reindex(["hospital", "care home", "school"])
     fig, ax = frame(f"{n.loc[['hospital', 'care home']].values.sum()} hospitals and care homes stood in the 2021 water",
                     "Sites with at least 5 % of their footprint flooded: evacuate these first", height=3.4, legend=True,
-                    note="Source: OpenStreetMap × Copernicus EMS flood extent; Vesdre: EFAS 500-year model. "
+                    notes="Source: OpenStreetMap × Copernicus EMS flood extent; Vesdre: EFAS 500-year model. "
                          "OSM misses some care homes: a floor.")
     left = 0
-    for kind, c, h in (("Satellite-mapped", BLUE, ""), ("Vesdre, modelled", SURFACE, "////")):
-        ax.barh(n.index, n[kind], left=left, height=0.55, color=c, edgecolor=BLUE, hatch=h)
+    for kind, c, h in (("Satellite-mapped", NAVY, ""), ("Vesdre, modelled", PAPER, HATCH)):
+        ax.barh(n.index, n[kind], left=left, height=0.62, color=c, edgecolor=NAVY, linewidth=1, hatch=h)
         left = left + n[kind]
     for i, v in enumerate(left):
-        ax.text(v + 0.4, i, str(v), va="center", fontsize=9.5)
+        ax.text(v + left.max() * 0.015, i, str(v), va="center", fontsize=10, weight="bold")
     ax.invert_yaxis()
     ax.set_yticks(range(len(n)), [t.capitalize() + "s" for t in n.index])
-    legend(ax, [patch("Satellite-mapped", BLUE), patch("Vesdre, modelled", SURFACE, "////")])
+    legend(ax, [patch("Satellite-mapped", NAVY), patch("Vesdre, modelled", PAPER, HATCH)])
     save(fig, "04_care_sites_flooded")
 
 
@@ -160,7 +154,7 @@ def action(r):
 def swatch(fig, x, y, color, w=0.018, h=0.022, hatch=""):
     fig.patches.append(matplotlib.patches.Rectangle((x, y), w, h, facecolor=color, hatch=hatch,
                                                     linewidth=0.6 if hatch else 0,
-                                                    edgecolor=INK2, transform=fig.transFigure, figure=fig))
+                                                    edgecolor=MUTED, transform=fig.transFigure, figure=fig))
 
 
 def risk_map():
@@ -179,12 +173,12 @@ def risk_map():
     fig.text(0.02, 0.96, f"{len(big)} municipalities would leave over 1,000 residents each without a shelter place",
              fontsize=17, weight="bold", va="top")
     fig.text(0.02, 0.91, f"If the July 2021 flood returned. {big.source.str.startswith('MODELLED').sum()} of the "
-                         f"{len(big)} are in the modelled Vesdre valley.", fontsize=11, color=INK2, va="top")
+                         f"{len(big)} are in the modelled Vesdre valley.", fontsize=11, color=MUTED, va="top")
     ax = fig.add_axes([0.01, 0.06, 0.53, 0.80])
     ax.set_axis_off()
     m.plot(ax=ax, color=m.color, edgecolor="white", linewidth=0.8)
-    m[modelled].plot(ax=ax, facecolor="none", edgecolor=INK2, hatch="///", linewidth=0)
-    floods.plot(ax=ax, color=BLUE, linewidth=0)
+    m[modelled].plot(ax=ax, facecolor="none", edgecolor=MUTED, hatch="///", linewidth=0)
+    floods.plot(ax=ax, color=WATER, linewidth=0)
     top = m[m["rank"] <= 10].sort_values("rank")
     for _, r in top.iterrows():  # numbered badges tie the map to the action list
         p = r.geometry.representative_point()
@@ -196,20 +190,20 @@ def risk_map():
     x0, y = 0.575, 0.80
     fig.text(x0, y + 0.03, "Residents without a shelter place", fontsize=10, weight="bold")
     for i, (lab, color) in enumerate([("0", NO_GAP)] + [(r, c) for _, r, c in CLASSES]):
-        swatch(fig, x0 + i * 0.068, y - 0.012, color, w=0.066, h=0.024)
-        fig.text(x0 + i * 0.068, y - 0.036, lab, fontsize=9, color=INK2)
-    swatch(fig, x0, y - 0.09, BLUE)
-    fig.text(x0 + 0.024, y - 0.086, "July 2021 flood", fontsize=9, color=INK2)
+        swatch(fig, x0 + i * 0.068, y - 0.012, color, w=0.066, h=0.016)
+        fig.text(x0 + i * 0.068, y - 0.036, lab, fontsize=9, color=MUTED)
+    swatch(fig, x0, y - 0.09, WATER)
+    fig.text(x0 + 0.024, y - 0.086, "July 2021 flood", fontsize=9, color=MUTED)
     swatch(fig, x0 + 0.13, y - 0.09, "none", hatch="///")
-    fig.text(x0 + 0.154, y - 0.086, "Modelled (Vesdre, EFAS)", fontsize=9, color=INK2)
+    fig.text(x0 + 0.154, y - 0.086, "Modelled (Vesdre, EFAS)", fontsize=9, color=MUTED)
 
     # action list: the ten largest gaps
     y -= 0.17
     cols = [(x0, "", "left"), (x0 + 0.022, "Municipality", "left"), (0.80, "No place", "right"),
             (0.815, "First action", "left"), (0.985, "Care sites\nflooded", "right")]
     for x, h, ha in cols:
-        fig.text(x, y, h, fontsize=9, color=INK2, ha=ha, va="bottom")
-    fig.add_artist(matplotlib.lines.Line2D([x0, 0.985], [y - 0.01] * 2, color=INK2, linewidth=0.6))
+        fig.text(x, y, h, fontsize=9, color=MUTED, ha=ha, va="bottom")
+    fig.add_artist(matplotlib.lines.Line2D([x0, 0.985], [y - 0.01] * 2, color=MUTED, linewidth=0.6))
     for _, r in top.iterrows():
         y -= 0.036
         name = r.municipality.replace(", Stadt", "") + (" *" if r.source.startswith("MODELLED") else "")
@@ -219,7 +213,7 @@ def risk_map():
             fig.text(x, y, t, fontsize=10, ha=ha, va="bottom", weight="bold" if x == 0.80 else "normal")
         swatch(fig, 0.735, y - 0.002, r.color, w=0.01)
     fig.text(x0, y - 0.04, "* Modelled. Care sites flooded: hospitals and care homes in the 2021 water, evacuate first.",
-             fontsize=8.5, color=INK2, va="top")
+             fontsize=8.5, color=MUTED, va="top")
     fig.text(0.02, 0.015, SOURCE + " Municipalities: GISCO LAU 2021. Shelters are candidates, not official "
                                    "(1.5 km walk, 4 m² per person). Counts rounded to 10.", fontsize=8, color=MUTED)
     save(fig, "06_risk_map_actions")

@@ -149,6 +149,8 @@ def lookup():
     k = live.clock()
     st.caption((f"Replay of the 2021 forecast, {live.drill(k['t']):%a %-d %b, %H:%M}" if k["mode"] == "replay"
                 else f"Live forecast, {k['t']:%a %-d %b, %H:%M}") + ". Follow the municipality's instructions.")
+    safe_now(h.municipality, f"{street} {num}", dest if has_go else "")
+    st.space("small")
 
     if not has_go:
         st.warning("No dry shelter within 10 km in our data: ask the municipal help line where to go.")
@@ -178,8 +180,6 @@ def lookup():
                 map_style=pdk.map_styles.CARTO_LIGHT), height=300)
             st.caption(":red[●] Your home · :green[●] Your shelter")
 
-    safe_now(h.municipality, f"{street} {num}", dest if has_go else "")
-
     o = host.available()  # placed guests and withdrawn offers no longer count
     towns = anna.load()[1]
     o = o[o.municipality.isin(towns.municipality)] if len(o) else o
@@ -194,39 +194,49 @@ def lookup():
 
 
 def safe_now(muni, door, dest):
-    """'I am safe' in one tap, for the address already found: crews then skip this home."""
-    st.markdown("**Tell the fire brigade**", help="Crews go first to homes with no news. No name or phone number is "
-                "stored: only the address, where you are and how many. In a real roll-out this is reached from the "
-                "link in the BE-Alert or NL-Alert SMS.")
-    done = st.session_state.get("res_done", {})
-    if done.get("door") == door:
-        if done["status"] == "safe":
-            st.success(f"**{door} is marked safe.** Crews will skip it. Thank you.", icon=":material/check_circle:")
-        else:
-            st.error(f"**Help request sent for {door}.** You are first on the crews' list. If water is rising, go "
-                     "upstairs and call 112.", icon=":material/sos:")
-        st.button("Change", type="tertiary", on_click=lambda: st.session_state.pop("res_done", None))
-        return
-    places = ([f"At {dest}"] if dest else []) + checkin.WHERE[1:]
-    a, b, c = st.columns([3, 1, 2], vertical_alignment="bottom")
-    where = a.selectbox("Where are you now?", places, key=f"res_where_{door}")
-    people = b.number_input("People", 1, 20, 1, key=f"res_people_{door}")
+    """'I am safe' in one tap, for the address already found: the crisis room and the crews see it at once."""
+    with st.container(key="safe"):
+        done = st.session_state.get("res_done", {})
+        if done.get("door") == door:
+            if done["status"] == "safe":
+                st.success(f"**{door} is marked safe.** The crisis room sees it now; crews will skip your door. "
+                           "Thank you.", icon=":material/check_circle:")
+            else:
+                st.error(f"**Help request sent for {door}.** You are first on the crews' list. If water is rising, "
+                         "go upstairs and call 112.", icon=":material/sos:")
+            st.button("Undo", type="tertiary", icon=":material/undo:", on_click=undo, args=(muni, door))
+            return
+        st.markdown("**Tell the crews where you are**", help="Crews go first to homes with no news. No name or phone "
+                    "number is stored: only the address, where you are and how many. In a real roll-out this is "
+                    "reached from the link in the BE-Alert or NL-Alert SMS.")
+        places = ([f"At {dest}"] if dest else []) + checkin.WHERE[1:]
 
-    def send(status):
-        live.add_checkin(muni, door, status, where if status == "safe" else "", int(people), False)
-        st.session_state.res_done = {"door": door, "status": status}
+        def send(status):
+            live.add_checkin(muni, door, status, st.session_state[f"res_where_{door}"] if status == "safe" else "",
+                             int(st.session_state[f"res_people_{door}"]), False)
+            st.session_state.res_done = {"door": door, "status": status}
 
-    c.button("I am safe", type="primary", icon=":material/check_circle:", width="stretch", on_click=send,
-             args=("safe",), key="res_safe")
-    st.button("I am still at home and need help to leave", icon=":material/sos:", on_click=send,
-              args=("needs help",), key="res_help")
+        a, b, c = st.columns([2, 2, 1], vertical_alignment="bottom")
+        a.button("I am safe", type="primary", icon=":material/check_circle:", width="stretch", on_click=send,
+                 args=("safe",), key="res_safe")
+        b.button("I need help to leave", icon=":material/sos:", width="stretch", on_click=send,
+                 args=("needs help",), key="res_help")
+        c.number_input("People", 1, 20, 1, key=f"res_people_{door}")
+        st.selectbox("Where are you now?", places, key=f"res_where_{door}")
+
+
+def undo(muni, door):
+    live.add_checkin(muni, door, "no news", "", 1, False)
+    st.session_state.pop("res_done", None)
 
 
 st.title("Am I at risk?")
 # the verdict banner draws with core's classes; take those, not its page padding or sidebar rules
 st.html(re.sub(r"\.block-container\{[^}]*\}|\[data-testid=st(Sidebar|SidebarNav|NavSectionHeader)\][^{]*\{[^}]*\}", "",
                core.CSS))
-st.html("<style>[data-testid=stTabs] [role=tablist]{flex-wrap:wrap;row-gap:.25rem}</style>")  # all 3 tabs on a phone
+st.html("<style>[data-testid=stTabs] [role=tablist]{flex-wrap:wrap;row-gap:.25rem}"
+        ".st-key-safe{background:#fff;border-radius:14px;padding:1rem 1.1rem;margin-top:.75rem}"
+        ".st-key-safe .stButton button{min-height:3.2rem;font-size:1.05rem;font-weight:650}</style>")  # all 3 tabs on a phone
 t1, t3 = st.tabs([f":blue[:material/home_pin:] {LEAVE}", f":green[:material/bed:] {BED}"])
 with t1:
     lookup()

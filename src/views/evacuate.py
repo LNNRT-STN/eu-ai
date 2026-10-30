@@ -222,10 +222,29 @@ st.caption(note)
 a = 70 if modelled else 140
 layers = [pdk.Layer("GeoJsonLayer", flood[(t.area, V)], filled=True, stroked=True, line_width_min_pixels=1,
                     get_fill_color=[0, 113, 227, a], get_line_color=[0, 90, 200, 200])]
+# where people go: a line from the town centre to each shelter of the plan, wider with the people it takes
+if len(plan):
+    top = plan.nlargest(10, "people")  # the numbered shelters; the long tail would turn the map into a starburst
+    flows = top.assign(a=[[t.lon, t.lat]] * len(top), b=[[x, y] for x, y in zip(top.s_lon, top.s_lat)],
+                       w=top.people ** .5 * .1 + 1.5)
+    layers.append(pdk.Layer("LineLayer", flows, get_source_position="a", get_target_position="b", get_width="w",
+                            width_units="'pixels'", get_color=core.rgb(core.SHELTER, 110)))
+# the evacuation roads themselves: white casing, blue where dry, orange where they sat in the 2021 water, red if closed
+shut = set(live.closures().osm_id.dropna().astype(str))
+ed = feats(EDGES, t.municipality)
+for f in ed["features"]:
+    q = f["properties"]
+    q["c"] = core.rgb("#d70015") if str(q["osm_id"]) in shut else core.rgb("#c93400") if q["in_flood_2021"] else core.rgb("#0071e3")
+    q["w"] = 3 + 5 * min(1, (q["people"] or 0) / 3000)
+    q["tname"] = (q["name"] if str(q["name"])[:1].isupper() else "Unnamed road") + (
+        " · closed" if str(q["osm_id"]) in shut else " · flooded in 2021" if q["in_flood_2021"] else "")
+    q["tinfo"] = f"Evacuation road for about {about(q['people'] or 0)} people"
 layers += [pdk.Layer("GeoJsonLayer", feats(RAIL, t.municipality), get_line_color=[29, 29, 31, 220],
                      line_width_min_pixels=3),
-           pdk.Layer("GeoJsonLayer", feats(EDGES, t.municipality), get_line_color=core.rgb("#c93400", 230),
-                     line_width_min_pixels=4)]
+           pdk.Layer("GeoJsonLayer", ed, get_line_color=[255, 255, 255, 240], get_line_width="properties.w + 4",
+                     line_width_units="'pixels'", line_cap_rounded=True),
+           pdk.Layer("GeoJsonLayer", ed, get_line_color="properties.c", get_line_width="properties.w",
+                     line_width_units="'pixels'", line_cap_rounded=True, pickable=True)]
 if len(care):
     cs = care.assign(tname=care.name, tinfo=[f"{k} in the 2021 water · {s:.0%} of the site"
                                              for k, s in zip(care.type, care.share_of_site_flooded)])
@@ -260,18 +279,20 @@ layers.append(pdk.Layer("ScatterplotLayer", ctr, get_position=["lon", "lat"], ge
                         stroked=True, pickable=True))
 pts = pd.concat([plan.rename(columns={"s_lon": "lon", "s_lat": "lat"})[["lon", "lat"]],
                  pd.DataFrame([{"lon": t.lon, "lat": t.lat}])])
-spread = core.km(pts.lon.mean(), pts.lat.mean(), pts.lon, pts.lat).max()
-z = 13 if spread < 1.5 else 12 if spread < 3 else 11 if spread < 6 else 10 if spread < 12 else 9
+# frame the town and its nearer half of shelters, so its evacuation roads read; the far shelters stay at the edges
+spread = core.km(t.lon, t.lat, pts.lon, pts.lat).quantile(.5) * 2
+z = 13 if spread < 1.5 else 12.5 if spread < 3 else 12 if spread < 5 else 11.5 if spread < 8 else 11
 tip = {"html": "<b>{tname}</b><br/>{tinfo}",
        "style": {"backgroundColor": "#1d1d1f", "color": "#fff", "fontSize": "13px", "borderRadius": "8px"}}
 st.pydeck_chart(pdk.Deck(layers=layers, map_style=pdk.map_styles.CARTO_LIGHT, tooltip=tip,
-                         initial_view_state=pdk.ViewState(longitude=pts.lon.mean(), latitude=pts.lat.mean(), zoom=z),
-                         views=[pdk.View(type="MapView", controller={"scrollZoom": False})]), height=440)
+                         initial_view_state=pdk.ViewState(longitude=t.lon, latitude=t.lat, zoom=z),
+                         views=[pdk.View(type="MapView", controller={"scrollZoom": False})]), height=480)
 st.caption(":green[●] Dry candidate shelter, size = people sent there (numbered as in the Shelters tab) · "
            + (":violet[●] Hospital, care home or school in the 2021 water · " if len(care) else "")
            + f":blue[■] 2021 water{' (modelled)' if modelled else ''} · "
            + (":yellow[●] Spare beds offered by residents (at their town centre) · " if len(free) else "")
-           + ":material/radio_button_unchecked: Town centre · :orange[━] Busiest evacuation roads · "
+           + ":material/radio_button_unchecked: Town centre · :green[━] To the 10 largest shelters · "
+           ":blue[━] Evacuation road · :orange[━] Evacuation road flooded in 2021 · :red[━] Closed · "
            ":material/remove: Railway in the 2021 water",
            help="Map © OpenStreetMap contributors, © CARTO. Shelters, roads and rail: OpenStreetMap; water: Copernicus "
                 "EMS (observed) or EFAS (modelled, Vesdre).")
@@ -344,7 +365,7 @@ with out:
                          f"{int(e.flood_bridges_used)} bridges in it.")
         st.caption("Road times are a minimum: buses at 30 km/h, no boarding, no traffic.")
         st.markdown(f"- **Leave before the river rises:** {e.reroute_share:.0%} of routes go back through the 2021 water.\n"
-                    f"- **Busiest road** (:orange[━] on the map): {road(e.busiest_road)}, about "
+                    f"- **Busiest road** (the widest line on the map): {road(e.busiest_road)}, about "
                     f"{about(e.busiest_road_people)} people {'on foot' if e.busiest_road_mode == 'walk' else 'by bus'}. "
                     "Put a marshal there.")
     else:

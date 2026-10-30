@@ -130,14 +130,13 @@ def where_to_act(d):
     v = st.session_state.get("cr_v", 0)
     key = f"cr_rows_{v}"
     t = pd.DataFrame({"Status": d.status.map(WORD), "Town": d.municipality.map(anna.town),
-                      "People": d.people.map(about), "To clear": d.todo.astype(int), "Left": d.left})
+                      "To clear": d.todo.astype(int), "Left": d.left})
     rows = d.municipality.tolist()
     st.caption("Tick a town, or click it on the map, to see its homes and streets.")
     t = t.style.map(lambda w: f"color:{TEXT.get(w, '#1d1d1f')};font-weight:600", subset=["Status"])
     st.dataframe(t, hide_index=True, key=key, on_select=lambda: pick_row(key, rows), selection_mode="single-row",
                  height=min(36 * len(d) + 38, 440),
                  column_config={
-                     "People": st.column_config.TextColumn("People", width="small", help="In the 2021 water (Vesdre: modelled)"),
                      "Left": st.column_config.ProgressColumn("Left", format="percent", min_value=0, max_value=1,
                                                              help="Share of the town's homes that have left"),
                      "Status": st.column_config.TextColumn("Status", width="small"),
@@ -192,6 +191,92 @@ def town_card(m, d, H):
         b.page_link("views/evacuate.py", label="Town plan", icon=":material/directions_run:")
 
 
+def named(n):
+    """A road's name, or '' for unnamed OSM ways that carry their type ("service", "footway") as name."""
+    return n if isinstance(n, str) and n[:1].isupper() else ""
+
+
+def roads(s):
+    """Evacuation roads (the busiest ways out, notebooks/evac_sim.py) of the towns at warn or evacuate, each with
+    its people and whether it sat in the 2021 water; closed roads as lines where their OSM way is known."""
+    E = checkin.edges()["features"]
+    act = set(s.municipality[s.status.isin(["warn", "evacuate"])])
+    cl = live.closures()
+    shut = set(cl.osm_id.dropna().astype(str))
+    routes = {"type": "FeatureCollection", "features": [
+        {"type": "Feature", "geometry": f["geometry"],
+         "properties": {"people": float(f["properties"]["people"] or 0), "name": named(f["properties"]["name"]),
+                        "flooded": bool(f["properties"]["in_flood_2021"])}}
+        for f in E if f["properties"]["municipality"] in act and str(f["properties"]["osm_id"]) not in shut]}
+    geo = {str(f["properties"]["osm_id"]): f["geometry"] for f in E}
+    closed = {"type": "FeatureCollection", "features": [
+        {"type": "Feature", "geometry": geo.get(str(r.osm_id)) or {"type": "Point", "coordinates": [r.lon, r.lat]},
+         "properties": {"name": named(r.name)}} for r in cl.dropna(subset=["lon"]).itertuples()]}
+    return routes, closed
+
+
+def residents_feed(t, replay):
+    """Real check-ins (typed by residents or crews, not simulated): the newest first. A new one pops a toast."""
+    ck = live.checkins()
+    real = ck[~ck.sim].tail(5).iloc[::-1]
+    if len(real) and real.id.iloc[0] != st.session_state.get("cr_seen"):
+        if "cr_seen" in st.session_state:
+            r = real.iloc[0]
+            st.toast(f"**{r.door}, {anna.town(r.municipality)}**: "
+                     + ("safe" if r.status == "safe" else "needs help" if r.status == "needs help" else "report undone"),
+                     icon=":material/check_circle:" if r.status == "safe" else ":material/sos:")
+        st.session_state.cr_seen = real.id.iloc[0]
+    with st.container(key="feed", gap="small"):
+        st.markdown(":green[:material/sensors:] **Reported by residents**",
+                    help="Check-ins sent from the resident page (Am I at risk?) or entered by crews, as they arrive. "
+                         "Simulated replay check-ins are not listed here.")
+        if real.empty:
+            st.caption("None yet. A resident who taps *I am safe* appears here at once.")
+            return
+        for r in real.itertuples():
+            ok = r.status == "safe"
+            where = (r.where or "").split(",")[0]
+            st.markdown(f"{':green[:material/check_circle:]' if ok else ':red[:material/sos:]'} **{r.door}**, "
+                        f"{anna.town(r.municipality)}  \n"
+                        + (f":gray[Safe · {r.people} {'person' if r.people == 1 else 'people'}"
+                           + (f" · {where}" if where else "") + "]" if ok else
+                           ":red[Needs help: crews go first]" if r.status == "needs help" else ":gray[Report undone]"))
+
+
+def briefings(c):
+    """Alerts on the left, the briefing drafts on the right: newest draft open, the others one click away."""
+    ev = live.events().tail(6).iloc[::-1]
+    allob = live.outbox()
+    ob = allob.tail(8).iloc[::-1]
+    st.subheader(":blue[:material/campaign:] Alerts and briefings",
+                 help="At each rise of a town's alert the tool drafts one briefing for the mayor and one for the "
+                      "district fire brigade. Claude writes the words, every figure comes from the tool; a template "
+                      "when no AI is available. Nothing is sent from here.")
+    a, b = st.columns([2, 3], gap="large")
+    with a:
+        st.markdown("**Latest alerts**")
+        if ev.empty:
+            st.caption("Nothing yet. Press Play in the sidebar.")
+        for r in ev.itertuples():
+            st.markdown(f":{ROWS.get(r.to, 'gray')}-badge[{WORD.get(r.to, r.to)}] **{anna.town(r.municipality)}** "
+                        f"· {when(r.t, c['mode'])}")
+    with b:
+        st.markdown(f"**Drafts ready to send** :blue-badge[{len(allob)}]")
+        if ob.empty:
+            st.caption("A draft appears here each time a town's alert rises.")
+            return
+        lab = {r.id: f"{r.recipient} · {when(r.t, c['mode'])}" for r in ob.itertuples()}
+        rid = st.selectbox("Draft", list(lab), format_func=lab.get, key="cr_draft",
+                           label_visibility="collapsed") or ob.id.iloc[0]
+        r = ob.set_index("id").loc[rid]
+        with st.container(border=True, key="draft"):
+            st.markdown(f":gray-badge[Draft · not sent] &nbsp; **To:** {r.recipient}")
+            text = live.report(rid)
+            st.markdown(text if text else "_Drafting…_")
+            st.caption("Template: no AI available." if r.source == "template" else
+                       "Words by Claude, numbers by the tool. Check before sending.")
+
+
 def board():
     c = live.advance()
     t = c["t"]
@@ -204,25 +289,22 @@ def board():
     core.banner(color, head, detail + (" Homes: simulated check-ins in the replay." if replay else ""), note=False)
     st.space("small")
 
-    left, right = st.columns([1, 1], gap="medium")
+    left, right = st.columns([3, 2], gap="medium")
     sel_t = st.session_state.get("cr_sel")
     with left:
         g = s.assign(lon=s.municipality.map(T.lon), lat=s.municipality.map(T.lat)).dropna(subset=["lon"])
-        cl = live.closures().dropna(subset=["lon"])
         hs = H[H.municipality == sel_t] if sel_t else H.iloc[0:0]
+        routes, closed = roads(s)
         sel = region_map(dict(
             towns=[dict(municipality=r.municipality, label=anna.town(r.municipality), lon=r.lon, lat=r.lat,
                         status=r.status if r.status in COL else "none", people=float(r.people),
                         people_expected=float(r.people_expected or 0), modelled=r.area in anna.MODELLED)
                    for r in g.itertuples()],
-            areas=outlines(), flood=water_by_town(),
+            areas=outlines(), flood=water_by_town(), routes=routes,
             homes={"type": "FeatureCollection", "sig": str(hs.s.value_counts().to_dict()), "features": [
                 {"type": "Feature", "geometry": {"type": "Point", "coordinates": [r.lon, r.lat]},
                  "properties": {"s": r.s}} for r in hs.itertuples()]},
-            closures={"type": "FeatureCollection", "features": [
-                {"type": "Feature", "geometry": {"type": "Point", "coordinates": [r.lon, r.lat]},
-                 "properties": {"name": r.name or ""}} for r in cl.itertuples()]},
-            selected=sel_t), key="crisis_map", height=540)
+            closures=closed, selected=sel_t), key="crisis_map", height=560)
         if sel and sel.get("selected") and sel.get("clicks") != st.session_state.get("cr_clicks"):
             st.session_state.cr_clicks = sel["clicks"]
             st.session_state.cr_sel = sel_t = sel["selected"]
@@ -231,39 +313,22 @@ def board():
         st.html("<div class='legend'>" + "".join(
             f"<span><i style='background:{COL[k]};opacity:.75'></i>{WORD[k]}</span>" for k in ("evacuate", "warn", "watch"))
             + "<span><i style='background:#0b3d91;opacity:.7'></i>2021 water</span>"
-            + ("<span><i style='background:#d70015;border-radius:50%'></i>Home asked for help</span>"
+            + "<span><i style='background:#0071e3;height:.25rem;border-radius:2px'></i>Road out</span>"
+            + "<span><i style='background:repeating-linear-gradient(90deg,#c93400 0 4px,transparent 4px 7px);height:.25rem'></i>Road out, flooded in 2021</span>"
+            + "<span><i style='background:#d70015;height:.3rem;border-radius:2px'></i>Closed</span>"
+            + ("<span><i style='background:#d70015;border-radius:50%'></i>Asked for help</span>"
                "<span><i style='background:#f2994a;border-radius:50%'></i>No news</span>"
                "<span><i style='background:#248a3d;border-radius:50%'></i>Has left</span>" if sel_t else
-               "<span>Click a town to see its homes</span>") + "</div>")
+               "<span>Click a town to see its homes and roads</span>") + "</div>")
     with right:
+        residents_feed(t, replay)
+        st.space("small")
         if sel_t:
             town_card(sel_t, d, H)
         else:
             where_to_act(d)
-
-    ev = live.events().tail(6).iloc[::-1]
-    ob = live.outbox().tail(8).iloc[::-1]
-    with st.expander(f"Alerts and briefings · {len(live.outbox())} drafts, not sent", icon=":material/campaign:"):
-        a, b = st.columns([2, 3], gap="medium")
-        with a:
-            st.markdown("**Latest alerts**", help="Newest first. Levels never drop during a replay.")
-            st.markdown("  \n".join(f"`{when(r.t, c['mode'])}` :{ROWS.get(r.to, 'gray')}-badge[{WORD.get(r.to, r.to)}]"
-                                    f" **{anna.town(r.municipality)}**" for r in ev.itertuples())
-                        if len(ev) else "Nothing yet. Press Play in the sidebar.")
-        with b:
-            st.markdown("**Briefing drafts**", help="One for the mayor and one for the district fire brigade each time "
-                        "a town's alert rises. Drafted by Claude from the tool's numbers (words only); a template when "
-                        "no AI is available. Nothing is sent.")
-            if ob.empty:
-                st.caption("They appear here when a town's alert rises.")
-            else:
-                lab = {r.id: f"{when(r.t, c['mode'])} · {r.recipient}" for r in ob.itertuples()}
-                rid = st.selectbox("Draft", list(lab), format_func=lab.get, key="cr_draft",
-                                   label_visibility="collapsed") or ob.id.iloc[0]
-                with st.container(border=True, height=230):
-                    st.write(live.report(rid))
-                if ob.set_index("id").source.get(rid) == "template":
-                    st.caption("Template (no AI available).")
+    st.space("medium")
+    briefings(c)
 
 
 # 2021 for comparison: sourced times from docs/TIMELINE_2021.md (all verified in the cited document)
@@ -280,10 +345,8 @@ Y2021 = [("ahr", "Ahr", f"13 Jul 11:25, flash-flood notice for the Koblenz regio
 
 
 def then_2021():
-    st.subheader(":violet[:material/history:] July 2021: when the orders came",
-                 help="EFAS notices and the first evacuation orders of 2021, against the first day the tool puts a "
-                      "town of that river at evacuate. Sources and more times: docs/TIMELINE_2021.md.")
-    st.caption("Tool column: the day, from flows computed afterwards; not the forecast available at the time.")
+    st.caption("EFAS notices and the first evacuation orders of 2021, against the first day the tool puts a town of "
+               "that river at evacuate. Sources: docs/TIMELINE_2021.md. Tool column: the day, from flows computed afterwards; not the forecast available at the time.")
     # the day whose daily flow (placed at noon) first puts a town of the river at evacuate; the hourly replay
     # interpolates towards the next day's mean, which would claim hours the daily data cannot give
     rp, area = live._replay(), live._towns().area.values
@@ -300,13 +363,17 @@ def then_2021():
 
 
 st.title("Crisis room")
+st.html("<style>.st-key-feed{background:#fff;border-radius:12px;padding:.8rem 1rem .75rem}"
+        ".st-key-feed p{margin-bottom:.15rem}.st-key-draft{background:#fff;max-height:340px;overflow:auto}"
+        ".st-key-draft p,.st-key-draft li{font-size:.95rem;line-height:1.5;max-width:75ch}</style>")
 t1, t2, t3 = st.tabs([":red[:material/crisis_alert:] Live board", ":violet[:material/priority_high:] Priorities",
                       ":blue[:material/water:] Rivers"])
 with t1:
-    st.fragment(board, run_every=1.5 if c["playing"] else None)()
+    st.fragment(board, run_every=1.5 if c["playing"] else 3)()
+    st.space("small")
     if c["mode"] == "replay":
-        st.space("small")
-        then_2021()
+        with st.expander("Compared with July 2021: when the orders came", icon=":material/history:"):
+            then_2021()
     with st.expander("How this is computed", icon=":material/info:"):
         st.markdown(
             "- **Alert level:** GloFAS river flow on each town's river against that point's own 2-, 5- and 20-year "
@@ -329,7 +396,8 @@ with t1:
             f"- **Map:** {ATTRIBUTION}")
 with t2:
     first_action.render()
-    briefing.render()
+    with st.expander("Shelter gap, municipality by municipality", icon=":material/map:"):
+        briefing.render()
     st.space("small")
     with st.expander("How this is computed", icon=":material/info:"):
         first_action.how()

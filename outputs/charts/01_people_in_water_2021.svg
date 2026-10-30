@@ -6,7 +6,7 @@
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2026-10-29T22:21:38.197625</dc:date>
+    <dc:date>2026-10-30T10:46:58.705808</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
@@ -26,125 +26,125 @@ L 648 302.4
 L 648 0 
 L 0 0 
 z
-" style="fill: #fcfcfb"/>
+" style="fill: #ffffff"/>
   </g>
   <g id="axes_1">
    <g id="patch_2">
-    <path d="M 158.4 262.8 
-L 583.2 262.8 
-L 583.2 72 
-L 158.4 72 
+    <path d="M 172.8 246.24 
+L 570.24 246.24 
+L 570.24 75.6 
+L 172.8 75.6 
 z
-" style="fill: #fcfcfb"/>
+" style="fill: #ffffff"/>
    </g>
    <g id="patch_3">
-    <path d="M 158.4 101.676989 
-L 562.971429 101.676989 
-L 562.971429 80.672727 
-L 158.4 80.672727 
+    <path d="M 172.8 102.141307 
+L 551.314286 102.141307 
+L 551.314286 83.356364 
+L 172.8 83.356364 
 z
-" clip-path="url(#p02b2ed63e3)" style="fill: #2a78d6; stroke: #2a78d6; stroke-width: 1.2; stroke-linejoin: miter"/>
+" clip-path="url(#pd1f8258749)" style="fill: #003399; stroke: #003399; stroke-linejoin: miter"/>
    </g>
    <g id="patch_4">
-    <path d="M 158.4 135.55483 
-L 259.66807 135.55483 
-L 259.66807 114.550568 
-L 158.4 114.550568 
+    <path d="M 172.8 132.439602 
+L 267.545719 132.439602 
+L 267.545719 113.654659 
+L 172.8 113.654659 
 z
-" clip-path="url(#p02b2ed63e3)" style="fill: #2a78d6; stroke: #2a78d6; stroke-width: 1.2; stroke-linejoin: miter"/>
+" clip-path="url(#pd1f8258749)" style="fill: #003399; stroke: #003399; stroke-linejoin: miter"/>
    </g>
    <g id="patch_5">
-    <path d="M 158.4 169.43267 
-L 209.139984 169.43267 
-L 209.139984 148.428409 
-L 158.4 148.428409 
+    <path d="M 172.8 162.737898 
+L 220.271985 162.737898 
+L 220.271985 143.952955 
+L 172.8 143.952955 
 z
-" clip-path="url(#p02b2ed63e3)" style="fill: #2a78d6; stroke: #2a78d6; stroke-width: 1.2; stroke-linejoin: miter"/>
+" clip-path="url(#pd1f8258749)" style="fill: #003399; stroke: #003399; stroke-linejoin: miter"/>
    </g>
    <g id="patch_6">
-    <path d="M 158.4 203.310511 
-L 178.780753 203.310511 
-L 178.780753 182.30625 
-L 158.4 182.30625 
+    <path d="M 172.8 193.036193 
+L 191.868094 193.036193 
+L 191.868094 174.25125 
+L 172.8 174.25125 
 z
-" clip-path="url(#p02b2ed63e3)" style="fill: #2a78d6; stroke: #2a78d6; stroke-width: 1.2; stroke-linejoin: miter"/>
+" clip-path="url(#pd1f8258749)" style="fill: #003399; stroke: #003399; stroke-linejoin: miter"/>
    </g>
    <g id="patch_7">
-    <path d="M 158.4 254.127273 
-L 541.049598 254.127273 
-L 541.049598 233.123011 
-L 158.4 233.123011 
+    <path d="M 172.8 238.483636 
+L 530.80437 238.483636 
+L 530.80437 219.698693 
+L 172.8 219.698693 
 z
-" clip-path="url(#p02b2ed63e3)" style="fill: url(#h20ac79a2e9); stroke: #2a78d6; stroke-width: 1.2; stroke-linejoin: miter"/>
+" clip-path="url(#pd1f8258749)" style="fill: url(#hcfb3d5b35f); stroke: #003399; stroke-linejoin: miter"/>
    </g>
    <g id="matplotlib.axis_1"/>
    <g id="matplotlib.axis_2">
     <g id="ytick_1">
      <g id="line2d_1"/>
      <g id="text_1">
-      <text style="font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #0b0b0b" x="154.9" y="95.934858" transform="rotate(-0 154.9 95.934858)">Ahr valley (DE)</text>
+      <text style="font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #14213d" x="169.3" y="97.508835" transform="rotate(-0 169.3 97.508835)">Ahr valley (DE)</text>
      </g>
     </g>
     <g id="ytick_2">
      <g id="line2d_2"/>
      <g id="text_2">
-      <text style="font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #0b0b0b" x="154.9" y="129.812699" transform="rotate(-0 154.9 129.812699)">Schleiden (DE)</text>
+      <text style="font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #14213d" x="169.3" y="127.807131" transform="rotate(-0 169.3 127.807131)">Schleiden (DE)</text>
      </g>
     </g>
     <g id="ytick_3">
      <g id="line2d_3"/>
      <g id="text_3">
-      <text style="font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #0b0b0b" x="154.9" y="163.69054" transform="rotate(-0 154.9 163.69054)">Erftstadt (DE)</text>
+      <text style="font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #14213d" x="169.3" y="158.105426" transform="rotate(-0 169.3 158.105426)">Erftstadt (DE)</text>
      </g>
     </g>
     <g id="ytick_4">
      <g id="line2d_4"/>
      <g id="text_4">
-      <text style="font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #0b0b0b" x="154.9" y="197.568381" transform="rotate(-0 154.9 197.568381)">6 smaller areas*</text>
+      <text style="font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #14213d" x="169.3" y="188.403722" transform="rotate(-0 169.3 188.403722)">6 smaller areas*</text>
      </g>
     </g>
     <g id="ytick_5">
      <g id="line2d_5"/>
      <g id="text_5">
-      <text style="font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #0b0b0b" x="154.9" y="248.385142" transform="rotate(-0 154.9 248.385142)">Vesdre valley (BE), modelled</text>
+      <text style="font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #5b6577" x="169.3" y="233.851165" transform="rotate(-0 169.3 233.851165)">Vesdre valley (BE), modelled</text>
      </g>
     </g>
    </g>
    <g id="text_6">
-    <text style="font-size: 9.5px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #0b0b0b" x="567.826286" y="94.685108" transform="rotate(-0 567.826286 94.685108)">21,000</text>
+    <text style="font-weight: 700; font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #14213d" x="556.992" y="96.538835" transform="rotate(-0 556.992 96.538835)">21,000</text>
    </g>
    <g id="text_7">
-    <text style="font-size: 9.5px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #0b0b0b" x="264.522927" y="128.562949" transform="rotate(-0 264.522927 128.562949)">5,300</text>
+    <text style="font-weight: 700; font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #14213d" x="273.223434" y="126.837131" transform="rotate(-0 273.223434 126.837131)">5,300</text>
    </g>
    <g id="text_8">
-    <text style="font-size: 9.5px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #0b0b0b" x="213.994841" y="162.44079" transform="rotate(-0 213.994841 162.44079)">2,600</text>
+    <text style="font-weight: 700; font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #14213d" x="225.949699" y="157.135426" transform="rotate(-0 225.949699 157.135426)">2,600</text>
    </g>
    <g id="text_9">
-    <text style="font-size: 9.5px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #0b0b0b" x="183.63561" y="196.318631" transform="rotate(-0 183.63561 196.318631)">1,100</text>
+    <text style="font-weight: 700; font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #14213d" x="197.545808" y="187.433722" transform="rotate(-0 197.545808 187.433722)">1,100</text>
    </g>
    <g id="text_10">
-    <text style="font-size: 9.5px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #0b0b0b" x="545.904455" y="247.135392" transform="rotate(-0 545.904455 247.135392)">19,900</text>
+    <text style="font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #5b6577" x="536.482084" y="232.786165" transform="rotate(-0 536.482084 232.786165)">19,900</text>
    </g>
   </g>
   <g id="text_11">
-   <text style="font-weight: 700; font-size: 14px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #0b0b0b" x="14.4" y="31.65" transform="rotate(-0 14.4 31.65)">About 30,000 residents lived in buildings the 2021 flood reached</text>
+   <text style="font-weight: 700; font-size: 14px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #14213d" x="18" y="33.81" transform="rotate(-0 18 33.81)">About 30,000 residents lived in buildings the 2021 flood reached</text>
   </g>
   <g id="text_12">
-   <text style="font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #4f6580" x="14.4" y="52.72" transform="rotate(-0 14.4 52.72)">Residents of flooded buildings, July 2021</text>
+   <text style="font-size: 10px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #5b6577" x="18" y="54.16" transform="rotate(-0 18 54.16)">Residents of flooded buildings, July 2021</text>
   </g>
   <g id="text_13">
-   <text style="font-size: 7.5px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; fill: #5a6e87" transform="translate(14.4 280.800234)">* Liège, Rochefort, Venlo, Eschweiler, Wassenberg, Euskirchen-Rheinbach. Vesdre: no satellite map, EFAS 500-year model, not in the total.</text>
-   <text style="font-size: 7.5px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; fill: #5a6e87" transform="translate(14.4 293.76)">Source: Copernicus EMS, EFAS, GHS-OBAT, GHS-POP 2020 (challenge data); OpenStreetMap. Team analysis. Residents are an order of magnitude.</text>
+   <text style="font-size: 7.5px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; fill: #5b6577" transform="translate(18 278.486484)">* Liège, Rochefort, Venlo, Eschweiler, Wassenberg, Euskirchen-Rheinbach. Vesdre: no satellite map, EFAS 500-year model, not in the total.</text>
+   <text style="font-size: 7.5px; font-family: 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; fill: #5b6577" transform="translate(18 292.32)">Source: Copernicus EMS, EFAS, GHS-OBAT, GHS-POP 2020 (challenge data); OpenStreetMap. Team analysis. Residents are an order of magnitude.</text>
   </g>
  </g>
  <defs>
-  <clipPath id="p02b2ed63e3">
-   <rect x="158.4" y="72" width="424.8" height="190.8"/>
+  <clipPath id="pd1f8258749">
+   <rect x="172.8" y="75.6" width="397.44" height="170.64"/>
   </clipPath>
  </defs>
  <defs>
-  <pattern id="h20ac79a2e9" patternUnits="userSpaceOnUse" x="0" y="0" width="72" height="72">
-   <rect x="0" y="0" width="73" height="73" fill="#fcfcfb"/>
+  <pattern id="hcfb3d5b35f" patternUnits="userSpaceOnUse" x="0" y="0" width="72" height="72">
+   <rect x="0" y="0" width="73" height="73" fill="#ffffff"/>
    <path d="M -36 36 
 L 36 -36 
 M -33 39 
@@ -195,7 +195,7 @@ M 33 105
 L 105 33 
 M 36 108 
 L 108 36 
-" style="fill: #2a78d6; stroke: #2a78d6; stroke-width: 0.8; stroke-linecap: butt; stroke-linejoin: miter"/>
+" style="fill: #003399; stroke: #003399; stroke-width: 0.8; stroke-linecap: butt; stroke-linejoin: miter"/>
   </pattern>
  </defs>
 </svg>
