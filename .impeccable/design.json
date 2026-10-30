@@ -1,0 +1,475 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-30T13:03:01+00:00",
+  "title": "Design System: Flood desk",
+  "extensions": {
+    "colorMeta": {
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "oklch(0.145 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.26 0 0)",
+          "oklch(0.37 0 0)",
+          "oklch(0.48 0 0)",
+          "oklch(0.59 0 0)",
+          "oklch(0.71 0 0)",
+          "oklch(0.83 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "ink-fill": {
+        "role": "primary",
+        "displayName": "Desk Ink",
+        "canonical": "oklch(0.205 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.26 0 0)",
+          "oklch(0.37 0 0)",
+          "oklch(0.48 0 0)",
+          "oklch(0.59 0 0)",
+          "oklch(0.71 0 0)",
+          "oklch(0.83 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "oklch(1 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.26 0 0)",
+          "oklch(0.37 0 0)",
+          "oklch(0.48 0 0)",
+          "oklch(0.59 0 0)",
+          "oklch(0.71 0 0)",
+          "oklch(0.83 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "sidebar-paper": {
+        "role": "neutral",
+        "displayName": "Sidebar Paper",
+        "canonical": "oklch(0.985 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.26 0 0)",
+          "oklch(0.37 0 0)",
+          "oklch(0.48 0 0)",
+          "oklch(0.59 0 0)",
+          "oklch(0.71 0 0)",
+          "oklch(0.83 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "quiet-surface": {
+        "role": "neutral",
+        "displayName": "Quiet Surface",
+        "canonical": "oklch(0.97 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.26 0 0)",
+          "oklch(0.37 0 0)",
+          "oklch(0.48 0 0)",
+          "oklch(0.59 0 0)",
+          "oklch(0.71 0 0)",
+          "oklch(0.83 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "quiet-text": {
+        "role": "neutral",
+        "displayName": "Quiet Text",
+        "canonical": "oklch(0.556 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.26 0 0)",
+          "oklch(0.37 0 0)",
+          "oklch(0.48 0 0)",
+          "oklch(0.59 0 0)",
+          "oklch(0.71 0 0)",
+          "oklch(0.83 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "oklch(0.922 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.26 0 0)",
+          "oklch(0.37 0 0)",
+          "oklch(0.48 0 0)",
+          "oklch(0.59 0 0)",
+          "oklch(0.71 0 0)",
+          "oklch(0.83 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "focus-ring": {
+        "role": "neutral",
+        "displayName": "Focus Ring",
+        "canonical": "oklch(0.708 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.26 0 0)",
+          "oklch(0.37 0 0)",
+          "oklch(0.48 0 0)",
+          "oklch(0.59 0 0)",
+          "oklch(0.71 0 0)",
+          "oklch(0.83 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "evacuate": {
+        "role": "secondary",
+        "displayName": "Evacuate Red",
+        "canonical": "oklch(0.55 0.21 27)",
+        "tonalRamp": [
+          "oklch(0.15 0.21 27)",
+          "oklch(0.26 0.21 27)",
+          "oklch(0.37 0.21 27)",
+          "oklch(0.48 0.21 27)",
+          "oklch(0.59 0.21 27)",
+          "oklch(0.71 0.21 27)",
+          "oklch(0.83 0.21 27)",
+          "oklch(0.95 0.21 27)"
+        ],
+        "note": "Hex in DESIGN.md frontmatter is canonical (index.css :root and lib/flood.ts HEX); canonical here is the OKLCH equivalent. Dark mode uses its own OKLCH step in index.css .dark."
+      },
+      "next": {
+        "role": "secondary",
+        "displayName": "Next Orange",
+        "canonical": "oklch(0.641 0.17 47.1)",
+        "tonalRamp": [
+          "oklch(0.15 0.17 47.1)",
+          "oklch(0.26 0.17 47.1)",
+          "oklch(0.37 0.17 47.1)",
+          "oklch(0.48 0.17 47.1)",
+          "oklch(0.59 0.17 47.1)",
+          "oklch(0.71 0.17 47.1)",
+          "oklch(0.83 0.17 47.1)",
+          "oklch(0.95 0.17 47.1)"
+        ],
+        "note": "Hex in DESIGN.md frontmatter is canonical (index.css :root and lib/flood.ts HEX); canonical here is the OKLCH equivalent. Dark mode uses its own OKLCH step in index.css .dark."
+      },
+      "watch": {
+        "role": "secondary",
+        "displayName": "Watch Amber",
+        "canonical": "oklch(0.621 0.136 68.1)",
+        "tonalRamp": [
+          "oklch(0.15 0.136 68.1)",
+          "oklch(0.26 0.136 68.1)",
+          "oklch(0.37 0.136 68.1)",
+          "oklch(0.48 0.136 68.1)",
+          "oklch(0.59 0.136 68.1)",
+          "oklch(0.71 0.136 68.1)",
+          "oklch(0.83 0.136 68.1)",
+          "oklch(0.95 0.136 68.1)"
+        ],
+        "note": "Hex in DESIGN.md frontmatter is canonical (index.css :root and lib/flood.ts HEX); canonical here is the OKLCH equivalent. Dark mode uses its own OKLCH step in index.css .dark."
+      },
+      "normal": {
+        "role": "secondary",
+        "displayName": "Normal Grey",
+        "canonical": "oklch(0.6 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.26 0 0)",
+          "oklch(0.37 0 0)",
+          "oklch(0.48 0 0)",
+          "oklch(0.59 0 0)",
+          "oklch(0.71 0 0)",
+          "oklch(0.83 0 0)",
+          "oklch(0.95 0 0)"
+        ],
+        "note": "Hex in DESIGN.md frontmatter is canonical (index.css :root and lib/flood.ts HEX); canonical here is the OKLCH equivalent. Dark mode uses its own OKLCH step in index.css .dark."
+      },
+      "shelter": {
+        "role": "tertiary",
+        "displayName": "Dry Shelter Green",
+        "canonical": "oklch(0.52 0.13 150.1)",
+        "tonalRamp": [
+          "oklch(0.15 0.13 150.1)",
+          "oklch(0.26 0.13 150.1)",
+          "oklch(0.37 0.13 150.1)",
+          "oklch(0.48 0.13 150.1)",
+          "oklch(0.59 0.13 150.1)",
+          "oklch(0.71 0.13 150.1)",
+          "oklch(0.83 0.13 150.1)",
+          "oklch(0.95 0.13 150.1)"
+        ],
+        "note": "Hex in DESIGN.md frontmatter is canonical (index.css :root and lib/flood.ts HEX); canonical here is the OKLCH equivalent. Dark mode uses its own OKLCH step in index.css .dark."
+      },
+      "shelter-far": {
+        "role": "tertiary",
+        "displayName": "Bus Shelter Green",
+        "canonical": "oklch(0.771 0.082 153.1)",
+        "tonalRamp": [
+          "oklch(0.15 0.082 153.1)",
+          "oklch(0.26 0.082 153.1)",
+          "oklch(0.37 0.082 153.1)",
+          "oklch(0.48 0.082 153.1)",
+          "oklch(0.59 0.082 153.1)",
+          "oklch(0.71 0.082 153.1)",
+          "oklch(0.83 0.082 153.1)",
+          "oklch(0.95 0.082 153.1)"
+        ],
+        "note": "Hex in DESIGN.md frontmatter is canonical (index.css :root and lib/flood.ts HEX); canonical here is the OKLCH equivalent. Dark mode uses its own OKLCH step in index.css .dark."
+      },
+      "water": {
+        "role": "tertiary",
+        "displayName": "EFAS Water Blue",
+        "canonical": "oklch(0.601 0.13 254.8)",
+        "tonalRamp": [
+          "oklch(0.15 0.13 254.8)",
+          "oklch(0.26 0.13 254.8)",
+          "oklch(0.37 0.13 254.8)",
+          "oklch(0.48 0.13 254.8)",
+          "oklch(0.59 0.13 254.8)",
+          "oklch(0.71 0.13 254.8)",
+          "oklch(0.83 0.13 254.8)",
+          "oklch(0.95 0.13 254.8)"
+        ],
+        "note": "Hex in DESIGN.md frontmatter is canonical (index.css :root and lib/flood.ts HEX); canonical here is the OKLCH equivalent. Dark mode uses its own OKLCH step in index.css .dark."
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Page title where a page has its own header (Data & limits), 1.5rem rising to 1.875rem from sm."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "The Verdict sentence (1rem rising to 1.125rem) and section heads on reading pages."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "SectionTitle above lists and stat groups; header page title at weight 500."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Verdict detail, list rows, accordion content; prose capped at 65-75ch."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Status tags, legend items, row meta, sources, sidebar hints."
+      },
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "Counts in stat cells and the Verdict's shelter key; always tabular."
+      }
+    },
+    "shadows": [
+      {
+        "name": "map-popup",
+        "value": "0 4px 16px rgb(0 0 0 / 0.12)",
+        "purpose": "MapLibre hover popups over towns, homes, shelters and roads."
+      },
+      {
+        "name": "map-control",
+        "value": "0 1px 3px rgb(0 0 0 / 0.1)",
+        "purpose": "MapLibre zoom control group."
+      },
+      {
+        "name": "header-blur",
+        "value": "backdrop-filter: blur(8px); background: color-mix(in oklch, oklch(1 0 0) 75%, transparent)",
+        "purpose": "Sticky 56px header when content scrolls under it."
+      }
+    ],
+    "motion": [
+      {
+        "name": "camera-fly",
+        "value": "fitBounds({ linear: false, curve: 1.42, speed: 1.6, padding: 48 }), no maxDuration, never essential",
+        "purpose": "Every change of place on the map; data swaps on moveend. MapLibre turns it into a jump under prefers-reduced-motion."
+      },
+      {
+        "name": "row-hover",
+        "value": "transition: background-color 150ms",
+        "purpose": "List rows and buttons."
+      },
+      {
+        "name": "disclosure-chevron",
+        "value": "transform: rotate(180deg) 200ms",
+        "purpose": "In-place collapsibles (Compare the floods)."
+      },
+      {
+        "name": "accordion",
+        "value": "tw-animate-css accordion-down / accordion-up",
+        "purpose": "Detail accordions."
+      },
+      {
+        "name": "copy-confirm",
+        "value": "1600ms",
+        "purpose": "How long \"Copied\" stays before reverting to \"Copy\"."
+      },
+      {
+        "name": "map-loading",
+        "value": "animate-pulse on quiet surface",
+        "purpose": "Placeholder until the map style loads."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "xl",
+        "value": "1280px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ink-filled action, at most one per panel (\"Open the town plan\").",
+      "html": "<button class=\"ds-btn-primary\">Open the town plan <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14\"/><path d=\"m12 5 7 7-7 7\"/></svg></button>",
+      "css": ".ds-btn-primary { display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 10px; border:1px solid transparent; border-radius:10px; background:oklch(0.205 0 0); color:oklch(0.985 0 0); font:500 14px/1 'Geist Variable', sans-serif; cursor:pointer; transition:all .15s; } .ds-btn-primary:hover { background:color-mix(in oklch, oklch(0.205 0 0) 80%, transparent); } .ds-btn-primary:focus-visible { outline:none; border-color:oklch(0.708 0 0); box-shadow:0 0 0 3px color-mix(in oklch, oklch(0.708 0 0) 50%, transparent); } .ds-btn-primary:active { transform:translateY(1px); }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary action such as Copy.",
+      "html": "<button class=\"ds-btn-outline\">Copy</button>",
+      "css": ".ds-btn-outline { height:28px; padding:0 10px; border:1px solid oklch(0.922 0 0); border-radius:8px; background:oklch(1 0 0); color:oklch(0.145 0 0); font:500 12.8px/1 'Geist Variable', sans-serif; cursor:pointer; transition:background .15s; } .ds-btn-outline:hover { background:oklch(0.97 0 0); } .ds-btn-outline:focus-visible { outline:none; border-color:oklch(0.708 0 0); box-shadow:0 0 0 3px color-mix(in oklch, oklch(0.708 0 0) 50%, transparent); }"
+    },
+    {
+      "name": "Flood Scenario Switch",
+      "kind": "nav",
+      "refersTo": "scenario-segment",
+      "description": "The one header control for the whole desk; the selected segment fills with ink, never red.",
+      "html": "<div class=\"ds-scn\"><span class=\"ds-scn-lbl\"><i class=\"ds-scn-dot\"></i>Flood</span><div class=\"ds-scn-grp\" role=\"radiogroup\" aria-label=\"Flood scenario for the whole desk\"><button role=\"radio\" aria-checked=\"false\">Normal</button><button role=\"radio\" aria-checked=\"false\">10-year</button><button role=\"radio\" aria-checked=\"true\">100-year</button><button role=\"radio\" aria-checked=\"false\">500-year</button></div></div>",
+      "css": ".ds-scn { display:flex; align-items:center; gap:12px; font-family:'Geist Variable', sans-serif; } .ds-scn-lbl { display:inline-flex; align-items:center; gap:8px; font-size:14px; color:oklch(0.556 0 0); } .ds-scn-dot { width:8px; height:8px; border-radius:50%; background:#d01d21; } .ds-scn-grp { display:flex; } .ds-scn-grp button { height:28px; padding:0 12px; border:1px solid oklch(0.922 0 0); border-left-width:0; background:transparent; color:oklch(0.145 0 0); font:500 12.8px/1 'Geist Variable', sans-serif; font-variant-numeric:tabular-nums; cursor:pointer; } .ds-scn-grp button:first-child { border-left-width:1px; border-radius:8px 0 0 8px; } .ds-scn-grp button:last-child { border-radius:0 8px 8px 0; } .ds-scn-grp button:hover { background:oklch(0.97 0 0); } .ds-scn-grp button[aria-checked=true] { background:oklch(0.145 0 0); color:oklch(1 0 0); font-weight:600; } .ds-scn-grp button[aria-checked=true]:hover { background:color-mix(in oklch, oklch(0.145 0 0) 90%, transparent); } .ds-scn-grp button:focus-visible { position:relative; z-index:1; outline:none; box-shadow:0 0 0 3px color-mix(in oklch, oklch(0.708 0 0) 50%, transparent); }"
+    },
+    {
+      "name": "Verdict (act)",
+      "kind": "card",
+      "refersTo": "verdict-act",
+      "description": "The one sentence a screen opens with, act tone when a planned flood needs action.",
+      "html": "<section class=\"ds-verdict\"><svg class=\"ds-verdict-icon\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\"/><path d=\"M12 9v4\"/><path d=\"M12 17h.01\"/></svg><div><h2>First action: move the 38 residents of the Résidence Les Saules care home.</h2><p>About 4,210 residents and 1,180 buildings sit in the 100-year zone; 12 dry shelters can take them.</p></div></section>",
+      "css": ".ds-verdict { display:flex; gap:12px; padding:14px 20px; border:1px solid color-mix(in oklch, #d01d21 20%, transparent); border-radius:14px; background:color-mix(in oklch, #d01d21 3.5%, transparent); font-family:'Geist Variable', sans-serif; } .ds-verdict-icon { flex-shrink:0; margin-top:2px; color:#d01d21; } .ds-verdict h2 { margin:0 0 4px; font-size:18px; font-weight:600; line-height:1.375; color:oklch(0.145 0 0); text-wrap:balance; font-variant-numeric:tabular-nums; } .ds-verdict p { margin:0; max-width:75ch; font-size:14px; line-height:1.625; color:oklch(0.556 0 0); }"
+    },
+    {
+      "name": "Verdict (calm)",
+      "kind": "card",
+      "refersTo": "verdict-calm",
+      "description": "Calm tone: no flood planned, or nothing to act on.",
+      "html": "<section class=\"ds-verdict-calm\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M12 16v-4\"/><path d=\"M12 8h.01\"/></svg><div><h2>No flood is switched on.</h2><p>Pick a flood in the header to plan for it.</p></div></section>",
+      "css": ".ds-verdict-calm { display:flex; gap:12px; padding:14px 20px; border:1px solid oklch(0.922 0 0); border-radius:14px; background:color-mix(in oklch, oklch(0.97 0 0) 40%, transparent); font-family:'Geist Variable', sans-serif; } .ds-verdict-calm svg { flex-shrink:0; margin-top:2px; color:oklch(0.556 0 0); } .ds-verdict-calm h2 { margin:0 0 4px; font-size:18px; font-weight:600; line-height:1.375; color:oklch(0.145 0 0); } .ds-verdict-calm p { margin:0; font-size:14px; line-height:1.625; color:oklch(0.556 0 0); }"
+    },
+    {
+      "name": "Status Tag",
+      "kind": "chip",
+      "refersTo": "status-tag",
+      "description": "A colour dot always beside its word.",
+      "html": "<span class=\"ds-tag\"><i style=\"background:#d01d21\"></i>Evacuate</span> <span class=\"ds-tag\"><i style=\"background:#bb7400\"></i>Watch</span> <span class=\"ds-tag\"><i style=\"background:#808080\"></i>Normal</span> <span class=\"ds-tag\"><i style=\"background:#1d7d3e\"></i>Safe</span>",
+      "css": ".ds-tag { display:inline-flex; align-items:center; gap:6px; margin-right:12px; font:500 12px/1.33 'Geist Variable', sans-serif; color:oklch(0.145 0 0); } .ds-tag i { display:inline-block; width:8px; height:8px; border-radius:50%; }"
+    },
+    {
+      "name": "Town List Row",
+      "kind": "custom",
+      "refersTo": "list-row",
+      "description": "Ranked row: status dot, name, meta, tabular figure; a progress bar only once progress exists.",
+      "html": "<ol class=\"ds-list\"><li><button><i style=\"background:#d01d21\"></i><span class=\"ds-list-main\"><b>Pepinster</b><small>Liège · 212 homes to clear</small></span><span class=\"ds-list-fig\"><b>2,140</b><span class=\"ds-bar\"><span style=\"width:34%\"></span></span></span></button></li><li><button><i style=\"background:#d01d21\"></i><span class=\"ds-list-main\"><b>Chaudfontaine</b><small>Liège · 160 homes to clear</small></span><span class=\"ds-list-fig\"><b>1,870</b><small>people</small></span></button></li></ol>",
+      "css": ".ds-list { margin:0; padding:0; list-style:none; border:1px solid oklch(0.922 0 0); border-radius:14px; overflow:hidden; font-family:'Geist Variable', sans-serif; } .ds-list li + li { border-top:1px solid oklch(0.922 0 0); } .ds-list button { display:flex; align-items:center; gap:12px; width:100%; padding:10px 16px; border:0; background:transparent; text-align:left; cursor:pointer; transition:background-color .15s; color:oklch(0.145 0 0); } .ds-list button:hover, .ds-list button:focus-visible { outline:none; background:color-mix(in oklch, oklch(0.97 0 0) 60%, transparent); } .ds-list i { width:10px; height:10px; border-radius:50%; flex-shrink:0; } .ds-list-main { flex:1; min-width:0; } .ds-list-main b, .ds-list-fig b { display:block; font-size:14px; font-weight:500; } .ds-list small { display:block; font-size:12px; color:oklch(0.556 0 0); } .ds-list-fig { width:96px; text-align:right; font-variant-numeric:tabular-nums; } .ds-bar { display:block; height:4px; margin-top:4px; border-radius:9999px; background:color-mix(in oklch, oklch(0.205 0 0) 20%, transparent); overflow:hidden; } .ds-bar span { display:block; height:100%; background:oklch(0.205 0 0); }"
+    },
+    {
+      "name": "Search Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Hairline field with a leading search icon, filters lists.",
+      "html": "<label class=\"ds-search\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/></svg><input placeholder=\"Search 214 towns\" aria-label=\"Search towns\"></label>",
+      "css": ".ds-search { position:relative; display:block; width:280px; } .ds-search svg { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:oklch(0.556 0 0); pointer-events:none; } .ds-search input { width:100%; height:32px; padding:0 10px 0 32px; border:1px solid oklch(0.922 0 0); border-radius:10px; background:transparent; font:400 14px 'Geist Variable', sans-serif; color:oklch(0.145 0 0); transition:border-color .15s, box-shadow .15s; } .ds-search input::placeholder { color:oklch(0.556 0 0); } .ds-search input:focus-visible { outline:none; border-color:oklch(0.708 0 0); box-shadow:0 0 0 3px color-mix(in oklch, oklch(0.708 0 0) 50%, transparent); }"
+    },
+    {
+      "name": "Sidebar Navigation",
+      "kind": "nav",
+      "refersTo": "",
+      "description": "Brand mark, three labelled items with hints, disclaimer in the foot.",
+      "html": "<nav class=\"ds-side\"><a class=\"ds-side-brand\"><span class=\"ds-side-mark\"></span><span><b>Flood desk</b><small>Meuse, Ahr, Erft, Rur</small></span></a><a class=\"ds-side-item\" aria-current=\"page\"><b>Region</b><small>Where to act</small></a><a class=\"ds-side-item\"><b>Town plan</b><small>Who leaves, where to</small></a><a class=\"ds-side-item\"><b>Data &amp; limits</b><small>What the numbers can't say</small></a><p class=\"ds-side-foot\">A planning tool, not an official warning. Warnings come from SPW, Rijkswaterstaat and the German state flood centres.</p></nav>",
+      "css": ".ds-side { display:flex; flex-direction:column; gap:2px; width:240px; padding:8px; background:oklch(0.985 0 0); border-right:1px solid oklch(0.922 0 0); font-family:'Geist Variable', sans-serif; color:oklch(0.145 0 0); } .ds-side a { display:flex; gap:8px; align-items:center; padding:8px; border-radius:8px; text-decoration:none; color:inherit; cursor:pointer; } .ds-side a:hover { background:oklch(0.97 0 0); } .ds-side a[aria-current=page] { background:oklch(0.97 0 0); font-weight:500; } .ds-side-item { flex-direction:column; align-items:flex-start !important; gap:0 !important; } .ds-side b { display:block; font-size:14px; font-weight:inherit; } .ds-side-brand b { font-weight:600; } .ds-side small { display:block; font-size:12px; color:oklch(0.556 0 0); } .ds-side-mark { width:32px; height:32px; border-radius:6px; background:oklch(0.145 0 0); flex-shrink:0; } .ds-side-foot { margin:24px 8px 4px; font-size:12px; line-height:1.625; color:oklch(0.556 0 0); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Calm Desk",
+    "overview": "The React frontend (`web/`) is a crisis desk for a coordinator who has just received a flood warning and has ministers on the phone. It is built on shadcn's Nova style with a neutral base: white paper, near-black ink, oklch greys, hairline borders, a 10px base radius and Geist throughout. The world is deliberately colourless so that the few colours it does carry are unmistakable. Urgency comes from the facts in the sentence, not from the styling around it.\n\nEvery screen reads top-down in three levels and opens each level only when asked: one Verdict (the sentence that says whether to act and what the first action is), then a ranked list beside a map, then the detail behind rows, tabs and accordions, with \"How this is computed\" always last. Density is that of a working tool, not a dashboard: one figure per row, small labels, tabular numbers, no wall of metric tiles.\n\nThe signature move is the map camera. Every change of place (region to town, town to home, home to shelter) flies: out, across, back in. The data for the new place lands with the camera, never before it.\n\nScope: this file describes the React frontend in `web/` only (Region, Town plan, Data & limits). The older Streamlit app in `src/` keeps its own Apple-HIG styling for the surfaces it still serves (door-knock, resident, 2021 vs today) and is not governed by these tokens until those surfaces move.",
+    "keyCharacteristics": [
+      "Neutral shadcn Nova base; colour carries flood status only, always paired with a word.",
+      "One Verdict per screen, then the list, then detail behind accordions.",
+      "Flat, hairline-bordered panels at 14px corners; no card shadows.",
+      "Geist Variable with stylistic set 01 and tabular figures for every number.",
+      "One flood-scenario control for the whole desk, in the header.",
+      "Every change of place on the map is a fly-to; reduced motion jumps."
+    ],
+    "rules": [
+      {
+        "name": "The Word-Beside-Colour Rule",
+        "body": "No colour carries meaning alone. Every status dot sits beside its word (StatusTag, legend item, filter segment, list row with its status in the text); every map layer has a legend line; the stacked shelter bar carries an `aria-label` and a labelled key below it.",
+        "section": "colors"
+      },
+      {
+        "name": "The Status-Only Rule",
+        "body": "Colour is reserved for flood status and the two place colours (shelter, water). There is no brand colour. Decoration, links, selection and emphasis use ink and greys.",
+        "section": "colors"
+      },
+      {
+        "name": "The Neutral Selection Rule",
+        "body": "A selected control is filled with ink (the scenario switch) or quiet grey (filters, rows), never with evacuate red. Red means \"evacuate\", so it cannot also mean \"you picked this\".",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Figures Rule",
+        "body": "Every number sits on tabular figures: all table cells, plus anything carrying the `tabular` class (counts, km, ranks, scenario years). Numbers are grouped en-GB style (\"12,340\") and percentages carry a thin space before \"%\".",
+        "section": "typography"
+      },
+      {
+        "name": "The Verdict-List-Detail Rule",
+        "body": "Each screen opens with exactly one Verdict, then the list (with its map), then detail behind accordions or tabs. \"How this is computed\" is always the last accordion item. Nothing below the Verdict is open by default.",
+        "section": "layout"
+      },
+      {
+        "name": "The One Switch Rule",
+        "body": "The flood scenario switch lives in the header only: one control for the whole desk and every person on it. No page, panel or sidebar repeats it. The sidebar's foot holds the planning-tool disclaimer (\"A planning tool, not an official warning...\") and nothing else.",
+        "section": "layout"
+      },
+      {
+        "name": "The Flat Panel Rule",
+        "body": "In-page surfaces never cast shadows; a border and a tint are enough. Shadows belong only to things that float over the map.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** pair every status colour with its word: a dot plus \"Evacuate\", a legend line for every map layer.",
+      "**Do** fill a selected control with ink (#171717 on the map, `foreground` in CSS) or the quiet surface tint.",
+      "**Do** open every screen with one Verdict, follow it with the list and map, and put detail in accordions with \"How this is computed\" last.",
+      "**Do** fly the camera on every change of place (`linear: false`, curve 1.42, speed 1.6, no `maxDuration`) and swap the data on landing.",
+      "**Do** set numbers in tabular figures and format them en-GB.",
+      "**Do** keep the light-mode status hex in `index.css` and `lib/flood.ts` `HEX` identical.",
+      "**Do** keep panels flat: a hairline border and a 14px corner."
+    ],
+    "donts": [
+      "**Don't** use evacuate red (or any status colour) to show selection, focus, links or emphasis.",
+      "**Don't** let a colour carry meaning alone, on the map or off it.",
+      "**Don't** add a second flood scenario control anywhere: the header holds the only one.",
+      "**Don't** put anything but the planning-tool disclaimer in the sidebar foot.",
+      "**Don't** show a progress bar before there is progress.",
+      "**Don't** pass `maxDuration` or `essential: true` to a camera move, and don't draw the new place's data before the camera lands.",
+      "**Don't** add shadows to in-page panels or rebuild the Streamlit wall of metric tiles, tabs and captions all open at once."
+    ]
+  }
+}
