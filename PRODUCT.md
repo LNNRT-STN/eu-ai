@@ -22,7 +22,7 @@ Turn the July 2021 flood evidence and a live river outlook into actions: is a fl
 
 ## Positioning
 
-Built only on public European data plus OpenStreetMap. Ties a live GloFAS river outlook, rated against each river's own July 2021 peak, to the people and sites that sat in the 2021 water, with shelter capacity per town and every number traceable to a re-runnable script. Separates observed from modelled evidence and says where the data is silent (the Vesdre is not in the satellite flood map).
+Built only on public European data plus OpenStreetMap. Ties a live GloFAS ensemble river outlook, rated on each river's own 2-, 5- and 20-year floods (backtested on July 2021), to the people and sites that sat in the 2021 water, with shelter capacity per town and every number traceable to a re-runnable script. Separates observed from modelled evidence and says where the data is silent (the Vesdre is not in the satellite flood map).
 
 ## Operating Context
 

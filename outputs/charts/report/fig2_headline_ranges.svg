@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="518.4pt" height="280.8pt" viewBox="0 0 518.4 280.8" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-10-30T10:11:52.945642</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 280.8 
+L 518.4 280.8 
+L 518.4 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 20.736 131.976 
+L 497.664 131.976 
+L 497.664 98.28 
+L 20.736 98.28 
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="line2d_1">
+    <path d="M 198.875834 115.128 
+L 377.449239 115.128 
+" clip-path="url(#p014e7b99a2)" style="fill: none; stroke: #14213d; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_2">
+    <path d="M 198.875834 125.7984 
+L 198.875834 104.4576 
+" clip-path="url(#p014e7b99a2)" style="fill: none; stroke: #14213d; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_3">
+    <path d="M 377.449239 125.7984 
+L 377.449239 104.4576 
+" clip-path="url(#p014e7b99a2)" style="fill: none; stroke: #14213d; stroke-linecap: square"/>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_4"/>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_5"/>
+    </g>
+    <g id="xtick_3">
+     <g id="line2d_6"/>
+    </g>
+    <g id="xtick_4">
+     <g id="line2d_7"/>
+    </g>
+    <g id="xtick_5">
+     <g id="line2d_8"/>
+    </g>
+    <g id="xtick_6">
+     <g id="line2d_9"/>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2"/>
+   <g id="patch_3">
+    <path d="M 20.736 122.148 
+L 235.700457 122.148 
+L 235.700457 108.108 
+L 20.736 108.108 
+z
+" clip-path="url(#p014e7b99a2)" style="fill: #003399"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 235.700457 122.148 
+L 295.186385 122.148 
+L 295.186385 108.108 
+L 235.700457 108.108 
+z
+" clip-path="url(#p014e7b99a2)" style="fill: #5a7fd6"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 700; font-size: 10px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: start; fill: #14213d" x="20.736" y="79.7472" transform="rotate(-0 20.736 79.7472)">Where satellites mapped the 2021 flood</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 8.5px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: start; fill: #5b6577" x="20.736" y="92.21472" transform="rotate(-0 20.736 92.21472)">Ahr, Schleiden, Liège, Venlo and 5 more areas (observed)</text>
+   </g>
+   <g id="text_3">
+    <text style="font-weight: 700; font-size: 15px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: start; fill: #003399" x="383.230185" y="115.640236" transform="rotate(-0 383.230185 115.640236)">19,000</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 7.8px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: start; fill: #5b6577" x="383.230185" y="128.940079" transform="rotate(-0 383.230185 128.940079)">range 12,300 to 24,700</text>
+   </g>
+   <g id="text_5">
+    <text style="font-weight: 700; font-size: 8px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="128.218228" y="117.198312" transform="rotate(-0 128.218228 117.198312)">78% near a full shelter</text>
+   </g>
+  </g>
+  <g id="axes_2">
+   <g id="patch_5">
+    <path d="M 20.736 203.58 
+L 497.664 203.58 
+L 497.664 169.884 
+L 20.736 169.884 
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="line2d_10">
+    <path d="M 55.147078 186.732 
+L 150.922892 186.732 
+" clip-path="url(#pe9e7dc9de7)" style="fill: none; stroke: #14213d; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_11">
+    <path d="M 55.147078 197.4024 
+L 55.147078 176.0616 
+" clip-path="url(#pe9e7dc9de7)" style="fill: none; stroke: #14213d; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_12">
+    <path d="M 150.922892 197.4024 
+L 150.922892 176.0616 
+" clip-path="url(#pe9e7dc9de7)" style="fill: none; stroke: #14213d; stroke-linecap: square"/>
+   </g>
+   <g id="matplotlib.axis_3">
+    <g id="xtick_7">
+     <g id="line2d_13"/>
+     <g id="text_6">
+      <text style="font-size: 8px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: middle; fill: #5b6577" x="20.736" y="212.904219" transform="rotate(-0 20.736 212.904219)">0</text>
+     </g>
+    </g>
+    <g id="xtick_8">
+     <g id="line2d_14"/>
+     <g id="text_7">
+      <text style="font-size: 8px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: middle; fill: #5b6577" x="92.997818" y="212.904219" transform="rotate(-0 92.997818 212.904219)">5,000</text>
+     </g>
+    </g>
+    <g id="xtick_9">
+     <g id="line2d_15"/>
+     <g id="text_8">
+      <text style="font-size: 8px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: middle; fill: #5b6577" x="165.259636" y="212.904219" transform="rotate(-0 165.259636 212.904219)">10,000</text>
+     </g>
+    </g>
+    <g id="xtick_10">
+     <g id="line2d_16"/>
+     <g id="text_9">
+      <text style="font-size: 8px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: middle; fill: #5b6577" x="237.521455" y="212.904219" transform="rotate(-0 237.521455 212.904219)">15,000</text>
+     </g>
+    </g>
+    <g id="xtick_11">
+     <g id="line2d_17"/>
+     <g id="text_10">
+      <text style="font-size: 8px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: middle; fill: #5b6577" x="309.783273" y="212.904219" transform="rotate(-0 309.783273 212.904219)">20,000</text>
+     </g>
+    </g>
+    <g id="xtick_12">
+     <g id="line2d_18"/>
+     <g id="text_11">
+      <text style="font-size: 8px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: middle; fill: #5b6577" x="382.045091" y="212.904219" transform="rotate(-0 382.045091 212.904219)">25,000</text>
+     </g>
+    </g>
+   </g>
+   <g id="matplotlib.axis_4"/>
+   <g id="patch_6">
+    <path d="M 20.736 193.752 
+L 97.174551 193.752 
+L 97.174551 179.712 
+L 20.736 179.712 
+z
+" clip-path="url(#pe9e7dc9de7)" style="fill: #003399"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 97.174551 193.752 
+L 107.710324 193.752 
+L 107.710324 179.712 
+L 97.174551 179.712 
+z
+" clip-path="url(#pe9e7dc9de7)" style="fill: #5a7fd6"/>
+   </g>
+   <g id="text_12">
+    <text style="font-weight: 700; font-size: 10px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: start; fill: #14213d" x="20.736" y="151.3512" transform="rotate(-0 20.736 151.3512)">Vesdre valley</text>
+   </g>
+   <g id="text_13">
+    <text style="font-size: 8.5px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: start; fill: #5b6577" x="20.736" y="163.81872" transform="rotate(-0 20.736 163.81872)">once-a-century flood map (modelled)</text>
+   </g>
+   <g id="text_14">
+    <text style="font-weight: 700; font-size: 15px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: start; fill: #003399" x="156.703837" y="187.244236" transform="rotate(-0 156.703837 187.244236)">6,000</text>
+   </g>
+   <g id="text_15">
+    <text style="font-size: 7.8px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: start; fill: #5b6577" x="156.703837" y="200.544079" transform="rotate(-0 156.703837 200.544079)">range 2,400 to 9,000</text>
+   </g>
+   <g id="text_16">
+    <text style="font-weight: 700; font-size: 8px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="58.955276" y="188.802312" transform="rotate(-0 58.955276 188.802312)">88%</text>
+   </g>
+   <g id="text_17">
+    <g id="patch_8">
+     <path d="M 259.2 199.808304 
+L 359.130781 199.808304 
+Q 362.955781 199.808304 362.955781 195.983304 
+L 362.955781 177.480696 
+Q 362.955781 173.655696 359.130781 173.655696 
+L 259.2 173.655696 
+Q 255.375 173.655696 255.375 177.480696 
+L 255.375 195.983304 
+Q 255.375 199.808304 259.2 199.808304 
+z
+" style="fill: #fff6cc; stroke: #ffcc00; stroke-linejoin: miter"/>
+    </g>
+    <text style="font-size: 8.5px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; fill: #14213d" transform="translate(259.2 184.306014)">Sharing shelters across</text>
+    <text style="font-size: 8.5px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; fill: #14213d" transform="translate(259.2 193.5574)">town borders: +900 places</text>
+   </g>
+  </g>
+  <g id="axes_3">
+   <g id="patch_9">
+    <path d="M 20.736 244.998 
+L 31.228416 244.998 
+L 31.228416 237.978 
+L 20.736 237.978 
+z
+" clip-path="url(#p5b1fecd18a)" style="fill: #003399; stroke: #003399; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 159.04512 244.998 
+L 169.537536 244.998 
+L 169.537536 237.978 
+L 159.04512 237.978 
+z
+" clip-path="url(#p5b1fecd18a)" style="fill: #5a7fd6; stroke: #5a7fd6; stroke-linejoin: miter"/>
+   </g>
+   <g id="line2d_19">
+    <path d="M 316.43136 241.488 
+L 335.50848 241.488 
+" clip-path="url(#p5b1fecd18a)" style="fill: none; stroke: #14213d; stroke-linecap: square"/>
+   </g>
+   <g id="text_18">
+    <text style="font-size: 8.5px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: start; fill: #14213d" x="35.04384" y="243.687624" transform="rotate(-0 35.04384 243.687624)">Shelter nearby, but full</text>
+   </g>
+   <g id="text_19">
+    <text style="font-size: 8.5px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: start; fill: #14213d" x="173.35296" y="243.687707" transform="rotate(-0 173.35296 243.687707)">No shelter within 20 min walk</text>
+   </g>
+   <g id="text_20">
+    <text style="font-size: 8.5px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: start; fill: #14213d" x="340.27776" y="243.687624" transform="rotate(-0 340.27776 243.687624)">range (low to high assumptions)</text>
+   </g>
+  </g>
+  <g id="line2d_20">
+   <path d="M 20.736 7.02 
+L 497.664 7.02 
+" style="fill: none; stroke: #003399; stroke-width: 2.2; stroke-linecap: square"/>
+  </g>
+  <g id="line2d_21">
+   <path d="M 20.736 7.02 
+L 51.84 7.02 
+" style="fill: none; stroke: #ffcc00; stroke-width: 4.5"/>
+  </g>
+  <g id="text_21">
+   <text style="font-weight: 700; font-size: 14px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: start; fill: #003399" x="20.736" y="31.252383" transform="rotate(-0 20.736 31.252383)">Most people left without a place live near a shelter that is full</text>
+  </g>
+  <g id="text_22">
+   <text style="font-size: 10px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: start; fill: #5b6577" x="20.736" y="47.996273" transform="rotate(-0 20.736 47.996273)">Residents without a shelter place if the 2021 flood returned, central estimate and range</text>
+  </g>
+  <g id="text_23">
+   <text style="font-size: 7.2px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: start; fill: #5b6577" x="20.736" y="269.456625" transform="rotate(-0 20.736 269.456625)">Source: Copernicus EMS (EMSR517/518/520), EFAS, GHS-POP, GHS-OBAT (JRC); OpenStreetMap 29.10.2026. Team 5 analysis.</text>
+  </g>
+  <g id="text_24">
+   <text style="font-size: 7.2px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: start; fill: #5b6577" x="20.736" y="258.786225" transform="rotate(-0 20.736 258.786225)">The two estimates use different flood maps and are not added together. Range: shelter space 3-5 m² per person, walk 1-2.5 km.</text>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p014e7b99a2">
+   <rect x="20.736" y="98.28" width="476.928" height="33.696"/>
+  </clipPath>
+  <clipPath id="pe9e7dc9de7">
+   <rect x="20.736" y="169.884" width="476.928" height="33.696"/>
+  </clipPath>
+  <clipPath id="p5b1fecd18a">
+   <rect x="20.736" y="234.468" width="476.928" height="14.04"/>
+  </clipPath>
+ </defs>
+</svg>

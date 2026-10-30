@@ -26,6 +26,8 @@ Rules:
 - Say that river flows come from a model (GloFAS) and are not a gauge reading when flows are mentioned.
   In a replay the flows were computed afterwards: never call them a live forecast, and never call the modelled
   July 2021 peak the real peak. Call a replay a replay of the 2021 forecast in line 1, and use the date given as it is.
+- Say how rare the flood is with the "flow is a" words as given (a return period, e.g. "a 20-year flood"), and
+  the status rule once. A return period is how rare the flow is in the model's record, not a promise.
 - If the flood extent is modelled, say so whenever you give its number of people.
 - End with this exact line: {FOOTER}"""
 
@@ -64,8 +66,8 @@ def template(kind, recipient, facts):
              + (f" (was {f['from']})." if f.get("from") else ".")]
     if "modelled_flow_m3s" in f:
         lines.append(f"River point {f.get('river_point', '?')}: {f['modelled_flow_m3s']} m3/s modelled (GloFAS), "
-                     f"2-year flood {f.get('modelled_two_year_flow_m3s', '?')}, modelled July 2021 peak "
-                     f"{f.get('modelled_july_2021_peak_m3s', '?')}.")
+                     f"a {f.get('flow_is_a', '?')}. 20-year flood {f.get('modelled_twenty_year_flow_m3s', '?')}, "
+                     f"modelled July 2021 peak {f.get('modelled_july_2021_peak_m3s', '?')}.")
     if "people_in_2021_satellite_flood_extent" in f:
         lines.append(f"About {f['people_in_2021_satellite_flood_extent']} residents lived inside the 2021 satellite "
                      "flood extent (a floor).")
@@ -119,7 +121,10 @@ def write(kind, recipient, facts) -> str:
 if __name__ == "__main__":
     t, s = draft("status", "Mayor of Pepinster", {"town": "Pepinster", "status": "evacuate", "from": "warn",
                                                    "time": "13 Jul 2021 18:00", "river_point": "Vesdre · Chaudfontaine",
-                                                   "modelled_flow_m3s": 146, "modelled_two_year_flow_m3s": 66, "modelled_july_2021_peak_m3s": 291,
+                                                   "modelled_flow_m3s": 146,
+                                                   "flow_is_a": "above 100-year flood (return period from the model's "
+                                                                "own record 1997–2020)",
+                                                   "modelled_twenty_year_flow_m3s": 61, "modelled_july_2021_peak_m3s": 291,
                                                    "people_in_modelled_flood_zone": 2163})
     print(s, last_error, last_usage)
     print(t)

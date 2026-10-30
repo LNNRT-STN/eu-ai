@@ -152,25 +152,27 @@ per town (section 9), and the risk ranking stays rule-based. If a second map lay
 improves the pooled ranking (AUC 0.75 → 0.79, interval above zero). Do **not** say that it beats EFAS on the Ahr
 or the Meuse.
 
-## 9. Impact forecast per town (`impact_forecast()` in `src/build_ml2.py`)
+## 9. Impact forecast per town (`impact_forecast()` in `src/impact.py`)
 
-Not a trained model: a transparent curve per river gauge that the replay and the live forecast use to set each
-town's status.
-- Input: the river flow at the town's gauge (GloFAS daily discharge, 19 points in `src/forecast.py`; town → gauge
-  in `outputs/data/town_gauge.csv`), one value or a list of ensemble members.
-- Curve: share of the July 2021 impact = 0 at the 2-year flow and 1 at the July 2021 peak. In between, the share
-  follows a log-flow scale with knots from the EFAS 10/100/500-year zones near the gauge's towns. The return
-  period flows come from a Gumbel fit to the GloFAS annual maxima 1991-2020 (`ml2_curves.json`).
-- Output per town: expected share and expected impact (people, single-storey homes, care sites), status none /
-  watch (< 0.25) / warn (0.25-0.6) / evacuate (≥ 0.6). With ensemble members, it also gives the share of
-  members at warn or worse.
-- Limits: the July 2021 replay feeds it **hindcast** flows (hindsight), not the forecasts available on the day.
-  GloFAS is daily, so the replay holds each day's flow and gives the day, not the hour. A town's status never steps down during the replay. The Urft point is weak
-  (peak 44 m³/s). The calibration knots come from EFAS, so they carry the EFAS blind spots described above.
+Not a trained model, and since 30 Oct 2026 no longer anchored on the July 2021 flood: return periods, as EFAS does.
+- Input: the river flow at the town's point (GloFAS daily discharge, 19 points in `src/forecast.py`; town → point
+  in `outputs/data/town_gauge.csv`), one value or the peaks of the ensemble runs.
+- Thresholds: a Gumbel fit (L-moments) to the point's annual peaks in the GloFAS v4 reanalysis
+  (`src/out/meuse/annual_max.json`): 1997–2025 for the live forecast, 1997–2020 for the 2021 backtest.
+- Status: watch / warn / evacuate at the 2- / 5- / 20-year flow; with ensemble runs, when ≥ 30 % of the runs reach
+  it within 10 days. `probability` = share of runs at the 5-year flow or above.
+- People expected: residents in the EFAS 10/100/500-year zones per town (`outputs/data/town_efas.csv`), interpolated
+  on log return period (0 at the 2-year flood), averaged over the runs.
+- Limits: the backtest feeds it **hindcast** flows (hindsight), not the forecasts available on the day. GloFAS is
+  daily, so it gives the day, not the hour. EFAS zones ignore dikes (the Meuse numbers are an upper bound) and skip
+  small streams (Kall, Bad Münstereifel and Kelmis have no zone). The Urft point is weak (peak 44 m³/s).
+- Replaced: the earlier curve (0 at the 2-year flow, 1 at the July 2021 peak, knots from a moment-method Gumbel
+  fit) gave 2021 return periods in the thousands to millions of years on the small rivers and could only say "how
+  close to 2021", not "how rare".
 
 ## 10. For the AI sheet (update to section 7)
 
 - *Retried with terrain:* pooled AUC 0.752 → 0.792; the gain over EFAS is +0.042 (95 % CI +0.024 to +0.058). There
   is no gain on the Meuse, and the Ahr gain is not significant. It is still not used for alert levels.
-- *Shipped instead:* a flow-to-impact curve per gauge (no training, calibrated on EFAS return-period zones) and
+- *Shipped instead:* a return-period rule per river point (no training; EFAS zones give the people) and
   Claude-drafted briefings (claude-haiku-5-5). Claude writes the words; every number comes from the engine.

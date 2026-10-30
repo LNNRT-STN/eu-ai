@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="518.4pt" height="266.4pt" viewBox="0 0 518.4 266.4" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-10-30T10:11:53.050018</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 266.4 
+L 518.4 266.4 
+L 518.4 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="line2d_1">
+    <path d="M 20.736 102.564 
+L 497.664 102.564 
+" clip-path="url(#p8801d6d86c)" style="fill: none; stroke: #c7ccd6; stroke-width: 0.6; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_2">
+    <path d="M 20.736 146.52 
+L 497.664 146.52 
+" clip-path="url(#p8801d6d86c)" style="fill: none; stroke: #c7ccd6; stroke-width: 0.6; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_3">
+    <path d="M 20.736 190.476 
+L 497.664 190.476 
+" clip-path="url(#p8801d6d86c)" style="fill: none; stroke: #c7ccd6; stroke-width: 0.6; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_4">
+    <path d="M 20.736 234.432 
+L 497.664 234.432 
+" clip-path="url(#p8801d6d86c)" style="fill: none; stroke: #c7ccd6; stroke-width: 0.6; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_5">
+    <path d="M 20.736 58.608 
+L 497.664 58.608 
+" clip-path="url(#p8801d6d86c)" style="fill: none; stroke: #c7ccd6; stroke-width: 0.6; stroke-linecap: square"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 700; font-size: 11px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: start; fill: #14213d" x="20.736" y="83.432572" transform="rotate(-0 20.736 83.432572)">Warning</text>
+   </g>
+   <g id="text_2">
+    <g id="patch_2">
+     <path d="M 99.68876 89.511 
+L 165.345948 89.511 
+Q 167.895948 89.511 167.895948 86.961 
+L 167.895948 74.211 
+Q 167.895948 71.661 165.345948 71.661 
+L 99.68876 71.661 
+Q 97.13876 71.661 97.13876 74.211 
+L 97.13876 86.961 
+Q 97.13876 89.511 99.68876 89.511 
+z
+" style="fill: #003399"/>
+    </g>
+    <text style="font-weight: 700; font-size: 8.5px; font-family: 'DejaVu Sans Mono'; text-anchor: start; fill: #ffffff" x="101.81376" y="82.794008" transform="rotate(-0 101.81376 82.794008)">✓  BETTER   </text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 9px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; fill: #14213d" transform="translate(197.19936 76.960863)">New alert systems in Wallonia, tested in 2026;</text>
+    <text style="font-size: 9px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; fill: #14213d" transform="translate(197.19936 88.827152)">longer forecasts and phone alerts in Germany</text>
+   </g>
+   <g id="text_4">
+    <text style="font-weight: 700; font-size: 11px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: start; fill: #14213d" x="20.736" y="127.38868" transform="rotate(-0 20.736 127.38868)">Protection</text>
+   </g>
+   <g id="text_5">
+    <g id="patch_3">
+     <path d="M 99.68876 133.467 
+L 165.345948 133.467 
+Q 167.895948 133.467 167.895948 130.917 
+L 167.895948 118.167 
+Q 167.895948 115.617 165.345948 115.617 
+L 99.68876 115.617 
+Q 97.13876 115.617 97.13876 118.167 
+L 97.13876 130.917 
+Q 97.13876 133.467 99.68876 133.467 
+z
+" style="fill: #ffcc00"/>
+    </g>
+    <text style="font-weight: 700; font-size: 8.5px; font-family: 'DejaVu Sans Mono'; text-anchor: start; fill: #14213d" x="101.81376" y="126.750008" transform="rotate(-0 101.81376 126.750008)">◔  SLOW     </text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 9px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; fill: #14213d" transform="translate(197.19936 121.226941)">Most Vesdre works start in 2026-27;</text>
+    <text style="font-size: 9px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; fill: #14213d" transform="translate(197.19936 133.677527)">Trooz and Verviers still wait for studies</text>
+   </g>
+   <g id="text_7">
+    <text style="font-weight: 700; font-size: 11px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: start; fill: #14213d" x="20.736" y="171.34468" transform="rotate(-0 20.736 171.34468)">Shelter</text>
+   </g>
+   <g id="text_8">
+    <g id="patch_4">
+     <path d="M 99.68876 177.423 
+L 165.345948 177.423 
+Q 167.895948 177.423 167.895948 174.873 
+L 167.895948 162.123 
+Q 167.895948 159.573 165.345948 159.573 
+L 99.68876 159.573 
+Q 97.13876 159.573 97.13876 162.123 
+L 97.13876 174.873 
+Q 97.13876 177.423 99.68876 177.423 
+z
+" style="fill: #b8202f"/>
+    </g>
+    <text style="font-weight: 700; font-size: 8.5px; font-family: 'DejaVu Sans Mono'; text-anchor: start; fill: #ffffff" x="101.81376" y="170.706008" transform="rotate(-0 101.81376 170.706008)">✕  MISSING  </text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 9px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: start; fill: #14213d" x="197.19936" y="170.82675" transform="rotate(-0 197.19936 170.82675)">No public list of flood shelters found in any municipality</text>
+   </g>
+   <g id="text_10">
+    <text style="font-weight: 700; font-size: 11px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: start; fill: #14213d" x="20.736" y="215.300572" transform="rotate(-0 20.736 215.300572)">Building</text>
+   </g>
+   <g id="text_11">
+    <g id="patch_5">
+     <path d="M 99.68876 221.379 
+L 165.345948 221.379 
+Q 167.895948 221.379 167.895948 218.829 
+L 167.895948 206.079 
+Q 167.895948 203.529 165.345948 203.529 
+L 99.68876 203.529 
+Q 97.13876 203.529 97.13876 206.079 
+L 97.13876 218.829 
+Q 97.13876 221.379 99.68876 221.379 
+z
+" style="fill: #b8202f"/>
+    </g>
+    <text style="font-weight: 700; font-size: 8.5px; font-family: 'DejaVu Sans Mono'; text-anchor: start; fill: #ffffff" x="101.81376" y="214.662008" transform="rotate(-0 101.81376 214.662008)">!  RISKY    </text>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 9px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: start; fill: #14213d" x="197.19936" y="214.78275" transform="rotate(-0 197.19936 214.78275)">New homes planned in Trooz on land flooded by over 2 m in 2021</text>
+   </g>
+  </g>
+  <g id="line2d_6">
+   <path d="M 20.736 6.66 
+L 497.664 6.66 
+" style="fill: none; stroke: #003399; stroke-width: 2.2; stroke-linecap: square"/>
+  </g>
+  <g id="line2d_7">
+   <path d="M 20.736 6.66 
+L 51.84 6.66 
+" style="fill: none; stroke: #ffcc00; stroke-width: 4.5"/>
+  </g>
+  <g id="text_13">
+   <text style="font-weight: 700; font-size: 14px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: start; fill: #003399" x="20.736" y="30.172383" transform="rotate(-0 20.736 30.172383)">Since 2021, warnings have improved faster than protection</text>
+  </g>
+  <g id="text_14">
+   <text style="font-size: 10px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: start; fill: #5b6577" x="20.736" y="45.908273" transform="rotate(-0 20.736 45.908273)">What has changed in the Meuse and Vesdre region, five years on</text>
+  </g>
+  <g id="text_15">
+   <text style="font-size: 7.2px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: start; fill: #5b6577" x="20.736" y="255.560625" transform="rotate(-0 20.736 255.560625)">Rhein-Zeitung/dpa (07.2026); Bezirksregierung Köln (17.06.2025).</text>
+  </g>
+  <g id="text_16">
+   <text style="font-size: 7.2px; font-family: 'Arial', 'Helvetica Neue', 'DejaVu Sans'; text-anchor: start; fill: #5b6577" x="20.736" y="245.437425" transform="rotate(-0 20.736 245.437425)">Sources: Wallonia (26.06.2026); RTBF (15.07.2026); Gouvernement wallon (25.06.2026);</text>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p8801d6d86c">
+   <rect x="20.736" y="58.608" width="476.928" height="175.824"/>
+  </clipPath>
+ </defs>
+</svg>

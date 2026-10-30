@@ -119,13 +119,18 @@ Output: `regions.geojson`.
 
 ### 4.4 `forecast.py`: live outlook
 
-- **River points:** ten GloFAS 0.05° cells, each picked by hand as the highest-flow cell in a 3×3 neighbourhood
+- **River points:** 19 GloFAS 0.05° cells, each picked by hand as the highest-flow cell in a 3×3 neighbourhood
   near the town (coordinates in `GAUGES`).
-- **Reference flows** (run once, ~4 min, paced at 20 s per request for the free tier) → `gauge_refs.json`:
-  - 2-year flood ≈ median of annual maxima 2011–2020;
-  - July 2021 peak = model maximum 10–25 July 2021.
-- **Rating** of the 30-day ensemble median (and of the wettest member): Normal → Above 2-year flood → Above half
-  of July 2021 → At or above July 2021.
+- **Return-period thresholds** (run once, paced at 20 s per request for the free tier) → `annual_max.json`: annual
+  peak flow per point, GloFAS v4 reanalysis 1997–2025; Gumbel fit by L-moments → 2-, 5-, 20- and 100-year flows,
+  the way EFAS and GloFAS set theirs. Each point is rated on its own model record, which cancels the model's bias
+  at that spot. The July 2021 peak (`gauge_refs.json`) is kept for scale only.
+- **Rating** of the ensemble (control + 50 runs): each run's peak over the next 10 days; Normal → Above 2-year →
+  Above 5-year → Above 20-year flood when at least 30 % of the runs reach it (the EFAS notification rule). Towns take
+  their river point's level as watch / warn / evacuate (`impact.py`), with people expected from the EFAS zone of the
+  forecast return period.
+- **Backtest:** the same rule on the July 2021 reanalysis flows, thresholds fitted on 1997–2020 only
+  (`python src/impact.py` → `outputs/data/backtest_2021.csv`).
 - **Rain:** 7-day forecast for four headwater points, largest 2-day total, vs. ERA5 total for 13–15 July 2021.
 - The dashboard caches these calls for 3 hours and works offline without the outlook.
 
@@ -142,8 +147,8 @@ Each is a choice the team made; challenge it if the evidence says otherwise.
 | A5 | Residents are spread **equally** over residential buildings in a ~1 km cell | Robust to misclassified large footprints | Over-counts small houses, under-counts flats; order of magnitude only |
 | A6 | Being in the water ≠ damaged | No damage data in BE/NL | Counts measure exposure, not loss |
 | A7 | EFAS cell under the point decides the 100-year view | Simple, transparent | ~30 m cells mis-place buildings near the edge of the zone |
-| A8 | Model-vs-model comparison (GloFAS forecast vs GloFAS 2021 peak) | Like for like; GloFAS underestimates small valleys | Ratings are relative to the model's 2021, not to observed 2021 |
-| A9 | 10 years (2011–2020) are enough for a 2-year flood estimate | Free-tier request limits | Noisy threshold |
+| A8 | Model-vs-model comparison (GloFAS forecast vs GloFAS's own return periods) | Like for like, as EFAS does; cancels the model's bias at each point | A storm the model misses entirely is still missed |
+| A9 | 29 years (1997–2025) and a Gumbel fit give usable 2- to 20-year flows | The record Open-Meteo serves | 100-year flows are uncertain; beyond them only "above 100-year" is shown |
 | A10 | Impact classes are **relative** (quartiles among hit communes) | No absolute damage threshold is available across countries | "Severe" ≠ a fixed level of damage |
 | A11 | The five under-detected communes were badly flooded despite the satellite map | **Team judgement, not challenge data** | Must be backed by a cited external source in the brief |
 

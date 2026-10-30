@@ -62,3 +62,46 @@ def _load_moves(_stamp):
     bus = pd.read_csv(DATA / "bus_plan.csv")
     bus["town"] = bus.municipality.map(town)
     return recv, bus
+
+
+ROAD = 1.3  # road distance / straight line, measured 1.2-1.4 in notebooks/evac_sim.py
+
+
+def shelter_address(r):
+    """'Ahrstraße 5, 53506 Ahrbrück' from a row of shelter_addresses.csv; '' when OSM has no address within 100 m."""
+    if not isinstance(r.get("street"), str):
+        return ""
+    place = " ".join(x for x in (r.get("postcode"), r.get("city")) if isinstance(x, str))
+    return f"{r['street']} {r['housenumber']}" + (f", {place}" if place else "")
+
+
+@st.cache_data
+def plan_shelters():
+    """Per town, the shelters its people go to in the 10 km plan, each with its street address
+    (notebooks/shelter_addresses.py)."""
+    bus = load_moves()[1]
+    p = bus.groupby(["municipality", "shelter", "cat", "s_lon", "s_lat"], as_index=False).people.sum()
+    p = p[p.people >= .5]
+    ad = pd.read_csv(DATA / "shelter_addresses.csv", dtype=str)
+    ad[["s_lon", "s_lat"]] = ad[["s_lon", "s_lat"]].astype(float)
+    p = p.merge(ad, on=["shelter", "s_lon", "s_lat"], how="left")
+    p["address"] = [shelter_address(r) for r in p.to_dict("records")]
+    # OSM sites with no name are listed as "Unnamed school": call them by what they are
+    p["label"] = p.shelter.where(~p.shelter.str.startswith("Unnamed "),
+                                 p.shelter.str.removeprefix("Unnamed ").str.capitalize())
+    return p
+
+
+def destinations(muni, homes):
+    """For each home (lon, lat) of one town: its nearest plan shelter, that shelter's address and the road km."""
+    import numpy as np
+    p = plan_shelters().query("municipality == @muni").reset_index(drop=True)
+    if p.empty:
+        return homes.assign(go="", go_address="", go_km=np.nan)
+    lat0 = np.radians(homes.lat.values)[:, None]
+    dx = (homes.lon.values[:, None] - p.s_lon.values[None]) * np.cos(lat0) * 111.32
+    dy = (homes.lat.values[:, None] - p.s_lat.values[None]) * 110.57
+    d = np.hypot(dx, dy) * ROAD
+    i = d.argmin(1)
+    return homes.assign(go=p.label.values[i], go_address=p.address.values[i], go_km=d[np.arange(len(i)), i].round(1),
+                        go_lon=p.s_lon.values[i], go_lat=p.s_lat.values[i], go_cat=p["cat"].values[i])

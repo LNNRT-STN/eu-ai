@@ -180,3 +180,34 @@ def test_mode_switch_clears_scenario():
     live.set_mode("live")
     live.set_mode("replay")
     assert live.events().empty and not live.checkins().sim.any()
+
+
+def test_ensemble_rule_needs_30_percent_of_runs():
+    import forecast
+    import impact
+    g = "Vesdre · Verviers"
+    q = forecast.thresholds()[g]["q"]
+    tg = impact.load_town_gauge()
+    runs = lambda share: [q[20] * 1.1] * int(51 * share) + [q[2] * .5] * (51 - int(51 * share))
+    town = lambda r: impact.impact_forecast({g: r}, tg).set_index("municipality").loc["Pepinster (BE)"]
+    assert town(runs(.4)).status == "evacuate" and town(runs(.4)).people_expected > 0
+    assert town(runs(.2)).status == "none"  # 20 % of runs is not enough for any level
+    assert town([q[5] * 1.01] * 51).status == "warn"
+
+
+def test_backtest_uses_pre_2021_thresholds():
+    import forecast
+    pre, full = forecast.thresholds(forecast.BACKTEST_YEAR), forecast.thresholds()
+    assert pre["Vesdre · Verviers"]["years"].endswith("2020") and full["Vesdre · Verviers"]["years"].endswith("2025")
+    assert pre["Vesdre · Verviers"]["q"][20] < full["Vesdre · Verviers"]["q"][20]  # 2021 raises the fitted floods
+
+
+def test_live_mode_judges_ensemble(monkeypatch):
+    import forecast
+    g = "Vesdre · Verviers"
+    q20 = forecast.thresholds()[g]["q"][20]
+    monkeypatch.setattr(live, "_live_runs", lambda t: {g: [q20 * 1.2] * 51})
+    monkeypatch.setattr(live, "_live_flows", lambda t: {g: q20 * 1.2})
+    T = live.towns_status(pd.Timestamp("2026-10-30 12:00"), "live").set_index("municipality")
+    assert T.at["Pepinster (BE)", "status"] == "evacuate" and T.at["Pepinster (BE)", "probability"] == 1
+    assert T.at["Bad Neuenahr-Ahrweiler, Stadt (DE)", "status"] == live.NO_POINT  # no flow for its point here

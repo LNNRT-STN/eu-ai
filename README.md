@@ -16,7 +16,7 @@ README for method and limits); only the river outlook uses `src/out/meuse/` (`ga
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-python src/forecast.py         # once: river reference flows (~4 min, paced for the Open-Meteo free tier)
+python src/forecast.py         # once: river reference flows and annual peaks (~12 min, paced for the Open-Meteo free tier)
 python src/build_priority.py   # July 2021 river replay for the Briefing (also needs the challenge files in data/working_data/)
 
 streamlit run src/dashboard.py   # http://localhost:8501
@@ -34,7 +34,8 @@ dashboard still works, but without the live outlook.
 | `src/build_charts.py` | Static charts and the action risk map for the brief → `outputs/charts/` (PNG + SVG). Reads only `outputs/data/`. |
 | `src/build_priority.py` | Priority score per commune (rules in its docstring) → `out/meuse/priority.geojson`; GloFAS flows 10–20 July 2021 → `out/meuse/replay_2021.json`. |
 | `src/build_sites.py` | Candidate shelters (OSM schools, town halls dry in 2021 and outside the 10/100-year zones) and care sites at risk → `out/meuse/sites.parquet`. |
-| `src/forecast.py` | Open-Meteo calls: river forecast, rain forecast, reference flows (`python src/forecast.py` builds `out/meuse/gauge_refs.json`). |
+| `src/forecast.py` | Open-Meteo calls: river ensemble forecast, rain forecast, return-period thresholds (`python src/forecast.py` builds `out/meuse/gauge_refs.json` and `out/meuse/annual_max.json`). |
+| `src/impact.py` | Impact forecast per town (return period → status, people in the EFAS zone) and the 2021 backtest (`python src/impact.py` → `outputs/data/town_efas.csv`, `outputs/data/backtest_2021.csv`). |
 | `src/build.py`, `src/build_meuse.py` | Clip OBAT buildings and GHS-POP residents to the flood extent and the EFAS zone; sum per commune and per cell. |
 | `src/build_regions.py` | Commune polygons with the 2021 impact score and EMS damage counts → `out/meuse/regions.geojson`. |
 | `src/enrich.py` | OSM facilities, waterways and NUTS3 for all mapped areas; makes the OSM facilities that `build_sites.py` needs. |
@@ -43,20 +44,27 @@ dashboard still works, but without the live outlook.
 
 Full detail (pipeline steps, libraries, assumption table): [docs/METHODOLOGY.md](docs/METHODOLOGY.md).
 
-**River outlook.** Ten points on the Meuse (Liège, Maastricht, Roermond, Venlo), Vesdre (Chaudfontaine, Verviers),
-Ourthe, Lesse, Rur and Inde. Each is the highest-flow GloFAS 0.05° cell near the town. For the next 30 days the
-dashboard shows the ensemble median and the wettest ensemble member, rated against reference flows from the same
-model at the same cell:
+**River outlook (the forecast).** 19 GloFAS points on the Meuse, Vesdre, Ourthe, Lesse, Rur, Inde, Hoëgne, Geul,
+Ahr, Erft and Urft, each the highest-flow 0.05° cell near its towns. As EFAS and GloFAS do, each point is rated on
+its own return periods: a Gumbel fit (L-moments) to the same model's annual peaks 1997–2025 gives the 2-, 5-, 20-
+and 100-year floods there, so a model that runs low in a small valley is rated against itself. The 51 ensemble
+runs (control + 50) give a probability for the next 10 days:
 
-| Level | Threshold |
-|---|---|
-| Normal | below the 2-year flood |
-| Above 2-year flood | median annual peak 2011–2020 |
-| Above half of July 2021 | half of the model's own July 2021 peak |
-| At or above July 2021 | the model's own July 2021 peak |
+| Level | Town status | A level counts when |
+|---|---|---|
+| Above 2-year flood | watch | ≥ 30 % of runs reach the 2-year flow |
+| Above 5-year flood | warn | ≥ 30 % of runs reach the 5-year flow |
+| Above 20-year flood | evacuate | ≥ 30 % of runs reach the 20-year flow |
 
-Using the model's own 2021 peak (not measured values) keeps the comparison like for like. Only 10 years of history
-are used because the free tier weighs requests by time span.
+People expected per town: residents in the EFAS 10/100/500-year zone, interpolated to the forecast return period
+(`src/impact.py`). The July 2021 peak is shown on the curves for scale only. Beyond the 100-year flood the screen says
+"above 100-year": 29 years of record cannot tell 200 from 2,000 years.
+
+**Backtest (the 2021 replay).** The same rule on the July 2021 GloFAS reanalysis flows, with thresholds fitted on
+1997–2020 only (what was known before the flood). `python src/impact.py` writes `outputs/data/backtest_2021.csv`:
+per town, the first day at watch / warn / evacuate, the return period of its 2021 peak, and people expected next to
+the people the satellite saw in the water. It tests the rule, not the forecasts issued on the day (Open-Meteo serves
+no archive of past GloFAS forecasts).
 
 **Rain outlook.** 7-day forecast for four headwater areas (upper Vesdre, upper Ourthe, Eifel/upper Rur, Amblève),
 with the largest 2-day total, next to the ERA5 reanalysis total for 13–15 July 2021.

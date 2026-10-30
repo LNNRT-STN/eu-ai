@@ -183,11 +183,13 @@ def river_line():
     else:
         g = gauges[gauges.gauge == near_g.gauge.iloc[0]].iloc[0]
         name = forecast.LEVELS[g.level][0]
-        txt = (f"**{g.gauge}, next 30 days: {name.lower()}** · peak {g.pct_2021:.0%} of its July 2021 peak on "
-               f"{g.peak_day:%a %d %b}" + (f"; wettest run: {forecast.LEVELS[g.level_worst][0].lower()}"
-                                           if g.level_worst > g.level else ""))
-        st.caption(f":material/water: {txt}", help="GloFAS 30-day river outlook (Open-Meteo), a model heads-up, not a "
-                                                   f"warning: official warnings come from {OFFICIAL[cc]}.")
+        txt = (f"**{g.gauge}, next {forecast.HORIZON} days: {name.lower()}** · "
+               + (f"{g.chance:.0%} of forecast runs, most on {g.peak_day:%a %d %b}" if g.level else
+                  f"median peak a {forecast.rp_text(g.rp_peak)} flood")
+               + (f"; wettest run: {forecast.LEVELS[g.level_worst][0].lower()}" if g.level_worst > g.level else ""))
+        st.caption(f":material/water: {txt}", help="GloFAS ensemble river outlook (Open-Meteo), rated on the point's "
+                                                   "own 2-, 5- and 20-year floods: a model heads-up, not a warning. "
+                                                   f"Official warnings come from {OFFICIAL[cc]}.")
         return
     st.caption(f":material/water: {txt}")
 

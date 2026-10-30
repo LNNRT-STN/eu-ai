@@ -1,0 +1,61 @@
+area,municipality,gauge,return_period_2021_peak,people_expected_at_peak,people_2021,no_efas_zone,first_watch,first_warn,first_evacuate
+ahr,"Bad Neuenahr-Ahrweiler, Stadt (DE)",Ahr · Bad Bodendorf,above 100-year,4214.0,15933,False,14 Jul,14 Jul,14 Jul
+vesdre,Verviers (BE),Vesdre · Verviers,above 100-year,4041.0,4703,False,13 Jul,13 Jul,14 Jul
+vesdre,Luik (BE),Meuse · Liège,above 100-year,66720.0,4105,False,14 Jul,14 Jul,14 Jul
+schleiden,"Schleiden, Stadt (DE)",Urft · Gemünd,above 100-year,2389.0,3477,False,14 Jul,14 Jul,14 Jul
+vesdre,Pepinster (BE),Vesdre · Verviers,above 100-year,2549.0,3318,False,13 Jul,13 Jul,14 Jul
+vesdre,Chaudfontaine (BE),Vesdre · Chaudfontaine,above 100-year,3444.0,2989,False,13 Jul,13 Jul,14 Jul
+erftstadt,"Erftstadt, Stadt (DE)",Erft · Erftstadt,above 100-year,3921.0,2615,False,13 Jul,14 Jul,14 Jul
+vesdre,Trooz (BE),Vesdre · Chaudfontaine,above 100-year,2457.0,2483,False,13 Jul,13 Jul,14 Jul
+ahr,"Sinzig, Stadt (DE)",Ahr · Bad Bodendorf,above 100-year,5028.0,2033,False,14 Jul,14 Jul,14 Jul
+schleiden,Kall (DE),Urft · Gemünd,above 100-year,0.0,1780,True,14 Jul,14 Jul,14 Jul
+vesdre,Limburg (BE),Vesdre · Verviers,above 100-year,730.0,1405,False,13 Jul,13 Jul,14 Jul
+ahr,Dernau (DE),Ahr · Altenahr,above 100-year,1525.0,1215,False,14 Jul,14 Jul,14 Jul
+ahr,Altenahr (DE),Ahr · Altenahr,above 100-year,746.0,817,False,14 Jul,14 Jul,14 Jul
+vesdre,Theux (BE),Hoëgne · Theux,above 100-year,1608.0,563,False,13 Jul,13 Jul,14 Jul
+vesdre,Dison (BE),Vesdre · Verviers,above 100-year,163.0,236,False,13 Jul,13 Jul,14 Jul
+venlo,Venlo (NL),Meuse · Venlo,above 100-year,21543.0,234,False,14 Jul,14 Jul,15 Jul
+ahr,Rech (DE),Ahr · Altenahr,above 100-year,63.0,219,False,14 Jul,14 Jul,14 Jul
+ahr,Schuld (DE),Ahr · Schuld,above 100-year,326.0,196,False,14 Jul,14 Jul,14 Jul
+ahr,Ahrbrück (DE),Ahr · Altenahr,above 100-year,181.0,171,False,14 Jul,14 Jul,14 Jul
+ahr,Mayschoß (DE),Ahr · Altenahr,above 100-year,402.0,166,False,14 Jul,14 Jul,14 Jul
+euskirchen,"Bad Münstereifel, Stadt (DE)",Erft · Bad Münstereifel,above 100-year,0.0,161,True,14 Jul,14 Jul,14 Jul
+liege,Wezet (BE),Meuse · Liège,above 100-year,5155.0,126,False,14 Jul,14 Jul,14 Jul
+ahr,Insul (DE),Ahr · Schuld,above 100-year,150.0,125,False,14 Jul,14 Jul,14 Jul
+venlo,Roermond (NL),Meuse · Roermond,above 100-year,12392.0,125,False,14 Jul,14 Jul,14 Jul
+euskirchen,"Euskirchen, Stadt (DE)",Erft · Bad Münstereifel,above 100-year,49.0,87,False,14 Jul,14 Jul,14 Jul
+wassenberg,"Wassenberg, Stadt (DE)",Rur · Wassenberg,above 100-year,289.0,76,False,14 Jul,14 Jul,14 Jul
+ahr,Hönningen (DE),Ahr · Schuld,above 100-year,171.0,73,False,14 Jul,14 Jul,14 Jul
+eschweiler,"Eschweiler, Stadt (DE)",Inde · Eschweiler,above 100-year,2766.0,57,False,14 Jul,14 Jul,14 Jul
+vesdre,Olne (BE),Vesdre · Verviers,above 100-year,215.0,45,False,13 Jul,13 Jul,14 Jul
+liege,Esneux (BE),Ourthe · Tabreux,above 100-year,4467.0,37,False,13 Jul,13 Jul,14 Jul
+liege,Oupeye (BE),Meuse · Liège,above 100-year,5641.0,29,False,14 Jul,14 Jul,14 Jul
+ahr,Müsch (DE),Ahr · Schuld,above 100-year,25.0,22,False,14 Jul,14 Jul,14 Jul
+ahr,Fuchshofen (DE),Ahr · Schuld,above 100-year,5.0,20,False,14 Jul,14 Jul,14 Jul
+erftstadt,Weilerswist (DE),Erft · Erftstadt,above 100-year,1155.0,18,False,13 Jul,14 Jul,14 Jul
+rochefort,Rochefort (BE),Lesse · Rochefort,above 100-year,1606.0,15,False,13 Jul,13 Jul,13 Jul
+liege,Maastricht (NL),Meuse · Maastricht,above 100-year,51318.0,14,False,14 Jul,14 Jul,14 Jul
+venlo,Peel en Maas (NL),Meuse · Roermond,above 100-year,1722.0,13,False,14 Jul,14 Jul,14 Jul
+eschweiler,"Stolberg (Rhld.), Kupferstadt (DE)",Inde · Eschweiler,above 100-year,283.0,13,False,14 Jul,14 Jul,14 Jul
+rochefort,Hamoir (BE),Ourthe · Tabreux,above 100-year,1018.0,11,False,13 Jul,13 Jul,14 Jul
+rochefort,Hotton (BE),Ourthe · Hotton,above 100-year,2166.0,10,False,13 Jul,14 Jul,14 Jul
+wassenberg,"Heinsberg, Stadt (DE)",Rur · Wassenberg,above 100-year,2469.0,10,False,14 Jul,14 Jul,14 Jul
+rochefort,La Roche-en-Ardenne (BE),Ourthe · Hotton,above 100-year,649.0,7,False,13 Jul,14 Jul,14 Jul
+eschweiler,Inden (DE),Inde · Eschweiler,above 100-year,921.0,6,False,14 Jul,14 Jul,14 Jul
+liege,Neupré (BE),Ourthe · Tabreux,above 100-year,14.0,5,False,13 Jul,13 Jul,14 Jul
+liege,Kelmis (BE),Geul · Gulpen-Wijlre,above 100-year,0.0,4,True,13 Jul,14 Jul,14 Jul
+liege,Bitsingen (BE),Meuse · Liège,above 100-year,1318.0,4,False,14 Jul,14 Jul,14 Jul
+ahr,Blankenheim (DE),Ahr · Schuld,above 100-year,2.0,3,False,14 Jul,14 Jul,14 Jul
+liege,Kinrooi (BE),Meuse · Roermond,above 100-year,370.0,3,False,14 Jul,14 Jul,14 Jul
+liege,Riemst (BE),Meuse · Maastricht,above 100-year,537.0,3,False,14 Jul,14 Jul,14 Jul
+ahr,Antweiler (DE),Ahr · Schuld,above 100-year,36.0,2,False,14 Jul,14 Jul,14 Jul
+ahr,Dümpelfeld (DE),Ahr · Schuld,above 100-year,46.0,2,False,14 Jul,14 Jul,14 Jul
+ahr,Wershofen (DE),Ahr · Schuld,above 100-year,73.0,2,False,14 Jul,14 Jul,14 Jul
+rochefort,Durbuy (BE),Ourthe · Hotton,above 100-year,2107.0,2,False,13 Jul,14 Jul,14 Jul
+liege,Maasgouw (NL),Meuse · Roermond,above 100-year,7004.0,1,False,14 Jul,14 Jul,14 Jul
+liege,Maasmechelen (BE),Meuse · Maastricht,above 100-year,15536.0,1,False,14 Jul,14 Jul,14 Jul
+rochefort,Rendeux (BE),Ourthe · Hotton,above 100-year,343.0,1,False,13 Jul,14 Jul,14 Jul
+venlo,Horst aan de Maas (NL),Meuse · Venlo,above 100-year,587.0,1,False,14 Jul,14 Jul,15 Jul
+venlo,Leudal (NL),Meuse · Roermond,above 100-year,2828.0,1,False,14 Jul,14 Jul,14 Jul
+venlo,Roerdalen (NL),Rur · Wassenberg,above 100-year,661.0,1,False,14 Jul,14 Jul,14 Jul
+erftstadt,"Kerpen, Kolpingstadt (DE)",Erft · Erftstadt,above 100-year,4227.0,1,False,13 Jul,14 Jul,14 Jul

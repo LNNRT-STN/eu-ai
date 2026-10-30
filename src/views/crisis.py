@@ -15,7 +15,7 @@ from shapely.geometry import mapping, shape
 import anna
 import core
 import live
-from views import briefing, first_action, rivers
+from views import briefing, checkin, first_action, rivers
 from regionmap import ATTRIBUTION, region_map
 from core import about, fmt
 
@@ -48,6 +48,7 @@ c = live.clock()
 # the absorbed pages draw with core's grouped-list classes; take those, not its page padding or sidebar rules
 st.html(re.sub(r"\.block-container\{[^}]*\}|\[data-testid=st(Sidebar|SidebarNav|NavSectionHeader)\][^{]*\{[^}]*\}", "",
                core.CSS))
+TEXT = {"Evacuate": "#b0000f", "Warn": "#a85400", "Watch": "#7a5d00"}  # status words, AA on white
 ROWS = {"evacuate": "red", "warn": "orange", "watch": "yellow", "none": "gray"}
 
 
@@ -56,105 +57,213 @@ def when(t, mode):
 
 
 def coming(t):
-    """What the 2021 flows still hold after t: the towns not yet at evacuate that will get there, and on which day."""
+    """What the 2021 flows still hold after t: '4 more towns reach evacuate, the first on Thu 1 Nov.' or ''."""
     tm = live._replay()["times"]
     ahead = tm.t_evacuate[tm.t_evacuate > t].dropna()
     if ahead.empty:
-        st.caption("No further town reaches evacuate in the July 2021 flows.")
+        return ""
+    return (f"{len(ahead)} more town{'s' if len(ahead) > 1 else ''} reach evacuate, the first on "
+            f"{live.drill(ahead.min()):%A %-d %B}.")
+
+
+@st.cache_data
+def outlines():
+    return json.loads((core.DATA / "municipality_outlines.geojson").read_text())
+
+
+def homes_now():
+    """Every home in the 2021 water with its newest report: needs help | no news | safe."""
+    D = checkin.doors()
+    ck = live.latest(live.checkins())
+    st_ = (ck.set_index(["municipality", "door"]).status if len(ck) else
+           pd.Series(dtype=str, index=pd.MultiIndex.from_arrays([[], []], names=["municipality", "door"])))
+    D = D.join(st_.rename("s"), on=["municipality", "door"])
+    D["s"] = D.s.fillna("no news")
+    return D
+
+
+def towns_now(s, H):
+    """One row per town that is not at normal: its status, people in the water and how far its homes are cleared."""
+    n = H.groupby(["municipality", "s"]).size().unstack(fill_value=0).reindex(columns=["needs help", "no news", "safe"],
+                                                                               fill_value=0)
+    d = s[s.status.isin(["evacuate", "warn", "watch"])].copy()
+    d = d.join(n, on="municipality").fillna({"needs help": 0, "no news": 0, "safe": 0})
+    d["homes"] = d["needs help"] + d["no news"] + d.safe
+    d["todo"] = d["needs help"] + d["no news"]
+    d["left"] = (d.safe / d.homes.where(d.homes > 0)).fillna(0)
+    return d.sort_values(["level", "people"], ascending=False)
+
+
+def verdict(m, d, t, replay):
+    """The one sentence the room needs: what to do, how many, and what is still coming."""
+    ev, wn = d[d.status == "evacuate"], d[d.status == "warn"]
+    obs = ev[~ev.area.isin(anna.MODELLED)]
+    nxt = coming(t) if replay else ""
+    if len(ev):
+        head = (f"Evacuate {len(ev)} town{'s' if len(ev) > 1 else ''} now: about {about(obs.people.sum())} people, "
+                f"{fmt(ev.todo.sum())} homes still to clear.")
+        mod = ev[ev.area.isin(anna.MODELLED)].people.sum()
+        detail = " ".join(x for x in (
+            f"Plus about {about(mod)} people in the modelled Vesdre zone, counted apart." if mod else "",
+            f"{fmt(ev['needs help'].sum())} homes asked for help: crews go there first." if ev["needs help"].sum() else "",
+            f"{len(wn)} more town{'s' if len(wn) != 1 else ''} warned." if len(wn) else "", nxt) if x)
+        return COL["evacuate"], head, detail
+    if len(wn):
+        return COL["warn"], f"No evacuation yet. {len(wn)} town{'s' if len(wn) > 1 else ''} warned: get ready.", nxt
+    return core.SHELTER, "No town needs to act now.", nxt or "No river is above its 2-year flood."
+
+
+def pick_row(key, rows):
+    sel = st.session_state[key].selection.rows
+    if sel:
+        st.session_state.cr_sel = rows[sel[0]]
+        if T.people.get(rows[sel[0]], 0) >= 10:  # only towns the sidebar Town picker lists
+            st.session_state.town = st.session_state._town = rows[sel[0]]
+
+
+def where_to_act(d):
+    """The ranked list of towns to act in; a click opens the town."""
+    st.markdown("**Where to act**", help="Towns above normal, the most urgent first.")
+    if d.empty:
+        st.caption("Every town is at normal.")
         return
-    first = ahead.min()
-    by = ahead.dt.normalize().value_counts().sort_index()
-    days = " · ".join(f"{live.drill(d):%a %-d %b}: {n}" for d, n in by.items())
-    st.warning(f"**A flood like July 2021 is coming. {len(ahead)} more towns reach evacuate, the first on "
-               f"{live.drill(first):%A %-d %B}.** Towns per day: {days}. A replay of the 2021 forecast, not an "
-               "official warning.", icon=":material/flood:")
+    v = st.session_state.get("cr_v", 0)
+    key = f"cr_rows_{v}"
+    t = pd.DataFrame({"Status": d.status.map(WORD), "Town": d.municipality.map(anna.town),
+                      "People": d.people.map(about), "To clear": d.todo.astype(int), "Left": d.left})
+    rows = d.municipality.tolist()
+    st.caption("Tick a town, or click it on the map, to see its homes and streets.")
+    t = t.style.map(lambda w: f"color:{TEXT.get(w, '#1d1d1f')};font-weight:600", subset=["Status"])
+    st.dataframe(t, hide_index=True, key=key, on_select=lambda: pick_row(key, rows), selection_mode="single-row",
+                 height=min(36 * len(d) + 38, 440),
+                 column_config={
+                     "People": st.column_config.TextColumn("People", width="small", help="In the 2021 water (Vesdre: modelled)"),
+                     "Left": st.column_config.ProgressColumn("Left", format="percent", min_value=0, max_value=1,
+                                                             help="Share of the town's homes that have left"),
+                     "Status": st.column_config.TextColumn("Status", width="small"),
+                     "Town": st.column_config.TextColumn("Town"),
+                     "To clear": st.column_config.NumberColumn("To clear", width="small",
+                                                               help="Homes with no news or asking for help")},
+                 )
+
+
+def back():
+    st.session_state.cr_sel = None
+    st.session_state.cr_v = st.session_state.get("cr_v", 0) + 1  # a fresh table, no row still selected
+
+
+def town_card(m, d, H):
+    """One town: what to do there, its homes, its worst-hit streets and where its people go."""
+    r = d.set_index("municipality").loc[m] if m in d.municipality.values else None
+    status = r.status if r is not None else "none"
+    h = H[H.municipality == m]
+    n = h.s.value_counts()
+    a, b = st.columns([3, 1], vertical_alignment="center")
+    a.markdown(f"### :{ROWS[status]}-badge[{WORD[status]}] {anna.town(m)}")
+    b.button("Region", icon=":material/arrow_back:", on_click=back, width="stretch", key="cr_back")
+    if h.empty:
+        st.caption("No homes in the 2021 water here in our data.")
+        return
+    todo = int(n.get("no news", 0) + n.get("needs help", 0))
+    st.markdown({"evacuate": f"**Clear {fmt(todo)} homes now.** Help requests first, then single-storey homes.",
+                 "warn": f"**Get {fmt(todo)} homes ready to leave.** No order yet.",
+                 "watch": "**River rising.** No action yet; check the list is ready."}.get(
+        status, "**Normal.** No action needed."))
+    with st.container(horizontal=True, gap="small"):
+        st.metric(":red[:material/sos:] Help", fmt(n.get("needs help", 0)), border=True, width="stretch")
+        st.metric(":orange[:material/door_front:] No news", fmt(n.get("no news", 0)), border=True, width="stretch")
+        st.metric(":green[:material/check_circle:] Left", fmt(n.get("safe", 0)), border=True, width="stretch")
+    st.progress(n.get("safe", 0) / len(h), text=f"{fmt(n.get('safe', 0))} of {fmt(len(h))} homes have left")
+    sx = h[h.street.notna()].assign(todo=h.s != "safe").groupby("street").agg(Homes=("door", "size"),
+                                                                              Left_to_clear=("todo", "sum"))
+    sx = sx.sort_values(["Left_to_clear", "Homes"], ascending=False).head(6).reset_index()
+    st.markdown("**Streets most hit**")
+    st.dataframe(sx.rename(columns={"street": "Street", "Left_to_clear": "To clear"}), hide_index=True,
+                 height=36 * len(sx) + 38)
+    go = anna.plan_shelters().query("municipality == @m").nlargest(3, "people")
+    if len(go):
+        st.markdown("**Where they go**", help="The town's 10 km shelter plan: candidate sites that stayed dry in 2021 "
+                                              "and in the 100-year model. Not official shelters.")
+        st.markdown("  \n".join(f":green[:material/home_health:] **{g.label}** · {g.address or 'no street address'}"
+                                f" · {about(g.people)} people" for g in go.itertuples()))
+    if T.people.get(m, 0) >= 10:
+        a, b = st.columns(2)
+        a.page_link("views/checkin.py", label="Door-knock list", icon=":material/how_to_reg:")
+        b.page_link("views/evacuate.py", label="Town plan", icon=":material/directions_run:")
 
 
 def board():
     c = live.advance()
     t = c["t"]
     live.tick(t)
-    s = live.towns_status(t)
-    m = live.summary(t)
-    if c["mode"] == "replay":
-        st.subheader(f"{live.drill(t):%a %d %b %Y, %H:%M} · replay of the 2021 forecast, arriving now")
-        coming(t)
-    else:
-        st.subheader(f"{t:%a %d %b %Y, %H:%M} · live forecast")
+    replay = c["mode"] == "replay"
+    s = live.towns_status(t).sort_values("level").drop_duplicates("municipality", keep="last")  # worst status
+    H = homes_now()
+    d = towns_now(s, H)
+    color, head, detail = verdict(live.summary(t), d, t, replay)
+    core.banner(color, head, detail + (" Homes: simulated check-ins in the replay." if replay else ""), note=False)
+    st.space("small")
 
-    sim = c["mode"] == "replay"
-    k = st.container(horizontal=True, gap="small")  # wraps on phones instead of stacking six rows
-    k.metric("Towns to evacuate", m["evacuate"], border=True, width=165,
-             help=f"{m['evacuate_under_50']} of them had fewer than 50 residents in the mapped 2021 water.")
-    k.metric("Towns warned", m["warn"], border=True, width=130)
-    k.metric("People to move", about(m["people_evacuate"]), border=True, width=185,
-             delta=f"+{about(m['people_evacuate_modelled'])} modelled" if m["people_evacuate_modelled"] else None,
-             delta_color="off", delta_arrow="off",
-             help="Residents inside the 2021 satellite flood of the towns at 'evacuate' (a floor). Below it, kept "
-                  "apart: residents in the modelled Vesdre zone (EFAS 500-year), which the satellite did not map")
-    hh = "Check-ins per home" + (", simulated in the replay." if sim else ".")
-    k.metric("Homes safe", fmt(m["safe"]), border=True, width=140, help=hh)
-    k.metric("Homes need help", fmt(m["needs_help"]), border=True, width=170, help=hh)
-    k.metric("Roads closed", m["roads_closed"], border=True, width=130)
-    st.caption("People to move: observed and modelled (Vesdre) kept apart, never added."
-               + (" Homes: simulated check-ins." if sim else ""))
-
-    left, right = st.columns([3, 2], gap="medium")
+    left, right = st.columns([1, 1], gap="medium")
+    sel_t = st.session_state.get("cr_sel")
     with left:
-        d = s.assign(lon=s.municipality.map(T.lon), lat=s.municipality.map(T.lat)).dropna(subset=["lon"])
-        d = d.sort_values("level").drop_duplicates("municipality", keep="last")  # one row per town, worst status
+        g = s.assign(lon=s.municipality.map(T.lon), lat=s.municipality.map(T.lat)).dropna(subset=["lon"])
         cl = live.closures().dropna(subset=["lon"])
+        hs = H[H.municipality == sel_t] if sel_t else H.iloc[0:0]
         sel = region_map(dict(
             towns=[dict(municipality=r.municipality, label=anna.town(r.municipality), lon=r.lon, lat=r.lat,
                         status=r.status if r.status in COL else "none", people=float(r.people),
                         people_expected=float(r.people_expected or 0), modelled=r.area in anna.MODELLED)
-                   for r in d.itertuples()],
-            flood=water_by_town(),
+                   for r in g.itertuples()],
+            areas=outlines(), flood=water_by_town(),
+            homes={"type": "FeatureCollection", "sig": str(hs.s.value_counts().to_dict()), "features": [
+                {"type": "Feature", "geometry": {"type": "Point", "coordinates": [r.lon, r.lat]},
+                 "properties": {"s": r.s}} for r in hs.itertuples()]},
             closures={"type": "FeatureCollection", "features": [
                 {"type": "Feature", "geometry": {"type": "Point", "coordinates": [r.lon, r.lat]},
                  "properties": {"name": r.name or ""}} for r in cl.itertuples()]},
-            selected=st.session_state.get("cr_sel")), key="crisis_map", height=470)
+            selected=sel_t), key="crisis_map", height=540)
         if sel and sel.get("selected") and sel.get("clicks") != st.session_state.get("cr_clicks"):
             st.session_state.cr_clicks = sel["clicks"]
-            st.session_state.cr_sel = sel["selected"]
-            if T.people.get(sel["selected"], 0) >= 10:  # only towns the sidebar Town picker lists
-                st.session_state.town = st.session_state._town = sel["selected"]
-        if st.session_state.get("cr_sel"):
-            a, b = st.columns([3, 1])
-            sel_t = st.session_state.cr_sel
-            if T.people.get(sel_t, 0) >= 10:  # the Town plan covers towns with 10 or more people in the water
-                a.page_link("views/evacuate.py", label=f"Open the plan for {anna.town(sel_t)}",
-                            icon=":material/arrow_forward:")
-            else:
-                a.caption(f"{anna.town(sel_t)}: under 10 people in the 2021 water, no town plan.")
-            b.button("Whole region", on_click=lambda: st.session_state.update(cr_sel=None), width="stretch")
-        st.caption(":red[●] Evacuate · :orange[●] Warn · :yellow[●] Watch · :blue[●] Normal · dashed edge: modelled "
-                   "(Vesdre) · click a town to fly in",
-                   help="Barrier: road closed. Number: people in the 2021 water (Vesdre: in the modelled zone). "
-                        + ATTRIBUTION)
+            st.session_state.cr_sel = sel_t = sel["selected"]
+            if T.people.get(sel_t, 0) >= 10:  # only towns the sidebar Town picker lists
+                st.session_state.town = st.session_state._town = sel_t
+        st.html("<div class='legend'>" + "".join(
+            f"<span><i style='background:{COL[k]};opacity:.75'></i>{WORD[k]}</span>" for k in ("evacuate", "warn", "watch"))
+            + "<span><i style='background:#0b3d91;opacity:.7'></i>2021 water</span>"
+            + ("<span><i style='background:#d70015;border-radius:50%'></i>Home asked for help</span>"
+               "<span><i style='background:#f2994a;border-radius:50%'></i>No news</span>"
+               "<span><i style='background:#248a3d;border-radius:50%'></i>Has left</span>" if sel_t else
+               "<span>Click a town to see its homes</span>") + "</div>")
     with right:
-        ev = live.events().tail(6).iloc[::-1]
-        st.markdown("**Latest**", help="The last alert changes, newest first. Levels never drop during a replay.")
-        if ev.empty:
-            st.caption("Nothing yet. Press Play in the sidebar.")
+        if sel_t:
+            town_card(sel_t, d, H)
         else:
-            st.markdown("  \n".join(f"`{when(r.t, c['mode'])}` :{ROWS.get(r.to, 'gray')}[●] **{anna.town(r.municipality)}**"
-                                    f" → {WORD.get(r.to, r.to)}" for r in ev.itertuples()))
-        ob = live.outbox().tail(8).iloc[::-1]
-        st.markdown(f"**Briefing drafts** · {len(live.outbox())} in the outbox, not sent",
-                    help="One briefing for the mayor and one for the district fire brigade each time a town's alert "
-                         "rises. Drafted by Claude from the tool's numbers (words only; every figure comes from the "
-                         "tool); a template when no AI is available.")
-        if ob.empty:
-            st.caption("Briefings for mayors and fire brigades appear here when a town's alert rises.")
-        else:
-            lab = {r.id: f"{when(r.t, c['mode'])} · {r.recipient}" for r in ob.itertuples()}
-            rid = st.selectbox("Draft", list(lab), format_func=lab.get, key="cr_draft",
-                               label_visibility="collapsed") or ob.id.iloc[0]
-            with st.container(border=True, height=230):
-                st.write(live.report(rid))
-            if ob.set_index("id").source.get(rid) == "template":
-                st.caption("Template (no AI available).")
+            where_to_act(d)
+
+    ev = live.events().tail(6).iloc[::-1]
+    ob = live.outbox().tail(8).iloc[::-1]
+    with st.expander(f"Alerts and briefings · {len(live.outbox())} drafts, not sent", icon=":material/campaign:"):
+        a, b = st.columns([2, 3], gap="medium")
+        with a:
+            st.markdown("**Latest alerts**", help="Newest first. Levels never drop during a replay.")
+            st.markdown("  \n".join(f"`{when(r.t, c['mode'])}` :{ROWS.get(r.to, 'gray')}-badge[{WORD.get(r.to, r.to)}]"
+                                    f" **{anna.town(r.municipality)}**" for r in ev.itertuples())
+                        if len(ev) else "Nothing yet. Press Play in the sidebar.")
+        with b:
+            st.markdown("**Briefing drafts**", help="One for the mayor and one for the district fire brigade each time "
+                        "a town's alert rises. Drafted by Claude from the tool's numbers (words only); a template when "
+                        "no AI is available. Nothing is sent.")
+            if ob.empty:
+                st.caption("They appear here when a town's alert rises.")
+            else:
+                lab = {r.id: f"{when(r.t, c['mode'])} · {r.recipient}" for r in ob.itertuples()}
+                rid = st.selectbox("Draft", list(lab), format_func=lab.get, key="cr_draft",
+                                   label_visibility="collapsed") or ob.id.iloc[0]
+                with st.container(border=True, height=230):
+                    st.write(live.report(rid))
+                if ob.set_index("id").source.get(rid) == "template":
+                    st.caption("Template (no AI available).")
 
 
 # 2021 for comparison: sourced times from docs/TIMELINE_2021.md (all verified in the cited document)
@@ -200,9 +309,13 @@ with t1:
         then_2021()
     with st.expander("How this is computed", icon=":material/info:"):
         st.markdown(
-            "- **Alert level:** GloFAS river flow on each town's river against its own 2-year flood and July 2021 "
-            "peak (impact forecast, src/build_ml2.py). Status uses the highest flow reached so far: levels never drop "
-            "during a replay.\n"
+            "- **Alert level:** GloFAS river flow on each town's river against that point's own 2-, 5- and 20-year "
+            "floods (watch, warn, evacuate; src/impact.py). Live: the ensemble runs over the next 10 days, a level "
+            "counting when 30 % of the runs reach it. Replay: the backtest, the 2021 flows on thresholds fitted on "
+            "1997–2020, what was known before the flood. Status uses the highest flow reached so far: levels never "
+            "drop during a replay.\n"
+            "- **People expected:** residents in the EFAS flood zone of that return period (no dikes, so the Meuse is "
+            "an upper bound; no zone on small streams such as the Urft at Kall).\n"
             "- **Replay of the 2021 forecast:** it steps on daily modelled flows (GloFAS reanalysis, computed afterwards), so it "
             f"gives the day, not the hour. Shown as if it began on {live.drill(live.START):%a %d %b %Y}: the dates are "
             "moved, the flows are those of 12-17 July 2021. A model replay, not official warnings.\n"

@@ -71,12 +71,17 @@ def save(muni, key):
 def editor(df, key, muni, height=None):
     """Door table where only Status and People are editable; edits are saved by save()."""
     st.session_state[f"{key}_rows"] = df[["door", "status", "people"]].to_dict("records")
+    df = df.assign(go_address=df.go_address.replace("", "no street address")) if "go_address" in df else df
     cfg = {"door": st.column_config.TextColumn("Address", width="medium", disabled=True),
            "label": st.column_config.SelectboxColumn("Status", options=list(CODE), required=True, width="small",
                                                      help="Set it after knocking: Has left takes the home off the list"),
            "single": st.column_config.CheckboxColumn("1 storey", width="small", disabled=True,
                                                      help="Single-storey home: no upper floor to escape to"),
            "where": st.column_config.TextColumn("Where they are", disabled=True),
+           "go": st.column_config.TextColumn("Send them to", width="medium", disabled=True,
+                                             help="Nearest shelter in the town's 10 km plan: a candidate site, dry in "
+                                                  "2021, not an official shelter"),
+           "go_address": st.column_config.TextColumn("Shelter address", width="medium", disabled=True),
            "people": st.column_config.TextColumn("People", width="small", validate=r"^\d{0,2}$",
                                                  help="People in this home, as reported; blank if unknown")}
     ppl = df.people.map(lambda n: str(int(n)) if pd.notna(n) and n else "")  # blank, not "None", when unknown
@@ -102,51 +107,66 @@ def crews(muni):
         a.warning("Includes simulated check-ins from the July 2021 replay, not real ones.", icon=":material/science:")
         b.button("Clear simulated", icon=":material/restart_alt:", key="ci_clear", on_click=live.clear_drill,
                  args=(muni,), help="Remove the simulated check-ins for this town. None come back until Reset.")
+    L = anna.destinations(muni, L)
     n = L.status.value_counts()
     single_open = int((L.single & (L.status == "no news")).sum())
-    with st.container(horizontal=True):  # one row, also on a phone
-        st.metric(":red[:material/sos:] Need help", fmt(n.get("needs help", 0)), border=True, width="stretch",
-                  help="Go first: they asked for help to leave.")
-        st.metric(":orange[:material/help:] No news", fmt(n.get("no news", 0)), border=True, width="stretch",
-                  help=f"{fmt(single_open)} of them single-storey: no upper floor to escape to, so they come first.")
-        st.metric(":green[:material/check_circle:] Have left", fmt(n.get("safe", 0)), border=True, width="stretch")
+    lvl = live.towns_status().sort_values("level").drop_duplicates("municipality", keep="last")
+    town_status = lvl.set_index("municipality").status.get(muni, "none")
+    todo_n = int(n.get("needs help", 0) + n.get("no news", 0))
+    st.markdown({"evacuate": f":red-badge[Evacuate] **Knock on {fmt(todo_n)} doors.** "
+                             f"{fmt(n.get('needs help', 0))} asked for help: go there first, then the "
+                             f"{fmt(single_open)} single-storey homes.",
+                 "warn": f":orange-badge[Warn] **Get ready: {fmt(todo_n)} homes to clear if the order comes.**",
+                 "watch": f":yellow-badge[Watch] **River rising. {fmt(todo_n)} homes on the list, no order yet.**"}.get(
+        town_status, f":gray-badge[Normal] **No order. {fmt(todo_n)} homes would be on the list.**"))
+    st.progress(n.get("safe", 0) / max(len(L), 1),
+                text=f"{fmt(n.get('safe', 0))} of {fmt(len(L))} homes have left")
 
     L["label"] = L.status.map(STATUS)
-    todo, v = L[L.status != "safe"], st.session_state.get("ci_v", 0)
-    left, right = st.columns(2, gap="medium")
-    with left:
-        st.caption(":material/edit: Knocked? Change the status: the map and counts follow.")
-        editor(todo[["door", "label", "people", "status", "single"]], f"ci_todo_{muni}_{v}", muni, height=404)
-        st.download_button("Download the list", todo[["door", "status", "single", "people", "lat", "lon"]]
-                           .to_csv(index=False), file_name=f"door_knock_{anna.town(muni).replace(' ', '_')}.csv",
-                           mime="text/csv", icon=":material/download:", key="ci_dl")
-    with right:
-        color = {"needs help": core.rgb(core.EVACUATE), "no news": core.rgb("#c93400", 170),
-                 "safe": core.rgb(core.SHELTER, 200)}
-        size = {"needs help": 8, "no news": 3, "safe": 4}  # help requests stand out, drawn last (on top)
-        pts = L.assign(c=L.status.map(color), r=L.status.map(size), tname=L.door,
-                       tinfo=[f"{STATUS[s]}{' · single-storey' if one else ''}" for s, one in zip(L.status, L.single)]
-                       ).sort_values("o", ascending=False)
-        st.pydeck_chart(pdk.Deck(
-            layers=[pdk.Layer("ScatterplotLayer", pts, get_position=["lon", "lat"], get_fill_color="c", get_radius="r",
-                              radius_units="'pixels'", stroked=True, get_line_color=[255, 255, 255],
-                              line_width_min_pixels=1, pickable=True)],
-            initial_view_state=pdk.ViewState(longitude=here.lon.median(), latitude=here.lat.median(), zoom=14),
-            map_style=pdk.map_styles.CARTO_LIGHT, tooltip={"html": "<b>{tname}</b><br/>{tinfo}"},
-            views=[pdk.View(type="MapView", controller={"scrollZoom": False})]), height=440)
-        st.caption(":red[⬤] Needs help · :orange[●] No news · :green[●] Has left")
-    done = L[L.status == "safe"]
-    if len(done):
-        with st.expander(f"Homes that have left ({fmt(len(done))})", icon=":material/check_circle:"):
-            st.caption("Wrong? Set the status back to No news or Needs help.")
-            editor(done[["door", "label", "status", "where", "people"]], f"ci_done_{muni}_{v}", muni)
+    v = st.session_state.get("ci_v", 0)
+    show = st.segmented_control(
+        "Show", ["To knock", "Asked for help", "Has left"], default="To knock", key=f"ci_show_{muni}",
+        label_visibility="collapsed",
+        format_func={"To knock": f"To knock · {fmt(todo_n)}",
+                     "Asked for help": f"Asked for help · {fmt(n.get('needs help', 0))}",
+                     "Has left": f"Has left · {fmt(n.get('safe', 0))}"}.get) or "To knock"
+    rows = {"To knock": L[L.status != "safe"], "Asked for help": L[L.status == "needs help"],
+            "Has left": L[L.status == "safe"]}[show]
+    cols = (["door", "label", "people", "status", "where"] if show == "Has left" else
+            ["door", "label", "people", "status", "single", "go", "go_address"])
+    st.caption(":material/edit: Knocked? Set the Status: the list, the map and the crisis room follow.")
+    editor(rows[cols], f"ci_{show}_{muni}_{v}", muni, height=min(36 * len(rows) + 38, 420))
+    a, b = st.columns([1, 3], vertical_alignment="center")
+    a.download_button("Download the list", rows[["door", "status", "single", "people", "go", "go_address", "lat", "lon"]]
+                      .to_csv(index=False), file_name=f"door_knock_{anna.town(muni).replace(' ', '_')}.csv",
+                      mime="text/csv", icon=":material/download:", key="ci_dl")
+
+    color = {"needs help": core.rgb(core.EVACUATE), "no news": core.rgb("#c93400", 170),
+             "safe": core.rgb(core.SHELTER, 200)}
+    size = {"needs help": 8, "no news": 3, "safe": 4}  # help requests stand out, drawn last (on top)
+    pts = L.assign(c=L.status.map(color), r=L.status.map(size), tname=L.door,
+                   tinfo=[f"{STATUS[s]}{' · single-storey' if one else ''} · go to {g}"
+                          for s, one, g in zip(L.status, L.single, L.go)]).sort_values("o", ascending=False)
+    st.pydeck_chart(pdk.Deck(
+        layers=[pdk.Layer("ScatterplotLayer", pts, get_position=["lon", "lat"], get_fill_color="c", get_radius="r",
+                          radius_units="'pixels'", stroked=True, get_line_color=[255, 255, 255],
+                          line_width_min_pixels=1, pickable=True)],
+        initial_view_state=pdk.ViewState(longitude=here.lon.median(), latitude=here.lat.median(), zoom=14),
+        map_style=pdk.map_styles.CARTO_LIGHT, tooltip={"html": "<b>{tname}</b><br/>{tinfo}"},
+        views=[pdk.View(type="MapView", controller={"scrollZoom": False})]), height=380)
+    st.caption(":red[⬤] Asked for help · :orange[●] No news · :green[●] Has left")
 
     # road closures: crews close and reopen; the crisis room map shows them
-    st.subheader(":red[:material/block:] Roads closed", help="Closed here, they show on the Crisis room map. 'Auto' "
-                 "closures come from the replay: evacuation roads in the 2021 water once the river reaches its 2021 "
-                 "peak.")
     cl = live.closures()
     cl = cl[cl.municipality == muni]
+    roads_box = st.expander(f"Roads closed · {len(cl)}", icon=":material/block:")
+    roads_box.caption("Closed here, they show on the Crisis room map. 'Auto' closures come from the replay: evacuation "
+                      "roads in the 2021 water once the river reaches its 2021 peak.")
+    with roads_box:
+        roads(muni, cl)
+
+
+def roads(muni, cl):
     for r in cl.itertuples():
         a, b = st.columns([5, 1], vertical_alignment="center")
         a.markdown(f"**{r.name or r.osm_id}** · {'auto, in the 2021 water' if r.auto else 'by ' + r.by}"

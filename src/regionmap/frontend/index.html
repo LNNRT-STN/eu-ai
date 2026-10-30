@@ -5,16 +5,18 @@
 <style>
 html,body{margin:0;height:100%;font:13px/1.35 "Source Sans Pro",system-ui,sans-serif;background:#e8eef5}
 #m{position:absolute;inset:0;border-radius:12px;overflow:hidden}
-.pin{display:flex;align-items:center;gap:6px;cursor:pointer}
-.pin i{width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.5);flex:none}
-.pin b{background:rgba(255,255,255,.94);color:#1d1d1f;padding:2px 7px;border-radius:6px;font-weight:400;
-  white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.pin{cursor:pointer}
+.pin b{display:block;background:rgba(255,255,255,.96);color:#1d1d1f;padding:3px 8px;border-radius:6px;font-weight:600;
+  white-space:nowrap;box-shadow:0 1px 2px rgba(0,0,0,.18),0 2px 8px rgba(0,0,0,.08)}
+.pin b span{font-weight:400;color:#4f6580}
 .pin b em{font-style:normal;font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:.02em;margin-right:4px}
-.pin.watch i{background:#f2c94c}.pin.warn i{background:#f2994a}.pin.evacuate i{background:#d70015}.pin.none i{background:#0071e3}
 .pin.evacuate b em{color:#d70015}.pin.warn b em{color:#a85400}.pin.watch b em{color:#7a5d00}.pin.none b em{color:#4f6580}
 .pin.sel b{outline:2px solid #1d1d1f}
-.pin.sel i{transform:scale(1.35)}
-body.far .pin.none:not(.sel) b{display:none}
+body.far .pin.none:not(.sel) b,body.far .pin.watch:not(.sel) b,body.far .pin.minor:not(.sel) b{display:none}
+body.far .pin b em{display:none}
+body.far .bar{display:none}
+body.near .pin b{display:none}
+.pin.evacuate b{background:#d70015;color:#fff}.pin.evacuate b em{color:#fff}.pin.evacuate b span{color:#ffe1e3}
 .pin.hid b{display:none}
 .bar{display:flex;align-items:center;gap:4px;pointer-events:none}
 .bar s{width:22px;height:10px;border:1px solid #1d1d1f;border-radius:2px;
@@ -37,7 +39,7 @@ const send = (type, data) => parent.postMessage(Object.assign({isStreamlitMessag
 let clicks = 0, lastH = null;
 const select = m => send("streamlit:setComponentValue", {value: {selected: m, clicks: ++clicks}, dataType: "json"});
 
-const STATUS = {none: "#0071e3", watch: "#f2c94c", warn: "#f2994a", evacuate: "#d70015"};
+const STATUS = {none: "#8e8e93", watch: "#f2c94c", warn: "#f2994a", evacuate: "#d70015"};
 const WORD = {none: "No alert", watch: "Watch", warn: "Warn", evacuate: "Evacuate"};
 const RANK = {none: 0, watch: 1, warn: 2, evacuate: 3};
 const OVERVIEW = [4.97, 50.05, 7.3, 51.45];  // fallback: Rochefort - Venlo - Ahr (all ten areas)
@@ -48,7 +50,7 @@ const fmt = n => n == null ? null : Math.round(n).toLocaleString("en-GB");
 
 let map = null, ready = false, pending = null, prev = {};
 const pins = new Map(), bars = new Map();
-let floodSig = null, closSig = null, cur = null;  // cur = municipality the camera is on (or null)
+let floodSig = null, closSig = null, areaSig = null, homeSig = null, cur = null;  // cur = municipality the camera is on (or null)
 let bounds = null;  // [w, s, e, n] of every town and all the water: the "whole region" view
 // "map": flat light basemap, status colours read best (default). "sat": Sentinel-2 imagery on 3D terrain.
 let mode = "map";
@@ -101,16 +103,24 @@ function build(p) {
           attribution: 'Terrain: <a href="https://registry.opendata.aws/terrain-tiles/" target="_blank">AWS Terrain Tiles</a> (Mapzen; SRTM, EU-DEM and others)'},
         hs: {type: "raster-dem", encoding: "terrarium", tileSize: 256, maxzoom: 15,
           tiles: ["https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"]},
+        areas: {type: "geojson", data: EMPTY},
+        homes: {type: "geojson", data: EMPTY},
         flood: {type: "geojson", data: EMPTY},
         closures: {type: "geojson", data: EMPTY}},
       layers: [{id: "img", type: "raster", source: "img"},
         {id: "hs", type: "hillshade", source: "hs", paint: {"hillshade-exaggeration": 0.25, "hillshade-shadow-color": "#1d1d1f"}},
-        {id: "flood-fill", type: "fill", source: "flood", paint: {"fill-color": "#0071e3", "fill-opacity": 0.25}},
+        {id: "area-fill", type: "fill", source: "areas", paint: {"fill-color": "#8e8e93", "fill-opacity": 0}},
+        {id: "area-edge", type: "line", source: "areas", paint: {"line-color": "#4f6580", "line-width": 0.8, "line-opacity": 0.5}},
+        {id: "flood-fill", type: "fill", source: "flood", paint: {"fill-color": "#0b3d91", "fill-opacity": 0.55}},
         {id: "flood-edge", type: "line", source: "flood", paint: {"line-color": "#ffffff", "line-width": 1, "line-opacity": 0.7}},
         {id: "flood-edge-modelled", type: "line", source: "flood", filter: NONE,
           paint: {"line-color": "#ffffff", "line-width": 1.6, "line-dasharray": [3, 2]}},
-        {id: "flood-sel", type: "line", source: "flood", filter: NONE,
-          paint: {"line-color": "#1d1d1f", "line-width": 3}},
+        {id: "area-sel", type: "line", source: "areas", filter: NONE,
+          paint: {"line-color": "#1d1d1f", "line-width": 2.5}},
+        {id: "homes", type: "circle", source: "homes",
+          paint: {"circle-radius": ["interpolate", ["linear"], ["zoom"], 10, 2.5, 15, ["match", ["get", "s"], "needs help", 7, 4.5]],
+            "circle-color": ["match", ["get", "s"], "needs help", "#d70015", "safe", "#248a3d", "#f2994a"],
+            "circle-stroke-color": "#ffffff", "circle-stroke-width": ["interpolate", ["linear"], ["zoom"], 12, 0, 14, 1]}},
         {id: "closure-case", type: "line", source: "closures", filter: ["==", ["geometry-type"], "LineString"],
           layout: {"line-cap": "butt"}, paint: {"line-color": "#ffffff", "line-width": 6}},
         {id: "closure-line", type: "line", source: "closures", filter: ["==", ["geometry-type"], "LineString"],
@@ -129,17 +139,19 @@ function build(p) {
   });
   map.addControl(new maplibregl.NavigationControl({visualizePitch: true}), "top-right");
   map.addControl(new maplibregl.ScaleControl({unit: "metric"}), "bottom-right");
-  const far = () => document.body.classList.toggle("far", map.getZoom() < 11);
+  // far: the region, only the larger towns named; near: inside one town, its homes speak, the labels step aside
+  const far = () => { document.body.classList.toggle("far", map.getZoom() < 11);
+                      document.body.classList.toggle("near", map.getZoom() >= 12.5); };
   map.on("zoomend", far); far();
   // Credits are printed under the map; keep the compact "i" button closed so it does not cover the bottom edge.
   map.on("load", () => document.querySelectorAll(".maplibregl-ctrl-attrib").forEach(e => e.classList.remove("maplibregl-compact-show")));
   map.on("moveend", declutter);
-  map.on("click", "flood-fill", e => {
+  map.on("click", "area-fill", e => {
     const m = e.features[0] && e.features[0].properties.municipality;
     if (m) { goTo(m, prev, true); paintSel(m); select(m); }
   });
-  map.on("mouseenter", "flood-fill", () => map.getCanvas().style.cursor = "pointer");
-  map.on("mouseleave", "flood-fill", () => map.getCanvas().style.cursor = "");
+  map.on("mouseenter", "area-fill", () => map.getCanvas().style.cursor = "pointer");
+  map.on("mouseleave", "area-fill", () => map.getCanvas().style.cursor = "");
   map.once("style.load", () => {
     if (map.setSky) map.setSky({"sky-color": "#a9c8ee", "horizon-color": "#e8eef5", "fog-color": "#e8eef5",
       "sky-horizon-blend": 0.6, "horizon-fog-blend": 0.6, "fog-ground-blend": 0.2});
@@ -157,7 +169,7 @@ function applyMode() {
   baseIds.forEach(id => vis(id, flat())); vis("img", !flat());
   map.setPaintProperty("hs", "hillshade-exaggeration", flat() ? 0.12 : 0.25);
   map.setPaintProperty("hs", "hillshade-shadow-color", flat() ? "#8e8e93" : "#1d1d1f");
-  const edge = flat() ? "#1d1d1f" : "#ffffff";
+  const edge = flat() ? "#0b3d91" : "#ffffff";
   map.setPaintProperty("flood-edge", "line-color", edge);
   map.setPaintProperty("flood-edge", "line-opacity", flat() ? 0.35 : 0.7);
   map.setPaintProperty("flood-edge-modelled", "line-color", edge);
@@ -183,7 +195,7 @@ document.querySelectorAll(".mode button").forEach(b => b.addEventListener("click
 document.querySelectorAll(".mode button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === mode)));
 
 function paintSel(m) {
-  map.setFilter("flood-sel", m ? ["==", ["get", "municipality"], m] : NONE);
+  map.setFilter("area-sel", m ? ["==", ["get", "municipality"], m] : NONE);
   let ch = false;
   pins.forEach((p, k) => { if (p.el.classList.contains("sel") !== (k === m)) { p.el.classList.toggle("sel", k === m); ch = true; } });
   if (ch) requestAnimationFrame(declutter);
@@ -198,15 +210,16 @@ function updatePins(towns, sel) {
     if (!p) {
       const el = document.createElement("div");
       el.addEventListener("click", ev => { ev.stopPropagation(); goTo(k, prev, true); paintSel(k); select(k); });
-      p = {el, marker: new maplibregl.Marker({element: el, anchor: "left"}).setLngLat([t.lon, t.lat]).addTo(map), html: ""};
+      p = {el, marker: new maplibregl.Marker({element: el, anchor: "center"}).setLngLat([t.lon, t.lat]).addTo(map), html: ""};
       pins.set(k, p);
     }
     const st = STATUS[t.status] ? t.status : "none";
     const n = fmt(t.people);  // stable 2021 count; "expected now" changes every tick and sits in the tooltip
-    const html = '<i></i><b><em>' + WORD[st] + "</em>" + esc(t.label || k) + (n != null ? " · " + n + (t.modelled ? " modelled" : " in 2021") : "") + "</b>";
+    const html = "<b><em>" + WORD[st] + "</em>" + esc(t.label || k) + (n != null && st !== "none" ? " <span>" + n + " people</span>" : "") + "</b>";
     if (p.html !== html) { p.el.innerHTML = html; p.html = html; }  // touch the DOM only on change
     // classList, not className: MapLibre keeps its own marker classes on this element
     p.el.classList.add("pin");
+    p.el.classList.toggle("minor", (t.people || 0) < 300);  // small towns: label only when zoomed in
     for (const x in STATUS) if (p.el.classList.contains(x) !== (x === st)) p.el.classList.toggle(x, x === st);
     if (p.el.classList.contains("sel") !== (k === sel)) { p.el.classList.toggle("sel", k === sel); changed = true; }
     p.el.title = (t.label || k) + ": " + WORD[st] + ". " + fmt(t.people) + " people in the 2021 water" +
@@ -230,8 +243,8 @@ function declutter() {
     p.el.classList.remove("hid");
     const lab = p.el.querySelector("b");
     if (!lab || getComputedStyle(lab).display === "none") continue;
-    const r = lab.getBoundingClientRect(), d = p.el.querySelector("i").getBoundingClientRect();
-    const box = {l: d.left, t: Math.min(r.top, d.top), r: r.right + 2, b: Math.max(r.bottom, d.bottom) + 2};
+    const r = lab.getBoundingClientRect();
+    const box = {l: r.left - 2, t: r.top - 2, r: r.right + 2, b: r.bottom + 2};
     if (shown.some(o => box.l < o.r && box.r > o.l && box.t < o.b && box.b > o.t)) p.el.classList.add("hid");
     else shown.push(box);
   }
@@ -245,9 +258,13 @@ function updateWater(towns) {
   }
   const keys = Object.keys(by);
   const color = keys.length ? ["match", ["get", "municipality"]] : null, op = keys.length ? ["match", ["get", "municipality"]] : null;
-  for (const k of keys) { color.push(k, STATUS[by[k].s]); op.push(k, by[k].s === "none" ? 0.25 : 0.62); }
-  map.setPaintProperty("flood-fill", "fill-color", color ? color.concat(["#0071e3"]) : "#0071e3");
-  map.setPaintProperty("flood-fill", "fill-opacity", op ? op.concat([0.25]) : 0.25);
+  const OP = {none: 0.04, watch: 0.28, warn: 0.36, evacuate: 0.42};
+  const near = op && ["match", ["get", "municipality"]];
+  for (const k of keys) { color.push(k, STATUS[by[k].s]); op.push(k, OP[by[k].s]); near.push(k, OP[by[k].s] / 4); }
+  map.setPaintProperty("area-fill", "fill-color", color ? color.concat(["#8e8e93"]) : "#8e8e93");
+  // strong across the region, faint inside a town so its streets and homes stay readable
+  map.setPaintProperty("area-fill", "fill-opacity", op ? ["interpolate", ["linear"], ["zoom"], 10, op.concat([0.04]),
+                                                          13, near.concat([0.01])] : 0.04);
   const mod = keys.filter(k => by[k].mod);
   const inMod = ["in", ["get", "municipality"], ["literal", mod]];
   map.setFilter("flood-edge-modelled", inMod);
@@ -282,6 +299,8 @@ function update(d, first) {
   const towns = d.towns || [];
   const fsig = d.flood ? (d.flood.features || []).length + ":" + JSON.stringify(d.flood).length : "0";
   if (fsig !== floodSig) { floodSig = fsig; map.getSource("flood").setData(d.flood || EMPTY); bounds = null; }
+  const asig = d.areas ? (d.areas.features || []).length : 0;
+  if (asig !== areaSig) { areaSig = asig; map.getSource("areas").setData(d.areas || EMPTY); }
   if (!bounds) bounds = extent(towns, d.flood);
   updateWater(towns);
   updateClosures(d.closures);
@@ -293,6 +312,15 @@ function update(d, first) {
   const s = first || sel !== (prev.selected || null) ? sel : cur;
   updatePins(towns, s);
   paintSel(s);
+  const hsig = d.homes ? JSON.stringify(d.homes).length + ":" + (d.homes.features || []).length + ":" + (d.homes.sig || "") : "0";
+  if (hsig !== homeSig) {
+    const fresh = (d.homes && d.homes.features || []).length && !(prev.homes && prev.homes.features || []).length;
+    homeSig = hsig; map.getSource("homes").setData(d.homes || EMPTY);
+    // a town just opened: frame its homes, not its centre point
+    const b = fresh && (d.selected || null) === cur && extent([], d.homes);
+    if (b) map.fitBounds([[b[0], b[1]], [b[2], b[3]]], {padding: 48, maxZoom: 15.5, duration: 1200,
+                                                         pitch: flat() ? 0 : 60, bearing: flat() ? 0 : -15});
+  }
   const cam = d.camera ? JSON.stringify(d.camera) : null;
   if (cam && cam !== (prev.camera ? JSON.stringify(prev.camera) : null)) {
     const c = d.camera, o = {duration: first ? 0 : 2500};

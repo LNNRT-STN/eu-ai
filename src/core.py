@@ -212,7 +212,7 @@ def _outlook():
     return *forecast.rivers(), forecast.rain(), pd.Timestamp.now(tz="Europe/Brussels")
 
 
-LAST = OUT / "outlook_last.pkl"  # last good outlook (local, gitignored): shown with its time when the API is down
+LAST = OUT / "outlook_last_rp.pkl"  # last good outlook (local, gitignored): shown with its time when the API is down
 
 
 def outlook():
@@ -226,7 +226,10 @@ def outlook():
         return (*got, None)
     except Exception as e:
         try:
-            return (*pd.read_pickle(LAST), f"live outlook unavailable ({e}); showing the last one")
+            last = pd.read_pickle(LAST)
+            if "chance" not in last[0]:  # saved by an older forecast.py: not readable by this one
+                raise ValueError("saved outlook is from an older version")
+            return (*last, f"live outlook unavailable ({e}); showing the last one")
         except Exception:
             return None, None, None, None, str(e)
 
@@ -236,12 +239,14 @@ def status(gauges, rain, err):
     if gauges is None:
         return OFFLINE, "River outlook unavailable", (f"Open-Meteo could not be reached ({escape(err)}). Exposure, "
                                                       "care sites and shelters below still work."), None
-    w = gauges.sort_values(["level", "pct_2021"], ascending=False).iloc[0]
-    worst = gauges.sort_values(["level_worst", "worst"], ascending=False).iloc[0]
-    head = ("No river flood expected in the next 30 days" if w.level == 0 else
+    w = gauges.sort_values(["level", "chance", "rp_peak"], ascending=False).iloc[0]
+    worst = gauges.sort_values(["level_worst", "rp_worst"], ascending=False).iloc[0]
+    h = forecast.HORIZON
+    head = (f"No river flood expected in the next {h} days" if w.level == 0 else
             f"{forecast.LEVELS[w.level][0]} expected on the {w.gauge.split(' · ')[0]} at {w.gauge.split(' · ')[1]}")
-    detail = (f"Highest point: {w.gauge}, {fmt(w.peak)} m³/s on {w.peak_day:%a %d %b}, "
-              f"{w.pct_2021:.0%} of its July 2021 peak. Rain in the headwaters: up to {rain.max_2day.max():.0f} mm in 2 days.")
+    detail = ((f"{w.chance:.0%} of the {h}-day forecast runs reach it, most on {w.peak_day:%a %d %b}. " if w.level else
+               f"Highest point: {w.gauge}, median peak a {forecast.rp_text(w.rp_peak)} flood. ")
+              + f"Rain in the headwaters: up to {rain.max_2day.max():.0f} mm in 2 days.")
     if worst.level_worst > w.level:
         detail += f" The wettest forecast run reaches “{forecast.LEVELS[worst.level_worst][0].lower()}” at {worst.gauge}."
     return forecast.LEVELS[w.level][1] if w.level else SHELTER, head, detail, w

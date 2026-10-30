@@ -127,7 +127,7 @@ def render(named=frozenset()):
     if show_gauges:
         import forecast
         layers.append(core.points(gauges.assign(fill=[core.rgb(forecast.LEVELS[l][1]) for l in gauges.level],
-                                                tip=[f"{r.gauge}\nforecast peak {r.peak:,.0f} m³/s ({r.pct_2021:.0%} of 2021)"
+                                                tip=[f"{r.gauge}\nforecast median peak {r.peak:,.0f} m³/s, a {forecast.rp_text(r.rp_peak)} flood"
                                                      for r in gauges.itertuples()]), "fill", 7))
     with left:
         focus = (sel.lon, sel.lat) if sel is not None else (com.lon.mean(), com.lat.mean()) if area is not None else None

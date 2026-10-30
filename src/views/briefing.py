@@ -132,14 +132,15 @@ def _map(p, sites, shelters, side, sel):
                                   core.rgb(core.EVACUATE), 5))
     river_key = ""
     if show_rivers and live.clock()["mode"] == "replay":
-        flow, ref, lvl = rivers.levels()
+        flow, rp, lvl = rivers.levels()
         day = min(max(live.clock()["t"].normalize(), flow.index.min()), flow.index.max())
-        g = pd.DataFrame([(k, la, lo, int(lvl.loc[day, k]), flow.loc[day, k] / ref[k][1])
-                          for k, (la, lo) in forecast.GAUGES.items() if side == "All" or SIDE[k.split(" · ")[1]] == side],
-                         columns=["gauge", "lat", "lon", "lvl", "pct"])
+        g = pd.DataFrame([(k, la, lo, int(lvl.loc[day, k]), rp.loc[day, k])
+                          for k, (la, lo) in forecast.GAUGES.items()
+                          if k in flow and (side == "All" or SIDE[k.split(" · ")[1]] == side)],
+                         columns=["gauge", "lat", "lon", "lvl", "rp"])
         layers.append(core.points(g.assign(fill=[core.rgb(forecast.LEVELS[l][1]) for l in g.lvl],
-                                           tip=[f"{r.gauge}\n{forecast.LEVELS[r.lvl][0]} · {r.pct:.0%} of the July "
-                                                f"2021 peak · replay {live.drill(day):%a %d %b}"
+                                           tip=[f"{r.gauge}\n{forecast.LEVELS[r.lvl][0]} · a {forecast.rp_text(r.rp)} "
+                                                f"flood · replay {live.drill(day):%a %d %b}"
                                                 for r in g.itertuples()]), "fill", 8, 2))
         river_key = "<b>River point, replay day</b>" + "".join(core.swatch(c, lab, True) for lab, c in forecast.LEVELS)
     v = core.view(core.bbox(), None if sel is None else (sel.lon, sel.lat), 11)

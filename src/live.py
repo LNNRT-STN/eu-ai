@@ -5,6 +5,10 @@ at once. Pages call advance() on every refresh; it moves the shared clock and, f
 raises town status, records events, auto-closes flooded evacuation roads, adds simulated (drill) check-ins and queues
 briefings for mayors and fire brigades. Briefings are drafted in a background thread (reports.py) and stored here.
 
+Both modes use the same rule (impact.py): the town's river against its 2-, 5- and 20-year flows. Live: the GloFAS
+ensemble over the next forecast.HORIZON days, a level counting when forecast.PROB of the runs reach it. Replay: the
+backtest, July 2021 flows against thresholds fitted on the record up to forecast.BACKTEST_YEAR.
+
 Replay assumptions (say them in the UI): each GloFAS daily flow holds for its whole day (no interpolated hours); the
 replay is shown as a drill that starts on DRILL_DAY0 (dates moved, data unchanged); a town's
 level holds its highest value reached so far in the replay (water that has risen is not un-warned when it falls).
@@ -33,7 +37,7 @@ START, END = pd.Timestamp("2021-07-12 06:00"), pd.Timestamp("2021-07-18 00:00")
 # data stay in July 2021; only the dates on screen and in briefings move (12 Jul 2021 -> Fri 30 Oct 2026).
 DRILL_DAY0 = pd.Timestamp("2026-10-30")
 SHIFT = DRILL_DAY0 - START.normalize()
-STATUS = ["none", "watch", "warn", "evacuate"]  # none: river at or below its 2-year flow
+STATUS = ["none", "watch", "warn", "evacuate"]  # = level 0-3: river at the 2-, 5-, 20-year flood (impact.py)
 ALERT = ("warn", "evacuate")
 MODELLED_AREAS = {"vesdre"}  # as anna.MODELLED: no satellite map, EFAS 500-year model  # the steps that make an event and briefings
 NO_POINT = "no river point"
@@ -265,8 +269,8 @@ def advance() -> dict:
 # ---------- rivers ----------
 
 _cache = {}
-_WATCH = [REFS, REFS.parent / "replay_2021.json", DATA / "town_gauge.csv", DATA / "ml2_curves.json",
-          DATA / "app_towns.csv"]
+_WATCH = [REFS, REFS.parent / "replay_2021.json", REFS.parent / "annual_max.json", DATA / "town_gauge.csv",
+          DATA / "town_efas.csv", DATA / "app_towns.csv"]
 
 
 def _fresh():
@@ -292,6 +296,18 @@ def _hourly():
         grid = pd.date_range(r.index[0], r.index[-1] + pd.Timedelta(hours=23), freq="h")
         _cache["hourly"] = r.reindex(grid, method="ffill")
     return _cache["hourly"]
+
+
+def _live_runs(t):
+    """Per gauge, each ensemble run's peak over the HORIZON days from t's day: what the live status is judged on."""
+    import core
+    import forecast
+    _, series, *_ = core.outlook()
+    if series is None or "m00" not in series:
+        return {}
+    d0 = t.normalize()
+    w = series[(pd.to_datetime(series.time) >= d0) & (pd.to_datetime(series.time) < d0 + pd.Timedelta(days=forecast.HORIZON))]
+    return {g: x[forecast.members(x)].max().values for g, x in w.groupby("gauge")}
 
 
 def _live_flows(t):
@@ -328,85 +344,52 @@ def _km(lon0, lat0, lon, lat):
     return np.hypot((lon - lon0) * 111.32 * np.cos(np.radians(lat0)), (lat - lat0) * 110.57)
 
 
-def _ml2():
-    """build_ml2 if another agent has provided impact_forecast there, else None (fallback: flow thresholds)."""
-    try:
-        import build_ml2
-        return build_ml2 if hasattr(build_ml2, "impact_forecast") else None
-    except Exception:
-        return None
-
-
-def _town_gauge(t):
-    """area, municipality, gauge (+ optional q2, q2021): outputs/data/town_gauge.csv, else the nearest
-    forecast.GAUGES point within 15 km (build_ml2.load_town_gauge does the same when present)."""
-    m = _ml2()
-    if m is not None and hasattr(m, "load_town_gauge"):
-        try:
-            return m.load_town_gauge()
-        except Exception:
-            pass
-    tg = DATA / "town_gauge.csv"
-    if tg.exists():
-        return pd.read_csv(tg)
-    import forecast
-    pts = forecast.GAUGES
-
-    def near(r):
-        d = {g: _km(lo, la, r.lon, r.lat) for g, (la, lo) in pts.items()}
-        g = min(d, key=d.get)
-        return g if d[g] <= RADIUS_KM else None
-    return t.assign(gauge=t.apply(near, axis=1))[["area", "municipality", "gauge"]]
+def _town_gauge():
+    """area, municipality, gauge: outputs/data/town_gauge.csv, else the nearest forecast.GAUGES point within 15 km."""
+    import impact
+    return impact.load_town_gauge()
 
 
 def _towns():
-    """Towns of the worst-case map with their river point and reference flows."""
+    """Towns of the worst-case map with their river point and its modelled July 2021 peak (context)."""
     if "towns" in _cache:
         return _cache["towns"]
     import anna
     t = anna.load()[1]
     t = t[t.variant == "worst"].drop_duplicates("municipality")[
         ["area", "municipality", "people", "lon", "lat"]].reset_index(drop=True)
-    tg = _town_gauge(t).drop_duplicates("municipality")
-    t = t.merge(tg[[c for c in ("municipality", "gauge", "q2", "q2021") if c in tg]], on="municipality", how="left")
+    tg = _town_gauge().drop_duplicates("municipality")
+    t = t.merge(tg[["municipality", "gauge"]], on="municipality", how="left")
     refs = _refs()
-    ok = lambda g: isinstance(g, str) and g in refs
     t["gauge"] = t.gauge.where(t.gauge.map(lambda g: isinstance(g, str)), None).astype(object)
-    for i, col in enumerate(("q2", "q2021")):
-        own = t[col] if col in t else pd.Series(np.nan, index=t.index)
-        t[col] = own.fillna(t.gauge.map(lambda g: refs[g][i] if ok(g) else np.nan))
+    t["q2021"] = t.gauge.map(lambda g: refs[g][1] if isinstance(g, str) and g in refs else np.nan)  # context only
     _cache["towns"] = t
     return t
 
 
-def _levels(T, q):
-    """0-3 from flow q: above the 2-year flow, above half the 2021 peak, at or above the 2021 peak."""
-    q = pd.Series(q, index=T.index, dtype=float)
-    return ((q >= T.q2).astype(int) + (q >= T.q2021 / 2).astype(int)
-            + (q >= T.q2021 * .999).astype(int))  # .999: the 2021 peak is the replay series' own maximum
+def _upto(mode):
+    import forecast
+    return forecast.BACKTEST_YEAR if mode == "replay" else None
 
 
-def _judge(T, fl, t=None):
-    """(level, status, people_expected) per town for flows fl. Status and people_expected from
-    build_ml2.impact_forecast when available, else level thresholds and a linear share of the 2021 people."""
-    q = T.gauge.map(lambda g: fl.get(g, np.nan) if isinstance(g, str) else np.nan)
-    level = _levels(T, q)
-    status = level.map(lambda l: STATUS[min(int(l), 2) + 1]).where(q.notna(), NO_POINT)
-    share = ((q - T.q2) / (T.q2021 - T.q2)).clip(0, 1).fillna(0)
-    pe = (T.people * share).round()
-    m = _ml2()
-    if m is not None:
-        try:
-            tg = T[["area", "municipality", "gauge", "q2", "q2021"]]
-            imp = m.impact_forecast({g: v for g, v in fl.items() if pd.notna(v)}, tg).drop_duplicates("municipality")
-            imp = imp.set_index("municipality").reindex(T.municipality)
-            s = imp.status.map({"none": "none", "watch": "watch", "warn": "warn", "evacuate": "evacuate",
-                                "no gauge": NO_POINT})
-            status = pd.Series(s.values, index=T.index).fillna(status)
-            pe = pd.Series(imp.people_expected.values, index=T.index).fillna(pe)
-        except Exception:
-            pass
-    return level, status, pe.fillna(0).astype(int)
+def _judge(T, fl, mode):
+    """level 0-3, status, people_expected, return_period, probability per town for flows fl (one flow, or the
+    ensemble runs' peaks, per gauge): impact.impact_forecast on the mode's thresholds."""
+    import impact
+    imp = impact.impact_forecast({g: v for g, v in fl.items() if np.size(v) and not np.isnan(v).all()},
+                                 T[["area", "municipality", "gauge"]], _upto(mode))
+    imp = imp.drop_duplicates("municipality").set_index("municipality").reindex(T.municipality)
+    status = pd.Series(imp.status.values, index=T.index).replace({"no gauge": NO_POINT}).fillna(NO_POINT)
+    return (pd.Series(imp.level.values, index=T.index).fillna(0).astype(int), status,
+            pd.Series(imp.people_expected.values, index=T.index).fillna(0).astype(int),
+            pd.Series(imp.return_period.values, index=T.index), pd.Series(imp.probability.values, index=T.index))
+
+
+def _q2(T, mode):
+    """The 2-year flow of each town's river point, on the mode's thresholds."""
+    import forecast
+    thr = forecast.thresholds(_upto(mode))
+    return T.gauge.map(lambda g: thr[g]["q"][2] if g in thr else np.nan)
 
 
 def _replay():
@@ -415,27 +398,31 @@ def _replay():
     if "replay" in _cache:
         return _cache["replay"]
     T, h = _towns(), _hourly().cummax()
-    lv, stt, pe = [], [], []
-    for _, row in h.iterrows():
-        a, b, c = _judge(T, row.to_dict())
-        lv.append(a.values), stt.append(b.values), pe.append(c.values)
-    lv, stt, pe = np.array(lv), np.array(stt, dtype=object), np.array(pe)
+    lv, stt, pe, rp = [], [], [], []
+    for _, day in h.groupby(h.index.normalize()):  # daily flows held all day: judge once per day
+        a, b, c, d, *_ = _judge(T, day.iloc[0].to_dict(), "replay")
+        for _ in range(len(day)):
+            lv.append(a.values), stt.append(b.values), pe.append(c.values), rp.append(d.values)
+    lv, stt, pe, rp = np.array(lv), np.array(stt, dtype=object), np.array(pe), np.array(rp)
     first = lambda mask: [h.index[mask[:, j].argmax()] if mask[:, j].any() else pd.NaT for j in range(len(T))]
     rank = np.vectorize(lambda s: STATUS.index(s) if s in STATUS else -1)(stt)
     w, e = STATUS.index("warn"), STATUS.index("evacuate")
     times = pd.DataFrame({"municipality": T.municipality, "t_warn": first(rank >= w), "t_evacuate": first(rank >= e),
                           "t_level3": first(lv >= 3)}).set_index("municipality")
-    _cache["replay"] = dict(index=h.index, level=lv, status=stt, people_expected=pe, times=times, peak=h)
+    _cache["replay"] = dict(index=h.index, level=lv, status=stt, people_expected=pe, return_period=rp, times=times,
+                            peak=h)
     return _cache["replay"]
 
 
 def towns_status(t=None, mode=None) -> pd.DataFrame:
-    """[municipality, area, gauge, flow, q2, q2021, level 0-3, status, people, people_expected, since].
-    level 1 above the 2-year flow, 2 above half the 2021 peak, 3 at or above it. status watch|warn|evacuate (or
-    "no river point"): from build_ml2.impact_forecast when present, else warn at level 1 and evacuate at 2+.
-    people: residents inside the 2021 flood extent; people_expected: impact_forecast's expectation (fallback: that
-    number scaled linearly between the 2-year flow and the 2021 peak). In replay, level and status hold the highest
-    value reached so far; since is when the current status was first reached."""
+    """[municipality, area, gauge, flow, q2, q2021, return_period, probability, level 0-3, status, people,
+    people_expected, since].
+    level 1/2/3 at the 2-/5-/20-year flow of the town's river point, status watch/warn/evacuate (or "no river
+    point"), from impact.impact_forecast: live on the ensemble runs over the next forecast.HORIZON days (probability:
+    share of runs at the 5-year flow), replay on the July 2021 flow against pre-2021 thresholds (the backtest).
+    q2: the 2-year flow; q2021: the modelled July 2021 peak (context). people: residents inside the 2021 flood
+    extent; people_expected: residents in the EFAS zone of the forecast return period. In replay, level and status
+    hold the highest value reached so far; since is when the current status was first reached."""
     k = clock()
     t, mode = _ts(t if t is not None else k["t"]), mode or k["mode"]
     _fresh()
@@ -446,18 +433,21 @@ def towns_status(t=None, mode=None) -> pd.DataFrame:
         R = _replay()
         i = max(int(R["index"].searchsorted(t, side="right")) - 1, 0)
         T["level"], T["status"], T["people_expected"] = R["level"][i], R["status"][i], R["people_expected"][i]
+        T["return_period"], T["probability"] = R["return_period"][i], (R["level"][i] >= 2).astype(float)
         tm = R["times"].reindex(T.municipality)
         T["since"] = np.where(T.status == "evacuate", tm.t_evacuate.values,
                               np.where(T.status == "warn", tm.t_warn.values, np.datetime64("NaT", "ns")))
         T["since"] = pd.to_datetime(T.since)
     else:
-        T["level"], T["status"], T["people_expected"] = _judge(T, fl, t)
+        runs = _live_runs(t)
+        T["level"], T["status"], T["people_expected"], T["return_period"], T["probability"] = _judge(T, runs or fl, mode)
         st = _q("SELECT municipality, since FROM state").set_index("municipality").since
         T["since"] = pd.to_datetime(T.municipality.map(st))
+    T["q2"] = _q2(T, mode)
     T["level"] = T.level.astype(int)
     T["people_expected"] = T.people_expected.astype(int)
-    return T[["municipality", "area", "gauge", "flow", "q2", "q2021", "level", "status", "people", "people_expected",
-              "since"]].sort_values(["level", "people"], ascending=False).reset_index(drop=True)
+    return T[["municipality", "area", "gauge", "flow", "q2", "q2021", "return_period", "probability", "level", "status",
+              "people", "people_expected", "since"]].sort_values(["level", "people"], ascending=False).reset_index(drop=True)
 
 
 def events(muni=None) -> pd.DataFrame:
@@ -522,11 +512,13 @@ def _name(m):
 
 def _facts(r, prev, s, when, t, mode):
     """Small facts dict for one report: numbers rounded here, so the AI never has to."""
+    import forecast
     raw = _towns().set_index("municipality").loc[r.municipality]
-    q, pe = r.flow, r.people_expected
+    q, pe, rp, p = r.flow, r.people_expected, r.return_period, r.probability
     if mode == "replay":
         at = towns_status(when, mode).set_index("municipality").loc[r.municipality]
-        q, pe = at.flow, at.people_expected
+        q, pe, rp, p = at.flow, at.people_expected, at.return_period, at.probability
+    thr = forecast.thresholds(_upto(mode))[r.gauge]
     import anna
     modelled = r.area in anna.MODELLED
     return {"town": _name(r.municipality), "status": s, "from": "normal" if prev == "none" else prev,
@@ -535,12 +527,20 @@ def _facts(r, prev, s, when, t, mode):
             "scenario": (f"replay of the 2021 forecast: the July 2021 flood shown as if it began on {DRILL_DAY0:%a %-d %b %Y}, on "
                          "modelled river flows computed afterwards (not a live forecast)"
                          if mode == "replay" else "live forecast"),
-            "river_point": r.gauge, "modelled_flow_m3s": int(round(q)), "modelled_two_year_flow_m3s": int(round(raw.q2)),
+            "river_point": r.gauge, "modelled_flow_m3s": int(round(q)),
+            "flow_is_a": forecast.rp_text(rp) + " flood (return period from the model's own record "
+                         + thr["years"] + ")",
+            "status_rule": "watch at the 2-year flood, warn at the 5-year, evacuate at the 20-year"
+                           + (f"; in the forecast, when {forecast.PROB:.0%} of the ensemble runs reach it within "
+                              f"{forecast.HORIZON} days" if mode == "live" else ""),
+            **({"forecast_runs_at_5_year_flood_or_above": f"{p:.0%}"} if mode == "live" and pd.notna(p) else {}),
+            "modelled_five_year_flow_m3s": int(round(thr["q"][5])),
+            "modelled_twenty_year_flow_m3s": int(round(thr["q"][20])),
             "modelled_july_2021_peak_m3s": int(round(raw.q2021)),
             ("people_in_modelled_flood_zone" if modelled else "people_in_2021_satellite_flood_extent"): int(r.people),
             "flood_extent": ("modelled (EFAS 500-year; the satellite did not map this valley)" if modelled
                              else "observed by satellite in July 2021 (a floor)"),
-            "people_expected_in_water": int(pe),
+            "people_in_modelled_flood_zone_for_this_flood": int(pe),
             "district": district(r.area, r.municipality)}
 
 
@@ -576,7 +576,7 @@ def _auto_close(T, t, mode):
             for r in roads.itertuples():
                 c.execute('INSERT INTO closures(osm_id,name,municipality,"by",note,lon,lat,t,auto) '
                           "VALUES(?,?,?,?,?,?,?,?,1)", (r.osm_id, r.name, m, "scenario",
-                                                       "Evacuation road in the July 2021 water; river at its 2021 peak",
+                                                       "Evacuation road in the July 2021 water; river at its 20-year flood",
                                                        float(r.lon), float(r.lat), str(when)))
             c.execute("INSERT INTO meta VALUES(?,?)", (key, str(t)))
 
